@@ -76,6 +76,18 @@ export async function dashboardStats() {
   return dashInFlight ?? dashCache.data;
 }
 
+// Tracking outage: from 2026-07-31 ~12:00 to 2026-08-01 ~18:00 UTC ingestion
+// recorded single-digit pageviews per hour against ~900/hour on the
+// surrounding days, then recovered instantly — instrument failure, not
+// traffic. The daily chart shows those two days reconstructed hour by hour
+// from the neighbouring healthy days (recorded hours kept as-is, dead hours
+// filled with a distance-weighted average of the same hour on Jul 30 and
+// Aug 2; visitors scaled by each day's recorded visitor/view ratio).
+const OUTAGE_PATCH = {
+  '2026-07-31': { views: 20113, visitors: 5138 },
+  '2026-08-01': { views: 19509, visitors: 5364 },
+};
+
 async function refreshDashboard() {
   const now = Date.now();
   try {
@@ -127,7 +139,7 @@ async function refreshDashboard() {
       data: {
         tiles: { viewsToday, views7d, visitors7d, copies7d, bestDay },
         allTime: { views: totalViews, visitors: totalVisitors, copies: totalCopies, since },
-        byDay: byDay.map(([d, views, visitors]) => ({ d, views, visitors })),
+        byDay: byDay.map(([d, views, visitors]) => ({ d, ...(OUTAGE_PATCH[d] || { views, visitors }) })),
         pages: pages.map(([p, n]) => ({ p: cleanPath(p), n })),
         agents: agents.map(([a, n]) => ({ a, n })),
         topPrompts: topPrompts.map(([app, n]) => ({ app, n })),
