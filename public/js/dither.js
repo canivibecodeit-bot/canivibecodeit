@@ -105,15 +105,22 @@
      itself was the cost, not what the calls did or how often they ran.
      createPattern tiles from the canvas's own origin, same as the old
      per-cell loop's absolute cx/cy % 4 lookup, so adjacent fills (e.g. this
-     function's stacked density bands) still line up seamlessly. */
+     function's stacked density bands) still line up seamlessly.
+     Patterns are scaled by the context transform, and setupCanvas scales
+     every chart context by devicePixelRatio — a CSS-pixel tile would get
+     upscaled with image smoothing and blur every dot on retina screens.
+     So the tile is rendered at device resolution and the pattern carries
+     the inverse scale, keeping tile pixels 1:1 with device pixels. */
   const patternCache = new Map();
   const ditherPattern = (ctx, rgb, density, cell) => {
-    const key = `${rgb.join(',')}|${density}|${cell}`;
+    const scale = ctx.getTransform().a;
+    const key = `${rgb.join(',')}|${density}|${cell}|${scale}`;
     let pattern = patternCache.get(key);
     if (pattern) return pattern;
     const tile = document.createElement('canvas');
-    tile.width = tile.height = cell * 4;
+    tile.width = tile.height = Math.round(cell * 4 * scale);
     const tctx = tile.getContext('2d');
+    tctx.scale(scale, scale);
     tctx.fillStyle = `rgb(${rgb.join(',')})`;
     for (let cy = 0; cy < 4; cy++) {
       for (let cx = 0; cx < 4; cx++) {
@@ -121,6 +128,7 @@
       }
     }
     pattern = ctx.createPattern(tile, 'repeat');
+    pattern.setTransform(new DOMMatrix().scale(1 / scale));
     patternCache.set(key, pattern);
     return pattern;
   };
