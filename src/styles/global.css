@@ -201,6 +201,9 @@ h3 {
 .site-nav a {
   color: var(--muted);
   transition: color 0.15s ease;
+  /* A wrapped link doubles the header's height, and the sponsor rails hang at
+     a fixed offset below it — links either fit or step out, never wrap. */
+  white-space: nowrap;
 }
 
 .site-nav a:hover {
@@ -2461,6 +2464,23 @@ a.tile {
   margin: 0 auto;
 }
 
+.site-footer .footer-nav {
+  justify-content: center;
+  gap: 10px 26px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-footer .footer-nav a {
+  color: var(--muted);
+}
+
+.site-footer .footer-nav a:hover {
+  color: var(--fg);
+  text-decoration: none;
+}
+
 .site-footer a {
   color: var(--primary);
 }
@@ -3007,6 +3027,17 @@ a.tile {
   }
 }
 
+/* The full nav row needs ~1020px of header on one line, and between 980px and
+   ~1500px (tapes band + the rail-squeezed band, where the header sits at its
+   984px floor) it doesn't get it. "submit an app" steps out first: it's the
+   longest label with the smallest audience, the github button beside it points
+   at the same repo, and the footer nav row carries the full link everywhere. */
+@media (min-width: 980px) and (max-width: 1499px) {
+  .site-nav .nav-submit {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
   /* Everything in one row without horizontal scroll. */
   .site-header .inner {
@@ -3195,11 +3226,11 @@ button.sp-banner {
   display: block;
   width: 200px;
   text-align: center;
-  /* Tall enough for a full 60-character tagline: 172px of inner width at 12px
-     mono is ~23 characters a line, and real taglines wrap to four of them.
+  /* Tall enough for a full 60-character tagline: 172px of inner width at 11px
+     mono is ~25 characters a line, and real taglines wrap to three of them.
      Every variant shares this height — a rail whose cards differ looks broken. */
-  height: 160px;
-  padding: 14px;
+  height: 140px;
+  padding: 12px 14px;
   border-radius: 6px;
   overflow: hidden;
   background: rgba(var(--tint, 51, 230, 103), 0.1);
@@ -3236,8 +3267,8 @@ button.sp-banner {
 .sp-icon {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 6px;
   overflow: hidden;
   background: rgba(var(--tint, 51, 230, 103), 0.18);
@@ -3265,10 +3296,10 @@ button.sp-banner {
 
 .sp-card .sp-name {
   display: block;
-  padding-top: 8px;
-  font-size: 16px;
+  padding-top: 7px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 18px;
   color: var(--fg);
   /* Always exactly one line. A 40-character name wraps to three at this size,
      which would push the tagline out of a fixed-height card. */
@@ -3286,8 +3317,8 @@ button.sp-banner {
   /* A single unbreakable word longer than the line would otherwise spill. */
   overflow-wrap: break-word;
   padding-top: 2px;
-  font-size: 12px;
-  line-height: 17px;
+  font-size: 11px;
+  line-height: 15px;
   color: var(--muted);
 }
 
@@ -3301,8 +3332,8 @@ button.sp-banner {
 
 .sp-card .sp-price {
   display: block;
-  padding-top: 12px;
-  font-size: 18px;
+  padding-top: 10px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--primary);
 }
@@ -3316,8 +3347,8 @@ button.sp-banner {
 .sp-card .sp-cta {
   display: block;
   padding-top: 8px;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 11px;
+  line-height: 15px;
   color: var(--fg);
 }
 
@@ -3404,6 +3435,9 @@ button.sp-banner {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* On tall viewports the even split would balloon each card past its
+       content; capped, the rail keeps its slack at the bottom instead. */
+    max-height: 176px;
   }
 
   /* When a card compresses, the tagline gives way first; icon, name and
@@ -3443,6 +3477,49 @@ button.sp-banner {
 
   .sp-right {
     right: 16px;
+  }
+
+  /* Short viewports: the tagline gives way in whole-line steps, then goes
+     entirely, then the sold-out notice bows out — the flex squeeze alone
+     would crop text mid-line instead. Thresholds assume a full rail of five
+     cards plus the notice at the type sizes above, with a little slack. */
+  @media (max-height: 1000px) {
+    .sp-rail .sp-card .sp-tag {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+  }
+
+  @media (max-height: 860px) {
+    .sp-rail .sp-card .sp-tag {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+  }
+
+  @media (max-height: 740px) {
+    .sp-rail .sp-card .sp-tag {
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
+  }
+
+  @media (max-height: 650px) {
+    .sp-rail .sp-card .sp-tag {
+      display: none;
+    }
+
+    /* Open/reserved cards shed their coax line the same way; the sold-out
+       card keeps its pre-book line — that one IS the card. */
+    .sp-rail .sp-card:not(.soldout) .sp-cta {
+      display: none;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .sp-rail .sp-card.soldout {
+      display: none;
+    }
   }
 
   .sp-banner {

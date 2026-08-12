@@ -109,7 +109,7 @@ const blocks = [orgLd, ...jsonld];
           <a href="/#death-list">the death list</a>
           <a href="/alternatives">alternatives</a>
           <a href="/stats">stats</a>
-          <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">submit an app</a>
+          <a class="nav-submit" href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">submit an app</a>
           <a href="/sponsor">sponsor</a>
           {
             user ? (
@@ -142,6 +142,15 @@ const blocks = [orgLd, ...jsonld];
     <SponsorRails />
 
     <footer class="site-footer">
+      {/* Sitewide section links. The header hides most of these on narrow
+          viewports (and "submit an app" in the rail-squeezed band), so this
+          row is the guaranteed path to every section from every page. */}
+      <nav class="inner footer-nav" aria-label="Site sections">
+        <a href="/#death-list">the death list</a>
+        <a href="/alternatives">alternatives</a>
+        <a href="/stats">stats</a>
+        <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">submit an app</a>
+      </nav>
       <div class="inner">
       <span>
         Yes, you can vibecode this site too.&ensp;<a href="/vibecode-this-site">Here's the prompt</a>&ensp;·&ensp;<a href="https://github.com/canivibecodeit/canivibecodeit">Source on GitHub</a>
