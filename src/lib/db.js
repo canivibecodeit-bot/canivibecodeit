@@ -419,15 +419,15 @@ async function pgDriver() {
       );
       return r.rows[0]?.count ?? 0;
     },
-    async clearRateLimit(key) {
-      await pool.query('DELETE FROM rate_limits WHERE key = $1', [key]);
-    },
-    // Non-mutating: is there a live rate-limit key inside its window? Used to
-    // prove an unvote is undoing a real prior vote from this same client.
-    async rateLimitActive(key, windowMs) {
-      const r = await pool.query('SELECT window_start FROM rate_limits WHERE key = $1', [key]);
-      const row = r.rows[0];
-      return !!row && Date.now() - Number(row.window_start) <= windowMs;
+    // Atomically spend a live rate-limit key: true only for the one caller
+    // that got to delete it. Checking and clearing as two statements let two
+    // concurrent unvotes both see the same key and both decrement.
+    async consumeRateLimit(key, windowMs) {
+      const r = await pool.query(
+        'DELETE FROM rate_limits WHERE key = $1 AND window_start >= $2 RETURNING key',
+        [key, Date.now() - windowMs]
+      );
+      return r.rowCount > 0;
     },
     async addEmail(email, source) {
       const r = await pool.query(
@@ -671,14 +671,14 @@ async function sqliteDriver() {
       db.prepare('UPDATE votes SET count = max(count - 1, 0) WHERE slug = ?').run(slug);
       return stmts.getVote.get(slug)?.count ?? 0;
     },
-    async clearRateLimit(key) {
-      db.prepare('DELETE FROM rate_limits WHERE key = ?').run(key);
-    },
-    // Non-mutating: is there a live rate-limit key inside its window? Used to
-    // prove an unvote is undoing a real prior vote from this same client.
-    async rateLimitActive(key, windowMs) {
-      const row = stmts.getLimit.get(key);
-      return !!row && Date.now() - row.window_start <= windowMs;
+    // Atomically spend a live rate-limit key: true only for the one caller
+    // that got to delete it. Checking and clearing as two statements let two
+    // concurrent unvotes both see the same key and both decrement.
+    async consumeRateLimit(key, windowMs) {
+      const r = db
+        .prepare('DELETE FROM rate_limits WHERE key = ? AND window_start >= ?')
+        .run(key, Date.now() - windowMs);
+      return r.changes > 0;
     },
     async addEmail(email, source) {
       return stmts.addEmail.run(email, source).changes > 0;
@@ -852,8 +852,8 @@ export async function removeVote(slug) {
   return (await getDriver()).removeVote(slug);
 }
 
-export async function clearRateLimit(key) {
-  return (await getDriver()).clearRateLimit(key);
+export async function consumeRateLimit(key, windowMs) {
+  return (await getDriver()).consumeRateLimit(key, windowMs);
 }
 
 export async function addToWaitlist(email, source) {
@@ -866,10 +866,6 @@ export async function addSponsorInquiry(email, message) {
 
 export async function rateLimit(key, max, windowMs) {
   return (await getDriver()).rateLimit(key, max, windowMs);
-}
-
-export async function rateLimitActive(key, windowMs) {
-  return (await getDriver()).rateLimitActive(key, windowMs);
 }
 
 export async function sponsorSlots() {
