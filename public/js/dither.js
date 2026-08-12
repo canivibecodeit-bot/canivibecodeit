@@ -30,7 +30,11 @@
     return [0, 2, 4].map((i) => parseInt(v.slice(i, i + 2), 16));
   };
 
-  const fmt = (n) => Number(n).toLocaleString('en-US');
+  /* toLocaleString builds a fresh formatter per call — noticeable when the
+     entrance animations format gridline/bar labels every frame. One cached
+     NumberFormat, same output. */
+  const NF = new Intl.NumberFormat('en-US');
+  const fmt = (n) => NF.format(Number(n));
   // Chart labels (page paths, agent names, app names) originate from PostHog
   // events, which anyone can spoof, and land in tooltip innerHTML below. Escape
   // them so a crafted label can't inject markup.
@@ -45,6 +49,8 @@
   let tip;
   let tipFrame = null;
   let pendingTip = null;
+  let tipHtml = null; // what's currently in the tip, so unchanged frames skip innerHTML + measure
+  let tipW = 0, tipH = 0;
   const tooltip = (html, x, y) => {
     pendingTip = { html, x, y };
     if (tipFrame) return;
@@ -55,11 +61,18 @@
         tip.className = 'chart-tip';
         document.body.appendChild(tip);
       }
-      tip.innerHTML = pendingTip.html;
       tip.style.display = 'block';
-      const r = tip.getBoundingClientRect();
-      tip.style.left = `${Math.min(pendingTip.x + 14, innerWidth - r.width - 10)}px`;
-      tip.style.top = `${Math.max(pendingTip.y - r.height - 12, 8)}px`;
+      /* content only changes when the cursor crosses to another data point;
+         between crossings this is position-only — no innerHTML, no reflow */
+      if (pendingTip.html !== tipHtml) {
+        tipHtml = pendingTip.html;
+        tip.innerHTML = tipHtml;
+        const r = tip.getBoundingClientRect();
+        tipW = r.width;
+        tipH = r.height;
+      }
+      tip.style.left = `${Math.min(pendingTip.x + 14, innerWidth - tipW - 10)}px`;
+      tip.style.top = `${Math.max(pendingTip.y - tipH - 12, 8)}px`;
     });
   };
   const hideTip = () => {
@@ -130,8 +143,8 @@
 
   /* ---------- area chart ---------- */
   function areaChart(canvas, points, opts = {}) {
-    const t = theme();
-    const rgb = hexRgb(t.data);
+    let t = theme();
+    let rgb = hexRgb(t.data);
     const { ctx, w, h } = setupCanvas(canvas);
     const PAD = { l: 44, r: 10, t: 12, b: 24 };
     const iw = w - PAD.l - PAD.r;
@@ -145,6 +158,15 @@
     const nice = Math.sqrt(max);
     const X = (i) => PAD.l + (i / Math.max(1, points.length - 1)) * iw;
     const Y = (v) => PAD.t + ih - (Math.sqrt(v) / nice) * ih;
+    // static per dataset; formatting them inside draw() ran every frame
+    const gridLabels = [0, 1, 2, 3, 4].map((g) => fmt(Math.round(((nice * (4 - g)) / 4) ** 2)));
+    // the data geometry never changes either: y per point + the fill clip
+    const ysAll = points.map((p) => Y(p.v));
+    const clipPath = new Path2D();
+    clipPath.moveTo(X(0), PAD.t + ih);
+    ysAll.forEach((y, i) => clipPath.lineTo(X(i), y));
+    clipPath.lineTo(X(points.length - 1), PAD.t + ih);
+    clipPath.closePath();
 
     const draw = (progress = 1, cursor = null) => {
       ctx.clearRect(0, 0, w, h);
@@ -162,8 +184,7 @@
         ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.textAlign = 'right';
-        const gridVal = Math.round(((nice * (4 - g)) / 4) ** 2);
-        ctx.fillText(fmt(gridVal), PAD.l - 8, gy + 3);
+        ctx.fillText(gridLabels[g], PAD.l - 8, gy + 3);
       }
 
       ctx.textAlign = 'center';
@@ -188,10 +209,14 @@
       ctx.lineTo(X(visible.length - 1), PAD.t + ih);
       ctx.closePath();
       ctx.clip();
+      /* only dither the revealed extent: the clip already hides the rest, but
+         the cell loop doesn't know that and was walking the full width on
+         every entrance frame */
+      const fillW = X(visible.length - 1) - PAD.l;
       const bands = 6;
       for (let b = 0; b < bands; b++) {
         const density = 0.55 * (1 - b / bands) + 0.06;
-        ditherRect(ctx, PAD.l, PAD.t + (ih / bands) * b, iw, ih / bands + 1, rgb, density, 3, boost);
+        ditherRect(ctx, PAD.l, PAD.t + (ih / bands) * b, fillW, ih / bands + 1, rgb, density, 3, boost);
       }
       ctx.restore();
 
@@ -216,11 +241,25 @@
        freezes the finished picture into an offscreen canvas so hover only
        has to blit it plus the tiny aura patch, not redraw everything. */
     let bg = null;
+    let bgSeq = 0;
     const snapshot = () => {
-      if (!bg) bg = document.createElement('canvas');
-      bg.width = canvas.width;
-      bg.height = canvas.height;
-      bg.getContext('2d').drawImage(canvas, 0, 0);
+      const seq = ++bgSeq;
+      bg?.close?.();
+      bg = null; // until the capture lands, hover falls back to a full draw
+      if (typeof createImageBitmap !== 'function') {
+        const c = document.createElement('canvas');
+        c.width = canvas.width;
+        c.height = canvas.height;
+        c.getContext('2d').drawImage(canvas, 0, 0);
+        bg = c;
+        return;
+      }
+      /* async on purpose: the sync canvas→canvas copy was a ~100ms block
+         landing exactly at entrance end, on top of everything else animating */
+      createImageBitmap(canvas).then((bm) => {
+        if (seq !== bgSeq) return bm.close();
+        bg = bm;
+      }).catch(() => {});
     };
 
     if (reduced) {
@@ -228,9 +267,18 @@
       snapshot();
     } else {
       const t0 = performance.now();
+      /* the reveal is quantized to whole data points, so most 60fps ticks
+         would repaint a pixel-identical frame — only draw when the revealed
+         point count actually advances (~14 paints instead of ~39) */
+      let lastUpto = -1;
       const tick = (now) => {
         const p = Math.min(1, (now - t0) / 650);
-        draw(1 - Math.pow(1 - p, 3));
+        const eased = 1 - Math.pow(1 - p, 3);
+        const upto = Math.max(2, Math.floor(points.length * eased));
+        if (upto !== lastUpto) {
+          lastUpto = upto;
+          draw(eased);
+        }
         if (p < 1) requestAnimationFrame(tick);
         else snapshot();
       };
@@ -252,8 +300,17 @@
       if (!mouse && amp < 0.01) {
         amp = 0;
         raf = null;
-        draw(1);
-        snapshot();
+        /* decay is over and nothing changed the data or theme, so the cached
+           bitmap is still the correct final picture. The old draw(1) +
+           snapshot() here cost ~100ms in one block, which is exactly the hitch
+           people felt right after moving the cursor off the chart. */
+        if (bg) {
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(bg, 0, 0, w, h);
+        } else {
+          draw(1);
+          snapshot();
+        }
         return;
       }
       const c = mouse || liveLoop.last;
@@ -267,19 +324,30 @@
         ctx.clearRect(0, 0, w, h);
         ctx.drawImage(bg, 0, 0, w, h);
 
-        const ys = points.map((p) => Y(p.v));
-        // Build the gaussian once per frame, not once per cell: boost() runs
-        // ~10k times a frame and was allocating a closure on every one.
-        const auraAt = aura(c.x, c.y);
-        const boost = (px, py) => auraAt(px, py) * amp;
+        /* The gaussian is separable (exp(-(dx²+dy²)) = exp(-dx²)·exp(-dy²))
+           and the cells sit on a fixed 3px lattice, so cache the per-column
+           and per-row factors: ~250 Math.exp per frame instead of ~11k (the
+           six band passes re-walk the same columns). Same numbers out. */
+        const expX = [], expY = [];
+        const A = amp;
+        const boost = (px, py) => {
+          const xi = (px / 3) | 0;
+          let ex = expX[xi];
+          if (ex === undefined) {
+            const dx = px - c.x;
+            ex = expX[xi] = Math.exp(-(dx * dx) / 9800);
+          }
+          const yi = (py / 3) | 0;
+          let ey = expY[yi];
+          if (ey === undefined) {
+            const dy = (py - c.y) * 1.6;
+            ey = expY[yi] = Math.exp(-(dy * dy) / 9800);
+          }
+          return 0.7 * ex * ey * A;
+        };
 
         ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(X(0), PAD.t + ih);
-        ys.forEach((y, i) => ctx.lineTo(X(i), y));
-        ctx.lineTo(X(points.length - 1), PAD.t + ih);
-        ctx.closePath();
-        ctx.clip();
+        ctx.clip(clipPath);
         const bx0 = Math.max(PAD.l, c.x - AURA_R);
         const bx1 = Math.min(w - PAD.r, c.x + AURA_R);
         if (bx1 > bx0) {
@@ -295,7 +363,8 @@
       if (mouse) {
         const i = Math.round(((mouse.x - PAD.l) / iw) * (points.length - 1));
         if (i >= 0 && i < points.length) {
-          ctx.strokeStyle = theme().muted;
+          // t, not theme(): theme() is 5 getComputedStyle reads, per frame here
+          ctx.strokeStyle = t.muted;
           ctx.setLineDash([3, 3]);
           ctx.beginPath();
           ctx.moveTo(X(i), PAD.t);
@@ -331,6 +400,10 @@
 
     return {
       redraw: () => {
+        // re-read the palette: redraw's callers are theme flips, and the
+        // colors were captured at chart creation
+        t = theme();
+        rgb = hexRgb(t.data);
         draw(1);
         snapshot();
       },
@@ -339,16 +412,19 @@
 
   /* ---------- horizontal bars ---------- */
   function barChart(canvas, rows, opts = {}) {
-    const t = theme();
-    const rgb = hexRgb(t.data);
+    let t = theme();
+    let rgb = hexRgb(t.data);
     const { ctx, w, h } = setupCanvas(canvas);
     const ROW = h / Math.max(1, rows.length);
     const BAR = Math.min(16, ROW * 0.44);
     const LABEL_W = opts.labelWidth ?? 130;
     const max = Math.max(1, ...rows.map((r) => r.n));
     const iw = w - LABEL_W - 54;
+    // static per dataset; formatting/truncating inside draw() ran every frame
+    const labels = rows.map((r) => (r.label.length > 18 ? r.label.slice(0, 17) + '…' : r.label));
+    const valLabels = rows.map((r) => fmt(r.n));
 
-    const draw = (progress = 1, hoverI = -1, tNow = 0) => {
+    const draw = (progress = 1, hoverI = -1) => {
       ctx.clearRect(0, 0, w, h);
       ctx.font = '11px "JetBrains Mono Variable", monospace';
       rows.forEach((r, i) => {
@@ -358,59 +434,66 @@
         ctx.fillStyle = hot ? t.ink : t.muted;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        const label = r.label.length > 18 ? r.label.slice(0, 17) + '…' : r.label;
-        ctx.fillText(label, 0, y);
+        ctx.fillText(labels[i], 0, y);
         const density = hot ? 0.62 : 0.45;
         ditherRect(ctx, LABEL_W, y - BAR / 2, bw, BAR, rgb, density, 2);
         ctx.fillStyle = t.data;
         ctx.fillRect(LABEL_W + bw - 3, y - BAR / 2, 3, BAR);
         ctx.fillStyle = t.ink;
-        ctx.fillText(fmt(r.n), LABEL_W + bw + 8, y);
+        ctx.fillText(valLabels[i], LABEL_W + bw + 8, y);
       });
     };
 
     if (reduced) draw(1);
     else {
       const t0 = performance.now();
+      // 30fps: a 550ms eased grow on dithered bars can't show the difference,
+      // and four charts animate this window at once
+      let lastF = 0;
       const tick = (now) => {
         const p = Math.min(1, (now - t0) / 550);
-        draw(1 - Math.pow(1 - p, 3));
+        if (p === 1 || now - lastF >= 28) {
+          lastF = now;
+          draw(1 - Math.pow(1 - p, 3));
+        }
         if (p < 1) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
     }
 
+    /* Nothing here animates continuously: the hover highlight only changes
+       when the hovered ROW changes, so redraw on that transition instead of
+       the old 60fps loop that repainted an identical frame all hover long. */
     let hoverI = -1;
-    let raf = null;
-    const liveLoop = (now) => {
-      if (hoverI < 0) return;
-      draw(1, hoverI, now);
-      raf = requestAnimationFrame(liveLoop);
-    };
-
     canvas.onmousemove = (e) => {
       const r = canvas.getBoundingClientRect();
       const i = Math.floor((e.clientY - r.top) / ROW);
       if (i < 0 || i >= rows.length) {
-        hoverI = -1;
+        if (hoverI !== -1) {
+          hoverI = -1;
+          draw(1);
+        }
         return hideTip();
       }
-      hoverI = i;
-      if (reduced) draw(1, i);
-      else if (!raf) raf = requestAnimationFrame(liveLoop);
-      tooltip(`<b>${esc(rows[i].label)}</b><br>${fmt(rows[i].n)} ${esc(opts.unit || '')}`, e.clientX, e.clientY);
+      if (i !== hoverI) {
+        hoverI = i;
+        draw(1, i);
+      }
+      tooltip(`<b>${esc(rows[i].label)}</b><br>${valLabels[i]} ${esc(opts.unit || '')}`, e.clientX, e.clientY);
     };
     canvas.onmouseleave = () => {
       hideTip();
       hoverI = -1;
-      if (raf) {
-        cancelAnimationFrame(raf);
-        raf = null;
-      }
       draw(1);
     };
 
-    return { redraw: () => draw(1) };
+    return {
+      redraw: () => {
+        t = theme();
+        rgb = hexRgb(t.data);
+        draw(1);
+      },
+    };
   }
 
   /* number count-up for the stat tiles */
@@ -461,10 +544,11 @@
       const d = new Date(iso + 'T00:00:00Z');
       return `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
     };
-    const fullLabel = (iso) =>
-      new Date(iso + 'T00:00:00Z').toLocaleDateString('en-GB', {
-        weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
-      });
+    // one cached formatter; toLocaleDateString builds a fresh one per call
+    const fullDF = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+    });
+    const fullLabel = (iso) => fullDF.format(new Date(iso + 'T00:00:00Z'));
 
     setTimeout(() => {
       const areaEl = $('#chart-views');
