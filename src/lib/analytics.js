@@ -76,10 +76,11 @@ export async function dashboardStats() {
   return dashInFlight ?? dashCache.data;
 }
 
-// Tracking outage: from 2026-07-31 ~12:00 to 2026-08-01 ~18:00 UTC ingestion
+// Tracking outage: from 2026-07-31 ~12:00 to 2026-08-01 ~18:48 UTC the /ph
+// proxy forwarded Cloudflare edge headers upstream and PostHog's own
+// Cloudflare rejected the events (error 1000; fixed in ffbae8e). Ingestion
 // recorded single-digit pageviews per hour against ~900/hour on the
-// surrounding days, then recovered instantly — instrument failure, not
-// traffic. The daily chart shows those two days reconstructed hour by hour
+// surrounding days. The daily chart shows those two days reconstructed
 // from the neighbouring healthy days (recorded hours kept as-is, dead hours
 // filled with a distance-weighted average of the same hour on Jul 30 and
 // Aug 2; visitors scaled by each day's recorded visitor/view ratio).
