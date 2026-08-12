@@ -94,16 +94,55 @@
     return { ctx, w, h };
   }
 
-  /* Dithered fill: paint cell-by-cell through the Bayer threshold matrix.
-     density 0..1 decides how many cells light up; cell = dot pitch in px.
-     boost(px, py) optionally adds cursor-reactive density per cell. */
+  /* The Bayer matrix is a 4x4 tile, so for a constant density the set of lit
+     cells repeats every 4 cells in both directions. Render that tile once
+     per (color, density, cell size) into a tiny offscreen canvas and reuse
+     it as a fill pattern — one fillRect call paints an arbitrarily large
+     area instead of one fillRect per lit cell (thousands, for a chart-sized
+     fill). This wasn't a JS-speed problem: on a GPU-driver-limited machine,
+     cutting the per-fill cell count ~9x (tested by bumping the cell size)
+     cut a multi-second load freeze by the same proportion — draw-call count
+     itself was the cost, not what the calls did or how often they ran.
+     createPattern tiles from the canvas's own origin, same as the old
+     per-cell loop's absolute cx/cy % 4 lookup, so adjacent fills (e.g. this
+     function's stacked density bands) still line up seamlessly. */
+  const patternCache = new Map();
+  const ditherPattern = (ctx, rgb, density, cell) => {
+    const key = `${rgb.join(',')}|${density}|${cell}`;
+    let pattern = patternCache.get(key);
+    if (pattern) return pattern;
+    const tile = document.createElement('canvas');
+    tile.width = tile.height = cell * 4;
+    const tctx = tile.getContext('2d');
+    tctx.fillStyle = `rgb(${rgb.join(',')})`;
+    for (let cy = 0; cy < 4; cy++) {
+      for (let cx = 0; cx < 4; cx++) {
+        if (BAYER[cy][cx] / 16 < density) tctx.fillRect(cx * cell, cy * cell, cell - 1, cell - 1);
+      }
+    }
+    pattern = ctx.createPattern(tile, 'repeat');
+    patternCache.set(key, pattern);
+    return pattern;
+  };
+
+  /* Dithered fill: paint through the Bayer threshold matrix. density 0..1
+     decides how many cells light up; cell = dot pitch in px. boost(px, py)
+     optionally adds cursor-reactive density per cell — that needs the slow
+     per-cell path since density then varies within the fill, but nothing
+     currently calls this with a boost (the live cursor aura patches its own
+     small region separately via ditherRectBoostOnly below). */
   function ditherRect(ctx, x, y, w, h, rgb, density, cell = 3, boost) {
+    if (!boost) {
+      ctx.fillStyle = ditherPattern(ctx, rgb, density, cell);
+      ctx.fillRect(x, y, w, h);
+      return;
+    }
     ctx.fillStyle = `rgb(${rgb.join(',')})`;
     const x0 = Math.floor(x / cell), x1 = Math.ceil((x + w) / cell);
     const y0 = Math.floor(y / cell), y1 = Math.ceil((y + h) / cell);
     for (let cy = y0; cy < y1; cy++) {
       for (let cx = x0; cx < x1; cx++) {
-        const d = boost ? Math.min(0.96, density + boost(cx * cell, cy * cell)) : density;
+        const d = Math.min(0.96, density + boost(cx * cell, cy * cell));
         if (BAYER[cy & 3][cx & 3] / 16 < d) {
           ctx.fillRect(cx * cell, cy * cell, cell - 1, cell - 1);
         }
