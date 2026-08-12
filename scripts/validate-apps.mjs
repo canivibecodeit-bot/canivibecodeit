@@ -14,12 +14,17 @@ const ALT_PLATFORMS = ['web', 'macos', 'windows', 'linux', 'ios', 'android', 'se
 const ALT_SELF_HOST = ['hosted', 'one-click', 'docker', 'ops'];
 
 const isStr = (v) => typeof v === 'string' && v.trim() !== '';
+// The slug is the one field that becomes URLs, file paths (/icons/<slug>.png)
+// and DOM attributes, so it gets a format allowlist rather than a character
+// blocklist: quotes and event-handler attributes need no angle brackets.
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const isSlug = (v) => isStr(v) && SLUG_RE.test(v);
 const isStrArray = (v) => Array.isArray(v) && v.every((x) => isStr(x));
 
 // Every key every entry carries today. A missing one is a PR that copied an old
 // template; the pages read all of them.
 const REQUIRED = {
-  slug: isStr,
+  slug: isSlug,
   name: isStr,
   domain: isStr,
   category: isStr,
