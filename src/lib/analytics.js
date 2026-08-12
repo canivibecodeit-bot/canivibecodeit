@@ -10,7 +10,7 @@ const QUERY = `
   SELECT
     countIf(event = '$pageview' AND timestamp >= toStartOfDay(now())) AS views_today,
     countIf(event = '$pageview') AS views_7d,
-    countDistinctIf(person_id, event = '$pageview') AS visitors_7d,
+    countDistinctIf(distinct_id, event = '$pageview') AS visitors_7d,
     countIf(event = 'copy_prompt') AS copies_7d,
     (SELECT max(pv) FROM (
       SELECT toDate(timestamp) AS d, countIf(event = '$pageview') AS pv
@@ -85,7 +85,7 @@ async function refreshDashboard() {
       hogql(QUERY),
       hogql(`
         SELECT countIf(event = '$pageview') AS views,
-               countDistinctIf(person_id, event = '$pageview') AS visitors,
+               countDistinctIf(distinct_id, event = '$pageview') AS visitors,
                countIf(event = 'copy_prompt') AS copies,
                toDate(min(timestamp)) AS since
         FROM events
@@ -94,7 +94,7 @@ async function refreshDashboard() {
       hogql(`
         SELECT toDate(timestamp) AS d,
                countIf(event = '$pageview') AS views,
-               countDistinctIf(person_id, event = '$pageview') AS visitors
+               countDistinctIf(distinct_id, event = '$pageview') AS visitors
         FROM events
         WHERE ${SITE} AND timestamp > now() - INTERVAL 14 DAY
         GROUP BY d ORDER BY d
@@ -188,7 +188,7 @@ async function refreshGlobe() {
         WHERE ${SITE} AND event = '$pageview'
       `);
       const countries7d = await hogql(`
-        SELECT properties.$geoip_country_code AS c, countDistinct(person_id) AS n
+        SELECT properties.$geoip_country_code AS c, countDistinct(distinct_id) AS n
         FROM events
         WHERE ${SITE} AND event = '$pageview'
           AND timestamp > now() - INTERVAL 7 DAY
@@ -215,8 +215,8 @@ async function refreshGlobe() {
       hogql(
         `
         SELECT properties.$geoip_country_code AS c,
-               countDistinct(person_id) AS n,
-               countDistinctIf(person_id,
+               countDistinct(distinct_id) AS n,
+               countDistinctIf(distinct_id,
                  timestamp > now() - INTERVAL 5 MINUTE) AS live,
                toUnixTimestamp(max(timestamp)) AS latest
         FROM events
