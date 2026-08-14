@@ -70,11 +70,26 @@
       track('theme_toggle', { theme: next });
     });
 
-    /* ---------- search filter + chips ---------- */
+    /* ---------- search filter + category dropdown ---------- */
     const search = $('#search');
     const rows = $$('#rows .row, #rows-rest .row');
     let activeCat = '';
     let activeVerdict = '';
+
+    // The live globe rides after the 10th VISIBLE row. A fixed DOM slot means
+    // a filtered list can render the globe before its first matching entry.
+    const placeGlobe = () => {
+      const box = $('#rows');
+      const globe = $('#globe-strip');
+      if (!box || !globe || !box.contains(globe)) return;
+      const visible = $$('.row', box).filter((r) => r.style.display !== 'none');
+      if (!visible.length) {
+        globe.style.display = 'none';
+        return;
+      }
+      globe.style.display = '';
+      visible[Math.min(9, visible.length - 1)].after(globe);
+    };
 
     const applyFilter = () => {
       const q = (search?.value || '').trim().toLowerCase();
@@ -97,7 +112,46 @@
       $$('.sp-banner, #stats-strip').forEach((b) => {
         b.style.display = filtering ? 'none' : '';
       });
+      placeGlobe();
     };
+
+    /* ---------- category dropdown (list header) ---------- */
+    const catDD = $('#cat-dd');
+    if (catDD && rows.length) {
+      const ddBtn = $('#cat-dd-btn');
+      const ddPanel = $('#cat-dd-panel');
+      const ddLabel = $('#cat-dd-label');
+      const ddClose = () => {
+        ddPanel.hidden = true;
+        ddBtn.setAttribute('aria-expanded', 'false');
+      };
+      ddBtn.addEventListener('click', () => {
+        const opening = ddPanel.hidden;
+        ddPanel.hidden = !opening;
+        ddBtn.setAttribute('aria-expanded', String(opening));
+        if (opening) $('.cat-opt.active', ddPanel)?.scrollIntoView({ block: 'nearest' });
+      });
+      ddPanel.addEventListener('click', (e) => {
+        const opt = e.target.closest('.cat-opt');
+        if (!opt) return;
+        activeCat = opt.dataset.cat || '';
+        $$('.cat-opt', ddPanel).forEach((o) => {
+          o.classList.toggle('active', o === opt);
+          o.setAttribute('aria-selected', String(o === opt));
+        });
+        ddLabel.textContent = opt.dataset.label;
+        ddBtn.classList.toggle('filtering', !!activeCat);
+        ddClose();
+        applyFilter();
+        track('category_filter', { category: activeCat || 'all' });
+      });
+      document.addEventListener('click', (e) => {
+        if (!catDD.contains(e.target)) ddClose();
+      }, { signal: page.signal });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') ddClose();
+      }, { signal: page.signal });
+    }
 
     $('#verdict-filter')?.addEventListener('click', (e) => {
       // Verdict chips only: the sort toggle is a .vchip in the same row, and it
@@ -166,6 +220,9 @@
       const frag = document.createDocumentFragment();
       ordered.forEach((el) => frag.appendChild(el));
       rowsBox.appendChild(frag);
+      // Re-appending startOrder put the globe back at its server-rendered
+      // slot; a filtered or re-sorted list wants it after the 10th visible row.
+      placeGlobe();
     };
 
     if (teamInput) {
@@ -329,20 +386,6 @@
       });
       search.addEventListener('blur', logSearch);
       srBox?.addEventListener('click', logSearch);
-    }
-
-    // Chips are real links (SEO); on the homepage they filter in place instead.
-    const chips = $('#chips');
-    if (chips && rows.length) {
-      chips.addEventListener('click', (e) => {
-        const chip = e.target.closest('.chip');
-        if (!chip || !chip.hasAttribute('data-cat') || e.metaKey || e.ctrlKey) return;
-        e.preventDefault();
-        activeCat = chip.dataset.cat || '';
-        $$('.chip', chips).forEach((c) => c.classList.toggle('active', c === chip));
-        applyFilter();
-        track('category_filter', { category: activeCat || 'all' });
-      });
     }
 
     /* ---------- odometer ---------- */
