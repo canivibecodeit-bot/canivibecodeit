@@ -3,9 +3,13 @@
    full = the dedicated-page card with platform icons, repo link and, when the
    entry carries a verified `facts` block, the fact rows. */
 import { existsSync } from 'node:fs';
-import { formatStars, formatMonth, formatLicense, SELF_HOST_LABELS, FACT_RUNS_LABELS } from '../lib/apps.js';
+import { formatStars, formatMonth, formatLicense, productPageLink, SELF_HOST_LABELS, FACT_RUNS_LABELS } from '../lib/apps.js';
 
 const { alt, compact = false, i = 0, appName = null } = Astro.props;
+
+// Two-way mesh with the /alternative/<product> pages: when this product has
+// one (it replaces 2+ apps), the full card links across to it.
+const prod = compact ? null : productPageLink(alt.name, alt.url);
 
 // Verified fact rows (skip what wasn't verified; null setupBlocker IS a
 // finding: it means the install was verified clean).
@@ -155,6 +159,7 @@ const ICONS = {
         <span class="alt-links">
           <a href={alt.url} target="_blank" rel="noopener">{host} ↗</a>
           {alt.repo && <a href={alt.repo} target="_blank" rel="noopener">repo ↗</a>}
+          {prod && <a href={`/alternative/${prod.slug}`}>replaces {prod.count} apps →</a>}
         </span>
       </div>
     </div>

@@ -322,6 +322,107 @@ export const SELF_HOST_LABELS = {
   ops: 'self-host, real ops',
 };
 
+// ---- the inverted axis: one free product → every paid app it replaces ----
+// Grouped by slugified product NAME, because the same product shows up under
+// URL variants across app files (frappe.io/erpnext vs erpnext.com, cryptpad.fr
+// vs cryptpad.org). The one real name clash in the data (Titanium's OnyX mac
+// utility vs onyx.app) is split by host below.
+const PRODUCT_SLUG_BY_HOST = new Map([['www.onyx.app', 'onyx-app'], ['onyx.app', 'onyx-app']]);
+
+// A product earns a page once it replaces 2+ paid apps; below that the app's
+// own alternatives page already tells the whole story.
+export const ALT_PRODUCT_PAGE_MIN = 2;
+
+export function productSlug(name, url) {
+  try {
+    const host = new URL(url).hostname;
+    if (PRODUCT_SLUG_BY_HOST.has(host)) return PRODUCT_SLUG_BY_HOST.get(host);
+  } catch {}
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+let productCache;
+
+export function alternativeProducts() {
+  if (productCache) return productCache;
+  const groups = new Map();
+  for (const app of allApps()) {
+    for (const alt of app.alternatives ?? []) {
+      const slug = productSlug(alt.name, alt.url);
+      if (!groups.has(slug)) groups.set(slug, []);
+      groups.get(slug).push({ app, alt });
+    }
+  }
+  const mode = (vals) => {
+    const c = new Map();
+    for (const v of vals) if (v != null) c.set(v, (c.get(v) ?? 0) + 1);
+    return [...c.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  };
+  productCache = [...groups.entries()]
+    .map(([slug, entries]) => {
+      const alts = entries.map((e) => e.alt);
+      // one pairing per app (URL variants can put the same app in twice)
+      const seen = new Set();
+      const pairings = entries
+        .filter(({ app }) => !seen.has(app.slug) && seen.add(app.slug))
+        .map(({ app, alt }) => ({ app, desc: alt.desc, gapVsPaid: alt.facts?.gapVsPaid ?? null }))
+        .sort((a, b) => (b.app.priceMonthly ?? 0) - (a.app.priceMonthly ?? 0));
+      // discontinued apps stay in the list as post-mortems but don't count as
+      // money the product currently replaces
+      const spendMonthly = Math.round(
+        pairings.reduce((s, p) => s + (!p.app.discontinued && p.app.priceMonthly != null ? p.app.priceMonthly : 0), 0)
+      );
+      const facts = alts
+        .filter((a) => a.facts)
+        .map((a) => a.facts)
+        .sort((a, b) => (b.checkedOn ?? '').localeCompare(a.checkedOn ?? ''))[0] ?? null;
+      return {
+        slug,
+        name: mode(alts.map((a) => a.name)),
+        url: mode(alts.map((a) => a.url)),
+        type: alts.some((a) => a.type === 'open-source') ? 'open-source' : 'free',
+        repo: mode(alts.map((a) => a.repo)),
+        stars: alts.some((a) => a.stars != null) ? Math.max(...alts.map((a) => a.stars ?? 0)) : null,
+        lastCommit: alts.map((a) => a.lastCommit).filter(Boolean).sort().at(-1) ?? null,
+        platforms: [...new Set(alts.flatMap((a) => a.platforms ?? []))],
+        selfHost: mode(alts.map((a) => a.selfHost)),
+        checkedOn: alts.flatMap((a) => [a.checkedOn, a.facts?.checkedOn]).filter(Boolean).sort().at(-1),
+        category: mode(pairings.map((p) => p.app.category)),
+        facts,
+        pairings,
+        spendMonthly,
+      };
+    })
+    .sort((a, b) => b.pairings.length - a.pairings.length || (b.stars ?? 0) - (a.stars ?? 0));
+  return productCache;
+}
+
+export function productsWithPage() {
+  return alternativeProducts().filter((p) => p.pairings.length >= ALT_PRODUCT_PAGE_MIN);
+}
+
+export function getProduct(slug) {
+  return alternativeProducts().find((p) => p.slug === slug);
+}
+
+// For the alt cards: link an entry to its product page when one exists.
+let productLinkCache;
+export function productPageLink(name, url) {
+  if (!productLinkCache) {
+    productLinkCache = new Map(productsWithPage().map((p) => [p.slug, p.pairings.length]));
+  }
+  const slug = productSlug(name, url);
+  const count = productLinkCache.get(slug);
+  return count ? { slug, count } : null;
+}
+
+// Same staging discipline as the alternatives pages: the sitemap carries the
+// top pages first; the rest joins with sitemap stage 2.
+const ALT_PRODUCT_SITEMAP_LIMIT = 30;
+export function productsSitemap() {
+  return productsWithPage().slice(0, ALT_PRODUCT_SITEMAP_LIMIT);
+}
+
 // Where the free thing actually runs, for the verified fact block.
 export const FACT_RUNS_LABELS = {
   local: 'on your machine',

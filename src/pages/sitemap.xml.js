@@ -1,4 +1,4 @@
-import { allApps, alternativesSitemapApps, categoriesInUse, moatsInUse } from '../lib/apps.js';
+import { allApps, alternativesSitemapApps, productsSitemap, categoriesInUse, moatsInUse } from '../lib/apps.js';
 
 export async function GET() {
   const base = 'https://canivibecodeit.com';
@@ -10,6 +10,9 @@ export async function GET() {
     ...allApps().map((a) => `${base}/${a.slug}`),
     ...altPages.map((a) => `${base}/${a.slug}/alternatives`),
     ...(altPages.length > 0 ? [`${base}/alternatives`] : []),
+    // Same staged rollout as the alternatives pages: top products first,
+    // the rest joins with sitemap stage 2.
+    ...productsSitemap().map((p) => `${base}/alternative/${p.slug}`),
     ...categoriesInUse().map((c) => `${base}/category/${c.slug}`),
     `${base}/categories`,
     ...moatsInUse().map((m) => `${base}/moat/${m.tag}`),
