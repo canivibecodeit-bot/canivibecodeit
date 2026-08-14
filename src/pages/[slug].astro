@@ -554,6 +554,13 @@ const tweet = encodeURIComponent(
     max-width: 76ch;
   }
 
+  /* Below the tier table the table's own bottom rule already draws the line;
+     a second border-top here reads as an ugly double rule. */
+  .tier-wrap + .p-rows {
+    border-top: 0;
+    margin-top: 0;
+  }
+
   .p-row {
     display: flex;
     gap: 18px;
