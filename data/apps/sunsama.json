@@ -5,16 +5,42 @@
   "category": "tasks-calendar",
   "subcategory": "daily planner",
   "tagline": "Daily planner that pulls tasks and calendar into a focused schedule",
-  "priceMonthly": 25,
+  "priceMonthly": 22,
   "pricing": {
-    "plan": "Personal",
-    "basis": "monthly per person",
+    "plan": "Pro",
+    "basis": "monthly per user",
     "unit": "per-seat",
-    "native": "25 USD",
+    "native": "22 USD",
     "source": "https://sunsama.com/pricing",
-    "checkedOn": "2026-07-30",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; listed at $25/month per person monthly and $20/month annually."
+    "notes": "Official pricing checked 2026-07-30; listed at $25/month per person monthly and $20/month annually.",
+    "tiers": [
+      {
+        "name": "Pro",
+        "monthly": 22,
+        "annualPerMonth": 17,
+        "per": "user",
+        "limits": "1 user; daily planning, task/calendar integrations, and analytics; no numeric task cap published.",
+        "notes": "The top pricing card shows $22/$17; a lower FAQ on the same live page still says $25/$20, so the card values were used."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, security, invoicing, and support.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual; 14-day trial with no card; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Every teammate added to a workspace is placed on the subscription and billed on a prorated basis.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://sunsama.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

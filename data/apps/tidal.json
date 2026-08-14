@@ -6,18 +6,55 @@
   "category": "audio",
   "subcategory": "music services and creator audio tools",
   "tagline": "Stream a personal lossless music library from user-owned storage",
-  "priceMonthly": 10.99,
+  "priceMonthly": 11.99,
   "pricing": {
     "plan": "Individual",
-    "basis": "monthly",
-    "unit": "flat",
+    "basis": "monthly per user",
+    "unit": "per-seat",
     "source": "https://tidal.com/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-12",
     "confidence": "high",
     "notes": "Official US monthly Individual price.",
-    "native": "10.99 USD",
+    "native": "11.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Individual",
+        "monthly": 11.99,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 account; full catalog and lossless/high-resolution streaming.",
+        "notes": null
+      },
+      {
+        "name": "Family",
+        "monthly": 19.99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Up to 6 total accounts.",
+        "notes": null
+      },
+      {
+        "name": "Student",
+        "monthly": 6.99,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 verified student account; reverification every 12 months.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "Monthly only; no annual plan is publicly offered. A 30-day trial is promotional, not a permanent free tier.",
+    "priceChanges": [],
+    "hiddenCosts": "The optional DJ add-on is extra, but TIDAL's own live pages conflict on its current U.S. amount ($7.50, $8 or $9/month); checkout is required to resolve it. Taxes, app-store billing and regional prices can differ.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://tidal.com/pricing",
+      "https://support.tidal.com/hc/en-us/articles/115003662825-Subscription-Types",
+      "https://tidal.com/plans/student",
+      "https://support.tidal.com/hc/en-us/articles/27563493690129-Tidal-DJ"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

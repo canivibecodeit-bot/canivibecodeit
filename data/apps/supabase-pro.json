@@ -17,7 +17,51 @@
     "notes": "Official Pro monthly project price before usage.",
     "native": "25 USD",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "2 active projects; 50,000 MAU; 500 MB database/project; 1 GB storage; 5 GB egress + 5 GB cached egress; 2 million Realtime messages",
+        "notes": "Projects may pause after 1 week of inactivity."
+      },
+      {
+        "name": "Pro",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "100,000 MAU; 8 GB database disk/project; 100 GB storage; 250 GB egress + 250 GB cached egress; 7-day backups/log retention",
+        "notes": "Includes $10/month in compute credits, enough for 1 Micro project; usage over allowances is metered."
+      },
+      {
+        "name": "Team",
+        "monthly": 599,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Pro usage allowances plus team controls, SSO, audit logs and longer operational support features",
+        "notes": "Usage and project compute remain separately metered."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom usage, support, compliance and deployment terms",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "2 active projects; 50,000 MAU; 500 MB database/project; 1 GB file storage; 5 GB egress + 5 GB cached egress; 50 MB maximum file; 200 Realtime connections; 2 million Realtime messages; 500,000 Edge Function invocations",
+    "billingTerms": "monthly self-serve billing; no public annual self-serve price shown",
+    "priceChanges": [],
+    "hiddenCosts": "The $25 Pro fee is not the whole bill: each project consumes compute after the included $10 credit; overages include MAU, storage, egress, database disk, Realtime, Edge Functions and image transforms; paid add-ons include custom domains ($10/month), PITR (from $100/month), phone MFA and log drains",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://supabase.com/pricing",
+      "https://supabase.com/docs/guides/platform/manage-your-usage/compute",
+      "https://supabase.com/docs/guides/platform/manage-your-usage"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

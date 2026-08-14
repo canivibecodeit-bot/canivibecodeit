@@ -17,7 +17,53 @@
     "notes": "Sold as separate one-time app purchases; canonical monthly price is null.",
     "native": "one-time",
     "kind": "one-time",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Things for Mac",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 Mac App Store license; 15-day direct-download trial.",
+        "notes": "$49.99 one-time."
+      },
+      {
+        "name": "Things for iPhone & Apple Watch",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 iPhone/Apple Watch App Store purchase.",
+        "notes": "$9.99 one-time."
+      },
+      {
+        "name": "Things for iPad",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 iPad App Store purchase.",
+        "notes": "$19.99 one-time."
+      },
+      {
+        "name": "Things for Apple Vision",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 Apple Vision App Store purchase.",
+        "notes": "$29.99 one-time."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "one-time purchase per Apple platform; no subscription or annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Mac, iPhone/Watch, iPad, and Vision are separate purchases; there is no cross-platform bundle, though Things Cloud sync is free.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://culturedcode.com/things/pricing/",
+      "https://culturedcode.com/things/mac/appstore/",
+      "https://culturedcode.com/things/iphone/appstore/",
+      "https://culturedcode.com/things/ipad/appstore/",
+      "https://culturedcode.com/things/vision/appstore/"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

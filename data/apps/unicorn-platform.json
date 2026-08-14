@@ -6,18 +6,86 @@
   "category": "website-builder",
   "subcategory": "websites and landing pages",
   "tagline": "Assemble a startup landing page from constrained components and export static code",
-  "priceMonthly": 18,
+  "priceMonthly": 14,
   "pricing": {
     "plan": "Maker",
     "basis": "monthly",
     "unit": "flat",
-    "source": "https://unicornplatform.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://unicornplatform.com/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Maker monthly rate.",
-    "native": "18 USD",
+    "native": "14 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Lurker",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "0 published websites; up to 10 pages and 10 blog posts in the builder; 10 AI uses; no custom domain, code export or collaborators",
+        "notes": "Free forever for drafting, but it does not include a live published site."
+      },
+      {
+        "name": "Maker",
+        "monthly": 14,
+        "annualPerMonth": 9,
+        "per": "workspace",
+        "limits": "1 published website; unlimited pages; 10 blog posts; custom domain and code export; 0 collaborators; Unicorn branding remains",
+        "notes": null
+      },
+      {
+        "name": "Startup",
+        "monthly": 49,
+        "annualPerMonth": 29,
+        "per": "workspace",
+        "limits": "1 published website; unlimited pages and blog posts; 1 collaborator; branding removal; custom domain and code export",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 69,
+        "annualPerMonth": 49,
+        "per": "workspace",
+        "limits": "3 published websites; unlimited pages, blog posts and collaborators; branding removal and code export",
+        "notes": null
+      },
+      {
+        "name": "Freelancer",
+        "monthly": 99,
+        "annualPerMonth": 79,
+        "per": "workspace",
+        "limits": "8 published websites; unlimited pages, blog posts and collaborators; branding removal and code export",
+        "notes": null
+      },
+      {
+        "name": "Agency",
+        "monthly": 179,
+        "annualPerMonth": 139,
+        "per": "workspace",
+        "limits": "20 published websites; unlimited pages, blog posts and collaborators; branding removal and code export",
+        "notes": null
+      },
+      {
+        "name": "Major",
+        "monthly": 350,
+        "annualPerMonth": 250,
+        "per": "workspace",
+        "limits": "100 published websites; unlimited pages, blog posts and collaborators; branding removal and code export",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "10 pages, 10 blog posts and 10 AI uses, but 0 published websites; no custom domain, export, collaborators or branding removal",
+    "billingTerms": "monthly + annual (live table discounts vary by tier, roughly 29% to 40%); 30-day money-back guarantee on paid plans",
+    "priceChanges": [],
+    "hiddenCosts": "Custom domains are bought separately; Stripe/payment-processing charges and fees from connected third-party services are not included",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://unicornplatform.com/pricing/",
+      "https://help.unicornplatform.com/en/article/how-to-upgrade-to-a-larger-plan-1xcs0y6/",
+      "https://help.unicornplatform.com/en/article/unicorn-platform-ai-hwl6fa/"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

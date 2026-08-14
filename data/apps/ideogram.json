@@ -17,7 +17,51 @@
     "notes": "Official Plus monthly tier.",
     "native": "20 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "10 slow credits/week; public generations; no priority credits.",
+        "notes": null
+      },
+      {
+        "name": "Plus",
+        "monthly": 20,
+        "annualPerMonth": 15,
+        "per": "user",
+        "limits": "1,000 priority credits/month, unlimited slow credits, private generation and unlimited character consistency.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 60,
+        "annualPerMonth": 42,
+        "per": "user",
+        "limits": "3,500 priority credits/month, unlimited slow credits and the best listed subscription credit rate.",
+        "notes": null
+      },
+      {
+        "name": "Team",
+        "monthly": 30,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "1,500 priority credits/user/month, central billing/admin and early collaboration access.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "10 slow credits per week and 0 priority credits.",
+    "billingTerms": "monthly + annual; Team is per user",
+    "priceChanges": [],
+    "hiddenCosts": "Top-up priority credits are sold separately, and API usage is billed separately per image. Custom model training is separately metered at $40 per training run.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://ideogram.ai/pricing",
+      "https://docs.ideogram.ai/using-ideogram/getting-started/signup-and-registration",
+      "https://ideogram.ai/api-pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

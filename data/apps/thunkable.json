@@ -17,7 +17,65 @@
     "notes": "Typical Builder monthly rate.",
     "native": "59 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "2,000 AI tokens/month; 3 public projects; 5 screens/project; 0 private projects; 0 live published apps",
+        "notes": "Private projects and ongoing published-app availability require a paid plan."
+      },
+      {
+        "name": "Accelerator",
+        "monthly": 19,
+        "annualPerMonth": 18,
+        "per": "workspace",
+        "limits": "20,000 AI tokens/month; 5 public projects; 1 private project; 10 screens/project; 0 live apps",
+        "notes": "The official pricing DOM exposed $18 and $19 with conflicting billing labels; values are recorded conservatively as annual/monthly."
+      },
+      {
+        "name": "Builder",
+        "monthly": 59,
+        "annualPerMonth": 37,
+        "per": "workspace",
+        "limits": "50,000 AI tokens/month; unlimited public projects; 10 private projects; unlimited screens; 1 live app",
+        "notes": "Monthly and annual billing."
+      },
+      {
+        "name": "Advanced",
+        "monthly": 189,
+        "annualPerMonth": 99,
+        "per": "workspace",
+        "limits": "100,000 AI tokens/month; unlimited public/private projects and screens; multiple live-app and collaboration features",
+        "notes": "Monthly and annual billing."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom users, apps, governance, support and contract terms",
+        "notes": "Contact sales."
+      },
+      {
+        "name": "Education",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom classroom, educator and institution terms",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "2,000 AI tokens/month; 3 public projects; 5 screens/project; 0 private projects; 0 live apps",
+    "billingTerms": "monthly + annual; exact Accelerator labels were inconsistent in the official page markup",
+    "priceChanges": [],
+    "hiddenCosts": "AI tokens reset and expire each month; additional token packs cost extra at unpublished rates, an active paid plan is needed to keep private/published apps available, and Apple/Google developer accounts are separate",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://thunkable.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

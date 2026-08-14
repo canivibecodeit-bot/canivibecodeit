@@ -17,7 +17,42 @@
     "notes": "Typical Business monthly seat price.",
     "native": "16 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "5 registered members; 1 floor; unlimited rooms; up to 50 concurrent guests; each guest may use the workspace up to 4 hours/week",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "Minimum 5 paid members; unlimited floors and rooms; up to 50 concurrent guests; recording and analytics",
+        "notes": "Billed annually; minimum annualized base is 5 × $16 = $80/month. Annual billing saves 20%; exact month-to-month rate was not exposed."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited guests plus custom security, onboarding and support",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "5 registered members; 1 floor; unlimited rooms; 50 concurrent guests; each guest limited to 4 hours/week",
+    "billingTerms": "monthly + annual (-20% annually); public Business price is $16/member/month billed annually; 5-seat minimum",
+    "priceChanges": [],
+    "hiddenCosts": "Business has a 5-paid-member minimum. A 14-day paid-plan trial can auto-convert to a subscription; added members are prorated, while removals generally affect the next invoice.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.kumospace.com/pricing",
+      "https://www.kumospace.com/help/pricing-faq"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

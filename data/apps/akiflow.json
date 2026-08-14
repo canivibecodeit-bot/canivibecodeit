@@ -14,7 +14,33 @@
     "source": "https://akiflow.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; Pro Monthly listed at $34/month and annual at $19/month."
+    "notes": "Official pricing checked 2026-07-30; Pro Monthly listed at $34/month and annual at $19/month.",
+    "tiers": [
+      {
+        "name": "Pro",
+        "monthly": 34,
+        "annualPerMonth": 19,
+        "per": "user",
+        "limits": "1 user; tasks, calendars, integrations, and time blocking; no numeric task/calendar cap published.",
+        "notes": "Annual price is a promoted 44% discount."
+      },
+      {
+        "name": "Teams",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, onboarding, and team controls.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (-44% advertised); 7-day trial; Teams custom",
+    "priceChanges": [],
+    "hiddenCosts": "The $19 annual equivalent is promotional; renewal terms beyond the displayed offer are not stated publicly.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://akiflow.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

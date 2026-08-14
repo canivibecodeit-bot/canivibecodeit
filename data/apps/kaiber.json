@@ -17,7 +17,50 @@
     "source": "https://kaiber.ai/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 10,
+        "annualPerMonth": 8,
+        "per": "flat",
+        "limits": "500 credits/month or 6,000 credits/year; 1 Canvas; 3 concurrent Canvas generations; 1 Editor timeline.",
+        "notes": null
+      },
+      {
+        "name": "Creator",
+        "monthly": 29,
+        "annualPerMonth": 23,
+        "per": "flat",
+        "limits": "1,500 credits/month or 18,000 credits/year; 5 Canvases; 15 concurrent Canvas generations; unlimited Editor timelines.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 99,
+        "annualPerMonth": 79,
+        "per": "flat",
+        "limits": "5,000 credits/month or 60,000 credits/year; unlimited Canvases and Canvas generations; Beat Sync batch size 10.",
+        "notes": null
+      },
+      {
+        "name": "Visionary",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited credits with white-glove service; public numeric usage and price are not published.",
+        "notes": "Contact-sales plan."
+      }
+    ],
+    "freeTierCaps": "no free tier; the only entry offer is a paid $5, 5-day trial with 500 credits",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "The $5 trial automatically converts to Creator Monthly unless canceled. Top-up credits are sold separately; Kaiber says credits roll over and do not expire.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://kaiber.ai/pricing",
+      "https://helpcenter.kaiber.ai/articles/6291249-kaiber-plans-what-you-need-to-know"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

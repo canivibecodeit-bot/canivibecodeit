@@ -17,7 +17,65 @@
     "notes": "Advertised annual-equivalent Team price; monthly billing is higher.",
     "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 5 users; 500 workflow runs/month; 5 GB storage; 20 agent hours; 250 AI credits",
+        "notes": "Builder and internal-user roles are free inside the 5-user cap."
+      },
+      {
+        "name": "Team, builder",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Builder seat; 5,000 workflow runs/month per organization; 1,000 pooled AI credits after introductory bonus",
+        "notes": "Official US page exposed the annual-equivalent price; monthly amount was not stable in the crawl."
+      },
+      {
+        "name": "Team, internal user",
+        "monthly": null,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "Internal end-user seat; shares the organization's workflow and AI allowances",
+        "notes": "Annual-equivalent price."
+      },
+      {
+        "name": "Business, builder",
+        "monthly": null,
+        "annualPerMonth": 50,
+        "per": "user",
+        "limits": "Builder seat; 5,000 workflow runs/month; 3,000 pooled AI credits; advanced permissions and environments",
+        "notes": "Annual-equivalent price."
+      },
+      {
+        "name": "Business, internal user",
+        "monthly": null,
+        "annualPerMonth": 15,
+        "per": "user",
+        "limits": "Internal end-user seat; business controls",
+        "notes": "Annual-equivalent price."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom builder/internal/external users, support, security and deployment terms",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "5 total users; 500 workflow runs/month; 5 GB storage; 20 agent hours; 250 AI credits",
+    "billingTerms": "monthly + annual; published self-serve figures are role-based per user",
+    "priceChanges": [],
+    "hiddenCosts": "Builder and internal-user seats have different rates; extra workflow capacity costs $75 per 5,000 runs, AI credits are pooled and reset without rollover, Agents are metered separately, and external-user pricing changes after the included band",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://retool.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

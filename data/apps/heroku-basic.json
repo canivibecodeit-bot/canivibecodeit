@@ -17,7 +17,322 @@
     "notes": "Official Basic dyno monthly price; databases and add-ons are separate.",
     "native": "7 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Eco",
+        "monthly": 5,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1,000 pooled dyno-hours/account/month; 0.5 GB RAM; sleeps after 30 minutes idle; personal apps only.",
+        "notes": "Flat $5 account charge rather than per-second proration."
+      },
+      {
+        "name": "Basic",
+        "monthly": 7,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "0.5 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Standard-1X",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "0.5 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Standard-2X",
+        "monthly": 50,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Performance-M",
+        "monthly": 250,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2.5 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Performance-L",
+        "monthly": 500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "14 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Performance-L-RAM",
+        "monthly": 500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "30 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Performance-XL",
+        "monthly": 750,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "62 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Performance-2XL",
+        "monthly": 1500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "126 GB RAM per dyno.",
+        "notes": "Cedar dyno."
+      },
+      {
+        "name": "Private-S",
+        "monthly": 125,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Private-M",
+        "monthly": 250,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2.5 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Private-L",
+        "monthly": 500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "14 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Private-L-RAM",
+        "monthly": 500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "30 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Private-XL",
+        "monthly": 750,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "62 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Private-2XL",
+        "monthly": 1500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "126 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-S",
+        "monthly": 150,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-M",
+        "monthly": 300,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2.5 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-L",
+        "monthly": 600,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "14 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-L-RAM",
+        "monthly": 600,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "30 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-XL",
+        "monthly": 900,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "62 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Shield-2XL",
+        "monthly": 1800,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "126 GB RAM per dyno.",
+        "notes": "Cedar isolated/compliance dyno."
+      },
+      {
+        "name": "Fir Classic 1c / 0.5 GB",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Classic 2c / 1 GB",
+        "monthly": 50,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir General Purpose 1c / 4 GB",
+        "monthly": 80,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir General Purpose 2c / 8 GB",
+        "monthly": 160,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir General Purpose 4c / 16 GB",
+        "monthly": 320,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir General Purpose 8c / 32 GB",
+        "monthly": 640,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir General Purpose 16c / 64 GB",
+        "monthly": 1000,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Compute 2c / 4 GB",
+        "monthly": 150,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Compute 4c / 8 GB",
+        "monthly": 300,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Compute 8c / 16 GB",
+        "monthly": 600,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Compute 16c / 32 GB",
+        "monthly": 1200,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Compute 32c / 64 GB",
+        "monthly": 2400,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Memory 1c / 8 GB",
+        "monthly": 100,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Memory 2c / 16 GB",
+        "monthly": 250,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Memory 4c / 32 GB",
+        "monthly": 500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Memory 8c / 64 GB",
+        "monthly": 750,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      },
+      {
+        "name": "Fir Memory 16c / 128 GB",
+        "monthly": 1500,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Published Fir dyno size; billed while provisioned.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly billing; non-Eco dynos are prorated per second with a 1-minute minimum; no annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Databases, add-ons, network services and support are separate. Review apps and one-off dynos also consume paid dyno time. Eco is charged as the full $5 monthly pool rather than normal per-second proration.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.heroku.com/pricing/",
+      "https://devcenter.heroku.com/articles/usage-and-billing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

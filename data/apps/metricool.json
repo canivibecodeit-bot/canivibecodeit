@@ -6,18 +6,84 @@
   "category": "social-media",
   "subcategory": "social scheduling and content repurposing",
   "tagline": "Schedule posts and consolidate basic account analytics for a few profiles",
-  "priceMonthly": 22,
+  "priceMonthly": 25,
   "pricing": {
-    "plan": "Starter",
+    "plan": "Starter (5 brands)",
     "basis": "monthly",
     "unit": "flat",
     "source": "https://metricool.com/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Starter monthly amount.",
-    "native": "22 USD",
+    "native": "25 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 brand; all supported networks except LinkedIn and X; 20 scheduled posts/month; 5 competitor profiles; 30 days of analytics history.",
+        "notes": null
+      },
+      {
+        "name": "Starter (5 brands)",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "workspace",
+        "limits": "5 brands; up to 100 competitor profiles; unlimited publishing under fair use; unlimited analytics history; LinkedIn included.",
+        "notes": null
+      },
+      {
+        "name": "Starter (10 brands)",
+        "monthly": 45,
+        "annualPerMonth": 36,
+        "per": "workspace",
+        "limits": "10 brands; up to 100 competitor profiles; unlimited publishing under fair use; unlimited analytics history; LinkedIn included.",
+        "notes": null
+      },
+      {
+        "name": "Advanced (15 brands)",
+        "monthly": 67,
+        "annualPerMonth": 53,
+        "per": "workspace",
+        "limits": "15 brands; up to 100 competitor profiles; unlimited publishing under fair use; unlimited analytics history; team roles, approvals, Looker Studio, and API.",
+        "notes": null
+      },
+      {
+        "name": "Advanced (25 brands)",
+        "monthly": 107,
+        "annualPerMonth": 85,
+        "per": "workspace",
+        "limits": "25 brands; up to 100 competitor profiles; unlimited publishing under fair use; unlimited analytics history; team roles, approvals, Looker Studio, and API.",
+        "notes": null
+      },
+      {
+        "name": "Advanced (50 brands)",
+        "monthly": 210,
+        "annualPerMonth": 159,
+        "per": "workspace",
+        "limits": "50 brands; up to 100 competitor profiles; unlimited publishing under fair use; unlimited analytics history; team roles, approvals, Looker Studio, and API.",
+        "notes": null
+      },
+      {
+        "name": "Custom",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "More than 50 brands with custom users, integrations, support, and commercial terms.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "1 brand; all supported networks except LinkedIn and X; 20 scheduled posts/month; 5 competitor profiles; 30 days of analytics history",
+    "billingTerms": "monthly + annual (about 20% lower on annual billing)",
+    "priceChanges": [],
+    "hiddenCosts": "X costs $10/month per connected account. Advanced Analytics starts at $12/month on Starter and $36/month on Advanced/Custom; VAT may be added.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://metricool.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

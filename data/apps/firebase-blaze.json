@@ -17,7 +17,36 @@
     "notes": "Blaze is pay as you go; canonical monthly amount is null.",
     "native": "usage-based",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Spark",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "Auth 50,000 MAU; Firestore 1 GiB, 50,000 reads/day, 20,000 writes/day and 20,000 deletes/day; Hosting 10 GB storage and 10 GB transfer/month; Realtime Database 1 GB, 100 concurrent connections and 10 GB download/month.",
+        "notes": "Test Lab includes 10 virtual-device and 5 physical-device tests/day; exceeding hard Spark limits generally stops the affected service rather than billing."
+      },
+      {
+        "name": "Blaze",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "No base fee; retains no-cost quotas and adds Functions 2M invocations/month, 400,000 GB-seconds, 200,000 CPU-seconds and 5 GB egress; then pay as you go.",
+        "notes": "Realtime Database supports up to 200,000 simultaneous connections/database; exact rates vary by product and region."
+      }
+    ],
+    "freeTierCaps": "Spark: Auth 50,000 MAU; Firestore 1 GiB plus 50,000 reads/day and 20,000 writes/day; Hosting 10 GB storage plus 10 GB transfer/month; Realtime Database 1 GB and 100 concurrent connections",
+    "billingTerms": "Spark is free with hard caps; Blaze has $0 base and monthly pay-as-you-go billing; no annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Blaze bills every Firebase/Google Cloud product independently after free quotas. Budget alerts do not stop spend, Storage pricing follows Google Cloud by region, and enabling Blaze can make previously hard-stopped usage billable.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://firebase.google.com/pricing",
+      "https://firebase.google.com/docs/projects/billing/firebase-pricing-plans",
+      "https://firebase.google.com/docs/firestore/pricing",
+      "https://firebase.google.com/docs/hosting/usage-quotas-pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

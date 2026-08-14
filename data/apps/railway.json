@@ -17,7 +17,51 @@
     "notes": "Hobby includes a monthly minimum or credit and then usage; recorded amount is the base commitment.",
     "native": "5 USD",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "First 30 days include $5 trial credit; afterward $1 resource credit/month; 1 project, 3 services/project, 1 vCPU and 0.5 GB RAM/service, 0.5 GB volume, 1 replica, 3-day logs, and 0 custom domains.",
+        "notes": null
+      },
+      {
+        "name": "Hobby",
+        "monthly": 5,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "$5 monthly minimum including $5 usage; 50 projects, 50 services/project, up to 48 vCPU/48 GB per service, 6 replicas, 5 GB volumes, 3 project members and 7-day logs.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "$20 monthly minimum including $20 usage; 100 projects, 100 services/project, up to 1,000 vCPU/1 TB per service, 42 replicas, 1 TB volumes, unlimited members and 30-day logs.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom commitment; up to 2,400 vCPU/2.4 TB per service, 50 replicas, 5 TB volumes and 90-day logs.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "after a 30-day $5 trial: $1 resource credit/month, 1 project, 3 services/project, 1 vCPU and 0.5 GB RAM/service, 0.5 GB volume, 1 replica, 3-day logs, and no custom domains",
+    "billingTerms": "monthly minimum-spend plans; no public annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Usage above included credit is $10/GB-month RAM, $20/vCPU-month, $0.05/GB egress and $0.15/GB-month volume storage; Object Storage is $0.015/GB-month. Agent tokens pass through at provider cost and use a default spend cap of $5 on Hobby or $20 on Pro.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://railway.com/pricing",
+      "https://docs.railway.com/pricing/plans",
+      "https://docs.railway.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

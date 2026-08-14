@@ -6,18 +6,60 @@
   "category": "design",
   "subcategory": "visual design and presentations",
   "tagline": "Design presentations, infographics, and simple interactive assets from templates",
-  "priceMonthly": 29,
+  "priceMonthly": 12.25,
   "pricing": {
     "plan": "Starter",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://visme.co/pricing",
-    "checkedOn": "2026-07-31",
+    "basis": "annual billing, per user per month",
+    "unit": "per-seat",
+    "source": "https://www.visme.co/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Starter monthly rate.",
-    "native": "29 USD",
+    "native": "12.25 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited projects; 500 MB storage; 50 slides/project; 10 AI credits/month; 3-minute recordings; PPT import up to 10 slides; public/Visme-branded output.",
+        "notes": null
+      },
+      {
+        "name": "Starter",
+        "monthly": null,
+        "annualPerMonth": 12.25,
+        "per": "user",
+        "limits": "1 GB storage; 200 AI credits/month; unlimited slides; JPG/PNG/PDF export; recordings up to 45 minutes.",
+        "notes": "Billed annually at $147 per person."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 24.75,
+        "per": "user",
+        "limits": "10 GB storage; 500 AI credits/month; PPTX/HTML5/video/GIF exports; brand tools and analytics.",
+        "notes": "Billed annually at $297 per person."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom pricing from 10 users; 25 GB storage/user and unlimited AI credits.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "Unlimited projects, 500 MB storage, 50 slides/project, 10 AI credits/month, 3-minute recordings and PPT import up to 10 slides.",
+    "billingTerms": "annual only for current self-serve paid plans; Enterprise is custom",
+    "priceChanges": [],
+    "hiddenCosts": "Enterprise starts at 10 users. Free output is public and Visme-branded; downloadable formats and privacy require a paid plan.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.visme.co/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

@@ -17,7 +17,34 @@
     "source": "https://dxo.com/dxo-photolab/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Essential",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Perpetual PhotoLab licence for 2 computers.",
+        "notes": "Current one-time price: $149.99."
+      },
+      {
+        "name": "Elite",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Perpetual PhotoLab licence for 3 computers; includes advanced DeepPRIME and X-Trans support.",
+        "notes": "Current one-time price: $239.99."
+      }
+    ],
+    "freeTierCaps": "no free tier; a time-limited trial is offered",
+    "billingTerms": "one-time perpetual licence; no monthly or annual subscription",
+    "priceChanges": [],
+    "hiddenCosts": "Future major-version upgrades are paid: current upgrade pricing shown is $84.99 for Essential and $119.99 for Elite. FilmPack ($149.99) and ViewPoint ($119.99) are separate optional products.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.dxo.com/dxo-photolab/pricing/",
+      "https://shop.dxo.com/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

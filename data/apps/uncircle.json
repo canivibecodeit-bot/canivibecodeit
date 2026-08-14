@@ -14,7 +14,33 @@
     "source": "https://uncircle.app/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "One-time $19 launch price (list $49) unlocks unlimited projects on up to 3 devices; the free tier covers 3 projects with every feature and never expires."
+    "notes": "One-time $19 launch price (list $49) unlocks unlimited projects on up to 3 devices; the free tier covers 3 projects with every feature and never expires.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "3 projects; unlimited agents, processes and terminals inside those projects.",
+        "notes": "All core features are included; the cap is project count."
+      },
+      {
+        "name": "Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited projects; use on 3 devices; all future updates.",
+        "notes": "One-time $49 purchase with a 30-day refund period."
+      }
+    ],
+    "freeTierCaps": "3 projects; unlimited agents, processes and terminals within those projects",
+    "billingTerms": "free plus a one-time $49 lifetime license; no recurring monthly or annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Claude Code, Codex and other CLI-agent/model subscriptions are not included; the user supplies those separately.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://uncircle.app/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

@@ -6,18 +6,44 @@
   "category": "community",
   "subcategory": "online communities and team communication",
   "tagline": "Build a small spatial web room with basic movement and text presence",
-  "priceMonthly": 7,
+  "priceMonthly": 12,
   "pricing": {
-    "plan": "Premium",
-    "basis": "monthly per user",
+    "plan": "Essential",
+    "basis": "annual billing, per user per month",
     "unit": "per-seat",
-    "source": "https://gather.town/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.gather.town/pricing",
+    "checkedOn": "2026-08-12",
     "confidence": "medium",
     "notes": "Typical Premium monthly seat price.",
-    "native": "7 USD",
+    "native": "12 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Essential",
+        "monthly": null,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "Unlimited meetings and chat; recording, transcription and guest hosting included subject to plan usage limits",
+        "notes": "Displayed as $12/member/month billed yearly; annual plan saves 20%. The exact month-to-month rate was not exposed on the accessible page."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom capacity, security and support",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no permanent free tier; 30-day trial with no credit card, for up to 50 teammates",
+    "billingTerms": "monthly + annual (-20% annually); exact monthly rate not publicly exposed",
+    "priceChanges": [],
+    "hiddenCosts": "Charged per registered member, while guests are free. Recording, transcription and guest-hosting allowances are metered, but the accessible pricing page did not expose all exact thresholds.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.gather.town/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

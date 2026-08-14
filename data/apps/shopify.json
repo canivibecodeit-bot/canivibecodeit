@@ -5,16 +5,68 @@
   "category": "commerce",
   "subcategory": "online store platform",
   "tagline": "Hosted ecommerce platform for stores, payments, checkout, and operations",
-  "priceMonthly": 39,
+  "priceMonthly": 25,
   "pricing": {
     "plan": "Basic",
     "basis": "monthly",
     "unit": "flat",
-    "native": "39 USD",
+    "native": "25 USD",
     "source": "https://www.shopify.com/pricing",
-    "checkedOn": "2026-07-30",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
-    "notes": "Official pricing checked; regional page showed US$25 annual-effective while US public references commonly list Basic $39/month monthly and $29/month annually."
+    "notes": "Official pricing checked; regional page showed US$25 annual-effective while US public references commonly list Basic $39/month monthly and $29/month annually.",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 5,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Simple online store and product links; 0 staff accounts; 5% transaction fee with Shopify Payments.",
+        "notes": "Only available to new merchants and stores still in the free-trial period; no annual price is published."
+      },
+      {
+        "name": "Basic",
+        "monthly": 25,
+        "annualPerMonth": 19,
+        "per": "workspace",
+        "limits": "Unlimited products; 10 inventory locations; 0 additional staff accounts; 2% fee when using a third-party payment provider.",
+        "notes": "Annual total is $228."
+      },
+      {
+        "name": "Grow",
+        "monthly": 65,
+        "annualPerMonth": 49,
+        "per": "workspace",
+        "limits": "Unlimited products; 10 inventory locations; up to 5 staff accounts; 1% third-party-provider fee.",
+        "notes": "Annual total is $588."
+      },
+      {
+        "name": "Advanced",
+        "monthly": 399,
+        "annualPerMonth": 299,
+        "per": "workspace",
+        "limits": "Unlimited products; 10 inventory locations; up to 15 staff accounts; 0.6% third-party-provider fee.",
+        "notes": "Annual total is $3,588."
+      },
+      {
+        "name": "Plus",
+        "monthly": 2300,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Starts at $2,300/month; unlimited staff; up to 200 inventory locations, 9 expansion stores and 20 POS Pro locations; 0.2% third-party-provider fee.",
+        "notes": "Starting price typically requires a 1- or 3-year contract; exact quote varies."
+      }
+    ],
+    "freeTierCaps": "no free tier; 3-day trial, then a promotional $1/month for 3 months before standard pricing",
+    "billingTerms": "Starter is monthly only; Basic/Grow/Advanced offer monthly + annual; Plus uses 1- or 3-year contracts",
+    "priceChanges": [],
+    "hiddenCosts": "Starter charges a 5% transaction fee with Shopify Payments; POS Pro is $89/month per location on non-Plus plans; synced marketplace orders above 50/month cost 1% up to $99/month; third-party gateway fees (2%/1%/0.6%/0.2%) are on top of the provider's processing fees; apps, themes and domains can add recurring costs.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.shopify.com/pricing",
+      "https://www.shopify.com/br/starter",
+      "https://help.shopify.com/en/manual/intro-to-shopify/pricing-plans/plans-features/shopify-starter-plan"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

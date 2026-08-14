@@ -6,18 +6,60 @@
   "category": "localization",
   "subcategory": "translation management and website localization",
   "tagline": "Manage translation keys, screenshots, reviews, and CI sync for a small product team",
-  "priceMonthly": 120,
+  "priceMonthly": 144,
   "pricing": {
-    "plan": "Essential",
+    "plan": "Explorer",
     "basis": "monthly",
     "unit": "flat",
-    "source": "https://lokalise.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://lokalise.com/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Official Essential monthly tier.",
-    "native": "120 USD",
+    "native": "144 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Explorer",
+        "monthly": 144,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited hosted words and translator/reviewer seats; plan-specific processed-word and advanced-seat allowances are not exposed as readable values on the live table",
+        "notes": "Live page displays $144/mo; the yearly toggle is present but its alternate price did not render in accessible page text."
+      },
+      {
+        "name": "Growth",
+        "monthly": 375,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited hosted words and translator/reviewer seats; unlimited languages from Growth; processed-word overage purchasable",
+        "notes": "Live page displays $375/mo; yearly price not verifiable from rendered text."
+      },
+      {
+        "name": "Advanced",
+        "monthly": 999,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited hosted words and translator/reviewer seats; advanced seats scale by tier, with published range 5 to 100 across paid plans",
+        "notes": "Live page displays $999/mo; yearly price not verifiable from rendered text."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom capacities, security, support and onboarding",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier; 14-day Enterprise-feature trial, no credit card",
+    "billingTerms": "monthly + annual; live page exposes the billing toggle but not the alternate yearly prices in readable text",
+    "priceChanges": [],
+    "hiddenCosts": "Pricing scales on processed source words and advanced seats; processed-word overage and extra advanced seats are purchasable, while translator/reviewer seats and hosted words are unlimited.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://lokalise.com/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

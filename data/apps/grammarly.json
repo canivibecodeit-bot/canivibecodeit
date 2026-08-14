@@ -14,7 +14,45 @@
     "source": "https://www.grammarly.com/plans",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official plan URL checked; public 2026 coverage commonly references Grammarly Pro/Premium around $30/month, with annual pricing lower and branding evolving under Superhuman."
+    "notes": "Official plan URL checked; public 2026 coverage commonly references Grammarly Pro/Premium around $30/month, with annual pricing lower and branding evolving under Superhuman.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "100 generative-AI prompts/month.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 30,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "2,000 AI prompts/member/month; up to 149 seats; 1 style guide; 1 brand tone; 2 groups.",
+        "notes": "Also offered quarterly at $60 per 3 months ($20/month effective); annual total is $144."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited prompts, members, style guides, brand tones, and groups.",
+        "notes": "Custom price."
+      }
+    ],
+    "freeTierCaps": "100 generative-AI prompts/month",
+    "billingTerms": "monthly + quarterly + annual for Pro; Enterprise is custom",
+    "priceChanges": [],
+    "hiddenCosts": "Additional Pro seats are prorated. A 7-day trial is available only for eligible accounts.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.grammarly.com/plans",
+      "https://www.grammarly.com/pro",
+      "https://support.grammarly.com/hc/en-us/articles/115000090011-How-much-does-Grammarly-Pro-cost",
+      "https://support.grammarly.com/hc/en-us/articles/25043801131149-About-Grammarly-Pro",
+      "https://support.grammarly.com/hc/en-us/articles/360033548272-Does-Grammarly-offer-a-trial"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

@@ -6,18 +6,96 @@
   "category": "photo-editing",
   "subcategory": "photo organization, culling and editing",
   "tagline": "Catalog local photos and apply basic non-destructive adjustments",
-  "priceMonthly": 11.99,
+  "priceMonthly": 22.49,
   "pricing": {
-    "plan": "Lightroom 1 TB",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://adobe.com/creativecloud/photography/compare-plans.html",
-    "checkedOn": "2026-07-31",
+    "plan": "Lightroom (1 TB)",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://www.adobe.com/creativecloud/photography/compare-plans.html",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Official Lightroom monthly subscription for the common individual plan.",
-    "native": "11.99 USD",
+    "native": "22.49 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Lightroom Mobile Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "5 GB shared Adobe cloud storage; core editing on iOS and Android; 0 desktop apps and no full desktop/mobile/web sync.",
+        "notes": "An indefinite mobile free tier exists even though Adobe's desktop comparison page emphasizes paid plans."
+      },
+      {
+        "name": "Lightroom Mobile Premium",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Mobile-only premium tools; 25 generative credits per month for new subscribers; desktop access is not included.",
+        "notes": "Purchased through Apple App Store or Google Play with regional monthly/yearly pricing; a current US dollar price was not published on Adobe's web page."
+      },
+      {
+        "name": "Lightroom (1 TB)",
+        "monthly": 22.49,
+        "annualPerMonth": 12.5,
+        "per": "user",
+        "limits": "1 TB cloud storage; Lightroom on desktop, mobile and web plus Lightroom Classic; 250 generative credits per month.",
+        "notes": "Annual prepaid is $149.99 ($12.50/month equivalent); annual billed monthly is $14.99."
+      },
+      {
+        "name": "Photography (1 TB)",
+        "monthly": null,
+        "annualPerMonth": 19.99,
+        "per": "user",
+        "limits": "1 TB cloud storage; Lightroom, Lightroom Classic and Photoshop; 1,000 generative credits per month.",
+        "notes": "The current US page publishes an annual commitment billed monthly at $19.99; no month-to-month price was verified."
+      },
+      {
+        "name": "Creative Cloud Pro",
+        "monthly": 104.99,
+        "annualPerMonth": 65,
+        "per": "user",
+        "limits": "100 GB cloud storage; 20+ apps including Lightroom and Photoshop; 4,000 premium generative credits per month.",
+        "notes": "Annual prepaid is $779.99 ($65.00/month equivalent); regular annual billed-monthly price is $69.99. Adobe was also displaying a temporary $34.99/month offer on the comparison page."
+      }
+    ],
+    "freeTierCaps": "Lightroom mobile is free indefinitely with core editing and 5 GB shared Adobe cloud storage; desktop Lightroom, Lightroom Classic and full cross-device syncing require a paid plan.",
+    "billingTerms": "mobile: monthly or yearly through app stores; desktop: month-to-month, annual billed monthly, or annual prepaid",
+    "priceChanges": [
+      {
+        "what": "Lightroom (1 TB), annual billed monthly",
+        "fromUsd": 11.99,
+        "toUsd": 14.99,
+        "when": "2026-03",
+        "source": "https://helpx.adobe.com/lightroom/desktop/kb/lightroom-1tb-plan-faq.html"
+      },
+      {
+        "what": "Lightroom (1 TB), annual prepaid total",
+        "fromUsd": 119.88,
+        "toUsd": 149.99,
+        "when": "2026-03",
+        "source": "https://helpx.adobe.com/lightroom/desktop/kb/lightroom-1tb-plan-faq.html"
+      },
+      {
+        "what": "Lightroom (1 TB), month-to-month",
+        "fromUsd": 17.99,
+        "toUsd": 22.49,
+        "when": "2026-03",
+        "source": "https://helpx.adobe.com/lightroom/desktop/kb/lightroom-1tb-plan-faq.html"
+      }
+    ],
+    "hiddenCosts": "Canceling an annual-billed-monthly Adobe plan after the 14-day refund window can trigger a fee equal to 50% of the remaining contract; extra 2 TB/5 TB/10 TB storage is sold separately but current US prices were not published.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.adobe.com/creativecloud/photography/compare-plans.html",
+      "https://helpx.adobe.com/lightroom/desktop/kb/lightroom-1tb-plan-faq.html",
+      "https://helpx.adobe.com/lightroom/mobile/app-subscriptions-and-account/upgrade-to-paid-subscription.html",
+      "https://helpx.adobe.com/lightroom/mobile/get-started/manage-cloud-storage-and-sync.html",
+      "https://www.adobe.com/products/photoshop-lightroom/mobile.html",
+      "https://helpx.adobe.com/account/individual/terms-policies-and-regulations/adobe-subscription-terms.html",
+      "https://helpx.adobe.com/account/individual/subscriptions-and-plans/plan-types-and-eligibility/changes-to-individual-plan.html"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

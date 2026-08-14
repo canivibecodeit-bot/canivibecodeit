@@ -17,7 +17,49 @@
     "notes": "Sold as a one-time AppSumo-style lifetime purchase; canonical monthly price is null.",
     "native": "one-time",
     "kind": "one-time",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "Unlimited bookings and booking types; 1 readable calendar connection and 1 writable calendar; paid, recurring, and package bookings.",
+        "notes": null
+      },
+      {
+        "name": "Individual Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "10 calendar connections; group bookings; AI assistant; custom emails and analytics.",
+        "notes": "$29 one-time AppSumo purchase."
+      },
+      {
+        "name": "Agency Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "25 calendar connections; unlimited team members; round-robin and collective meetings; US/Canada SMS reminders.",
+        "notes": "$79 one-time AppSumo purchase."
+      },
+      {
+        "name": "Pro",
+        "monthly": 12,
+        "annualPerMonth": 8.25,
+        "per": "flat",
+        "limits": "25 calendar connections; no TidyCal branding; custom domain; priority support.",
+        "notes": "Billed $99/year on annual plan."
+      }
+    ],
+    "freeTierCaps": "Unlimited bookings and booking types; 1 readable calendar connection and 1 writable calendar; paid, recurring, and package bookings.",
+    "billingTerms": "Free forever + one-time lifetime licenses + Pro monthly or annual (-31%)",
+    "priceChanges": [],
+    "hiddenCosts": "Payment processing still costs extra; Agency retains reduced TidyCal branding, while complete branding removal requires Pro.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://tidycal.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

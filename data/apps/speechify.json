@@ -17,7 +17,43 @@
     "notes": "Annual Premium price divided by 12; monthly billing is higher.",
     "native": "11.58 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "10 robotic voices; listening up to 1.5× speed; text-to-speech only; current pricing page publishes no word/time cap.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 29,
+        "annualPerMonth": 11.58,
+        "per": "flat",
+        "limits": "1,000+ natural voices; 60+ languages; up to 5× listening speed; scan/listen, AI summaries/chat, cloud-drive integrations.",
+        "notes": "Annual total is $139."
+      },
+      {
+        "name": "Enterprise & EDU",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom users, administration, accessibility deployment, and support.",
+        "notes": "Custom price."
+      }
+    ],
+    "freeTierCaps": "10 robotic voices; 1.5× speed; text-to-speech only; no fixed word/time cap published on the current pricing page",
+    "billingTerms": "monthly + annual (-60% advertised for annual); Enterprise/EDU is custom",
+    "priceChanges": [],
+    "hiddenCosts": "Speechify Studio, creator voiceover/dubbing, and API usage are separate products/subscriptions and are not included in Reader Premium. Refunds are tightly limited and app-store pricing can differ.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://speechify.com/pricing/",
+      "https://speechify.com/blog/is-speechify-free-for-students/",
+      "https://speechify.com/refund-policy/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,33 @@
     "notes": "Official monthly Plus subscription.",
     "native": "29 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited resumes and job tracking; 10 templates; top 5 job-description keywords; 10 resume-bullet, 2 summary and 2 cover-letter AI credits.",
+        "notes": null
+      },
+      {
+        "name": "Teal+",
+        "monthly": 29,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited templates, job-description keywords and AI credits.",
+        "notes": "Billed every 30 days; alternatives are $13 every 7 days or $79 every 90 days ($26.33 per 30-day month equivalent)."
+      }
+    ],
+    "freeTierCaps": "Unlimited resumes/job tracking; 10 templates; top 5 job-description keywords; 10 resume-bullet, 2 summary and 2 cover-letter AI credits",
+    "billingTerms": "recurring 7-day + 30-day + 90-day periods; no annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "The shortest option is $13 every 7 days, which is much costlier than the 30- or 90-day cadence; no annual discount exists.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.tealhq.com/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

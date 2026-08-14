@@ -17,7 +17,51 @@
     "notes": "Typical Pro seat price; annual billing may be lower.",
     "native": "18 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "15 shared credits per month; maximum 5 credits per day; unlimited projects.",
+        "notes": null
+      },
+      {
+        "name": "Team",
+        "monthly": 20,
+        "annualPerMonth": 18,
+        "per": "workspace",
+        "limits": "50 shared credits per month; unlimited seats.",
+        "notes": "$216 billed yearly, derived from the vendor's stated $24 annual saving; monthly credits roll over for 1 month, annual credits for up to 2 years."
+      },
+      {
+        "name": "Business",
+        "monthly": 40,
+        "annualPerMonth": 36,
+        "per": "workspace",
+        "limits": "50 shared credits per month; unlimited seats; adds SSO, audit logs, and retention controls.",
+        "notes": "$432 billed yearly, derived from the vendor's stated $48 annual saving; monthly credits roll over for 1 month, annual credits for up to 2 years."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom credit volume, security, and support; public numeric price and limits are not stated.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "15 shared credits per month, with a hard maximum of 5 credits per day; unlimited projects.",
+    "billingTerms": "monthly + annual; annual savings are $24 on Team and $48 on Business",
+    "priceChanges": [],
+    "hiddenCosts": "The former $18/seat Pro price on file has been replaced by shared credit bundles. Different AI tasks consume different amounts; top-ups cost extra but are not publicly priced, and unused monthly credits roll over only to the next month.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.supernormal.com/pricing",
+      "https://help.supernormal.com/en/articles/14418695-supernormal-2-0-plans-pricing",
+      "https://help.supernormal.com/en/articles/14645308-usage-credits"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

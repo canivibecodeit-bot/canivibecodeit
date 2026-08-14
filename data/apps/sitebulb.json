@@ -17,7 +17,69 @@
     "notes": "Typical Lite monthly subscription.",
     "native": "18 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Desktop Lite",
+        "monthly": 18,
+        "annualPerMonth": 15,
+        "per": "user",
+        "limits": "1 user; 10,000 URLs/audit; 100+ audit hints.",
+        "notes": "Annual total is $180."
+      },
+      {
+        "name": "Desktop Pro",
+        "monthly": 42,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 user; 500,000 URLs/audit by default, configurable up to 2,000,000; 300+ audit hints.",
+        "notes": "An annual option and 15% discount are advertised, but the exact billed annual amount was not reliably exposed."
+      },
+      {
+        "name": "Cloud Mini",
+        "monthly": 125,
+        "annualPerMonth": 125,
+        "per": "workspace",
+        "limits": "2 users; 50,000 total URLs/month; 50,000 URLs/audit; no concurrent audits; unlimited projects and connected accounts; 0 desktop licences.",
+        "notes": "Annual total is $1,500."
+      },
+      {
+        "name": "Cloud Small",
+        "monthly": 245,
+        "annualPerMonth": 245,
+        "per": "workspace",
+        "limits": "5 users; 1,000,000 total URLs/month; 250,000 URLs/audit; no concurrent audits; unlimited projects and connected accounts; 5 desktop licences.",
+        "notes": "Annual total is $2,940."
+      },
+      {
+        "name": "Cloud Medium",
+        "monthly": 495,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "10 users; 2,500,000 total URLs/month; 1,000,000 URLs/audit; concurrent audits; 10 desktop licences.",
+        "notes": "Monthly price verified; exact annual billed amount was not reliably exposed."
+      },
+      {
+        "name": "Cloud Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "10+ users; 5,000,000+ total URLs/month; 2,500,000+ URLs/audit; custom concurrency and desktop licences.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no standing free tier; Desktop has a 14-day no-card trial, while Cloud has no free trial",
+    "billingTerms": "monthly + annual; invoice/PO payment is yearly only, and custom Cloud packages are annual-only",
+    "priceChanges": [],
+    "hiddenCosts": "Extra Desktop users start at about $9.44/month or $7.31/month equivalent when billed £65/year. Cloud does not add project or JavaScript-rendering fees.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://sitebulb.com/subscriptions/pricing/index/",
+      "https://sitebulb.com/subscriptions/pricing/index/?annual=true",
+      "https://sitebulb.com/subscriptions/pricing/server/",
+      "https://sitebulb.com/subscriptions/pricing/server/?annual=true",
+      "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

@@ -17,7 +17,51 @@
     "source": "https://bazqux.com/",
     "checkedOn": "2026-07-31",
     "confidence": "medium",
-    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication."
+    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication.",
+    "tiers": [
+      {
+        "name": "Standard",
+        "monthly": null,
+        "annualPerMonth": 2.5,
+        "per": "user",
+        "limits": "Up to 3,000 feeds; 500 filters/smart streams; up to 500 retained articles/feed.",
+        "notes": "Annual-only: $30/year."
+      },
+      {
+        "name": "Supporter",
+        "monthly": null,
+        "annualPerMonth": 4.17,
+        "per": "user",
+        "limits": "Same product limits as Standard; higher payment supports development.",
+        "notes": "Annual-only: $50/year."
+      },
+      {
+        "name": "Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Lifetime hosted account; same core product limits as the subscription.",
+        "notes": "One-time purchase: $249."
+      }
+    ],
+    "freeTierCaps": "no free tier; 30-day trial",
+    "billingTerms": "annual-only subscriptions plus a one-time lifetime purchase; no month-to-month plan",
+    "priceChanges": [
+      {
+        "what": "Annual subscription",
+        "fromUsd": 19,
+        "toUsd": 30,
+        "when": "2020-03",
+        "source": "https://blog.bazqux.com/2020/07/mark-above-below-article-menu.html"
+      }
+    ],
+    "hiddenCosts": "VAT/GST can be added based on location",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://bazqux.com/",
+      "https://bazqux.com/faq",
+      "https://blog.bazqux.com/2020/07/mark-above-below-article-menu.html"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

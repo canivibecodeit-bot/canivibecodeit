@@ -17,7 +17,42 @@
     "source": "https://git-tower.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": null,
+        "annualPerMonth": 5.75,
+        "per": "user",
+        "limits": "1 user; core native Git client features.",
+        "notes": "Annual-only price is $69/year."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 10.75,
+        "per": "user",
+        "limits": "1 user; advanced workflows and integrations.",
+        "notes": "Annual-only price is $129/year; published team discount is 10% at 10+ seats."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": 12.42,
+        "per": "user",
+        "limits": "Enterprise controls and support.",
+        "notes": "Annual-only price is $149/year."
+      }
+    ],
+    "freeTierCaps": "no permanent free tier; 30-day Pro trial only",
+    "billingTerms": "annual only; no monthly plan",
+    "priceChanges": [],
+    "hiddenCosts": "Prices can be reduced for 10+ Pro seats; taxes may apply. Free licenses exist only for approved students, teachers, educational institutions and nonprofits, and are not a general free tier.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.git-tower.com/pricing",
+      "https://www.git-tower.com/blog/tower-pricing-2026"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

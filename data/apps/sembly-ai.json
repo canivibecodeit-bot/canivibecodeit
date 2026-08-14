@@ -6,18 +6,60 @@
   "category": "meeting-notes",
   "subcategory": "meeting transcription and AI notes",
   "tagline": "Transcribe a call and produce structured minutes, tasks, and searchable topics",
-  "priceMonthly": 15,
+  "priceMonthly": 17,
   "pricing": {
-    "plan": "Professional",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://sembly.ai/pricing",
-    "checkedOn": "2026-07-31",
+    "plan": "Basic",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://www.sembly.ai/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Professional monthly rate.",
-    "native": "15 USD",
+    "native": "17 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 17,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited meeting hours; 5 upload hours per paid user; 1-year history; 3 native automations.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 29,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Up to 40 users/workspace; 10 upload hours, 5 AI documents, 5 AI insights, 5 native automations, and 5 webhooks per paid user; 2-year history.",
+        "notes": null
+      },
+      {
+        "name": "MAX",
+        "monthly": 39,
+        "annualPerMonth": 30,
+        "per": "user",
+        "limits": "Minimum 3 users, maximum 500; 15 upload hours, 40 AI documents, 40 AI insights, 20 automations, and 20 webhooks per paid user; unlimited history.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom invoicing, security reviews, support, and success package; no public numeric price.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (annual advertised 30% lower); free trials offered with no duration published",
+    "priceChanges": [],
+    "hiddenCosts": "MAX requires at least 3 paid users. Upload hours, AI documents, AI insights, automations, and webhooks remain per-user quotas despite unlimited meeting hours. The former $15 'Professional' plan on file is not in the current live lineup.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.sembly.ai/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

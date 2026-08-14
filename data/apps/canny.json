@@ -6,18 +6,52 @@
   "category": "user-research",
   "subcategory": "feedback boards, interviews and product research",
   "tagline": "Collect feature requests, merge duplicates, publish statuses, and maintain a roadmap",
-  "priceMonthly": 99,
+  "priceMonthly": 79,
   "pricing": {
-    "plan": "Starter",
-    "basis": "monthly",
+    "plan": "Pro",
+    "basis": "annual billing, per month",
     "unit": "flat",
     "source": "https://canny.io/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-12",
     "confidence": "high",
     "notes": "Official Starter monthly tier.",
-    "native": "99 USD",
+    "native": "79 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "25 tracked users; 5 managers; unlimited contributors, feedback and boards.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 79,
+        "per": "workspace",
+        "limits": "Starts at 100 tracked users; 10 managers; unlimited contributors.",
+        "notes": "Starting annual-equivalent price."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Starts at 5,000 tracked users; custom managers, security, integrations and service terms.",
+        "notes": "Quote required."
+      }
+    ],
+    "freeTierCaps": "25 tracked users; 5 managers; unlimited contributors, feedback and boards.",
+    "billingTerms": "Monthly + annual; the public Pro card exposes the annual-equivalent rate and says annual billing saves 20%; Business is custom.",
+    "priceChanges": [],
+    "hiddenCosts": "Without a spend cap, exceeding the tracked-user band can automatically move the account to the next tier and create a prorated charge; with a spend cap, Canny stops tracking new users. Autopilot users count toward tracked-user usage.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://canny.io/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

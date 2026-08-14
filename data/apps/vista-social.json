@@ -6,18 +6,60 @@
   "category": "social-media",
   "subcategory": "social scheduling and content repurposing",
   "tagline": "Schedule and review content across several profiles with a shared calendar",
-  "priceMonthly": 39,
+  "priceMonthly": 79,
   "pricing": {
-    "plan": "Pro",
+    "plan": "Professional",
     "basis": "monthly",
     "unit": "flat",
     "source": "https://vistasocial.com/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Pro monthly amount.",
-    "native": "39 USD",
+    "native": "79 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Professional",
+        "monthly": 79,
+        "annualPerMonth": 63.17,
+        "per": "flat",
+        "limits": "15 social profiles, 2 users, 10,000 DM contacts, 1,000 AI credits/month",
+        "notes": "Annual plan is billed $758/year."
+      },
+      {
+        "name": "Advanced",
+        "monthly": 149,
+        "annualPerMonth": 119.17,
+        "per": "flat",
+        "limits": "30 social profiles, 4 users, 25,000 DM contacts, 2,000 AI credits/month",
+        "notes": "Annual plan is billed $1,430/year."
+      },
+      {
+        "name": "Scale",
+        "monthly": 349,
+        "annualPerMonth": 303.17,
+        "per": "flat",
+        "limits": "70 social profiles, 8 users on the plan card, 100,000 DM contacts, 3,500 AI credits/month",
+        "notes": "Annual plan is billed $3,638/year. Another official line says 'invite up to 10 users,' conflicting with the 8-user card cap."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Custom/unlimited profiles, users, DM contacts and AI credits",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (about 20% off); 14-day free trial",
+    "priceChanges": [],
+    "hiddenCosts": "X integration costs $29/month on any plan. Listening beyond owned profiles starts at $75/month. Employee Advocacy is free for 3 advocates but starts at $199/month for 25 employees. Scale add-on profiles are sold in blocks of 10 and extra users cost more; exact prices are not public.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://vistasocial.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

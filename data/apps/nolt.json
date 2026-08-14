@@ -17,7 +17,41 @@
     "notes": "Official Essential monthly tier.",
     "native": "29 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Essential",
+        "monthly": null,
+        "annualPerMonth": 29,
+        "per": "workspace",
+        "limits": "1 board; unlimited users, content and admins.",
+        "notes": "Billed $348/year."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 69,
+        "per": "workspace",
+        "limits": "5 boards; unlimited users, content and admins.",
+        "notes": "Billed $828/year."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited boards plus custom security, support and procurement terms.",
+        "notes": "Quote required."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "Annual prices are public and save more than 20%; a monthly toggle exists, but exact month-to-month prices were not exposed. A 10-day Pro trial needs no card.",
+    "priceChanges": [],
+    "hiddenCosts": "Switching plans is prorated; refunds are not offered.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://nolt.io/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

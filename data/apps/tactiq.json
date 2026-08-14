@@ -17,7 +17,59 @@
     "notes": "Official Pro monthly tier.",
     "native": "12 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "10 transcripts per month and 5 AI credits per month.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 12,
+        "annualPerMonth": 8,
+        "per": "user",
+        "limits": "Unlimited transcripts and 10 AI credits per month.",
+        "notes": null
+      },
+      {
+        "name": "Team",
+        "monthly": 20,
+        "annualPerMonth": 16.67,
+        "per": "user",
+        "limits": "Unlimited transcripts and unlimited AI credits.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 40,
+        "annualPerMonth": 29.16,
+        "per": "user",
+        "limits": "Unlimited transcripts and AI credits, plus retention controls, AI agents, customer success, and SSO.",
+        "notes": "Positioned for teams of 20+ users."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom deployment for roughly 200+ users; public price and numeric usage limits are not stated.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "10 transcripts per month and 5 AI credits per month.",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "Business is positioned for 20+ users and Enterprise for 200+, but the public page does not state contractual seat minimums.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://tactiq.io/pricing",
+      "https://help.tactiq.io/en/articles/8649126-how-to-choose-the-right-tactiq-plan-and-pricing",
+      "https://help.tactiq.io/en/articles/9036416-how-to-upgrade-your-tactiq-plan"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

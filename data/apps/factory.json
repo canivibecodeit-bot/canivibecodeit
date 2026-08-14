@@ -17,7 +17,57 @@
     "source": "https://factory.ai/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Pro",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Rolling 5-hour, 7-day and 30-day usage quotas; exact numeric allowance is not publicly stated.",
+        "notes": null
+      },
+      {
+        "name": "Plus",
+        "monthly": 100,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Approximately 5 times the Pro allowance; includes Factory-managed Droid Computers.",
+        "notes": "Exact numeric quotas are not publicly stated."
+      },
+      {
+        "name": "Max",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Approximately 10 times the Pro allowance; includes Factory-managed Droid Computers.",
+        "notes": "Exact numeric quotas are not publicly stated."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Up to 150 seats; custom usage, controls and support.",
+        "notes": "Contact sales."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited seats with custom usage, deployment and support terms.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly self-serve plans; no public annual plan; Business and Enterprise are custom",
+    "priceChanges": [],
+    "hiddenCosts": "Extra Usage is prepaid with a $10 minimum; Missions require Extra Usage, so the subscription price is not a complete ceiling. Purchased Extra Usage does not expire.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.factory.ai/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

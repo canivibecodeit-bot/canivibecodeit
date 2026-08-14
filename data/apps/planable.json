@@ -17,7 +17,51 @@
     "notes": "Official Basic monthly tier.",
     "native": "39 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "50 posts total (lifetime, not monthly), unlimited workspaces and users; no X publishing",
+        "notes": "No time limit and no credit card; the 50-post counter never resets and deleted posts still count."
+      },
+      {
+        "name": "Basic",
+        "monthly": 39,
+        "annualPerMonth": 32.5,
+        "per": "workspace",
+        "limits": "60 posts/workspace/month, 4 social pages/workspace, unlimited users, 10 GB media storage",
+        "notes": "Annual billing is $390/workspace/year."
+      },
+      {
+        "name": "Pro",
+        "monthly": 59,
+        "annualPerMonth": 49.17,
+        "per": "workspace",
+        "limits": "150 posts/workspace/month, 10 social pages/workspace, unlimited users, 50 GB media storage",
+        "notes": "Annual billing is $590/workspace/year."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited posts, pages, labels and campaigns; multi-level approvals, SSO, 100 GB media storage",
+        "notes": "Custom pricing typically starts around $2,500/year."
+      }
+    ],
+    "freeTierCaps": "50 posts total across unlimited workspaces/users; no reset, deleted posts still count, and X publishing is unavailable",
+    "billingTerms": "monthly + annual (2 months free); subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Pricing is per workspace, not per user. Analytics costs $14/workspace/month or $140/year; Social Inbox/Engagement costs $9/workspace/month or $90/year; an extra-posts add-on raises the cap to 500 posts/month for $49/month or $490/year and applies to all workspaces. Taxes are extra.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://planable.io/pricing/",
+      "https://help.planable.io/hc/en-us/articles/21715370520092-Questions-on-pricing",
+      "https://help.planable.io/hc/en-us/articles/21715460376092-Upgrade-my-company"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

@@ -15,7 +15,41 @@
     "checkedOn": "2026-08-07",
     "confidence": "high",
     "notes": "Seat-based: one seat is one connected social account. Three tiers priced per seat per month: Basic 3.99, Essentials 6.99 (shown), Pro 12.99. Yearly billing is 30% off the monthly rate. priceMonthly is one Essentials seat; the site multiplies by the team size you type in.",
-    "freeTier": "No free plan. You can connect up to two accounts to look around, but publishing needs a paid subscription, and every plan starts with a 3-day trial that takes a card."
+    "freeTier": "No free plan. You can connect up to two accounts to look around, but publishing needs a paid subscription, and every plan starts with a 3-day trial that takes a card.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 3.49,
+        "annualPerMonth": 2.79,
+        "per": "flat",
+        "limits": "Per connected social account: 100 posts/month, 5 GB storage, 100 ideas, 1 API/MCP key; 1 workspace, no team",
+        "notes": "The vendor prices per connected social account; billed $33.51/year at the displayed early-adopter rate."
+      },
+      {
+        "name": "Essentials",
+        "monthly": 6.99,
+        "annualPerMonth": 4.89,
+        "per": "flat",
+        "limits": "Per connected social account: 200 posts/month, 10 GB storage, 300 ideas, 3 API/MCP keys; 10 workspaces, 5 team members",
+        "notes": "The vendor prices per connected social account; billed $58.71/year at the displayed early-adopter rate."
+      },
+      {
+        "name": "Pro",
+        "monthly": 10.49,
+        "annualPerMonth": 9.09,
+        "per": "flat",
+        "limits": "Per connected social account: unlimited posts and ideas, 25 GB storage, 5 API/MCP keys; unlimited workspaces/team",
+        "notes": "The vendor prices per connected social account; billed $109.11/year at the displayed early-adopter rate."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (page says save 30%); 3-day free trial",
+    "priceChanges": [],
+    "hiddenCosts": "Every connected social profile is billed as a separate account, so the displayed price multiplies by the number of profiles. X links require Pro.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://posteahora.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

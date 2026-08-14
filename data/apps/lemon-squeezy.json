@@ -17,7 +17,52 @@
     "notes": "No fixed monthly subscription; fees are transaction based.",
     "native": "transaction-based",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Ecommerce",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "No published product or revenue cap; 5% + $0.50 per transaction as merchant of record.",
+        "notes": null
+      },
+      {
+        "name": "Email 0-500 subscribers",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "Up to 500 subscribers and 5,000 email sends per calendar month.",
+        "notes": null
+      },
+      {
+        "name": "Email 501+ subscribers",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Pricing scales with total subscriber count above 500; numeric brackets did not render in the live calculator.",
+        "notes": "Monthly and annual billing are offered."
+      },
+      {
+        "name": "Custom / Volume",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom high-volume commerce terms; 0 self-serve prices published.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "Ecommerce has no monthly fee or published usage cap; Email is free up to 500 subscribers and 5,000 sends per calendar month",
+    "billingTerms": "ecommerce is transaction-only; Email offers monthly + annual billing",
+    "priceChanges": [],
+    "hiddenCosts": "Base commerce fee is 5% + $0.50, with +1.5% for international payments, +1.5% for PayPal and +0.5% for subscriptions; non-US Stripe payouts add 1%, PayPal payouts add $0.50 in the US or 3% capped at $30 elsewhere; recovered carts add 5%, merchant affiliate referrals add 3%, and affiliate payouts add 2%; Email send limits are 10× the plan's subscriber allowance, and exceeding the subscriber cap triggers an automatic plan upgrade.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.lemonsqueezy.com/pricing",
+      "https://docs.lemonsqueezy.com/help/getting-started/fees",
+      "https://docs.lemonsqueezy.com/help/email/sending-limits",
+      "https://docs.lemonsqueezy.com/help/email/importing-subscribers"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

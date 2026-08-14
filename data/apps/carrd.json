@@ -14,7 +14,155 @@
     "source": "https://carrd.co/pro",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; Pro Standard listed at $19/year, equivalent to about $1.58/month."
+    "notes": "Official pricing checked 2026-07-30; Pro Standard listed at $19/year, equivalent to about $1.58/month.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "3 total site slots; Carrd-branded .carrd.co URL; no custom domains, forms, embeds or third-party analytics",
+        "notes": null
+      },
+      {
+        "name": "Pro Lite",
+        "monthly": null,
+        "annualPerMonth": 0.75,
+        "per": "flat",
+        "limits": "3 site slots; premium Carrd URLs and no branding; no custom domains, forms, widgets or embeds",
+        "notes": "$9/year; annual-only plan."
+      },
+      {
+        "name": "Pro Lite 10",
+        "monthly": null,
+        "annualPerMonth": 1.17,
+        "per": "flat",
+        "limits": "10 site slots; premium Carrd URLs and no branding; no custom domains, forms, widgets or embeds",
+        "notes": "$14/year; annual-only plan."
+      },
+      {
+        "name": "Pro Lite 25",
+        "monthly": null,
+        "annualPerMonth": 2.42,
+        "per": "flat",
+        "limits": "25 site slots; premium Carrd URLs and no branding; no custom domains, forms, widgets or embeds",
+        "notes": "$29/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard",
+        "monthly": null,
+        "annualPerMonth": 1.58,
+        "per": "flat",
+        "limits": "10 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$19/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 25",
+        "monthly": null,
+        "annualPerMonth": 3.25,
+        "per": "flat",
+        "limits": "25 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$39/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 50",
+        "monthly": null,
+        "annualPerMonth": 5.75,
+        "per": "flat",
+        "limits": "50 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$69/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 100",
+        "monthly": null,
+        "annualPerMonth": 9.92,
+        "per": "flat",
+        "limits": "100 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$119/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 250",
+        "monthly": null,
+        "annualPerMonth": 20.75,
+        "per": "flat",
+        "limits": "250 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$249/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 500",
+        "monthly": null,
+        "annualPerMonth": 33.25,
+        "per": "flat",
+        "limits": "500 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$399/year; annual-only plan."
+      },
+      {
+        "name": "Pro Standard 1000",
+        "monthly": null,
+        "annualPerMonth": 49.92,
+        "per": "flat",
+        "limits": "1000 site slots; custom domains, forms, widgets/embeds and analytics",
+        "notes": "$599/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus",
+        "monthly": null,
+        "annualPerMonth": 4.08,
+        "per": "flat",
+        "limits": "25 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$49/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus 50",
+        "monthly": null,
+        "annualPerMonth": 7.42,
+        "per": "flat",
+        "limits": "50 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$89/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus 100",
+        "monthly": null,
+        "annualPerMonth": 13.25,
+        "per": "flat",
+        "limits": "100 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$159/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus 250",
+        "monthly": null,
+        "annualPerMonth": 29.08,
+        "per": "flat",
+        "limits": "250 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$349/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus 500",
+        "monthly": null,
+        "annualPerMonth": 49.92,
+        "per": "flat",
+        "limits": "500 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$599/year; annual-only plan."
+      },
+      {
+        "name": "Pro Plus 1000",
+        "monthly": null,
+        "annualPerMonth": 83.25,
+        "per": "flat",
+        "limits": "1000 site slots; Standard features plus advanced forms/settings, downloads, redirects, password protection and site files",
+        "notes": "$999/year; annual-only plan."
+      }
+    ],
+    "freeTierCaps": "3 total site slots on Carrd-branded URLs; no custom domains, forms, embeds/widgets or analytics",
+    "billingTerms": "annual only for Pro plans; optional automatic yearly renewal or manual pay-as-you-go renewal",
+    "priceChanges": [],
+    "hiddenCosts": "The low-cost Lite plans do not support custom domains or business features; higher site-slot variants increase the annual price, and account credits/virtual balance are non-cash and non-transferable.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://carrd.co/pro",
+      "https://carrd.co/docs/pro/plans",
+      "https://carrd.co/docs/account/understanding-site-slots"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

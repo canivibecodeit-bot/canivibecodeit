@@ -17,7 +17,49 @@
     "notes": "Official Premium monthly seat price.",
     "native": "12.5 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 10 collaborators/workspace, 10 boards/workspace, unlimited cards, 10 MB/file and 250 automation runs/month",
+        "notes": null
+      },
+      {
+        "name": "Standard",
+        "monthly": 6,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "Unlimited boards, 250 MB/file and 1,000 automation runs/month",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 12.5,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited automation runs, dashboard/timeline/table/calendar/map views and workspace admin controls",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": 17.5,
+        "per": "user",
+        "limits": "Unlimited workspaces, organization-wide permissions, public-board controls and Atlassian Guard Standard",
+        "notes": "Annual-only starting rate is $210/user/year; per-user price can decrease at higher seat counts."
+      }
+    ],
+    "freeTierCaps": "10 collaborators/workspace, 10 boards/workspace, unlimited cards, 10 MB/file and 250 automation runs/month",
+    "billingTerms": "monthly + annual for Standard/Premium; Enterprise annual only",
+    "priceChanges": [],
+    "hiddenCosts": "Multi-board guests are billed as workspace members. Third-party Power-Ups may charge separate subscriptions. Enterprise uses volume pricing, so the exact per-user rate changes with seat count.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.trello.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

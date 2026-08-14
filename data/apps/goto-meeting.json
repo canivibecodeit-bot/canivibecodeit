@@ -17,7 +17,50 @@
     "notes": "Typical Professional monthly organizer price with annual billing.",
     "native": "12 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "1 organizer; up to 3 participants; 40-minute meetings",
+        "notes": null
+      },
+      {
+        "name": "Professional",
+        "monthly": 14,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "Up to 150 participants; unlimited meeting duration and cloud recording",
+        "notes": "Price is per organizer"
+      },
+      {
+        "name": "Business",
+        "monthly": 19,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "Up to 250 participants; unlimited meeting duration and cloud recording",
+        "notes": "Price is per organizer"
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Up to 250 participants; custom deployment and support",
+        "notes": "Contact sales; price is per organizer"
+      }
+    ],
+    "freeTierCaps": "1 organizer, 3 participants per meeting and 40 minutes per meeting",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "Licenses are for organizers, not attendees; each simultaneous hosted meeting needs a separate organizer license. Enhanced Audio is a separately sold add-on.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.goto.com/pricing/meeting",
+      "https://www.goto.com/meeting/free-video-conferencing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,51 @@
     "source": "https://learnworlds.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "medium",
-    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication."
+    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication.",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 29,
+        "annualPerMonth": 24,
+        "per": "workspace",
+        "limits": "Unlimited users and paid courses; 1 admin; 3-page website; $5 fee per paid course enrollment.",
+        "notes": "Annual price is $288."
+      },
+      {
+        "name": "Pro Trainer",
+        "monthly": 99,
+        "annualPerMonth": 79,
+        "per": "workspace",
+        "limits": "Unlimited users; 5 admins; unlimited site pages; 0 LearnWorlds transaction fee.",
+        "notes": "Annual price is $948."
+      },
+      {
+        "name": "Learning Center",
+        "monthly": 299,
+        "annualPerMonth": 249,
+        "per": "workspace",
+        "limits": "Unlimited users; 25 admins; 0 LearnWorlds transaction fee.",
+        "notes": "Annual price is $2,988."
+      },
+      {
+        "name": "High Volume & Corporate",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom users, admins, SLAs and scale; 0 self-serve prices published.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier; 30-day free trial",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "Starter charges $5 for every paid course enrollment; the white-label mobile app is $149/month on eligible tiers; school content syncing is $149/month on Pro Trainer and cross-school syncing is $149/month on Learning Center; processors charge separately.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.learnworlds.com/pricing/",
+      "https://www.learnworlds.com/product/features/checkout-and-payments/",
+      "https://support.learnworlds.com/support/solutions/articles/12000097417-schools-content-syncing-add-on"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

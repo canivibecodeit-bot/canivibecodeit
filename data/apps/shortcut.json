@@ -17,7 +17,50 @@
     "notes": "Official Team monthly seat price.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 10 users, 1 team, 1 workspace and 1 workflow",
+        "notes": null
+      },
+      {
+        "name": "Team",
+        "monthly": 10,
+        "annualPerMonth": 8.5,
+        "per": "user",
+        "limits": "Unlimited users, up to 5 teams, 1 workspace and up to 5 workflows",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 16,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "Unlimited users, teams, workspaces and workflows; advanced roadmaps/security/reporting",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom enterprise security, onboarding, support and controls",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "Up to 10 users, 1 team, 1 workspace and 1 workflow",
+    "billingTerms": "monthly + annual; 14-day Business trial, no credit card",
+    "priceChanges": [],
+    "hiddenCosts": "Each paid seat includes up to 5 no-cost Observer seats; users who need editing rights are paid. Enterprise is custom. Qualified nonprofits can receive Shortcut free.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.shortcut.com/pricing/",
+      "https://www.shortcut.com/faq/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

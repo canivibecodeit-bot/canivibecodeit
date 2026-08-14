@@ -6,18 +6,60 @@
   "category": "automation",
   "subcategory": "workflow automation and app integrations",
   "tagline": "Connect two services and expose every transformation and retry",
-  "priceMonthly": 19,
+  "priceMonthly": 22,
   "pricing": {
-    "plan": "Basic",
+    "plan": "Pro",
     "basis": "monthly",
     "unit": "flat",
     "source": "https://albato.com/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Basic monthly rate.",
-    "native": "19 USD",
+    "native": "22 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "100 transactions/month; 5 active automations; 2 steps per automation; unlimited app connections; 7-day logs; 15-minute update interval",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 22,
+        "annualPerMonth": 15,
+        "per": "workspace",
+        "limits": "Starts at 1,000 transactions/month; unlimited automations and steps; 1 user; 30-day logs; 5-minute update interval",
+        "notes": "Transaction allowance is selected with a pricing slider and can scale to 2,000,000/month; 7-day trial."
+      },
+      {
+        "name": "Teams",
+        "monthly": 93,
+        "annualPerMonth": 65,
+        "per": "workspace",
+        "limits": "Starts at 5,000 transactions/month; 5 users; unlimited automations/steps; 30-day logs; 3-minute update interval",
+        "notes": "Displayed on the live pricing page but marked Coming soon, so it was not yet generally self-serve."
+      },
+      {
+        "name": "Custom",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom transaction allowance; unlimited users; 60-day logs; 1-minute update interval; dedicated CSM and SLA",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "100 transactions/month, 5 automations, 2 steps per automation, unlimited connections, 7-day logs and 15-minute update interval",
+    "billingTerms": "free + monthly and annual billing; annual saves up to 30%; paid prices increase with the selected transaction package",
+    "priceChanges": [],
+    "hiddenCosts": "Automatic overages can continue after the included transactions; at the base Pro package extra transactions are listed at $0.033 each and cost 50% more per unit than included transactions; AI usage counts 2,000 tokens as 1 transaction",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://albato.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

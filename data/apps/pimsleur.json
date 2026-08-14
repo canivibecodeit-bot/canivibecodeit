@@ -17,7 +17,70 @@
     "notes": "Official All Access monthly subscription.",
     "native": "20.95 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Audio-Only, single language",
+        "monthly": 14.95,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "All available audio lessons for 1 language; course depth varies by language",
+        "notes": "Not available for every language."
+      },
+      {
+        "name": "Premium, single language",
+        "monthly": 19.95,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "All available levels for 1 language plus reading, Voice Coach, flashcards, and review features",
+        "notes": null
+      },
+      {
+        "name": "All Access, monthly",
+        "monthly": 20.95,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "All available levels across 51 languages; all app features",
+        "notes": null
+      },
+      {
+        "name": "All Access, annual",
+        "monthly": null,
+        "annualPerMonth": 13.75,
+        "per": "user",
+        "limits": "All available levels across 50+ languages; billed $164.95 annually",
+        "notes": "Effective monthly rate rounded from the official annual total."
+      },
+      {
+        "name": "All Access, lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "50+ languages and all available levels; live page lists $798 one-time and a $478.80 promotional checkout price",
+        "notes": "One-time purchase, not a subscription; promotional eligibility and expiry can change."
+      },
+      {
+        "name": "Single-language lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Permanent access to the selected language/levels; price varies by language and number of levels",
+        "notes": "One-time purchase; no single universal price is published."
+      }
+    ],
+    "freeTierCaps": "no permanent free tier (1 sample lesson; paid subscriptions offer a 7-day trial)",
+    "billingTerms": "Audio-Only and Premium are monthly; All Access monthly or annual; lifetime products are one-time purchases; trials auto-convert",
+    "priceChanges": [],
+    "hiddenCosts": "Course depth varies by language; lifetime discounts are promotional, and app-store prices can differ slightly from direct web prices.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.pimsleur.com/subscriptions",
+      "https://www.pimsleur.com/learn-french/",
+      "https://www.pimsleur.com/learn-hindi/subscription-audio/",
+      "https://www.pimsleur.com/pimsleur-faq/",
+      "https://www.pimsleur.com/learn-french/lifetime-subscription/",
+      "https://www.pimsleur.com/subscription-terms/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

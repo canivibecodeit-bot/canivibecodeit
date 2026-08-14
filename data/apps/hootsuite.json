@@ -17,7 +17,50 @@
     "notes": "Typical annual-equivalent Standard price; monthly billing and regional packages vary.",
     "native": "99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Standard",
+        "monthly": null,
+        "annualPerMonth": 99,
+        "per": "user",
+        "limits": "10 social accounts; unlimited publishing.",
+        "notes": "Public price is the per-user monthly equivalent on annual billing; exact month-to-month rate was not reliably exposed."
+      },
+      {
+        "name": "Professional",
+        "monthly": null,
+        "annualPerMonth": 199,
+        "per": "user",
+        "limits": "Unlimited social accounts; unlimited publishing.",
+        "notes": "Public price is the per-user monthly equivalent on annual billing; exact month-to-month rate was not reliably exposed."
+      },
+      {
+        "name": "Advanced",
+        "monthly": null,
+        "annualPerMonth": 399,
+        "per": "user",
+        "limits": "Unlimited social accounts; approval and workflow controls.",
+        "notes": "Public price is the per-user monthly equivalent on annual billing; exact month-to-month rate was not reliably exposed."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom users, accounts, governance, analytics, integrations, security, and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier (14-day no-card trial only; trial publishing is capped at 10–20 posts/day per organization and bulk scheduling is disabled)",
+    "billingTerms": "monthly + annual; annual per-user rates are public, but exact month-to-month rates were not reliably exposed",
+    "priceChanges": [],
+    "hiddenCosts": "Each additional seat is separately billed; premium add-ons and tax can increase the total. The no-card trial does not auto-charge.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.hootsuite.com/plans",
+      "https://hootsuite.com/plans"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,49 @@
     "notes": "Typical Starter monthly seat price.",
     "native": "11 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 11,
+        "annualPerMonth": 9,
+        "per": "user",
+        "limits": "20 projects; maximum 5 users.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 20,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "Unlimited projects; maximum 50 users.",
+        "notes": null
+      },
+      {
+        "name": "Unlimited",
+        "monthly": 28,
+        "annualPerMonth": 22,
+        "per": "user",
+        "limits": "Unlimited projects and users.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, security, onboarding, and support.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (about -20%); trial; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Tasks is a separate add-on starting at $5/person/month.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://timelyapp.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,33 @@
     "notes": "Official month-to-month price.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Monthly Subscription",
+        "monthly": 10,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "All product features; 30-day trial; price locked for life",
+        "notes": null
+      },
+      {
+        "name": "Annual Subscription",
+        "monthly": null,
+        "annualPerMonth": 8.33,
+        "per": "flat",
+        "limits": "All product features; user can set annual price, displayed default $100/year; 30-day trial",
+        "notes": "Annual amount is user-selectable; $100/year is the displayed default, not a hard fixed price."
+      }
+    ],
+    "freeTierCaps": "no free tier; 30-day trial with no credit card",
+    "billingTerms": "monthly + annual (annual price is user-set; displayed default $100/year)",
+    "priceChanges": [],
+    "hiddenCosts": "Annual customers can choose their own price; organization pricing is separate. Pausing converts unused time into account credit.",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://lunchmoney.app/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

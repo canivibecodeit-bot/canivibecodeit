@@ -6,18 +6,47 @@
   "category": "photo-editing",
   "subcategory": "photo organization, culling and editing",
   "tagline": "Host a personal photo gallery and metadata archive on user-owned storage",
-  "priceMonthly": 8.25,
+  "priceMonthly": 11,
   "pricing": {
     "plan": "Pro",
-    "basis": "annual-equivalent",
+    "basis": "monthly",
     "unit": "flat",
-    "source": "https://flickr.com/account/upgrade/pro",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.flickr.com/account/upgrade/pro",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Annual Pro plan divided by 12; exact list price can change.",
-    "native": "8.25 USD",
+    "native": "11 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "Up to 1,000 photos/videos total; up to 50 non-public items; Safe-rated and non-commercial content only.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 11,
+        "annualPerMonth": 6.83,
+        "per": "flat",
+        "limits": "Unlimited full-resolution storage with no monthly upload cap; ad-free browsing, detailed stats and premium support.",
+        "notes": "Annual total is $82; a 2-year plan is $148 ($6.17/month equivalent). US prices exclude applicable tax; international USD pricing is higher."
+      }
+    ],
+    "freeTierCaps": "1,000 items total and 50 non-public photos/videos; only Safe-rated, non-commercial content is allowed",
+    "billingTerms": "monthly + annual + 2-year; auto-renewing and non-refundable",
+    "priceChanges": [],
+    "hiddenCosts": "US tax may be added; users outside supported local currencies can be charged the higher tax-inclusive international USD rates ($13 monthly, $96 annual or $170 for 2 years); app-store prices can differ.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.flickr.com/account/upgrade/pro",
+      "https://www.flickrhelp.com/hc/en-us/articles/4404064001812-Pricing-FAQ",
+      "https://www.flickrhelp.com/hc/en-us/articles/13690320471060-Free-account-limits-and-enforcement",
+      "https://www.flickrhelp.com/hc/en-us/articles/4404058158612-Manage-Your-Flickr-Pro-Subscription-and-Payment-Options"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

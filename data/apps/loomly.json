@@ -6,18 +6,53 @@
   "category": "social-media",
   "subcategory": "social scheduling and content repurposing",
   "tagline": "Plan, approve, and schedule a small team's content calendar",
-  "priceMonthly": 42,
+  "priceMonthly": 65,
   "pricing": {
-    "plan": "Base",
+    "plan": "Starter",
     "basis": "monthly",
     "unit": "flat",
-    "source": "https://loomly.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.loomly.com/pricing",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Base monthly tier.",
-    "native": "42 USD",
+    "native": "65 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 65,
+        "annualPerMonth": 49,
+        "per": "workspace",
+        "limits": "12 social accounts; 3 users; unlimited calendars; 2 social-listening uses/month.",
+        "notes": "AI usage is included but the public page labels the allowance only as 'limited' without a number."
+      },
+      {
+        "name": "Beyond",
+        "monthly": 332,
+        "annualPerMonth": 249,
+        "per": "workspace",
+        "limits": "60 social accounts; unlimited users and calendars; 5 social-listening uses/month.",
+        "notes": "AI usage is included but the public page labels the allowance only as 'extended' without a number."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "61+ social accounts; unlimited users and calendars; custom governance, security, and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier (15-day no-card trial only)",
+    "billingTerms": "monthly + annual (about 25% lower on annual billing)",
+    "priceChanges": [],
+    "hiddenCosts": "AI usage is capped, but the current public page does not publish numeric AI limits; more than 60 social accounts requires Enterprise.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.loomly.com/pricing",
+      "https://loomly.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

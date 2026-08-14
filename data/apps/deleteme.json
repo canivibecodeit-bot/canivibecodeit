@@ -17,7 +17,74 @@
     "notes": "Typical annual single-person price divided by 12; package length can differ.",
     "native": "10.75 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "1 person, 1 year",
+        "monthly": null,
+        "annualPerMonth": 10.75,
+        "per": "flat",
+        "limits": "1 person; ongoing removals and quarterly privacy reports; average cited result of about 15 public listings removed",
+        "notes": "$129 billed yearly."
+      },
+      {
+        "name": "2 people, 1 year",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2 people; ongoing removals and quarterly reports",
+        "notes": "The live official page offered this tier but did not expose a stable numeric USD total to the crawler."
+      },
+      {
+        "name": "Family (4 people), 1 year",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Up to 4 people; ongoing removals and quarterly reports",
+        "notes": "The live official page offered this tier but did not expose a stable numeric USD total to the crawler."
+      },
+      {
+        "name": "1 person, 2 years",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 person; 24 months of ongoing removals and reports",
+        "notes": "Biennial prepayment; exact official USD total was not exposed reliably."
+      },
+      {
+        "name": "2 people, 2 years",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2 people; 24 months of ongoing removals and reports",
+        "notes": "Biennial prepayment; exact official USD total was not exposed reliably."
+      },
+      {
+        "name": "Family (4 people), 2 years",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Up to 4 people; 24 months of ongoing removals and reports",
+        "notes": "Biennial prepayment; exact official USD total was not exposed reliably."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom employee count, data-broker coverage, support and contract terms",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free removal tier; a free exposure scan is offered",
+    "billingTerms": "annual or biennial prepayment only; no month-to-month plan",
+    "priceChanges": [],
+    "hiddenCosts": "The low monthly figure is an annualized or biennial equivalent and the full term is charged upfront; service is primarily for U.S. residents, renews automatically, and wider business/custom-removal coverage is quote priced",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://joindeleteme.com/pricing/",
+      "https://joindeleteme.com/privacy-protection-plans/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,81 @@
     "notes": "Typical Freelancer monthly amount.",
     "native": "22 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free Forms/Surveys Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 content type; 1,200 leads/year; 4 content pieces; 1 user.",
+        "notes": null
+      },
+      {
+        "name": "Freelancer Limited",
+        "monthly": 22,
+        "annualPerMonth": 14,
+        "per": "workspace",
+        "limits": "3,000 leads/year; 5 content pieces; 1 user; 5 content types.",
+        "notes": null
+      },
+      {
+        "name": "Freelancer Pro",
+        "monthly": 45,
+        "annualPerMonth": 25,
+        "per": "workspace",
+        "limits": "12,000 leads/year; 7 content pieces; 1 user; 7 content types.",
+        "notes": null
+      },
+      {
+        "name": "Essentials",
+        "monthly": 115,
+        "annualPerMonth": 95,
+        "per": "workspace",
+        "limits": "90,000 leads/year; unlimited content pieces; 3 users; 9 content types.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 720,
+        "annualPerMonth": 600,
+        "per": "workspace",
+        "limits": "600,000 leads/year; unlimited content pieces; 10 users; all content types.",
+        "notes": null
+      },
+      {
+        "name": "Startup Basic",
+        "monthly": 35,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "9,000 leads/year; 3 content pieces; 1 user; 7 content types.",
+        "notes": "Eligibility restrictions apply to new companies; no public annual price was shown."
+      },
+      {
+        "name": "Startup Special",
+        "monthly": 55,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "12,000 leads/year; 6 content pieces; 1 user; 8 content types.",
+        "notes": "Eligibility restrictions apply to startups/SMBs; no public annual price was shown."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom leads, users, integrations, security and service levels.",
+        "notes": "Quote required."
+      }
+    ],
+    "freeTierCaps": "1 content type limited to forms/surveys; 1,200 leads/year; 4 content pieces; 1 user.",
+    "billingTerms": "Monthly + annual on the core plans; annual commitments are billed upfront. Startup plans are publicly shown as monthly; Enterprise is contract pricing.",
+    "priceChanges": [],
+    "hiddenCosts": "Lead quotas are annual rather than monthly; standard plans include 1 integration; extra leads and integrations require a quote; unused annual capacity does not roll into a new term; done-for-you content starts at $250 per content piece.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://outgrow.co/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

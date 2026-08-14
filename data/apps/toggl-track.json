@@ -6,18 +6,64 @@
   "category": "time-tracking",
   "subcategory": "time tracking, focus and attention",
   "tagline": "Track time quickly, edit entries, and report by project, client, and tag",
-  "priceMonthly": 10,
+  "priceMonthly": 12,
   "pricing": {
     "plan": "Starter",
     "basis": "monthly per user",
     "unit": "per-seat",
-    "source": "https://toggl.com/track/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://toggl.com/track/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Official Starter monthly user price.",
-    "native": "10 USD",
+    "native": "12 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 5 users; unlimited projects, clients, and time entries; 30 API requests/hour/user/organization; 1 connected Google or Outlook calendar account.",
+        "notes": null
+      },
+      {
+        "name": "Starter",
+        "monthly": 12,
+        "annualPerMonth": 9,
+        "per": "user",
+        "limits": "Unlimited users; billable rates, project estimates, tasks, and reporting.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 20,
+        "annualPerMonth": 14,
+        "per": "user",
+        "limits": "Unlimited users; approvals, labor-cost tracking, audits, and advanced project controls.",
+        "notes": "First annual year is promoted at $14/user/month; regular annual renewal is $18/user/month."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, security, support, and terms.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "Up to 5 users; unlimited projects, clients, and time entries; 30 API requests/hour/user/organization; 1 connected Google or Outlook calendar account.",
+    "billingTerms": "monthly + annual; Premium annual is $14/user/month for year 1 then $18/user/month; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Every workspace member needs a license; vacant licenses remain billed until manually removed; added seats are prorated; refunds are generally limited to billing-system errors.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://toggl.com/track/pricing/",
+      "https://support.toggl.com/en-us/article/basic-information-on-toggl-track-pricing-1jk9e2l/",
+      "https://support.toggl.com/en-us/article/understanding-licenses-in-toggl-track-jk034e/",
+      "https://support.toggl.com/en-us/article/api-webhook-limits-85auc8/",
+      "https://toggl.com/track/time-tracking-ios/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

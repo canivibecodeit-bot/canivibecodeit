@@ -6,18 +6,52 @@
   "category": "no-code-apps",
   "subcategory": "internal tools and application builders",
   "tagline": "Compose an internal dashboard from a database and a fixed widget library",
-  "priceMonthly": 40,
+  "priceMonthly": 15,
   "pricing": {
     "plan": "Business",
     "basis": "monthly per user",
     "unit": "per-seat",
-    "source": "https://appsmith.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.appsmith.com/pricing",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Business seat rate; verify current cloud packaging.",
-    "native": "40 USD",
+    "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Up to 5 cloud users; 5 workspaces; 3 Git repositories; unlimited apps",
+        "notes": "Permanent cloud free tier."
+      },
+      {
+        "name": "Business",
+        "monthly": 15,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Up to 99 users; unlimited workspaces, Git repositories, environments and apps",
+        "notes": "Cloud bills a user for the full month if that user exists at any point in the month."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": 2500,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Starts at 100 users; unlimited workspaces, Git repositories, environments and apps",
+        "notes": "Published starting minimum; managed or air-gapped hosting can cost extra."
+      }
+    ],
+    "freeTierCaps": "5 cloud users; 5 workspaces; 3 Git repositories; unlimited apps",
+    "billingTerms": "monthly self-serve Business; Enterprise starts at 100 users and is generally contract/annual billed",
+    "priceChanges": [],
+    "hiddenCosts": "Business is per user and a user present at any point in a billing month is charged for the whole month; Enterprise has a 100-user/$2,500 monthly floor, while air-gapped, dedicated or managed-hosting services are add-ons",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.appsmith.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

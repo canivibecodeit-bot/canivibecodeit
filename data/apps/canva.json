@@ -5,16 +5,61 @@
   "category": "design",
   "subcategory": "graphic design suite",
   "tagline": "Template-based design suite for social posts, docs, decks, and brand assets",
-  "priceMonthly": 18,
+  "priceMonthly": 15,
   "pricing": {
     "plan": "Pro",
-    "basis": "monthly",
-    "unit": "flat",
-    "native": "18 USD",
-    "source": "https://www.canva.com/en_in/pricing/",
-    "checkedOn": "2026-07-30",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "native": "15 USD",
+    "source": "https://www.canva.com/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
-    "notes": "Official pricing varies by region; 2026 public pricing coverage lists Canva Pro around $18/month in USD markets, while local pages may show regional currency."
+    "notes": "Official pricing varies by region; 2026 public pricing coverage lists Canva Pro around $18/month in USD markets, while local pages may show regional currency.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "5 GB cloud storage; free-content library; free video exports up to 480p; paid assets remain watermarked unless licensed.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 15,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "100 GB cloud storage and premium templates, assets, brand tools and AI features.",
+        "notes": "Annual price is $120 per person per year."
+      },
+      {
+        "name": "Business",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "500 GB cloud storage; 20x the Free plan's AI allowance; Leonardo.Ai Essential, Flourish Presenter and team/marketing controls; no seat minimum.",
+        "notes": "Canva confirms monthly and yearly billing, but the current public page did not expose a stable USD annual-effective amount."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom enterprise pricing with approximately 1–5 TB storage depending deployment; public price is not listed.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "5 GB storage and free-content access; free video export is capped at 480p, while premium assets require licensing.",
+    "billingTerms": "monthly + annual; Business pricing varies by location and team size",
+    "priceChanges": [],
+    "hiddenCosts": "Premium content can require a one-off licence or paid plan, and regional pricing/tax can differ. Canva Teams is no longer sold to new sign-ups; existing Teams customers keep legacy pricing.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.canva.com/pricing/",
+      "https://www.canva.com/newsroom/news/introducing-canva-business/",
+      "https://www.canva.com/help/canva-business-billing/",
+      "https://www.canva.com/resources/marketing-mix/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

@@ -14,7 +14,51 @@
     "source": "https://linear.app/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official pricing page checked 2026-07-30: Free (2 teams, 250 issues), Basic 10 USD/user/mo and Business 16 USD/user/mo billed yearly. Month-to-month billing costs more than the yearly rate."
+    "notes": "Official pricing page checked 2026-07-30: Free (2 teams, 250 issues), Basic 10 USD/user/mo and Business 16 USD/user/mo billed yearly. Month-to-month billing costs more than the yearly rate.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "Unlimited members; 2 teams; 250 issues total; 10 MB file uploads; 15 release pipelines.",
+        "notes": null
+      },
+      {
+        "name": "Basic",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Up to 5 teams; unlimited issues and file uploads.",
+        "notes": "A monthly option exists, but its exact current sticker price was not exposed in the official public HTML; $10 is the annual monthly-equivalent."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "Unlimited teams and issues; advanced controls and analytics.",
+        "notes": "A monthly option exists, but its exact current sticker price was not exposed in the official public HTML; $16 is the annual monthly-equivalent."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom limits, controls, support and contract terms.",
+        "notes": "Annual contract; contact sales."
+      }
+    ],
+    "freeTierCaps": "unlimited members, 2 teams, 250 issues total, 10 MB uploads, and 15 release pipelines",
+    "billingTerms": "monthly and annual for self-serve paid plans; Enterprise is annual/custom",
+    "priceChanges": [],
+    "hiddenCosts": "Every unsuspended workspace member is billable; annual plans receive monthly seat true-ups and removals create invoice credits rather than cash refunds. Linear's AI agents use separately prepaid credits: ad-hoc purchases start at $10 and auto-reload starts at $50.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://linear.app/pricing",
+      "https://linear.app/docs/billing-and-plans",
+      "https://linear.app/docs/agents/credits"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

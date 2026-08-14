@@ -17,7 +17,61 @@
     "notes": "Pricing is usage or sales based; canonical monthly amount is null.",
     "native": "usage-or-custom",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Forever Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "Unlimited users, projects and languages; CAT editor, unlimited Translation Memory storage and glossaries; initial AI balance only",
+        "notes": "Initial Smartword allocation is one-time and expires; core workspace remains free."
+      },
+      {
+        "name": "Adapt",
+        "monthly": null,
+        "annualPerMonth": 100,
+        "per": "workspace",
+        "limits": "Unlimited users; Chief of Staff plus Content Translator and Content Writer AI Co-workers; annual Smartwords allowance varies by contract",
+        "notes": "Starts at $1,200/year, billed annually."
+      },
+      {
+        "name": "Accelerate",
+        "monthly": null,
+        "annualPerMonth": 2000,
+        "per": "workspace",
+        "limits": "Unlimited users; adds Reviewer and Marketplace collaboration; annual Smartwords allowance varies by contract",
+        "notes": "Starts at $24,000/year, billed annually."
+      },
+      {
+        "name": "Anticipate",
+        "monthly": null,
+        "annualPerMonth": 5000,
+        "per": "workspace",
+        "limits": "Unlimited users; adds Content Update and QA Co-workers, API, SSO/2FA and reporting",
+        "notes": "Starts at $60,000/year, billed annually."
+      },
+      {
+        "name": "Autonomous",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited users; all Co-workers, parallel/branching workflows, 7 hierarchical workspaces and enterprise governance",
+        "notes": "Custom annual pricing."
+      }
+    ],
+    "freeTierCaps": "Unlimited users, projects and languages; initial AI balance is 15,000 Smartwords for corporate-email trials (14 days) or 3,000 for non-corporate-email trials (7 days), then AI use needs a top-up or paid plan",
+    "billingTerms": "paid plans are annual only at published starting prices; consumption is based on Smartwords, not seats",
+    "priceChanges": [],
+    "hiddenCosts": "Smartwords expire at renewal and extra Smartwords are paid; Marketplace commission is 20% on Forever Free and lower on paid plans; AI dubbing consumes 10 Smartwords per word and OCR image translation costs 1,000 Smartwords per image.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.smartcat.com/pricing/",
+      "https://help.smartcat.com/pricing-plan-overview/",
+      "https://help.smartcat.com/smartcat-free-plan-vs-paid-plans/",
+      "https://help.smartcat.com/understanding-smartwords/",
+      "https://help.smartcat.com/understanding-fees-and-commissions/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

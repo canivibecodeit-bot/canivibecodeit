@@ -6,18 +6,44 @@
   "category": "personal-finance",
   "subcategory": "budgeting, invoicing and small-business finance",
   "tagline": "Maintain a local personal ledger with imports, budgets, and reports",
-  "priceMonthly": 5.99,
+  "priceMonthly": 6.99,
   "pricing": {
     "plan": "Classic Deluxe",
-    "basis": "annual-equivalent",
+    "basis": "annual billing, per month",
     "unit": "flat",
-    "source": "https://quicken.com/products/classic-deluxe",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.quicken.com/products/classic-deluxe/",
+    "checkedOn": "2026-08-13",
     "confidence": "medium",
     "notes": "Annual subscription converted to a monthly equivalent; promotions vary.",
-    "native": "5.99 USD",
+    "native": "6.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Classic Deluxe",
+        "monthly": null,
+        "annualPerMonth": 6.99,
+        "per": "flat",
+        "limits": "Multiple budgets; debt tools; tax reports; retirement planner; investment tracking; unlimited tags/custom categories",
+        "notes": "Displayed price is a first-year promotional monthly equivalent, billed annually; offer ends 2026-09-11."
+      },
+      {
+        "name": "Classic Deluxe + LifeHub",
+        "monthly": null,
+        "annualPerMonth": 8.99,
+        "per": "flat",
+        "limits": "Classic Deluxe plus LifeHub document and essential-information organization",
+        "notes": "First-year promotional monthly equivalent, billed annually; bundle page shows a regular comparison price of $10.98/month equivalent."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "annual only; full annual charge upfront; first-year promotional pricing",
+    "priceChanges": [],
+    "hiddenCosts": "Auto-renews yearly at the then-current rate, which is not numerically disclosed on the page. Third-party terms/fees may apply. Product is designed for the US and Canada.",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.quicken.com/products/classic-deluxe/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

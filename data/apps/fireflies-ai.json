@@ -14,7 +14,107 @@
     "source": "https://fireflies.ai/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; Pro is listed at $18/seat/month monthly and $10/seat/month annually."
+    "notes": "Official pricing checked 2026-07-30; Pro is listed at $18/seat/month monthly and $10/seat/month annually.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited transcription and AI summaries; 400 storage minutes per team; 20 one-time AI credits per team.",
+        "notes": "AI credits are shared by the whole team, not granted per seat."
+      },
+      {
+        "name": "Pro",
+        "monthly": 18,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited transcription and AI summaries; 8,000 storage minutes per seat; 20 one-time AI credits per team.",
+        "notes": "Base subscription does not include recurring AI credits."
+      },
+      {
+        "name": "Business",
+        "monthly": 29,
+        "annualPerMonth": 19,
+        "per": "user",
+        "limits": "Unlimited transcription, AI summaries, and storage; 30 one-time AI credits per team.",
+        "notes": "Base subscription does not include recurring AI credits."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": 39,
+        "per": "user",
+        "limits": "Unlimited transcription, AI summaries, and storage; 50 one-time AI credits per team.",
+        "notes": "Annual only."
+      },
+      {
+        "name": "AI Credits 50",
+        "monthly": 5,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "50 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 200",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "200 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 1,000",
+        "monthly": 90,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "1,000 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 2,500",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "2,500 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 5,000",
+        "monthly": 375,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "5,000 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 7,500",
+        "monthly": 450,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "7,500 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      },
+      {
+        "name": "AI Credits 10,000",
+        "monthly": 600,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "10,000 purchased AI credits per month, shared by the team.",
+        "notes": "Auto-renews monthly; unused purchased credits do not roll over."
+      }
+    ],
+    "freeTierCaps": "Unlimited transcription and AI summaries; 400 storage minutes per team; 20 one-time AI credits shared by the team.",
+    "billingTerms": "monthly + annual; Enterprise is annual only",
+    "priceChanges": [],
+    "hiddenCosts": "Included AI credits are one-time and shared across the entire team. When a paid team runs out, Fireflies automatically starts the lowest $5/50-credit monthly add-on unless disabled; purchased credits expire at each billing cycle.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://fireflies.ai/pricing",
+      "https://guide.fireflies.ai/articles/2114151875-learn-about-ai-credits?lang=en",
+      "https://guide.fireflies.ai/articles/1092250300-learn-about-fireflies-pro-tier-features"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

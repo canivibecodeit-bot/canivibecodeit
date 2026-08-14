@@ -17,7 +17,49 @@
     "source": "https://on1.com/products/photo-raw/buy",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Photo RAW 2026.5",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Perpetual licence for 2 computers; updates within the 2026 release line.",
+        "notes": "Current sale price: $49.99; regular price shown as $99.99."
+      },
+      {
+        "name": "Photo RAW MAX 2026.5, Perpetual",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Perpetual MAX licence for 3 computers; exact current public USD checkout price was not exposed.",
+        "notes": null
+      },
+      {
+        "name": "Photo RAW MAX, Subscription",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "200 GB cloud storage, future versions and up to 5 installs; exact public USD price was not exposed.",
+        "notes": null
+      },
+      {
+        "name": "Photo Studio, Subscription",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 TB cloud storage, all ON1 titles/plugins, future releases and up to 5 installs; exact public USD price was not exposed.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier; a trial is offered",
+    "billingTerms": "one-time perpetual licences and recurring subscriptions are both sold",
+    "priceChanges": [],
+    "hiddenCosts": "The one-time licence covers the current major-year release, not future major versions. Future upgrades, auto-upgrade programmes and cloud storage beyond the perpetual product are additional costs.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.on1.com/products/photo-raw/buy/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

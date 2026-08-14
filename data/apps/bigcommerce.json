@@ -17,7 +17,51 @@
     "notes": "Official Standard monthly tier.",
     "native": "39 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Core",
+        "monthly": 39,
+        "annualPerMonth": 29,
+        "per": "workspace",
+        "limits": "Up to $30,000 trailing-12-month GMV before automatic upgrade; unlimited products/bandwidth/staff; 2% open-payment-provider fee; up to 3 storefronts.",
+        "notes": "Additional storefronts cost $30/month each."
+      },
+      {
+        "name": "Growth",
+        "monthly": 105,
+        "annualPerMonth": 79,
+        "per": "workspace",
+        "limits": "Up to $100,000 trailing-12-month GMV before automatic upgrade; unlimited products/bandwidth/staff; 1% provider fee; up to 5 storefronts.",
+        "notes": "Additional storefronts cost $50/month each."
+      },
+      {
+        "name": "Scale",
+        "monthly": 399,
+        "annualPerMonth": 299,
+        "per": "workspace",
+        "limits": "$33,333 monthly GMV allowance; 0.9% overage on excess; automatic upgrade at $2 million trailing-12-month GMV; 0.6% provider fee; up to 8 storefronts.",
+        "notes": "Additional storefronts cost $100/month each."
+      },
+      {
+        "name": "Performance",
+        "monthly": null,
+        "annualPerMonth": 1499,
+        "per": "workspace",
+        "limits": "Starts at $1,499/month billed annually; custom GMV/payment terms; official update cites a $250,000/month Inclusive-GMV reference cap with 0.6% overage above it, subject to contract.",
+        "notes": "Custom quote; annual contract; contracted terms control."
+      }
+    ],
+    "freeTierCaps": "no free tier; 15-day trial with no credit card",
+    "billingTerms": "monthly + annual for Core/Growth/Scale; Performance starts at $1,499/month billed annually",
+    "priceChanges": [],
+    "hiddenCosts": "Revenue thresholds force automatic upgrades; Scale charges 0.9% of monthly GMV above $33,333; the Performance update cites a $250,000/month Inclusive-GMV reference cap with 0.6% overage, subject to contract; open-payment-provider fees are 2%/1%/0.6% on Core/Growth/Scale; extra storefronts are $30/$50/$100 per month, and Core phone support is a paid add-on with no public price.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.bigcommerce.com/essentials/pricing/",
+      "https://www.bigcommerce.com/dm/plan-pricing-updates-2026/",
+      "https://www.bigcommerce.com/pricing/faq/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

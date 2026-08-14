@@ -17,7 +17,65 @@
     "source": "https://libsyn.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Bare essentials",
+        "monthly": 8,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Exact upload and feature caps are not disclosed on the public pricing page",
+        "notes": null
+      },
+      {
+        "name": "Basic",
+        "monthly": 12,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "3 audio upload hours/month; up to 100 GB video uploads/month; basic IAB statistics",
+        "notes": null
+      },
+      {
+        "name": "Advanced",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "10 audio upload hours/month; up to 100 GB video/month; advanced IAB statistics",
+        "notes": null
+      },
+      {
+        "name": "Max",
+        "monthly": 150,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "55 audio upload hours/month; up to 100 GB video/month; advanced statistics",
+        "notes": null
+      },
+      {
+        "name": "Professional",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Custom dynamic ads, API access, onboarding, support, storage and analytics",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Custom network, security, service and commercial terms",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier; every paid plan has a 30-day trial requiring a card",
+    "billingTerms": "monthly only on public self-serve plans; no annual plan published",
+    "priceChanges": [],
+    "hiddenCosts": "Plans meter newly uploaded audio each month; advanced professional features and enterprise service are custom-priced.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://libsyn.com/plans-and-pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

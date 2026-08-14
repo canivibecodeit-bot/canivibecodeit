@@ -14,7 +14,35 @@
     "source": "https://www.monarch.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official pricing page checked; 2026 public references list $14.99/month or $99.99/year for Core."
+    "notes": "Official pricing page checked; 2026 public references list $14.99/month or $99.99/year for Core.",
+    "tiers": [
+      {
+        "name": "Core",
+        "monthly": 14.99,
+        "annualPerMonth": 8.33,
+        "per": "flat",
+        "limits": "One household; budgeting, goals, cash flow, net worth and account tracking",
+        "notes": "7-day trial. Annual price is $99.99/year."
+      },
+      {
+        "name": "Plus",
+        "monthly": null,
+        "annualPerMonth": 16.58,
+        "per": "flat",
+        "limits": "Everything in Core plus forecasting, business tracking, advanced investment analysis, gains/losses and estate-planning features",
+        "notes": "Annual only at $199/year; 7-day trial; desktop-first features."
+      }
+    ],
+    "freeTierCaps": "no free tier; 7-day free trial",
+    "billingTerms": "Core monthly + annual; Plus annual only",
+    "priceChanges": [],
+    "hiddenCosts": "Taxes may apply; app-store billing terms can differ. Core promotions do not apply to Plus or monthly plans. Plus is unavailable on advisor-sponsored accounts.",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.monarch.com/pricing",
+      "https://help.monarch.com/hc/en-us/articles/44815447567636-Updating-Your-Subscription",
+      "https://www.monarch.com/blog/monarch-plus"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

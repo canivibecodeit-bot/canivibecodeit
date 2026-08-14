@@ -17,7 +17,41 @@
     "source": "https://getstencil.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "10 images saved/downloaded/shared per month; 50 uploads; 10 collections; 10 favorites; 10 Instagram SMS/month.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 9,
+        "per": "user",
+        "limits": "50 saved images/month; 250 uploads; 25 collections; 100 favorites; 25 Instagram SMS/month; 5 million photos, 3.1 million icons, 1,350 templates and 7,750 fonts.",
+        "notes": "Annual-effective rate is public; current monthly USD amount was not exposed."
+      },
+      {
+        "name": "Unlimited",
+        "monthly": null,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "Unlimited saved images, uploads, collections and favorites; 100 Instagram SMS/month.",
+        "notes": "Annual-effective rate is public; current monthly USD amount was not exposed."
+      }
+    ],
+    "freeTierCaps": "10 saves/downloads/shares per month, 50 uploads, 10 collections, 10 favorites and 10 Instagram SMS/month.",
+    "billingTerms": "monthly + annual; annual billing advertises 40% savings, but exact current monthly USD amounts were not exposed",
+    "priceChanges": [],
+    "hiddenCosts": "Each account is licensed to one user and sharing an account across an organisation is prohibited. The money-back guarantee lasts 7 days.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://getstencil.com/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

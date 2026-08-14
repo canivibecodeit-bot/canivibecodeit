@@ -5,16 +5,67 @@
   "category": "no-code-apps",
   "subcategory": "visual web app builder",
   "tagline": "No-code platform for building custom web apps with workflows and data",
-  "priceMonthly": 32,
+  "priceMonthly": 59,
   "pricing": {
-    "plan": "Starter",
-    "basis": "monthly",
+    "plan": "Starter, Web & Mobile",
+    "basis": "annual billing, per month",
     "unit": "flat",
-    "native": "32 USD",
+    "native": "59 USD",
     "source": "https://bubble.io/pricing",
-    "checkedOn": "2026-07-30",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
-    "notes": "Official pricing URL checked; 2026 public references list Starter around $32/month monthly and $29/month annually."
+    "notes": "Official pricing URL checked; 2026 public references list Starter around $32/month monthly and $29/month annually.",
+    "tiers": [
+      {
+        "name": "Free, Web & Mobile",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 editor; 50,000 workload units/month; 6 hours server logs; development version only",
+        "notes": "No live web or app-store deployment."
+      },
+      {
+        "name": "Starter, Web & Mobile",
+        "monthly": null,
+        "annualPerMonth": 59,
+        "per": "workspace",
+        "limits": "1 editor; 175,000 workload units/month; 2 days logs; 5 mobile build submissions/month; 3 live app versions",
+        "notes": "Official page exposed $59/month equivalent when billed annually; monthly price was not reliably exposed."
+      },
+      {
+        "name": "Growth, Web & Mobile",
+        "monthly": null,
+        "annualPerMonth": 209,
+        "per": "workspace",
+        "limits": "2 editors; 250,000 workload units/month; 14 days logs; 10 branches; 10 build submissions; 5 live versions",
+        "notes": "Annual-billing equivalent."
+      },
+      {
+        "name": "Team, Web & Mobile",
+        "monthly": null,
+        "annualPerMonth": 549,
+        "per": "workspace",
+        "limits": "5 editors; 500,000 workload units/month; 20 days logs; 25 branches; 20 build submissions; 8 live versions",
+        "notes": "Annual-billing equivalent."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom workload, hosting region, server, build and support limits",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "1 editor; 50,000 workload units/month; 6 hours of server logs; development-only web/mobile versions with no live deployment",
+    "billingTerms": "monthly + annual (save up to 20%); each project needs its own plan",
+    "priceChanges": [],
+    "hiddenCosts": "Workload units are the real meter and web + mobile share one allowance; overage or prepaid workload tiers cost extra, storage is $3 per additional 100 GB/month, and paid plugin subscriptions are separate",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://bubble.io/pricing",
+      "https://bubble.io/pricing/workload"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

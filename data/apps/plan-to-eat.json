@@ -17,7 +17,26 @@
     "notes": "Official monthly subscription.",
     "native": "5.95 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Plan to Eat",
+        "monthly": 5.95,
+        "annualPerMonth": 4.08,
+        "per": "flat",
+        "limits": "One household account with recipe storage, meal calendar, shopping lists, and use across all supported devices.",
+        "notes": "$49 billed yearly; 14-day full trial with no card."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual; annual is $49/year (about 4 months cheaper than monthly); 14-day trial",
+    "priceChanges": [],
+    "hiddenCosts": "An annual subscription bought through Apple's App Store is $54.99 rather than the $49 direct-web price.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.plantoeat.com/pricing",
+      "https://learn.plantoeat.com/help/how-much-does-plan-to-eat-cost"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

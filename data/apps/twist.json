@@ -17,7 +17,35 @@
     "notes": "Official Unlimited monthly seat price.",
     "native": "8 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 month of message history; 5 integrations; 5 GB storage; up to 500 internal members and 500 external guests",
+        "notes": null
+      },
+      {
+        "name": "Unlimited",
+        "monthly": 8,
+        "annualPerMonth": 6,
+        "per": "user",
+        "limits": "Unlimited message history, integrations and storage; up to 500 internal members and 500 external guests",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "1 month of history; 5 integrations; 5 GB storage; up to 500 internal members plus 500 external guests",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "All internal team members and multi-channel guests are billable on Unlimited; single-channel guests are free. New users are prorated and removals create account credit after the refund window; a workspace cannot mix Free and Unlimited members.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://twist.com/pricing",
+      "https://twist.com/help/articles/what-is-twist-unlimited-mehD6bnu",
+      "https://twist.com/help/articles/how-guests-work-in-twist-pPt1PKPY"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

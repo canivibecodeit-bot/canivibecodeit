@@ -17,7 +17,42 @@
     "notes": "Pricing is usage based per photo; canonical monthly amount is null.",
     "native": "usage-based",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Pay-as-you-go",
+        "monthly": 7,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "No edit-volume cap; 2 computers; base color editing starts at $0.05 per photo.",
+        "notes": "The $7 monthly minimum becomes editing credit and rolls over; there is no annual PAYG option for new self-serve subscribers."
+      },
+      {
+        "name": "Limitless",
+        "monthly": null,
+        "annualPerMonth": 179,
+        "per": "user",
+        "limits": "Unlimited editing, retouching, AI tools and AI culling for 1 individual photographer; 2 computers.",
+        "notes": "Published annual rate is $179/month billed upfront for the year; a monthly option exists, but its current USD price did not render."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Multiple photographers/computers, API access and high-volume capacity; 0 self-serve prices published.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier; 1,000-edit free trial with no credit card",
+    "billingTerms": "PAYG monthly; Limitless monthly or annual prepaid (annual saves about 20%); Business custom",
+    "priceChanges": [],
+    "hiddenCosts": "On PAYG, straighten/crop/portrait crop/headshot crop/smooth skin/subject mask are $0.20 per photo each; culling starts at $29/month and cloud backup starts at $29/month. PAYG credits are non-refundable; Limitless excludes teams and the separate Imagen for Real Estate product.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://imagen-ai.com/pricing/",
+      "https://support.imagen-ai.com/hc/en-us/articles/4544978323857-Imagen-pricing-and-plans"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

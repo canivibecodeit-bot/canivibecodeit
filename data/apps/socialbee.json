@@ -17,7 +17,65 @@
     "notes": "Official Accelerate monthly tier.",
     "native": "49 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Bootstrap",
+        "monthly": 29,
+        "annualPerMonth": 24.17,
+        "per": "workspace",
+        "limits": "5 social profiles, 1 user, 1 workspace, 10 categories, 10 sources, 1,000 posts/category",
+        "notes": "Annual plan is billed $290/year; page card rounds this to $24/month."
+      },
+      {
+        "name": "Accelerate",
+        "monthly": 49,
+        "annualPerMonth": 40.83,
+        "per": "workspace",
+        "limits": "10 profiles, 1 user, 1 workspace, 50 categories, 30 sources, 5,000 posts/category",
+        "notes": "Annual plan is billed $490/year; page card rounds this to $40.8/month."
+      },
+      {
+        "name": "Pro",
+        "monthly": 99,
+        "annualPerMonth": 82.5,
+        "per": "workspace",
+        "limits": "25 profiles, 3 users/workspace, 5 workspaces, unlimited categories/sources, 5,000 posts/category",
+        "notes": "Annual plan is billed $990/year; page card rounds this to $82.5/month."
+      },
+      {
+        "name": "Pro50",
+        "monthly": 179,
+        "annualPerMonth": 149.2,
+        "per": "workspace",
+        "limits": "50 profiles, 5 users/workspace, 10 workspaces, unlimited categories/sources",
+        "notes": "Annual page card displays $149.2/month, billed annually."
+      },
+      {
+        "name": "Pro100",
+        "monthly": 329,
+        "annualPerMonth": 274.2,
+        "per": "workspace",
+        "limits": "100 profiles, 5 users/workspace, 20 workspaces, unlimited categories/sources",
+        "notes": "Annual page card displays $274.2/month, billed annually."
+      },
+      {
+        "name": "Pro150",
+        "monthly": 449,
+        "annualPerMonth": 374.2,
+        "per": "workspace",
+        "limits": "150 profiles, 5 users/workspace, 30 workspaces, unlimited categories/sources",
+        "notes": "Annual page card displays $374.2/month, billed annually."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (page labels 16% off); 14-day Pro trial, no card; 30-day money-back guarantee",
+    "priceChanges": [],
+    "hiddenCosts": "Extra users, workspaces and profiles are paid add-ons with prices shown only inside the app; profile caps count every connected account; temporary promo codes are excluded.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://socialbee.com/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

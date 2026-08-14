@@ -14,7 +14,57 @@
     "source": "https://wireflow.ai/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "high",
-    "notes": "Starter is $24/mo monthly or $19.20/mo billed annually, and includes 1,600 credits. A free tier builds up to 5 workflows but cannot generate · generation is credit-gated on every plan."
+    "notes": "Starter is $24/mo monthly or $19.20/mo billed annually, and includes 1,600 credits. A free tier builds up to 5 workflows but cannot generate · generation is credit-gated on every plan.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "Up to 5 workflows; the first generation after setup is free, then generations consume paid credits.",
+        "notes": null
+      },
+      {
+        "name": "Starter",
+        "monthly": 24,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1,600 credits per month; approximately 53 images or 94 video seconds; unlimited workflows.",
+        "notes": "Credit top-up: $10 for 500 credits."
+      },
+      {
+        "name": "Professional",
+        "monthly": 45,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "4,300 credits per month; approximately 143 images or 252 video seconds; unlimited workflows.",
+        "notes": "Unused credits can roll over for up to 3 months; top-up is $10 for 600 credits."
+      },
+      {
+        "name": "Team",
+        "monthly": 249,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "4 seats and 21,500 credits per month; approximately 716 images or 1,264 video seconds; unlimited workflows.",
+        "notes": "Unused credits can roll over for up to 3 months; additional seats automatically change the bill at an unpublished rate."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom seats, credits and support; 0 self-serve prices published.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "Up to 5 workflows; 1 first generation after setup is free, with no recurring included-credit allowance published.",
+    "billingTerms": "monthly only, no annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "Starter credits expire at each billing-period end; Professional and Team credits roll over only 3 months; credit top-ups cost $10, and extra Team-seat pricing is not published.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.wireflow.ai/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

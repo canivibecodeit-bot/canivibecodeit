@@ -14,7 +14,79 @@
     "source": "https://claude.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official Anthropic pricing/support checked 2026-07-30; Pro listed at $20/month and $200/year."
+    "notes": "Official Anthropic pricing/support checked 2026-07-30; Pro listed at $20/month and $200/year.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "200K context window; message allowance varies with demand and resets approximately every 5 hours.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 20,
+        "annualPerMonth": 16.67,
+        "per": "flat",
+        "limits": "200K context window; higher usage than Free.",
+        "notes": "Annual plan is $200 paid upfront; the live page rounds the effective rate to $17/month."
+      },
+      {
+        "name": "Max 5x",
+        "monthly": 100,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "About 5× Pro usage; 200K context window.",
+        "notes": null
+      },
+      {
+        "name": "Max 20x",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "About 20× Pro usage; 200K context window.",
+        "notes": null
+      },
+      {
+        "name": "Team Standard",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Minimum 2 members; 2-150 members; 200K context window.",
+        "notes": null
+      },
+      {
+        "name": "Team Premium",
+        "monthly": 125,
+        "annualPerMonth": 100,
+        "per": "user",
+        "limits": "Minimum 2 members; about 5× Team Standard usage; 200K context window.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "500K context window; included token allowance is 0 and model usage is billed separately at API rates.",
+        "notes": "Annual-only seat price; usage charges are additional."
+      }
+    ],
+    "freeTierCaps": "200K context window; variable message allowance that resets approximately every 5 hours",
+    "billingTerms": "Pro and Team offer monthly + annual; Max is monthly only; Enterprise is annual-only plus metered usage",
+    "priceChanges": [],
+    "hiddenCosts": "Paid plans can enable extra-usage credits billed at API rates. Fable 5 usage on Pro and Team Standard has been pay-as-you-go from the first token since 2026-07-20.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://claude.com/pricing",
+      "https://support.claude.com/en/articles/11049762-choose-a-claude-plan",
+      "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+      "https://support.claude.com/en/articles/9266767-what-is-the-team-plan",
+      "https://support.claude.com/en/articles/9797531-what-is-the-enterprise-plan",
+      "https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans",
+      "https://support.claude.com/en/articles/15424964-claude-fable-5-on-your-plan"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

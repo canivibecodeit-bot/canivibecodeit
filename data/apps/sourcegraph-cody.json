@@ -17,7 +17,26 @@
     "source": "https://sourcegraph.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Cody Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom users and pooled AI credits; exact numeric credit allowance is not publicly stated.",
+        "notes": "Sourcegraph's broader Enterprise platform advertises a $16,000 minimum contract, but the billing period and Cody-specific allocation are not sufficiently explicit to place in a monthly or annual price field."
+      }
+    ],
+    "freeTierCaps": "no free tier; Cody Free and Cody Pro were discontinued on July 23, 2025",
+    "billingTerms": "custom Enterprise contract; no self-serve monthly or annual price",
+    "priceChanges": [],
+    "hiddenCosts": "Only an Enterprise contract remains; AI-credit volume and add-ons are custom. Credits are pooled and can roll into renewal, but the platform contract floor can dwarf the former individual subscription.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://sourcegraph.com/pricing",
+      "https://sourcegraph.com/blog/changes-to-cody-free-pro-and-enterprise-starter-plans"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

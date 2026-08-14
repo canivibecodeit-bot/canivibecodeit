@@ -17,7 +17,67 @@
     "source": "https://www.literatureandlatte.com/store/scrivener",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Standard macOS licence",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 macOS major-version licence; usable on multiple computers owned by the licensee or household.",
+        "notes": "One-time purchase: $59.99. The recurring-price fields are null because this is not a subscription."
+      },
+      {
+        "name": "Educational macOS licence",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 macOS major-version licence; education eligibility required.",
+        "notes": "One-time educational licence is sold, but its current checkout price was not exposed on the accessible public page."
+      },
+      {
+        "name": "Standard Windows licence",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 Windows major-version licence; usable on multiple computers owned by the licensee or household.",
+        "notes": "One-time purchase: $59.99. The recurring-price fields are null because this is not a subscription."
+      },
+      {
+        "name": "Educational Windows licence",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 Windows major-version licence; education eligibility required.",
+        "notes": "One-time educational licence is sold, but its current checkout price was not exposed on the accessible public page."
+      },
+      {
+        "name": "iOS/iPadOS app",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1 universal iPhone/iPad purchase.",
+        "notes": "One-time App Store purchase: $23.99; sold separately from the desktop licences."
+      },
+      {
+        "name": "macOS + Windows bundle",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2 desktop OS licences: 1 macOS licence and 1 Windows licence.",
+        "notes": "One-time bundle is sold, but its current checkout price was not exposed on the accessible public page."
+      }
+    ],
+    "freeTierCaps": "no free tier; trial lasts 30 days of actual use",
+    "billingTerms": "one-time perpetual licences only; no monthly or annual subscription plan",
+    "priceChanges": [],
+    "hiddenCosts": "macOS, Windows and iOS/iPadOS are separate purchases unless the desktop bundle is bought; paid major-version upgrades may be required; Dropbox is required for supported desktop-to-iOS sync",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.literatureandlatte.com/store/scrivener",
+      "https://www.literatureandlatte.com/how-our-licensing-works",
+      "https://www.literatureandlatte.com/scrivener/overview"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

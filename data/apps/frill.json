@@ -17,7 +17,49 @@
     "notes": "Official Startup monthly tier.",
     "native": "25 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Startup",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "50 active ideas; 1 survey of each supported type; unlimited admins, widgets and tracked users.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 49,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited ideas; 3 surveys of each supported type; unlimited admins, widgets and tracked users.",
+        "notes": null
+      },
+      {
+        "name": "Growth",
+        "monthly": 149,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited ideas and surveys; Privacy, Surveys and White Labeling included.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": 349,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited ideas and surveys; SOC 2 controls, audit log, IP allowlisting and dedicated support.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "Monthly + annual; exact annual-equivalent rates were not exposed on the checked page. A 14-day trial is offered without a card.",
+    "priceChanges": [],
+    "hiddenCosts": "Privacy, Surveys and White Labeling are paid add-ons on lower tiers; their individual prices were not publicly stated.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://frill.co/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

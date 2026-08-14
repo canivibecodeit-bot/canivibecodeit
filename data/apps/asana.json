@@ -17,7 +17,57 @@
     "notes": "Official Starter monthly seat price.",
     "native": "13.49 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Personal",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 2 users; unlimited tasks, projects, messages, activity logs and file storage; 100 MB maximum per file",
+        "notes": "Free forever."
+      },
+      {
+        "name": "Starter",
+        "monthly": 13.49,
+        "annualPerMonth": 10.99,
+        "per": "user",
+        "limits": "Unlimited users, automations and free guests; 50,000 AI Studio Basic credits per billing account/month",
+        "notes": null
+      },
+      {
+        "name": "Advanced",
+        "monthly": 30.49,
+        "annualPerMonth": 24.99,
+        "per": "user",
+        "limits": "Unlimited users/automations/free guests; 75,000 AI Studio Basic credits per billing account/month; portfolios, goals and workload",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats and controls; 200,000 AI Studio Basic credits per billing account/month; SAML, SCIM and service accounts",
+        "notes": "Custom quote."
+      },
+      {
+        "name": "Enterprise+",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Enterprise features plus advanced compliance, audit and data-control capabilities",
+        "notes": "Custom quote; exact AI-credit allowance was not separately exposed."
+      }
+    ],
+    "freeTierCaps": "Up to 2 users, unlimited tasks/projects/messages/activity logs/storage, and 100 MB per uploaded file",
+    "billingTerms": "monthly + annual; paid subscriptions auto-renew and standard purchases are non-refundable",
+    "priceChanges": [],
+    "hiddenCosts": "Seat quantities are sold in increments: 2–5 by 1, through 30 by 5, through 100 by 10, through 500 by 25, then by 50. Timesheets & Budgets costs $5.99/user/month billed annually. AI Studio Plus is separately paid and AI Studio Pro is annual-only; public prices were not exposed. Taxes may apply.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://asana.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

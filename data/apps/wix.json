@@ -14,7 +14,59 @@
     "source": "https://www.wix.com/plans",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official plan URL checked; 2026 public coverage lists Core around $29/month annual-effective, with monthly pricing/promos varying."
+    "notes": "Official plan URL checked; 2026 public coverage lists Core around $29/month annual-effective, with monthly pricing/promos varying.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "Up to 999 free sites; each site has 500 MB storage and 1 GB bandwidth on a wixsite.com URL, with Wix branding; no custom domain or online payments",
+        "notes": "Free sites are indefinite and include hosting, templates, CMS and basic business tools."
+      },
+      {
+        "name": "Light",
+        "monthly": 24,
+        "annualPerMonth": 17,
+        "per": "workspace",
+        "limits": "1 site; 2 GB storage; 2 site collaborators; custom domain and Wix-branding removal; no payment acceptance",
+        "notes": "Per-site subscription. The annual plan is prepaid; a domain voucher is included for the first year."
+      },
+      {
+        "name": "Core",
+        "monthly": 36,
+        "annualPerMonth": 29,
+        "per": "workspace",
+        "limits": "1 site; 50 GB storage; 5 collaborators; payments, basic ecommerce, scheduling and basic marketing suite",
+        "notes": "Per-site subscription."
+      },
+      {
+        "name": "Business",
+        "monthly": 46,
+        "annualPerMonth": 39,
+        "per": "workspace",
+        "limits": "1 site; 100 GB storage; 10 collaborators; standard ecommerce, scheduling and marketing suite",
+        "notes": "Per-site subscription."
+      },
+      {
+        "name": "Business Elite",
+        "monthly": 172,
+        "annualPerMonth": 159,
+        "per": "workspace",
+        "limits": "1 site; unlimited storage; 100 collaborators; advanced ecommerce, marketing, scheduling and developer-platform features",
+        "notes": "Per-site subscription."
+      }
+    ],
+    "freeTierCaps": "Up to 999 free sites; 500 MB storage and 1 GB bandwidth per site; wixsite.com URL and Wix branding; no custom domain or online payments",
+    "billingTerms": "free + monthly, annual and longer paid terms; annual prices are monthly equivalents charged upfront; 14-day money-back guarantee",
+    "priceChanges": [],
+    "hiddenCosts": "Each paid plan covers 1 site; domain renewal after the first-year voucher, business email, email-marketing allowances and many App Market products cost extra; payment processing, cross-border, currency-conversion, refund and chargeback fees apply by country; taxes are extra",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.wix.com/plans",
+      "https://www.wix.com/blog/is-wix-free",
+      "https://support.wix.com/en/article/wix-payments-service-fees"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

@@ -17,7 +17,42 @@
     "notes": "Annual-equivalent Personal price; monthly billing may differ.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 website, 50 pages, Tilda subdomain and roughly 100 core blocks; no custom domain",
+        "notes": "The comparison table supplies the 50-page cap; the main pricing page only says 1 website."
+      },
+      {
+        "name": "Personal",
+        "monthly": 15,
+        "annualPerMonth": 10,
+        "per": "workspace",
+        "limits": "1 website, 1,000 pages, custom domain and full block library",
+        "notes": "Annual subscribers can remove the Made on Tilda label."
+      },
+      {
+        "name": "Business",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "workspace",
+        "limits": "5 websites, 1,000 pages per website, custom domains, source-code export and API access",
+        "notes": "Annual subscribers can remove the Made on Tilda label."
+      }
+    ],
+    "freeTierCaps": "1 website with 50 pages on a Tilda subdomain; about 100 core blocks and no custom-domain connection",
+    "billingTerms": "monthly + annual; annual prices are effective monthly rates paid upfront",
+    "priceChanges": [],
+    "hiddenCosts": "Custom domains are not included; sending newsletters uses a separate Mailchimp or SendGrid account. Code export is restricted to Business, and the branding-removal option requires annual billing.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://tilda.cc/pricing/",
+      "https://tilda.cc/pricing-compare/"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

@@ -17,7 +17,53 @@
     "notes": "Sold as one-time platform-specific licences; canonical monthly amount is null.",
     "native": "one-time",
     "kind": "one-time",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "iOS",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited recipes and Paprika Cloud Sync after purchase.",
+        "notes": "One-time $4.99 purchase; sold separately from macOS, Windows, and Android."
+      },
+      {
+        "name": "macOS",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited recipes and Paprika Cloud Sync after purchase.",
+        "notes": "One-time $29.99 purchase; sold separately from iOS, Windows, and Android."
+      },
+      {
+        "name": "Windows",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited recipes and Paprika Cloud Sync; licence covers up to 5 PCs.",
+        "notes": "One-time $29.99 purchase; permanent trial is limited to 50 recipes and has no cloud sync."
+      },
+      {
+        "name": "Android unlock",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited recipes and Paprika Cloud Sync after in-app unlock.",
+        "notes": "One-time in-app unlock; the current Google Play listing does not expose the USD in-app-purchase amount. Paprika's official launch material stated $4.99, but that historical amount is not treated as a verified current price."
+      }
+    ],
+    "freeTierCaps": "Android and Windows can be used indefinitely with up to 50 recipes and no Paprika Cloud Sync; iOS and macOS require purchase.",
+    "billingTerms": "one-time purchase per platform; no monthly or annual plan and no single cross-platform desktop licence",
+    "priceChanges": [],
+    "hiddenCosts": "Each platform is a separate purchase. The currently exposed US prices total $64.97 for iOS, macOS, and Windows before the Android unlock, whose live USD amount is not publicly shown.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.paprikaapp.com/",
+      "https://www.paprikaapp.com/windows/",
+      "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868",
+      "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222628?mt=12",
+      "https://play.google.com/store/apps/details?id=com.hindsightlabs.paprika.android.v3"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

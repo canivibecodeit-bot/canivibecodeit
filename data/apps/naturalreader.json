@@ -6,18 +6,86 @@
   "category": "voice-ai",
   "subcategory": "synthetic voice, dubbing and AI avatars",
   "tagline": "Read user-provided text and documents aloud with a small set of licensed or local voices",
-  "priceMonthly": 9.99,
+  "priceMonthly": 13.9,
   "pricing": {
-    "plan": "Personal",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://naturalreaders.com/online/",
-    "checkedOn": "2026-07-31",
+    "plan": "Lite",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://help.naturalreaders.com/en/articles/8854700-plans-pricing-personal-version",
+    "checkedOn": "2026-08-12",
     "confidence": "medium",
     "notes": "Typical Personal monthly rate.",
-    "native": "9.99 USD",
+    "native": "13.9 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited system Free Voices; 20,000 Lite-voice characters/day; 4,000 shared Plus/Cloned characters/day; no MP3 conversion or OCR.",
+        "notes": null
+      },
+      {
+        "name": "Lite",
+        "monthly": 13.9,
+        "annualPerMonth": 6.58,
+        "per": "user",
+        "limits": "Unlimited Lite listening; 1,000,000 Lite-voice MP3 characters/month; no Plus/Pro voices or voice cloning.",
+        "notes": "Annual total is $79."
+      },
+      {
+        "name": "Plus",
+        "monthly": 20.9,
+        "annualPerMonth": 9.92,
+        "per": "user",
+        "limits": "500,000 shared Plus/Cloned listening characters/day; 1,000,000 Lite MP3 characters/month + 1,000,000 shared Plus/Cloned MP3 characters/month; clone up to 2 voices.",
+        "notes": "Annual total is $119."
+      },
+      {
+        "name": "Pro",
+        "monthly": 25.9,
+        "annualPerMonth": 13.25,
+        "per": "user",
+        "limits": "500,000 shared Plus/Cloned/Pro listening characters/day; 1,000,000 Lite MP3 characters/month + 1,000,000 shared premium MP3 characters/month; clone up to 2 voices.",
+        "notes": "Annual total is $159."
+      },
+      {
+        "name": "Lite EDU",
+        "monthly": null,
+        "annualPerMonth": 49.92,
+        "per": "flat",
+        "limits": "Annual packages: 50 users $599; 100 $700; 150 $800; 200 $900; 250 $1,000; 500 $1,800; 1,000 $2,500; 1,500 $2,900; 2,000 $3,300.",
+        "notes": "Annual-only; price field is the effective monthly cost of the 50-user starting package, not a per-user rate."
+      },
+      {
+        "name": "Plus EDU",
+        "monthly": null,
+        "annualPerMonth": 24.92,
+        "per": "flat",
+        "limits": "Annual packages: 5 users $299; 10 $499; 20 $899; 30 $1,200; 40 $1,400; 50 $1,500; above 50 starts at $25/user/year.",
+        "notes": "Annual-only; price field is the effective monthly cost of the 5-user starting package."
+      },
+      {
+        "name": "Site License",
+        "monthly": null,
+        "annualPerMonth": 275,
+        "per": "flat",
+        "limits": "Minimum 2,000 enrolled users; starts at $3,300/year.",
+        "notes": "Annual-only; pricing is based on total enrollment."
+      }
+    ],
+    "freeTierCaps": "unlimited system voices; 20,000 Lite-voice characters/day; 4,000 Plus/Cloned characters/day; no MP3 or OCR",
+    "billingTerms": "individual plans are monthly + annual; EDU and Site License plans are annual-only",
+    "priceChanges": [],
+    "hiddenCosts": "Audio made under Personal/EDU plans is licensed for personal use only; commercial rights require the separately billed Commercial AI Voice Generator. App Store/Google Play prices, taxes, and regional fees can differ.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://help.naturalreaders.com/en/articles/8854700-plans-pricing-personal-version",
+      "https://help.naturalreaders.com/en/articles/8823770-voices-languages-and-tts-limits-personal-version",
+      "https://naturalreaders.com/online/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

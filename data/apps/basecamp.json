@@ -17,7 +17,41 @@
     "notes": "Official Plus per-user monthly tier.",
     "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "1 project, 1 GB storage, up to 20 users",
+        "notes": "No time limit."
+      },
+      {
+        "name": "Pro",
+        "monthly": 15,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited projects, 500 GB storage; clients, guests and contractors are free, while employees are paid seats",
+        "notes": "Monthly billing only; 30-day trial."
+      },
+      {
+        "name": "Pro Unlimited",
+        "monthly": null,
+        "annualPerMonth": 299,
+        "per": "flat",
+        "limits": "Unlimited users/projects, 5 TB storage and priority support",
+        "notes": "Annual-only plan billed $3,588/year; 60-day trial."
+      }
+    ],
+    "freeTierCaps": "1 project, 1 GB storage and up to 20 users",
+    "billingTerms": "Free + Pro monthly only + Pro Unlimited annual only; trials require no card and do not auto-charge",
+    "priceChanges": [],
+    "hiddenCosts": "On Pro, every employee is a $15/month seat; only clients/guests/contractors are free. Optional Timesheet, Admin Pro Pack and each extra 1 TB of storage cost $50/month apiece. Pro Unlimited requires the full annual commitment, though cancellation refunds unused annual time pro rata.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://basecamp.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

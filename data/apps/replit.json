@@ -14,7 +14,50 @@
     "source": "https://replit.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official pricing page and 2026 updates checked; public page shows Core around $20/month annual-effective and $25/month monthly depending toggle."
+    "notes": "Official pricing page and 2026 updates checked; public page shows Core around $20/month annual-effective and $25/month monthly depending toggle.",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "1 published project; free daily Agent credits are provided, but the numeric daily amount is not publicly stated.",
+        "notes": null
+      },
+      {
+        "name": "Core",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "$25 in monthly usage credits; 5 collaborators; 2 parallel agents.",
+        "notes": "Annual price is the published monthly equivalent."
+      },
+      {
+        "name": "Pro",
+        "monthly": 100,
+        "annualPerMonth": 95,
+        "per": "user",
+        "limits": "$100 in monthly usage credits; 15 collaborators; 50 viewers; 10 parallel agents; 28-day rollback history.",
+        "notes": "Annual price is the published monthly equivalent."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom seats, credits, controls, support and contract terms.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "1 published project plus a daily Agent-credit grant whose exact numeric size is not publicly stated",
+    "billingTerms": "monthly and annual for Core and Pro; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Agent work, deployments, compute, storage and other resources draw from the included dollar credit and then become pay as you go; current resource rates can change, and taxes are extra.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://replit.com/pricing",
+      "https://docs.replit.com/billing/about-billing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

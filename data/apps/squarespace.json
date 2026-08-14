@@ -14,7 +14,52 @@
     "source": "https://www.squarespace.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "medium",
-    "notes": "Official pricing checked; 2026 public coverage lists Basic around $25/month monthly and lower annual pricing."
+    "notes": "Official pricing checked; 2026 public coverage lists Basic around $25/month monthly and lower annual pricing.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 25,
+        "annualPerMonth": 16,
+        "per": "workspace",
+        "limits": "1 website, up to 1,000 pages, 2 contributors, unlimited products, 30 minutes video storage; 2% commerce fee and 7% digital-product fee",
+        "notes": "Current Website-plan lineup; prices are the US prices shown by the live pricing selector. Annual billing is charged upfront."
+      },
+      {
+        "name": "Core",
+        "monthly": 36,
+        "annualPerMonth": 23,
+        "per": "workspace",
+        "limits": "1 website, up to 1,000 pages, unlimited contributors and products, 5 hours video storage; 0% commerce fee and 5% digital-product fee",
+        "notes": "Includes premium integrations and custom code."
+      },
+      {
+        "name": "Plus",
+        "monthly": 56,
+        "annualPerMonth": 39,
+        "per": "workspace",
+        "limits": "1 website, up to 1,000 pages, unlimited contributors and products, 50 hours video storage; 0% commerce fee and 1% digital-product fee",
+        "notes": null
+      },
+      {
+        "name": "Advanced",
+        "monthly": 139,
+        "annualPerMonth": 99,
+        "per": "workspace",
+        "limits": "1 website, up to 1,000 pages, unlimited contributors, products and video storage; 0% commerce and digital-product fees",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier; 14-day private website trial with no credit card, up to 5 contributors during the trial",
+    "billingTerms": "monthly + annual; every website is a separate subscription and annual plans are billed upfront",
+    "priceChanges": [],
+    "hiddenCosts": "Basic adds a 2% commerce fee and 7% digital-product fee; Core adds 5% on digital products and Plus 1%, all on top of payment processing. Each site is billed separately; the free domain and one Core+ Google Workspace inbox last only the first year, while domains, extra email users, Acuity Scheduling and Email Campaigns renew separately.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.squarespace.com/pricing",
+      "https://support.squarespace.com/hc/en-us/articles/206536797-Choosing-the-right-Squarespace-plan",
+      "https://support.squarespace.com/hc/en-us/articles/206536827-Starting-a-Squarespace-trial-site",
+      "https://support.squarespace.com/hc/en-us/articles/27853679334157-Transaction-fees-and-payment-processing-rates"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

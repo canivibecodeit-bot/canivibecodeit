@@ -6,18 +6,87 @@
   "category": "photo-editing",
   "subcategory": "photo organization, culling and editing",
   "tagline": "Run local duplicate detection and transparent culling heuristics over a photo folder",
-  "priceMonthly": 24.99,
+  "priceMonthly": 15,
   "pricing": {
-    "plan": "Pro",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://aftershoot.com/pricing",
-    "checkedOn": "2026-07-31",
+    "plan": "Select",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://account.aftershoot.com/pricing",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Pro monthly subscription.",
-    "native": "24.99 USD",
+    "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Select",
+        "monthly": 15,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited photo culling; 1 user.",
+        "notes": "Annual plan is $120 prepaid."
+      },
+      {
+        "name": "Edit",
+        "monthly": 35,
+        "annualPerMonth": 30,
+        "per": "user",
+        "limits": "Unlimited photo editing; 1 user.",
+        "notes": "Annual plan is $360 prepaid."
+      },
+      {
+        "name": "Retouch",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Unlimited supported retouching; 1 user.",
+        "notes": "Annual plan is $240 prepaid."
+      },
+      {
+        "name": "Select + Edit",
+        "monthly": 50,
+        "annualPerMonth": 40,
+        "per": "user",
+        "limits": "Unlimited culling and editing; 1 user.",
+        "notes": "Annual plan is $480 prepaid."
+      },
+      {
+        "name": "Select + Retouch",
+        "monthly": 40,
+        "annualPerMonth": 30,
+        "per": "user",
+        "limits": "Unlimited culling and supported retouching; 1 user.",
+        "notes": "Annual plan is $360 prepaid."
+      },
+      {
+        "name": "Edit + Retouch",
+        "monthly": 60,
+        "annualPerMonth": 50,
+        "per": "user",
+        "limits": "Unlimited editing and supported retouching; 1 user.",
+        "notes": "Annual plan is $600 prepaid."
+      },
+      {
+        "name": "Complete",
+        "monthly": 55,
+        "annualPerMonth": 45,
+        "per": "user",
+        "limits": "Unlimited culling, editing and supported retouching; 1 user.",
+        "notes": "Annual plan is $540 prepaid."
+      }
+    ],
+    "freeTierCaps": "no free tier; 30-day full-access trial with no card required",
+    "billingTerms": "monthly + annual; subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "An additional custom AI profile is $7/month or $70/year; keeping custom profiles after canceling Edit/Retouch costs $4/month; a subscription can be paused only once per year for up to 3 months.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://account.aftershoot.com/pricing",
+      "https://aftershoot.com/blog/aftershoot-pricing-tiers/",
+      "https://aftershoot.com/blog/the-workflow-complete/",
+      "https://aftershoot.com/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

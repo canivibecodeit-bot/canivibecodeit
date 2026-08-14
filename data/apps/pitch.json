@@ -17,7 +17,58 @@
     "notes": "Advertised annual-equivalent seat price; monthly billing is higher.",
     "native": "20 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1–5 members; 100 one-time AI credits; 2 external guests; 10 GB total storage; 1 teamspace.",
+        "notes": null
+      },
+      {
+        "name": "Plus",
+        "monthly": 12,
+        "annualPerMonth": 10,
+        "per": "flat",
+        "limits": "Maximum 1 member; 500 AI credits/month; 5 external guests; 10 GB storage.",
+        "notes": null
+      },
+      {
+        "name": "Team",
+        "monthly": 18,
+        "annualPerMonth": 15,
+        "per": "user",
+        "limits": "1–25 members; 500 AI credits per seat/month pooled across the workspace; 25 advanced links; 3 teamspaces; 2 rooms; 25 guests; 10 GB/member.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 24,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "1–200 members; 750 AI credits per seat/month pooled across the workspace; unlimited advanced links, teamspaces, rooms and guests; 10 GB/member.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "For 30+ seats with SSO/SCIM, invoicing and custom support; price is not public.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "1–5 members, 100 one-time AI credits, 2 guests, 10 GB total storage and 1 teamspace.",
+    "billingTerms": "monthly + annual (-17%)",
+    "priceChanges": [],
+    "hiddenCosts": "Member caps count paid and free roles. AI credits renew with the subscription and are pooled across the workspace, so heavy users can consume the team's allowance.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://pitch.com/pricing/usd",
+      "https://pitch.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

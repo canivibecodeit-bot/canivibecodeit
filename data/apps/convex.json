@@ -17,7 +17,50 @@
     "source": "https://convex.dev/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "medium",
-    "notes": "The pricing model is not safely comparable as one fixed monthly USD amount. Review the official source before publication."
+    "notes": "The pricing model is not safely comparable as one fixed monthly USD amount. Review the official source before publication.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1-6 developers; 40 deployments; 0.5 GB database; 1 GB database I/O/month; 1M function calls/month; 20 action GB-hours; 1 GB files and 1 GB egress.",
+        "notes": "S16 limits include 1,000 concurrent sessions, 16 concurrent queries and 64 concurrent actions."
+      },
+      {
+        "name": "Starter",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Same free included quotas and 1-6 developers/40 deployments, then pay as you go above them.",
+        "notes": "No base subscription, but this is not an unlimited free tier."
+      },
+      {
+        "name": "Professional",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1-20 developers; 300 deployments; 25M function calls; 250 action GB-hours; 50 GB database storage and I/O; 100 GB files; 50 GB egress.",
+        "notes": "S256 resource class."
+      },
+      {
+        "name": "Business / Enterprise",
+        "monthly": 2500,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "$2,500 monthly minimum with custom included allocations and dedicated terms.",
+        "notes": "Annual commitment discounts are available."
+      }
+    ],
+    "freeTierCaps": "1-6 developers, 40 deployments, 0.5 GB database, 1 GB database I/O/month, 1M function calls/month, 20 action GB-hours, 1 GB files and 1 GB egress",
+    "billingTerms": "Free and Starter have no base fee; Professional is monthly; annual commitment discounts are limited to Business/Enterprise",
+    "priceChanges": [],
+    "hiddenCosts": "Overages meter each resource separately. Starter rates include $2.20/M calls, $0.33/action-GB-hour, $0.22/GB database storage, $0.033/GB files and $0.132/GB egress; Professional rates are lower. EU-region usage is priced at 1.3x US.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.convex.dev/pricing",
+      "https://docs.convex.dev/production/state/limits"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,41 @@
     "notes": "Typical Starter monthly package; seat and word limits apply.",
     "native": "135 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 160,
+        "annualPerMonth": 135,
+        "per": "workspace",
+        "limits": "10 collaborators; unlimited projects/files; price rises across hosted-word bands (monthly table lists $160, $260, $380 and $510)",
+        "notes": "Lowest published band shown; annual bands are $135, $215, $320 and $425 per month."
+      },
+      {
+        "name": "Growth",
+        "monthly": 236,
+        "annualPerMonth": 200,
+        "per": "workspace",
+        "limits": "30 collaborators; annual plan includes 60,000 AI words/year; price rises across hosted-word bands up to $2,465 monthly",
+        "notes": "Lowest published band shown; annual bands start at $200/mo and rise to $2,050/mo."
+      },
+      {
+        "name": "Enterprise+",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "100 collaborators; annual plan includes 300,000 AI words/year; up to 6 TB/year Transifex Live usage",
+        "notes": "Contact sales; malformed placeholder prices on page were not treated as real."
+      }
+    ],
+    "freeTierCaps": "no general free tier; free trial only, plus a separate free program for qualifying non-commercial open-source projects",
+    "billingTerms": "monthly + annual (2 months free)",
+    "priceChanges": [],
+    "hiddenCosts": "Base price scales by hosted-word band; AI capacity is a paid add-on from $84/month for Starter and monthly subscribers; LexiQA and some support/onboarding capabilities are add-ons.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.transifex.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

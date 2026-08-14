@@ -17,7 +17,37 @@
     "notes": "Typical monthly subscription; promotions and lifetime offers are common.",
     "native": "15.99 USD",
     "kind": "one-time",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Monthly",
+        "monthly": 19.99,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 user; access to 25 languages; 500+ flashcard topics; billed monthly",
+        "notes": null
+      },
+      {
+        "name": "Yearly",
+        "monthly": null,
+        "annualPerMonth": 13.25,
+        "per": "user",
+        "limits": "1 user; access to 25 languages; 500+ flashcard topics; billed $159 yearly",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual; auto-renewing; 14-day money-back guarantee rather than a permanent free tier",
+    "priceChanges": [],
+    "hiddenCosts": "Licenses are for one user and may not be shared; lifetime offers can appear separately by promotion, but no standard lifetime tier was displayed on the current US buy page.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.rosettastone.com/buy",
+      "https://www.rosettastone.com/membership",
+      "https://support.rosettastone.com/managing-your-subscription/",
+      "https://support.rosettastone.com/multiple-users-on-one-subscription/",
+      "https://support.rosettastone.com/about-our-lifetime-subscription/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

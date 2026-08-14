@@ -6,18 +6,36 @@
   "category": "personal-finance",
   "subcategory": "budgeting, invoicing and small-business finance",
   "tagline": "Import account exports and build spending plans, watchlists, and reports",
-  "priceMonthly": 5.99,
+  "priceMonthly": 3.99,
   "pricing": {
-    "plan": "Simplifi",
-    "basis": "monthly",
+    "plan": "Quicken Simplifi",
+    "basis": "annual billing, per month",
     "unit": "flat",
-    "source": "https://quicken.com/products/simplifi",
-    "checkedOn": "2026-07-31",
+    "source": "https://www.quicken.com/products/simplifi/",
+    "checkedOn": "2026-08-13",
     "confidence": "medium",
     "notes": "Typical standard monthly amount before promotions.",
-    "native": "5.99 USD",
+    "native": "3.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Quicken Simplifi",
+        "monthly": null,
+        "annualPerMonth": 3.99,
+        "per": "flat",
+        "limits": "Account aggregation, spending plan, reports, investments, projected cash flow and retirement planner; sharing with 1 additional person",
+        "notes": "First-year promotional monthly equivalent, billed annually; crossed-out regular equivalent is $6.99/month. Offer ends 2026-09-11."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "annual only; full annual charge upfront; first-year promotional pricing",
+    "priceChanges": [],
+    "hiddenCosts": "Auto-renews yearly at the then-current rate. The displayed $3.99/month equivalent is a new-member first-year offer, not the renewal rate; exact annual checkout total may differ from 12× the displayed equivalent.",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.quicken.com/products/simplifi/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

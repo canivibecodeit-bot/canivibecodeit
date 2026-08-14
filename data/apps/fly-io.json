@@ -17,7 +17,25 @@
     "notes": "No stable monthly plan; pricing is usage based.",
     "native": "usage-based",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Pay as you go",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Per-second Machines billing; published 30-day examples include shared-cpu-1x at $2.02 for 256 MB, $3.32 for 512 MB, $5.92 for 1 GB and $11.11 for 2 GB.",
+        "notes": "Additional published examples: shared-cpu-2x from $4.04/month, 4x from $8.08, 6x from $12.11 and 8x from $16.15, depending on RAM."
+      }
+    ],
+    "freeTierCaps": "no free tier for new organizations; legacy free allowances may survive only on older accounts",
+    "billingTerms": "monthly pay as you go with per-second resource billing; no annual plan",
+    "priceChanges": [],
+    "hiddenCosts": "RAM above the bundled amount is roughly $5/GB per 30 days; volumes, snapshots, dedicated IPs and network egress are separate. Optional support costs $29/month Standard, $199/month Premium or at least $2,500/month Enterprise; Fly Kubernetes starts at $75/cluster/month plus resources.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://fly.io/docs/about/pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

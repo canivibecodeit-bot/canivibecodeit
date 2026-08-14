@@ -17,7 +17,34 @@
     "notes": "Typical subscription price for the current Reeder release; storefront pricing should be rechecked.",
     "native": "1 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 10 feeds; no shared feeds; OPML import can be blocked by the 10-feed cap.",
+        "notes": null
+      },
+      {
+        "name": "Reeder subscription",
+        "monthly": 1,
+        "annualPerMonth": 0.83,
+        "per": "user",
+        "limits": "Unlimited personal feeds across supported Apple devices; public shared feeds expose up to the latest 50 items.",
+        "notes": "Annual total is $10."
+      }
+    ],
+    "freeTierCaps": "10 feeds; no shared feeds",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "Reeder Classic is a separate product and purchase; its current one-time price was not exposed on the live Reeder subscription page",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://reederapp.com/",
+      "https://reederapp.com/help/"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

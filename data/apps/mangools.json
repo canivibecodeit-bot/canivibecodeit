@@ -17,7 +17,45 @@
     "notes": "Official Basic monthly subscription.",
     "native": "49 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 49,
+        "annualPerMonth": 29.9,
+        "per": "workspace",
+        "limits": "100 keyword lookups/24 hours; up to 200 imported keywords per lookup; 200 tracked keywords; weekly rank updates.",
+        "notes": "Usage limits are shared with added subusers."
+      },
+      {
+        "name": "Premium",
+        "monthly": 69,
+        "annualPerMonth": 44.9,
+        "per": "workspace",
+        "limits": "500 keyword lookups/24 hours; up to 700 imported keywords per lookup; 700 tracked keywords; weekly rank updates.",
+        "notes": "Usage limits are shared with added subusers."
+      },
+      {
+        "name": "Agency",
+        "monthly": 129,
+        "annualPerMonth": 89.9,
+        "per": "workspace",
+        "limits": "1,200 keyword lookups/24 hours; up to 700 imported keywords per lookup; 1,500 tracked keywords; daily rank updates.",
+        "notes": "Usage limits are shared with added subusers."
+      }
+    ],
+    "freeTierCaps": "5 keyword lookups/24 hours (15 related + 5 competitor keywords per lookup); a separate 10-day trial includes 10 tracked keywords",
+    "billingTerms": "monthly + annual (annual saves up to 35%)",
+    "priceChanges": [],
+    "hiddenCosts": "The optional AI Search Watcher PRO bundle adds $12/month or $7.80/month on annual billing; extra seats are available, but the current public seat price is not shown.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://mangools.com/plans-and-pricing",
+      "https://mangools.com/faq",
+      "https://mangools.com/kwfinder/features/import-keywords/",
+      "https://mangools.com/blog/serpwatcher-guide/",
+      "https://mangools.com/kwfinder/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

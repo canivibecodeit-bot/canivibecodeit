@@ -17,7 +17,25 @@
     "notes": "Pricing is sales-led; canonical price is null.",
     "native": "custom",
     "kind": "custom",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Custom",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom crawl volume, projects, data retention, modules, support, and security; no public numeric allowance.",
+        "notes": "Modules include Analyze, Monitor, Protect, and Impact."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "custom quote; public monthly and annual rates are not published",
+    "priceChanges": [],
+    "hiddenCosts": "Price scales with URL volume and selected modules.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.lumar.io/pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

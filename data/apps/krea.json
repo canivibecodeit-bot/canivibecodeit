@@ -6,18 +6,78 @@
   "category": "generative-media",
   "subcategory": "AI image and video generation",
   "tagline": "Manage real-time and batch generation workflows from user-owned models or APIs",
-  "priceMonthly": 10,
+  "priceMonthly": 9,
   "pricing": {
     "plan": "Basic",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://krea.ai/pricing",
-    "checkedOn": "2026-07-31",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://www.krea.ai/pricing",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Basic monthly tier.",
-    "native": "10 USD",
+    "native": "9 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "100 compute units/day; full real-time models and limited image, video, 3D, lipsync, upscale and LoRA access.",
+        "notes": null
+      },
+      {
+        "name": "Basic",
+        "monthly": 9,
+        "annualPerMonth": 5.4,
+        "per": "user",
+        "limits": "5,000 compute units/month; selected video models; LoRA training with up to 50 images; upscale to 22K.",
+        "notes": "Annual-effective value is calculated from the official 'Yearly -40% off' label."
+      },
+      {
+        "name": "Pro",
+        "monthly": 35,
+        "annualPerMonth": 21,
+        "per": "user",
+        "limits": "20,000 compute units/month; all video models; Nodes/Apps workflow automation and Nodes Agent.",
+        "notes": "Annual-effective value is calculated from the official 'Yearly -40% off' label."
+      },
+      {
+        "name": "Max",
+        "monthly": 105,
+        "annualPerMonth": 63,
+        "per": "user",
+        "limits": "60,000 compute units/month at the displayed selection; unlimited relaxed generations; LoRA fine-tuning with up to 2,000 files.",
+        "notes": "Other compute selections from 40,000 to 100,000 change the price."
+      },
+      {
+        "name": "Business",
+        "monthly": 200,
+        "annualPerMonth": 120,
+        "per": "workspace",
+        "limits": "80,000 compute units/month at the displayed selection; up to 50 seats; LoRA training with up to 20,000 images; unlimited relaxed generation.",
+        "notes": "Other compute selections from 20,000 to 1.5 million change the price."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom compute packages, spend controls, SLA, audit logs and support.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "100 compute units per day.",
+    "billingTerms": "monthly + annual (-40% shown on the yearly toggle)",
+    "priceChanges": [],
+    "hiddenCosts": "Monthly subscription compute does not roll over. One-time compute packs expire after 90 days. Max and Business prices rise with the selected compute allowance; annual Business/Enterprise arrangements can roll unused compute for up to 12 months.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.krea.ai/pricing",
+      "https://www.krea.ai/",
+      "https://docs.krea.ai/user-guide/compute-units"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

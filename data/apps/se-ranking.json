@@ -6,18 +6,53 @@
   "category": "seo-marketing",
   "subcategory": "keyword research, backlinks and rank tracking",
   "tagline": "Track an owned keyword set and combine it with user-supplied audit and backlink files",
-  "priceMonthly": 65,
+  "priceMonthly": 129,
   "pricing": {
-    "plan": "Essential",
+    "plan": "Core",
     "basis": "monthly",
     "unit": "flat",
-    "source": "https://seranking.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://seranking.com/subscription.html",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Essential monthly rate; keyword count and check frequency change price.",
-    "native": "65 USD",
+    "native": "129 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Core",
+        "monthly": 129,
+        "annualPerMonth": 103.2,
+        "per": "workspace",
+        "limits": "10 projects; 1 manager seat; 2,000 daily tracked keywords; 100 daily AI prompts; 5 GEO domains; 250,000 audit pages/month; 25,000 API credits; 10 reports; 25 articles.",
+        "notes": null
+      },
+      {
+        "name": "Growth",
+        "monthly": 279,
+        "annualPerMonth": 223.2,
+        "per": "workspace",
+        "limits": "30 projects; 3 manager seats; 5,000 daily tracked keywords; 250 daily AI prompts; 15 GEO domains; 2,000,000 audit pages/month; 100,000 API credits; 30 reports; 50 articles.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom projects, seats, keywords, AI prompts, GEO domains, crawl pages, API credits, reports, and articles.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier (14-day no-card trial only)",
+    "billingTerms": "monthly + annual (20% lower on annual billing)",
+    "priceChanges": [],
+    "hiddenCosts": "Add-ons start at $16/month for seats, $22.40/month for extra Core keyword capacity, $32/month for Growth keyword capacity, $39.20/month for article capacity, and $18.40/month for extra locations.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://seranking.com/subscription.html",
+      "https://seranking.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

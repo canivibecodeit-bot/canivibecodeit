@@ -14,7 +14,88 @@
     "source": "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official OpenAI help/pricing checked 2026-07-30; ChatGPT Plus remains listed at $20/month."
+    "notes": "Official OpenAI help/pricing checked 2026-07-30; ChatGPT Plus remains listed at $20/month.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "27K Instant context (about 12 pages); exact message, upload, image, voice, and research counts are variable and not published as fixed numbers.",
+        "notes": null
+      },
+      {
+        "name": "Go",
+        "monthly": 8,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "About 10× Free usage; 54K Instant context and up to 256K reasoning context.",
+        "notes": "Monthly only; may include ads."
+      },
+      {
+        "name": "Plus",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "54K Instant context; up to 256K reasoning context; 40 ChatGPT agent messages/month.",
+        "notes": null
+      },
+      {
+        "name": "Pro 5x",
+        "monthly": 100,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "5× Plus usage; 128K Instant context and up to 400K reasoning context.",
+        "notes": null
+      },
+      {
+        "name": "Pro 20x",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "20× Plus usage; 128K Instant context and up to 400K reasoning context; 400 ChatGPT agent messages/month.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 25,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Minimum 2 seats; 1 hour of Voice in Chat included; flexible credits available for advanced usage.",
+        "notes": "Annual rate is billed annually."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, controls, context, and flexible-credit allowance.",
+        "notes": "Custom annual contract."
+      },
+      {
+        "name": "Edu",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Institutional deployment; custom seats and usage.",
+        "notes": "Custom institutional contract."
+      }
+    ],
+    "freeTierCaps": "27K Instant context (about 12 pages); fixed message/upload/image limits are not publicly guaranteed",
+    "billingTerms": "individual plans are monthly only; Business is monthly or annual; Enterprise and Edu are custom contracts",
+    "priceChanges": [],
+    "hiddenCosts": "Business/Enterprise/Edu advanced usage can be metered through flexible credits. Published examples include extra Voice in Chat at 5 credits/minute and Voice in Work/Codex at about 6 credits/minute; Business seat additions can trigger proration/true-ups.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://chatgpt.com/pricing/?country=US",
+      "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus",
+      "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers",
+      "https://help.openai.com/en/articles/8792828-what-is-chatgpt-business",
+      "https://help.openai.com/en/articles/8792536-managing-billing-and-seats-in-chatgpt-business",
+      "https://help.openai.com/en/articles/11752874-chatgpt-agent",
+      "https://help.openai.com/en/articles/11487671-flexible-pricing-for-the-enterprise-edu-and-business-plans",
+      "https://openai.com/index/introducing-chatgpt-go/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

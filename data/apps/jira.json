@@ -6,19 +6,62 @@
   "category": "project-management",
   "subcategory": "software issue tracking and agile planning",
   "tagline": "Plan software work through backlogs, issues, sprints, workflows, and releases",
-  "priceMonthly": 9.05,
+  "priceMonthly": 7.91,
   "pricing": {
     "plan": "Standard",
-    "basis": "monthly per user",
+    "basis": "annual billing, per user per month",
     "unit": "per-seat",
     "source": "https://www.atlassian.com/software/jira/pricing",
-    "checkedOn": "2026-08-09",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Official Standard monthly seat price for one user; volume pricing lowers the per-user amount for larger teams.",
-    "native": "9.05 USD",
+    "native": "7.91 USD",
     "freeTier": "The Free plan covers up to 10 users with 2 GB of storage and 100 automation rule runs per month.",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Up to 10 users, 2 GB storage, 100 automation rule runs/month; unlimited goals, projects, tasks and forms",
+        "notes": null
+      },
+      {
+        "name": "Standard",
+        "monthly": null,
+        "annualPerMonth": 7.91,
+        "per": "user",
+        "limits": "Up to 100,000 users, 250 GB storage, 1,700 automation runs/month and 25 Rovo credits/user/month",
+        "notes": "Displayed annual effective price; monthly price is progressive and depends on user count, so no single monthly number was recorded."
+      },
+      {
+        "name": "Premium",
+        "monthly": null,
+        "annualPerMonth": 14.54,
+        "per": "user",
+        "limits": "Up to 100,000 users, unlimited storage, 1,000 automation runs per paid user/month and 70 Rovo credits/user/month",
+        "notes": "Displayed annual effective price; monthly price is progressive and depends on user count."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Annual custom plan with unlimited automation, up to 150 sites, 150 Rovo credits/user/month and Atlassian Guard Standard",
+        "notes": "Custom annual quote."
+      }
+    ],
+    "freeTierCaps": "Up to 10 users, 2 GB storage and 100 automation rule runs/month",
+    "billingTerms": "monthly + annual (annual saves up to 17%); Enterprise annual only; monthly pricing is progressive by user count",
+    "priceChanges": [],
+    "hiddenCosts": "The per-user rate changes with team size, so the bill is not a simple headline-price multiplication. Marketplace apps, Guard beyond included entitlements and other Atlassian products add cost. Rovo credits currently do not incur automatic overage charges; Atlassian says it will provide notice before changing that.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.atlassian.com/software/jira/pricing",
+      "https://www.atlassian.com/en/software/jira/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

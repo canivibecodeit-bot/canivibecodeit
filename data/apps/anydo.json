@@ -17,7 +17,54 @@
     "notes": "Typical Premium monthly rate; annual billing is lower.",
     "native": "7.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Personal",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "1.5 MB attachment limit; 1 priority tag; 5 Any.do Moment sessions/month; no numeric task/list cap published.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 7.99,
+        "annualPerMonth": 4.99,
+        "per": "user",
+        "limits": "Unlimited recurring tasks, reminders, color tags, and Moment sessions; larger attachments.",
+        "notes": null
+      },
+      {
+        "name": "Family",
+        "monthly": 9.99,
+        "annualPerMonth": 8.33,
+        "per": "flat",
+        "limits": "Up to 4 family members; up to 4 shared family boards.",
+        "notes": null
+      },
+      {
+        "name": "Workspace",
+        "monthly": 7.99,
+        "annualPerMonth": 4.99,
+        "per": "user",
+        "limits": "1 to unlimited members; unlimited boards; 100+ workflow templates.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "1.5 MB attachment limit; 1 priority tag; 5 Any.do Moment sessions/month; no numeric task/list cap published.",
+    "billingTerms": "monthly + annual; Family is flat for up to 4 members; Workspace is per member",
+    "priceChanges": [],
+    "hiddenCosts": "Workspace bills each member; Family is capped at 4 members and 4 shared boards.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.any.do/pricing",
+      "https://support.any.do/en/articles/8635977-any-do-subscription-plans-explained-free-premium-family-and-workspace",
+      "https://support.any.do/en/articles/9518334-upgrading-to-any-do-family",
+      "https://support.any.do/en/articles/9517093-upgrading-to-any-do-teams-workspace",
+      "https://support.any.do/en/articles/8635882-prioritize-your-day-with-any-do-moment",
+      "https://support.any.do/en/articles/8635897-adding-notes-files-to-personal-tasks"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

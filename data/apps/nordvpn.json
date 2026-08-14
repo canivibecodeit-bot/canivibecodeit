@@ -6,18 +6,52 @@
   "category": "security",
   "subcategory": "passwords, privacy and private networking",
   "tagline": "Configure a private tunnel to a user-owned server for personal remote access",
-  "priceMonthly": 12.99,
+  "priceMonthly": 14.69,
   "pricing": {
     "plan": "Basic",
     "basis": "monthly",
     "unit": "flat",
-    "source": "https://nordvpn.com/pricing",
-    "checkedOn": "2026-07-31",
+    "source": "https://nordvpn.com/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Typical month-to-month Basic price; long-term promotions are much lower.",
-    "native": "12.99 USD",
+    "native": "14.69 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 14.69,
+        "annualPerMonth": 5.39,
+        "per": "flat",
+        "limits": "10 devices; VPN plus anti-malware, tracker and ad-blocking features",
+        "notes": "1-year introductory total is $64.68; renews at $139.08/year ($11.59/month equivalent). A 2-year + 3-month promo is $3.49/month for 27 months."
+      },
+      {
+        "name": "Complete",
+        "monthly": 19.49,
+        "annualPerMonth": 6.39,
+        "per": "flat",
+        "limits": "10 devices; Basic plus password manager, data-breach monitoring and 1 TB encrypted cloud storage",
+        "notes": "1-year introductory total is $76.68; renews at $219.48/year ($18.29/month equivalent). A 2-year + 3-month promo is $4.39/month."
+      },
+      {
+        "name": "Complete Max",
+        "monthly": 21.49,
+        "annualPerMonth": 8.29,
+        "per": "flat",
+        "limits": "10 devices; Complete plus a dedicated IP entitlement and expanded identity/security features",
+        "notes": "1-year introductory total is $99.48; renews at $301.08/year ($25.09/month equivalent). A 2-year + 3-month promo is $6.39/month."
+      }
+    ],
+    "freeTierCaps": "no free tier; 30-day money-back guarantee",
+    "billingTerms": "monthly, 1-year and 2-year terms; annual fields are first-term 1-year equivalents and renew at higher prices",
+    "priceChanges": [],
+    "hiddenCosts": "Introductory prices jump sharply at renewal, sales tax can be added, and some identity/dedicated-IP features require regional eligibility or additional setup",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://nordvpn.com/pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,65 @@
     "notes": "Pricing is sales-led; canonical monthly amount is null.",
     "native": "custom",
     "kind": "custom",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Freelancer",
+        "monthly": null,
+        "annualPerMonth": 27,
+        "per": "workspace",
+        "limits": "1 TMS seat; unlimited projects/languages; 650,000 TMS processed words/year; 1,000,000 MTUs/year; 1 Portal user",
+        "notes": "Annual billing price; no Strings seats."
+      },
+      {
+        "name": "Software UI/UX",
+        "monthly": null,
+        "annualPerMonth": 525,
+        "per": "workspace",
+        "limits": "15 Strings seats; 5 Strings projects; 1,000,000 managed words; 500,000 TMS processed words/year; 1,000,000 MTUs/year",
+        "notes": "Annual billing price."
+      },
+      {
+        "name": "Professional",
+        "monthly": null,
+        "annualPerMonth": 525,
+        "per": "workspace",
+        "limits": "Unlimited TMS seats/projects/languages; 15 Strings seats; 200,000 Strings managed words; 4,000,000 TMS processed words/year",
+        "notes": "Annual billing price; sold under Freelancer & LSP plans."
+      },
+      {
+        "name": "Team",
+        "monthly": null,
+        "annualPerMonth": 1245,
+        "per": "workspace",
+        "limits": "Unlimited TMS seats/projects/languages; 20 Strings seats; 1,200,000 managed words; 2,500,000 TMS processed words/year; 12,000,000 MTUs/year",
+        "notes": "Annual billing price."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "150 Strings seats; unlimited TMS seats/projects/languages; 3,000,000 managed words and 12,000,000 TMS processed words/year on direct-business package",
+        "notes": "Custom price."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "150+ Strings seats and custom product capacities",
+        "notes": "Custom price."
+      }
+    ],
+    "freeTierCaps": "no free tier; 14-day trial with Enterprise features except integrations that require additional fees",
+    "billingTerms": "annual + quarterly; published prices are annual-billing equivalents, quarterly prices require sales contact",
+    "priceChanges": [],
+    "hiddenCosts": "Capacity top-ups for seats, processed/managed words, MTUs, AIUs, workflows, models and Portal users are sold separately; Phrase Studio is a volume add-on; professional translation starts at $0.06/word.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://phrase.com/pricing/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

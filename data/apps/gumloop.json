@@ -17,7 +17,35 @@
     "notes": "Typical Starter monthly tier; usage credits apply.",
     "native": "97 USD",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Pro",
+        "monthly": 37,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "20,000 credits/month; unlimited agents, 35+ models, BYO API keys, unlimited seats and teams; 5 concurrent workflow runs; 25 concurrent agent chats; 1 hosted MCP server",
+        "notes": "New accounts receive a card-required 14-day Pro trial that auto-converts unless canceled."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom credits, concurrency, MCP hosting, model proxying, governance, security, retention and support",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier; new accounts get a card-required 14-day Pro trial, while legacy free balances no longer replenish",
+    "billingTerms": "monthly Pro billing; no public annual plan; 14-day card-required trial auto-converts unless canceled",
+    "priceChanges": [],
+    "hiddenCosts": "Overage is $0.005 per credit after 20,000; the default overage cap can reach 1,000,000 credits ($5,000) per period; model usage is passed through, successful tools cost at least 1 credit plus tool-specific charges, active compute costs 5 credits/minute, and an 8% orchestration fee is added; unused non-Enterprise credits do not roll over",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.gumloop.com/pricing",
+      "https://docs.gumloop.com/core-concepts/credits",
+      "https://www.gumloop.com/blog/transparent-pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

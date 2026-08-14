@@ -17,7 +17,45 @@
     "notes": "Official monthly Nitro subscription.",
     "native": "9.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Discord (Base)",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "100 servers; 1,000 friends; 10 MB file uploads; 2,000-character messages; screen share 720p/30fps",
+        "notes": "Core Discord account is free."
+      },
+      {
+        "name": "Nitro Basic",
+        "monthly": 2.99,
+        "annualPerMonth": 2.5,
+        "per": "flat",
+        "limits": "100 servers; 50 MB file uploads; 2,000-character messages; screen share up to 1080p/30fps or 720p/60fps",
+        "notes": "$29.99 billed yearly; annual-equivalent rounded to $2.50/month."
+      },
+      {
+        "name": "Nitro",
+        "monthly": 9.99,
+        "annualPerMonth": 8.33,
+        "per": "flat",
+        "limits": "200 servers; 500 MB file uploads; 4,000-character messages; source-quality streaming up to 60fps; 2 Server Boosts; 30% off extra Boosts; 3 friend passes",
+        "notes": "$99.99 billed yearly; annual-equivalent rounded to $8.33/month."
+      }
+    ],
+    "freeTierCaps": "100 servers; 1,000 friends; 10 MB uploads; 2,000 characters/message; 720p/30fps screen share",
+    "billingTerms": "monthly + annual; localized/app-store pricing may differ",
+    "priceChanges": [],
+    "hiddenCosts": "Extra Server Boosts are separate recurring purchases; server perk levels require 2, 7 or 14 allocated Boosts and additional perks can require separate sets of 3 Boosts. Taxes, mobile-store pricing and localized pricing can differ.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://discord.com/nitro",
+      "https://support.discord.com/hc/en-us/articles/115000435108-What-are-Nitro-Nitro-Basic",
+      "https://discord.com/blog/beginners-guide-to-nitro",
+      "https://support.discord.com/hc/en-us/articles/33694251638295-Discord-Account-Caps-Server-Caps-and-More",
+      "https://support.discord.com/hc/en-us/articles/360028038352-Server-Boosting-FAQ"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

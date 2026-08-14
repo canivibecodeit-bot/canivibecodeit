@@ -17,7 +17,58 @@
     "source": "https://sketch.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "medium",
-    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication."
+    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication.",
+    "tiers": [
+      {
+        "name": "Standard",
+        "monthly": null,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "1 workspace and 50 GB storage/editor.",
+        "notes": "Published annual-effective rate; current monthly USD amount was not exposed."
+      },
+      {
+        "name": "Professional",
+        "monthly": null,
+        "annualPerMonth": 24,
+        "per": "user",
+        "limits": "1 workspace, 50 GB/editor and SSO.",
+        "notes": "Published annual-effective rate; current monthly USD amount was not exposed."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": 44,
+        "per": "user",
+        "limits": "1 workspace, unlimited storage, SCIM and BYOK; custom review for 15+ editors.",
+        "notes": "Published annual-effective rate."
+      },
+      {
+        "name": "Private Cloud",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited workspaces/storage with private deployment; custom price plus one-time setup/requirements charges.",
+        "notes": null
+      },
+      {
+        "name": "Mac-only License",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Perpetual Mac app licence for 1 seat with 1 year of updates; no web collaboration, sharing or iOS preview.",
+        "notes": "One-time price: $120 per seat."
+      }
+    ],
+    "freeTierCaps": "no free tier; a 30-day trial is offered and viewers are free",
+    "billingTerms": "monthly + annual subscriptions; Mac-only licence is a one-time purchase",
+    "priceChanges": [],
+    "hiddenCosts": "After subscription cancellation, a workspace becomes read-only and is available for download for 90 days before deletion. Private Cloud adds setup/custom-requirement charges. Direct purchases in India are unavailable from July 15, 2026 and require a partner.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.sketch.com/pricing/",
+      "https://www.sketch.com/docs/account-and-billing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

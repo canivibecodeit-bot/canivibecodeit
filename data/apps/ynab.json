@@ -14,7 +14,25 @@
     "source": "https://www.ynab.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; monthly plan listed at $14.99/month and annual at $109/year."
+    "notes": "Official pricing checked 2026-07-30; monthly plan listed at $14.99/month and annual at $109/year.",
+    "tiers": [
+      {
+        "name": "YNAB",
+        "monthly": 14.99,
+        "annualPerMonth": 9.08,
+        "per": "flat",
+        "limits": "All features; share one subscription with up to 5 other people (6 total)",
+        "notes": "34-day trial when signing up directly; annual is $109/year."
+      }
+    ],
+    "freeTierCaps": "no free tier; 34-day free trial; up to 6 people can share one paid subscription",
+    "billingTerms": "monthly + annual ($109/year); taxes extra where applicable",
+    "priceChanges": [],
+    "hiddenCosts": "Third-party app stores may require a card for the trial and can use different billing terms.",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.ynab.com/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

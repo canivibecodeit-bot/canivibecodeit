@@ -17,7 +17,42 @@
     "notes": "Typical Pro monthly tier.",
     "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "10 standard images per 3 hours; 3 shared premium-model generations per month; the live comparison table lists 2 downloads per day.",
+        "notes": "Playground's own current pages conflict: the comparison table also says 5 images per 3 hours, an April 2026 article says 10 downloads per day, and commercial-use wording differs. The lower download cap is preserved here as the pricing-table value."
+      },
+      {
+        "name": "Pro",
+        "monthly": 15,
+        "annualPerMonth": 12,
+        "per": "flat",
+        "limits": "75 standard images per 3 hours; 150 shared premium-model generations per month; 10 Nano Banana Pro edits per month; unlimited downloads.",
+        "notes": "Annual plan is $144 prepaid."
+      },
+      {
+        "name": "Pro Plus",
+        "monthly": 45,
+        "annualPerMonth": 36,
+        "per": "flat",
+        "limits": "Unlimited standard-image generations; 1,000 shared premium-model generations per month; 250 Nano Banana Pro edits per month; unlimited downloads.",
+        "notes": "Annual plan is $432 prepaid."
+      }
+    ],
+    "freeTierCaps": "10 standard images per 3 hours; 3 shared premium-model generations per month; pricing table says 2 downloads per day, but other official Playground pages publish conflicting free limits.",
+    "billingTerms": "monthly + annual (-20%); subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Monthly premium-model allowances reset; no rollover or published self-serve overage/top-up price was found, and Playground's official free-limit/commercial-use pages conflict.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://playgroundai.com/design/pricing",
+      "https://playgroundai.com/blog/is-playground-ai-free-what-you-get-on-free-vs-pro-vs-pro-plus"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,50 @@
     "notes": "Typical Personal monthly rate.",
     "native": "9 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Personal",
+        "monthly": 9,
+        "annualPerMonth": 7.5,
+        "per": "user",
+        "limits": "1 project budget; time tracking and reports.",
+        "notes": "Timeular is now branded EARLY; annual total $90."
+      },
+      {
+        "name": "Personal Pro",
+        "monthly": 14,
+        "annualPerMonth": 11.67,
+        "per": "user",
+        "limits": "Up to 50 project budgets; rounding options of 1, 5, 6, 10, 15, or 30 minutes.",
+        "notes": "Annual total $140."
+      },
+      {
+        "name": "Team",
+        "monthly": 19,
+        "annualPerMonth": 15.83,
+        "per": "user",
+        "limits": "Team features; dedicated success manager at 20+ seats.",
+        "notes": "Annual total $190/user."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, security, and support.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual; 30-day trial; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Taxes/VAT are extra and checkout localizes pricing; Team success-manager service starts only at 20+ seats.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://early.app/pricing/",
+      "https://support.early.app/en/articles/5557612-how-our-plans-and-pricing-work"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

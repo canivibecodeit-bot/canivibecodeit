@@ -17,7 +17,57 @@
     "notes": "Official Core per-user monthly rate.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Prototype",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Up to 10 test users; prototype access to all features; not licensed for a production deployment",
+        "notes": "Free only while prototyping."
+      },
+      {
+        "name": "Starter",
+        "monthly": 5,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Per active user/month; basic app and automation features",
+        "notes": "Monthly per-user subscription."
+      },
+      {
+        "name": "Core",
+        "monthly": 10,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Per active user/month; advanced app and automation features plus security controls",
+        "notes": "Core may be included with eligible paid Google Workspace editions."
+      },
+      {
+        "name": "Enterprise Plus",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Per active user/month; enterprise governance, integrations and machine-learning features",
+        "notes": "Requires an organization managed through Google Workspace or Cloud Identity."
+      },
+      {
+        "name": "Publisher Pro",
+        "monthly": 50,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "1 public app with unlimited anonymous users; no sign-in and no security filters",
+        "notes": "Price is per app/month, not per creator or end user."
+      }
+    ],
+    "freeTierCaps": "Prototype use for up to 10 test users; production deployment is not included",
+    "billingTerms": "monthly only; no public annual discount shown",
+    "priceChanges": [],
+    "hiddenCosts": "Starter/Core/Enterprise are per active user, so external-user count drives cost; Publisher Pro is $50 per public app and removes authenticated-user security; Google Workspace may bundle Core, but otherwise Workspace itself is a separate subscription",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://about.appsheet.com/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

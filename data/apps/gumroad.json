@@ -17,7 +17,26 @@
     "notes": "No fixed monthly fee; Gumroad charges transaction fees.",
     "native": "transaction-based",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Creator account",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "No published cap on products or revenue; direct/profile sales cost 10% + $0.50 plus processing.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "No monthly fee and no published product/revenue cap; direct sales pay 10% + $0.50 plus payment processing",
+    "billingTerms": "transaction-only pricing; no monthly or annual subscription",
+    "priceChanges": [],
+    "hiddenCosts": "Direct/profile sales add payment processing (typically 2.9% + $0.30 for cards) to Gumroad's 10% + $0.50; Discover marketplace sales cost 30% including processing; processing fees are not returned on refunds.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://gumroad.com/pricing",
+      "https://gumroad.com/help/article/66-gumroads-fees.html"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

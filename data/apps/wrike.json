@@ -17,7 +17,57 @@
     "notes": "Official Team monthly seat price.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Essential task and project management; the current public page does not disclose numeric user, storage or task caps",
+        "notes": "A permanent Free plan is listed, but its numeric ceilings were not exposed."
+      },
+      {
+        "name": "Team",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "2–15 users and Wrike AI Essentials",
+        "notes": "Displayed per-user monthly equivalent is billed annually."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 25,
+        "per": "user",
+        "limits": "5–200 users, advanced resource planning/reporting and part of Wrike AI Elite",
+        "notes": "Displayed per-user monthly equivalent is billed annually."
+      },
+      {
+        "name": "Pinnacle",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom plan with advanced analytics/resource management and 3× more AI actions than Business",
+        "notes": "Custom annual quote."
+      },
+      {
+        "name": "Apex",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom plan with 10× more AI actions, unlimited whiteboards and Wrike Integrate/Sync",
+        "notes": "Custom annual quote."
+      }
+    ],
+    "freeTierCaps": "Free plan exists, but the live public page does not expose numeric user, storage or task caps",
+    "billingTerms": "Free + annual-billed paid plans; Business and above annual only; 14-day trial, no card",
+    "priceChanges": [],
+    "hiddenCosts": "Seats are sold in bundles: up to 30 in groups of 5, 30–100 in groups of 10 and above 100 in groups of 25. Whiteboard is $15/user/month; Integrate, Sync, Datahub, Lock and AI-action packs are separately quoted. Taxes are extra, and guided deployment is required for 20+ users.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.wrike.com/price/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

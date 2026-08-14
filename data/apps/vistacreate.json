@@ -17,7 +17,34 @@
     "notes": "Typical Pro monthly price; regional taxes may vary.",
     "native": "13 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 seat; 100,000+ templates; 1 million+ assets; social scheduling; numeric storage and AI-generation caps are not published.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 13,
+        "annualPerMonth": 10,
+        "per": "workspace",
+        "limits": "Up to 10 seats included; 200,000+ templates; 170 million+ assets; 100 AI image generations/month; unlimited Brand Kits and storage.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "1 seat, 100,000+ templates and 1 million+ assets; numeric storage and AI-generation caps are not published.",
+    "billingTerms": "monthly + annual (-23%)",
+    "priceChanges": [],
+    "hiddenCosts": "Web and app-store prices can differ by region. Pro includes up to 10 seats, so there is no per-seat fee inside that limit.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://create.vista.com/pricing/",
+      "https://support.create.vista.com/hc/en-us/articles/6347917526940-What-VistaCreate-plans-are-available"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

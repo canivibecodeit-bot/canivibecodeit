@@ -17,7 +17,75 @@
     "notes": "Common annual-equivalent individual Advantage price; monthly options differ.",
     "native": "39 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited survey creation; 10 questions/survey; 3 collectors/survey; the response-viewing cap is displayed only inside the account.",
+        "notes": null
+      },
+      {
+        "name": "Standard Monthly",
+        "monthly": 99,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 user; 1,000 responses/month.",
+        "notes": null
+      },
+      {
+        "name": "Advantage Annual",
+        "monthly": null,
+        "annualPerMonth": 39,
+        "per": "user",
+        "limits": "1 user; 15,000 responses/year.",
+        "notes": "Billed $468/year."
+      },
+      {
+        "name": "Premier Annual",
+        "monthly": null,
+        "annualPerMonth": 139,
+        "per": "user",
+        "limits": "1 user; 40,000 responses/year.",
+        "notes": "Billed $1,668/year."
+      },
+      {
+        "name": "Team Advantage",
+        "monthly": null,
+        "annualPerMonth": 30,
+        "per": "user",
+        "limits": "Minimum 3 seats; 50,000 responses/year per team.",
+        "notes": null
+      },
+      {
+        "name": "Team Premier",
+        "monthly": null,
+        "annualPerMonth": 92,
+        "per": "user",
+        "limits": "Minimum 3 seats; 100,000 responses/year per team.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom seats, responses, security and service terms.",
+        "notes": "Quote required."
+      }
+    ],
+    "freeTierCaps": "Unlimited survey creation; 10 questions/survey; 3 collectors/survey; the exact response-viewing cap was not publicly exposed before sign-in.",
+    "billingTerms": "One monthly individual plan plus annual individual/team plans; team plans require at least 3 paid seats; plans auto-renew.",
+    "priceChanges": [],
+    "hiddenCosts": "Excess responses can cost up to $0.15 each; Audience respondents are a separate purchase; analyst seats are sold in pairs; invited seats can be prorated; downgrading can remove access to responses older than 365 days above Basic limits.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://www.surveymonkey.com/pricing/individual/details/",
+      "https://www.surveymonkey.com/pricing/details/",
+      "https://help.surveymonkey.com/en/surveymonkey/billing/response-limits/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

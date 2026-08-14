@@ -6,18 +6,53 @@
   "category": "documents",
   "subcategory": "PDF editing, document workflows and electronic signatures",
   "tagline": "Edit ordinary PDFs, convert Office files, and maintain reusable form fields",
-  "priceMonthly": 14.99,
+  "priceMonthly": 10.83,
   "pricing": {
-    "plan": "PDF Editor Plus",
-    "basis": "annual-equivalent",
-    "unit": "flat",
-    "source": "https://foxit.com/pdf-editor/pricing.html",
-    "checkedOn": "2026-07-31",
+    "plan": "PDF Editor",
+    "basis": "annual billing, per user per month",
+    "unit": "per-seat",
+    "source": "https://www.foxit.com/pdf-editor/pricing/",
+    "checkedOn": "2026-08-13",
     "confidence": "medium",
     "notes": "Annual subscription converted to monthly equivalent; regional packaging differs.",
-    "native": "14.99 USD",
+    "native": "10.83 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Foxit PDF Reader",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Free PDF viewing, annotation and collaboration; free Foxit account includes 20 AI credits/month",
+        "notes": null
+      },
+      {
+        "name": "PDF Editor",
+        "monthly": null,
+        "annualPerMonth": 10.83,
+        "per": "user",
+        "limits": "Windows, macOS and web; DMS; 20 AI credits/month; 14-day full-feature trial",
+        "notes": "Annual list price is $129.99/user; Foxit offers annual paid-in-full and annual billed-monthly modes, not a no-commitment monthly plan"
+      },
+      {
+        "name": "PDF Editor+",
+        "monthly": null,
+        "annualPerMonth": 13.33,
+        "per": "user",
+        "limits": "Editor plus iOS/Android, AI Smart Redact and 150 pooled eSign envelopes/year; 20 AI credits/month",
+        "notes": "Annual list price is $159.99/user; annual paid-in-full and annual billed-monthly modes"
+      }
+    ],
+    "freeTierCaps": "Foxit PDF Reader is free; a free Foxit account gets 20 AI credits/month; paid-editor features require a 14-day trial or subscription",
+    "billingTerms": "annual commitment only (paid in full or billed monthly); 14-day trial, no card",
+    "priceChanges": [],
+    "hiddenCosts": "AI Assistant upgrade is $49.99/user/year for 2,000 credits/month; credits reset and do not roll over; local taxes; only 150 eSign envelopes/year on Editor+",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.foxit.com/pdf-editor/pricing/",
+      "https://www.foxit.com/ai/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

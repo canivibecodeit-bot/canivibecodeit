@@ -6,18 +6,63 @@
   "category": "education",
   "subcategory": "learning, flashcards and language practice",
   "tagline": "Build interactive practice around user-authored math and science lessons",
-  "priceMonthly": 24.99,
+  "priceMonthly": 30,
   "pricing": {
-    "plan": "Premium",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://brilliant.org/premium",
-    "checkedOn": "2026-07-31",
+    "plan": "Premium Individual",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://brilliant.org/subscribe/",
+    "checkedOn": "2026-08-12",
     "confidence": "medium",
     "notes": "Typical monthly Premium price.",
-    "native": "24.99 USD",
+    "native": "30 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "First 2 levels of every course; up to 2 lessons/day; sequential progress; occasional ads",
+        "notes": null
+      },
+      {
+        "name": "Premium Individual",
+        "monthly": 30,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Unlimited lessons and all levels across 40+ courses; no ads; jump ahead; Koji tutoring",
+        "notes": "Annual plan is billed $240 once per year."
+      },
+      {
+        "name": "Premium Family",
+        "monthly": null,
+        "annualPerMonth": 40,
+        "per": "flat",
+        "limits": "Up to 6 seats; each member gets a separate Premium account; all 40+ courses",
+        "notes": "The live subscription flow presents this as an annual-renewing flat-price household plan."
+      },
+      {
+        "name": "Premium Group",
+        "monthly": null,
+        "annualPerMonth": 11.33,
+        "per": "user",
+        "limits": "3–50 seats; starts at 3 seats for $33.99/month equivalent; each extra seat $10.10/month",
+        "notes": "Annual only and billed as one payment; the displayed per-user figure is the 3-seat starting rate."
+      }
+    ],
+    "freeTierCaps": "First 2 levels of every course and up to 2 lessons/day; sequential progress; occasional ads",
+    "billingTerms": "Individual monthly + annual; Family annual; Group annual only; subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Group plan has a 3-seat minimum; extra seats cost $10.10/month each and a full group cannot add seats mid-term, capacity can be increased at renewal.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://brilliant.org/subscribe/",
+      "https://brilliant.org/subscribe/group-plans/",
+      "https://brilliant.org/faq/",
+      "https://brilliant.org/help/pricing-and-plans/what-s-the-brilliant-group-plan/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

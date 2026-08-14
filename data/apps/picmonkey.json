@@ -17,7 +17,41 @@
     "source": "https://picmonkey.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 7.99,
+        "annualPerMonth": 6,
+        "per": "user",
+        "limits": "1 GB cloud storage and JPG/PNG export.",
+        "notes": "Annual total starts at $72."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited storage, PDF export and 1 Brand Kit; current USD price was not exposed in the official public page.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Multiple Brand Kits and team/collaboration controls; current USD price was not exposed.",
+        "notes": "Requires at least 2 seats."
+      }
+    ],
+    "freeTierCaps": "0 downloads and 0 shares without a paid subscription; a free account can edit/save, and a 7-day trial is offered.",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": "Business requires 2 or more paid seats. Background remover and some stock features are unavailable during the trial; usage is subject to fair-use limits.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.picmonkey.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

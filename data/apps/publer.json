@@ -17,7 +17,49 @@
     "notes": "Typical Professional starting monthly price; account count changes total.",
     "native": "12 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "1 user, 1 workspace, 3 social accounts excluding X, 10 queued scheduled posts/account, 25 drafts, 24-hour post history",
+        "notes": "Pinterest on Free additionally requires at least 100 followers or a claimed website."
+      },
+      {
+        "name": "Professional",
+        "monthly": 15,
+        "annualPerMonth": 12,
+        "per": "flat",
+        "limits": "Minimum 3 paid social accounts and 1 owner; unlimited scheduling/drafts/media/workspaces/RSS/history; X supported",
+        "notes": "Base minimum is 3 social accounts at $5/account/month or $4/account/month billed annually; additional members cost extra."
+      },
+      {
+        "name": "Business",
+        "monthly": 30,
+        "annualPerMonth": 24,
+        "per": "flat",
+        "limits": "Minimum 3 paid social accounts and 1 owner; Professional features plus unlimited AI prompts, analytics, competitor analysis and API access",
+        "notes": "Base minimum is 3 social accounts at $10/account/month or $8/account/month billed annually; additional members cost extra."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Custom account/member volume, unlimited daily posting, onboarding and priority support",
+        "notes": "Custom quote; billed yearly."
+      }
+    ],
+    "freeTierCaps": "1 user, 1 workspace, 3 social accounts excluding X, 10 queued scheduled posts per account, 25 drafts and 24-hour post history",
+    "billingTerms": "monthly + annual (2 months free); Enterprise annual only; 14-day money-back guarantee",
+    "priceChanges": [],
+    "hiddenCosts": "Paid prices scale with every social account and additional member, with a 3-account minimum; every 10th account/member is free after 9. VAT is excluded. 'Unlimited' paid scheduling still has anti-spam daily posting limits.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://publer.io/plans"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

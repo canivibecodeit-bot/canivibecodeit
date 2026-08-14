@@ -17,7 +17,51 @@
     "notes": "Official Starter monthly tier with 300 credits per month.",
     "native": "9 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 9,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "300 credits/month; about 400 low-cost image generations or 40 video generations; 40 minutes TTS/voice cloning; 2 concurrent generations.",
+        "notes": null
+      },
+      {
+        "name": "Basic",
+        "monthly": 29,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "1,100 credits/month; about 1,200 images or 120 videos; 2 hours TTS/voice cloning; 4 concurrent generations.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 49,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "2,000 credits/month; about 1,600 images or 150 videos; 4 hours 10 minutes TTS/voice cloning; 6 concurrent generations.",
+        "notes": null
+      },
+      {
+        "name": "Max",
+        "monthly": 99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "4,200 credits/month; about 4,000 images or 280 videos; 7 hours 35 minutes TTS/voice cloning; 8 concurrent generations.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "A free sign-up is offered, but the official pricing page does not publish a recurring free-credit allowance.",
+    "billingTerms": "monthly + annual (page advertises savings up to 43%, but exact annual USD amounts were not exposed)",
+    "priceChanges": [],
+    "hiddenCosts": "Subscription credits reset without rollover. Credit packs require a subscription and never expire: $5/90 credits, $10/250, $30/900 or $90/3,000. Refunds are only available if no more than 50 credits were used in the billing period.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://nsketch.ai/pricing",
+      "https://nsketch.ai/credits",
+      "https://nsketch.ai/terms"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "high",

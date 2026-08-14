@@ -17,7 +17,57 @@
     "notes": "Official Starter monthly tier.",
     "native": "49 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 49,
+        "annualPerMonth": 39,
+        "per": "workspace",
+        "limits": "1 user; 1 site; 50 tracked keywords; 20,000 crawled pages/month.",
+        "notes": null
+      },
+      {
+        "name": "Standard",
+        "monthly": 99,
+        "annualPerMonth": 79,
+        "per": "workspace",
+        "limits": "1 user; 3 sites; 300 tracked keywords; 400,000 crawled pages/month; 2 AI content briefs/month.",
+        "notes": null
+      },
+      {
+        "name": "Medium",
+        "monthly": 179,
+        "annualPerMonth": 143,
+        "per": "workspace",
+        "limits": "2 users; 10 sites; 1,500 tracked keywords; 2,000,000 crawled pages/month; 2 AI-visibility dashboards; 100 tracked prompts; 10 AI content briefs/month.",
+        "notes": null
+      },
+      {
+        "name": "Large",
+        "monthly": 299,
+        "annualPerMonth": 239,
+        "per": "workspace",
+        "limits": "3 users; 25 sites; 3,000 tracked keywords; 5,000,000 crawled pages/month; 4 AI-visibility dashboards; 200 tracked prompts; 50 AI content briefs/month.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom sites, users, tracked keywords, crawl capacity, AI visibility, API access, and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (about 20% lower on annual billing)",
+    "priceChanges": [],
+    "hiddenCosts": "Additional users and expanded limits are paid upgrades; current public unit prices were not exposed.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://moz.com/products/pro/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

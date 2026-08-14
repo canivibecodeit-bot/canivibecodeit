@@ -17,7 +17,58 @@
     "notes": "Official Basic monthly tier.",
     "native": "25 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 25,
+        "annualPerMonth": 19,
+        "per": "workspace",
+        "limits": "1 published site included; unlimited builder projects; 150 AI credits/month; email support",
+        "notes": "Additional published sites cost $19/month or $171/year each."
+      },
+      {
+        "name": "Team",
+        "monthly": 39,
+        "annualPerMonth": 29,
+        "per": "workspace",
+        "limits": "1 published site; 3 team seats; unlimited client accounts; 150 AI credits/month",
+        "notes": "Additional published sites cost $17/month or $168/year each."
+      },
+      {
+        "name": "Agency",
+        "monthly": 69,
+        "annualPerMonth": 52,
+        "per": "workspace",
+        "limits": "4 published sites; 6 team seats; unlimited client accounts; 150 AI credits/month",
+        "notes": "Additional published sites cost $17/month or $168/year each."
+      },
+      {
+        "name": "White Label",
+        "monthly": 199,
+        "annualPerMonth": 149,
+        "per": "workspace",
+        "limits": "4 published sites; 6 team seats; unlimited client accounts; full white-label platform; 150 AI credits/month",
+        "notes": "Additional published sites cost $17/month or $168/year each."
+      },
+      {
+        "name": "Custom",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom site volume, seats, AI credits, API, SSO, support and commercial terms",
+        "notes": "Price on request."
+      }
+    ],
+    "freeTierCaps": "no free tier; 14-day White Label trial with no credit card",
+    "billingTerms": "monthly + annual; annual plans billed upfront",
+    "priceChanges": [],
+    "hiddenCosts": "The account plan only includes 1 site on Basic/Team or 4 on Agency/White Label; every extra published site is billed separately. AI Visibility starts at $19/month after its 14-day free period, and ecommerce/bookings plans are separate add-ons.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.duda.co/pricing",
+      "https://support.duda.co/hc/en-us/articles/26518285687191-Account-Management-Subscription-and-Cancelation"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

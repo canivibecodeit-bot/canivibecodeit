@@ -17,7 +17,61 @@
     "source": "https://xmind.app/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "10 personal online maps (team space: 3 collaborative maps); 3 sheets/map, 3-day history, 5 Pitch slides and 10 AI credits",
+        "notes": "Desktop/mobile basic maps are available; the numeric caps above are for online/collaborative use."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 4.92,
+        "per": "user",
+        "limits": "Up to 50 manually created online maps; 3 sheets/map, 3-day history, unlimited Pitch slides and 10 AI credits",
+        "notes": "Displayed yearly-billing equivalent; exact month-to-month price was not exposed in accessible official content."
+      },
+      {
+        "name": "Premium",
+        "monthly": null,
+        "annualPerMonth": 8.25,
+        "per": "user",
+        "limits": "Unlimited collaborative maps and sheets; 30-day history; 500 AI credits/month; real-time collaboration, tasks and editable Gantt",
+        "notes": "Displayed yearly-billing equivalent; exact month-to-month price was not exposed in accessible official content."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited collaborative maps/sheets; 30-day history; 800 AI credits/seat/month; team administration and editable Gantt",
+        "notes": "Official Team page displays $10/seat/month and separately confirms a 7-day trial for the yearly plan; recorded as the displayed annual-plan equivalent."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited maps/sheets/history; custom AI credits; SAML SSO, onboarding and dedicated success support",
+        "notes": "Contact sales; custom pricing."
+      }
+    ],
+    "freeTierCaps": "Personal: 10 online maps, 3 sheets/map, 3-day history, 5 Pitch slides and 10 AI credits; Team space: 3 collaborative maps",
+    "billingTerms": "monthly and annual for individual plans (up to 50% annual discount); Business yearly plan confirmed, exact monthly rates not publicly exposed",
+    "priceChanges": [],
+    "hiddenCosts": "AI-generated maps can temporarily bypass Free/Pro manual-map limits while credits remain; credits expire/reset. One subscription covers up to 5 computers and 5 mobile devices. Monthly plans and AI-credit add-ons are non-refundable; yearly website purchases have a 7-day refund window. Xmind does not support downgrading an active higher tier.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://xmind.com/pricing",
+      "https://xmind.com/pricing/teams",
+      "https://xmind.com/business",
+      "https://xmind.com/enterprise",
+      "https://xmind.com/help/differences-free-pro-premium-business"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

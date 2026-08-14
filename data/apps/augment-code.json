@@ -17,7 +17,33 @@
     "source": "https://augmentcode.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Business",
+        "monthly": 100,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Up to 50 seats; $100 of model/compute usage included each month; up to 50 concurrent Cosmos sessions.",
+        "notes": "Flat workspace fee rather than per-seat pricing; usage is metered at the model provider's public price plus a 40% service fee, plus applicable compute."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Unlimited users and concurrent sessions; custom usage commitment and controls.",
+        "notes": "Quote required; annual volume discounts are advertised."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "Business is monthly; Enterprise uses custom contracts and may be annual; no public annual Business price",
+    "priceChanges": [],
+    "hiddenCosts": "Usage above the included $100 requires prepaid top-ups; purchased top-ups expire after 12 months.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.augmentcode.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

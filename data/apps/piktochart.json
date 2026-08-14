@@ -6,18 +6,84 @@
   "category": "design",
   "subcategory": "visual design and presentations",
   "tagline": "Assemble infographics and reports from data, text, and reusable visual blocks",
-  "priceMonthly": 29,
+  "priceMonthly": 15,
   "pricing": {
     "plan": "Pro",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://piktochart.com/pricing",
-    "checkedOn": "2026-07-31",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://piktochart.com/pricing/",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Pro monthly rate.",
-    "native": "29 USD",
+    "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 owner plus 3 members; 2 PNG downloads; 60 AI credits; 1 GB storage; 1 folder; unlimited projects.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 15,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "500 AI credits/member, unlimited PNG downloads and 100 GB storage/member.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 20,
+        "annualPerMonth": 17,
+        "per": "user",
+        "limits": "1,000 AI credits/member, unlimited PNG/PDF/PPT downloads and 250 GB storage/member.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom pricing for 101+ members.",
+        "notes": null
+      },
+      {
+        "name": "Education",
+        "monthly": null,
+        "annualPerMonth": 3.33,
+        "per": "user",
+        "limits": "250 AI credits/member and 100 GB storage/member.",
+        "notes": "Published as $39.99 per member per year."
+      },
+      {
+        "name": "Campus",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom campus deployment with a 3,000-seat minimum.",
+        "notes": null
+      },
+      {
+        "name": "Nonprofit",
+        "monthly": null,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "250 AI credits/member and 100 GB storage/member.",
+        "notes": "Published as $60 per member per year."
+      }
+    ],
+    "freeTierCaps": "1 owner + 3 members, 2 PNG downloads, 60 AI credits, 1 GB storage, 1 folder and unlimited projects.",
+    "billingTerms": "monthly + annual for commercial plans; Education and Nonprofit are annual; Campus/Enterprise are custom",
+    "priceChanges": [],
+    "hiddenCosts": "Commercial tiers charge per member after the free workspace allowance. Campus has a 3,000-seat minimum, and purchases are generally non-refundable.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://piktochart.com/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

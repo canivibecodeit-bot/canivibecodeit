@@ -17,7 +17,41 @@
     "notes": "Typical Professional monthly equivalent; annual billing can be lower.",
     "native": "11 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Professional",
+        "monthly": 11,
+        "annualPerMonth": 9,
+        "per": "user",
+        "limits": "1 Mac; automatic time tracking and reports.",
+        "notes": null
+      },
+      {
+        "name": "Expert",
+        "monthly": 14,
+        "annualPerMonth": 11,
+        "per": "user",
+        "limits": "Up to 2 Macs; expanded reporting and invoicing integrations.",
+        "notes": null
+      },
+      {
+        "name": "Connect",
+        "monthly": 20,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "Up to 3 Macs/user; team collaboration and shared projects.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (20%+ discount); 30-day trial without card",
+    "priceChanges": [],
+    "hiddenCosts": "Device limits rise by tier: 1 Mac on Professional, 2 on Expert, and 3 per user on Connect.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://timingapp.com/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

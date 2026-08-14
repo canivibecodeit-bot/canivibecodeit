@@ -17,7 +17,41 @@
     "source": "https://carbonmade.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Beginner",
+        "monthly": 9.99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "8 projects; unlimited image/video uploads; 3 navigation options; SD video",
+        "notes": "Annual billing is offered at about 20% off, but the live page did not expose the exact annual dollar price in its accessible text."
+      },
+      {
+        "name": "Professional",
+        "monthly": 14.99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "50 projects; unlimited image/video uploads; 5 navigation options; 4K video/audio; custom pages and private portfolio",
+        "notes": "Annual billing is offered at about 20% off, but the live page did not expose the exact annual dollar price in its accessible text."
+      },
+      {
+        "name": "Unlimited",
+        "monthly": 24.99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited projects and pages; includes all Professional features",
+        "notes": "Annual billing is offered at about 20% off, but the live page did not expose the exact annual dollar price in its accessible text."
+      }
+    ],
+    "freeTierCaps": "no free tier; unlimited-duration private trial, but payment is required to publish the portfolio live",
+    "billingTerms": "monthly + annual (advertised as about 20% off); exact annual prices were not exposed in the accessible page text",
+    "priceChanges": [],
+    "hiddenCosts": "A custom domain itself is not included; Carbonmade hosts the site and lets you connect a domain you already own.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://carbonmade.com/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

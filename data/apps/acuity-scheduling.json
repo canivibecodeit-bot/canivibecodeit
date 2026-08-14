@@ -17,7 +17,49 @@
     "source": "https://acuityscheduling.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "medium",
-    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication."
+    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication.",
+    "tiers": [
+      {
+        "name": "Starter",
+        "monthly": 20,
+        "annualPerMonth": 16,
+        "per": "flat",
+        "limits": "1 calendar, unlimited services and appointments, intake forms and email reminders",
+        "notes": null
+      },
+      {
+        "name": "Standard",
+        "monthly": 34,
+        "annualPerMonth": 27,
+        "per": "flat",
+        "limits": "Up to 6 calendars; text reminders; packages, memberships and gift certificates",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 61,
+        "annualPerMonth": 49,
+        "per": "flat",
+        "limits": "Up to 36 calendars; HIPAA BAA, removed branding, multiple time zones, API and custom CSS",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Unlimited calendars, unlimited scheduling instances, additional APIs and VIP account management",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (about 20% off); 7-day trial, no credit card",
+    "priceChanges": [],
+    "hiddenCosts": "Taxes and ordinary payment-processor fees are extra. Calendar limits are hard plan differentiators; there are no setup, cancellation or support fees on self-serve plans.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://acuityscheduling.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

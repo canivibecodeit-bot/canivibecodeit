@@ -17,7 +17,59 @@
     "source": "https://booklikeaboss.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Espresso",
+        "monthly": 10,
+        "annualPerMonth": 8.33,
+        "per": "flat",
+        "limits": "Unlimited free bookings/meetings, SMS reminders, group bookings, embeds and integrations",
+        "notes": "Freelancer plan; annual effective rate."
+      },
+      {
+        "name": "Mocha",
+        "monthly": 12,
+        "annualPerMonth": 10,
+        "per": "flat",
+        "limits": "Espresso features plus custom domain and removal of Book Like A Boss branding/footer",
+        "notes": "Freelancer plan."
+      },
+      {
+        "name": "Cappuccino",
+        "monthly": 20,
+        "annualPerMonth": 16.66,
+        "per": "flat",
+        "limits": "Paid bookings, coupons, events/classes, recurring appointments and memberships",
+        "notes": "Freelancer plan; does not include the full white-label/custom-domain bundle."
+      },
+      {
+        "name": "Latte",
+        "monthly": 30,
+        "annualPerMonth": 25,
+        "per": "flat",
+        "limits": "All sales features plus custom domain, removed branding and advanced customization",
+        "notes": "Freelancer plan."
+      },
+      {
+        "name": "Teams",
+        "monthly": null,
+        "annualPerMonth": 8.5,
+        "per": "user",
+        "limits": "Minimum 3 users; team scheduling/admin and 100 SMS credits per seat",
+        "notes": "Current official team page exposes $8.50/user/month billed yearly; exact month-to-month price was not exposed."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual for freelancer plans; Teams annual price exposed; 14-day trial, no card; subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Teams has a 3-seat minimum. Teams Pro costs an additional $5/seat/month and doubles SMS credits from 100 to 200 per seat while adding white-label/admin customization. Book Like A Boss takes 0% of sales, but Stripe/PayPal processing fees still apply.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.blab.co/pricing/freelancer",
+      "https://www.blab.co/pricing/teams",
+      "https://booklikeaboss.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

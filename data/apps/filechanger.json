@@ -16,7 +16,41 @@
     "confidence": "high",
     "notes": "Metered by input file size per month, not by conversion count. Pro is 99 USD/month for roughly 3.5x the document and image allowance.",
     "native": "39 USD",
-    "freeTier": "The free tier is real and permanent: 200 MB each of documents, images and audio per month, 50 MB of video, and API keys plus MCP access included."
+    "freeTier": "The free tier is real and permanent: 200 MB each of documents, images and audio per month, 50 MB of video, and API keys plus MCP access included.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "200 MB documents + 200 MB images + 200 MB audio + 50 MB video per calendar month; about 200 document conversions; API keys and MCP access",
+        "notes": null
+      },
+      {
+        "name": "Starter",
+        "monthly": 39,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Per month: 100 GB documents, 100 GB images, 50 GB audio, 10 GB video; about 100,000 document conversions; API + MCP",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 99,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Per month: 350 GB documents, 350 GB images, 200 GB audio, 50 GB video; about 350,000 document conversions; API + MCP",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "200 MB documents, 200 MB images, 200 MB audio and 50 MB video per calendar month; about 200 document conversions; API and MCP included",
+    "billingTerms": "monthly only; change or cancel any time through Polar",
+    "priceChanges": [],
+    "hiddenCosts": "Allowances are separate by format group and meter input bytes, not output size; no annual plan is published",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://filechanger.io/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

@@ -14,7 +14,58 @@
     "source": "https://runwayml.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing checked 2026-07-30; Standard plan listed at $15/month monthly and $12/month annually in public pricing references."
+    "notes": "Official pricing checked 2026-07-30; Standard plan listed at $15/month monthly and $12/month annually in public pricing references.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "125 one-time credits and 5 GB storage.",
+        "notes": null
+      },
+      {
+        "name": "Standard",
+        "monthly": 15,
+        "annualPerMonth": 12,
+        "per": "flat",
+        "limits": "625 credits/month, shown as about 52 seconds of Gen-4.5; watermark removal and 4K upscale.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 35,
+        "annualPerMonth": 28,
+        "per": "flat",
+        "limits": "2,250 credits/month, shown as about 187 seconds of Gen-4.5; 500 GB storage.",
+        "notes": null
+      },
+      {
+        "name": "Max",
+        "monthly": 95,
+        "annualPerMonth": 76,
+        "per": "flat",
+        "limits": "9,500 credits/month, shown as about 791 seconds of Gen-4.5; unused included credits can roll over for 1 month.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom credits, seats, security and support; public price is not listed.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "125 credits once, not monthly, plus 5 GB storage.",
+    "billingTerms": "monthly + annual (-20%)",
+    "priceChanges": [],
+    "hiddenCosts": "Standard and Pro included credits do not roll over; Max rolls them for only one month. Extra credit purchases start at 1,000 credits and do not expire.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://runwayml.com/pricing",
+      "https://help.runwayml.com/hc/en-us/articles/21668707517587-How-do-credits-work"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

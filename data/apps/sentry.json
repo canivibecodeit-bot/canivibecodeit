@@ -17,7 +17,49 @@
     "notes": "Official Team monthly base price before event usage.",
     "native": "29 USD",
     "kind": "usage-based",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Developer",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "workspace",
+        "limits": "1 user; unlimited projects; 5,000 errors; 5 GB logs; 5 GB app metrics; 5 million spans; 50 replays; 30-day retention",
+        "notes": "Permanent free plan."
+      },
+      {
+        "name": "Team",
+        "monthly": null,
+        "annualPerMonth": 26,
+        "per": "workspace",
+        "limits": "Unlimited users/projects; 50,000 errors; 5 GB logs; 5 GB app metrics; 5 million spans; 50 replays; up to 90-day retention",
+        "notes": "$26/month equivalent when billed annually; monthly-toggle amount was not exposed in the crawl."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 80,
+        "per": "workspace",
+        "limits": "Unlimited users/projects; Team base event allowances; 1,000 metric monitors; unlimited dashboards; business controls",
+        "notes": "$80/month equivalent when billed annually; monthly-toggle amount was not exposed in the crawl."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom event volumes, support, retention, security and contract terms",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "1 user; unlimited projects; 5,000 errors, 5 GB logs, 5 GB app metrics, 5 million spans and 50 replays/month; 1 uptime monitor, 1 cron monitor, 20 metric monitors, 1 GB attachments and 100 builds",
+    "billingTerms": "monthly + annual; published annual equivalents for Team and Business",
+    "priceChanges": [],
+    "hiddenCosts": "Errors, spans, replays and other event categories can overage separately; logs/app metrics are $0.50/GB, uptime alerts $1 each, cron monitors $0.78 each, profiling is metered, and Seer AI is a separate usage charge",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://sentry.io/pricing/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

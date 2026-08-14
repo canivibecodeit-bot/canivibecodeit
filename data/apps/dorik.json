@@ -6,18 +6,52 @@
   "category": "website-builder",
   "subcategory": "websites and landing pages",
   "tagline": "Build a small responsive site with pages, collections, and simple forms",
-  "priceMonthly": 19,
+  "priceMonthly": 29,
   "pricing": {
     "plan": "Personal",
     "basis": "monthly",
     "unit": "flat",
     "source": "https://dorik.com/pricing",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Personal monthly rate.",
-    "native": "19 USD",
+    "native": "29 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Personal",
+        "monthly": 29,
+        "annualPerMonth": 20.75,
+        "per": "flat",
+        "limits": "1 custom domain; 25 static pages; 200 blog posts; 5 CMS collections and 200 collection items; no collaborators",
+        "notes": "$249/year. A two-year commitment is advertised at $10.38/month equivalent; a separate $249 one-time lifetime offer was also live."
+      },
+      {
+        "name": "Business",
+        "monthly": 59,
+        "annualPerMonth": 41.5,
+        "per": "flat",
+        "limits": "3 custom domains; unlimited pages/blog posts/storage/bandwidth; 10 collaborators",
+        "notes": "$498/year. A two-year commitment is advertised at $20.75/month equivalent; a separate $599 one-time lifetime offer was also live."
+      },
+      {
+        "name": "Agency",
+        "monthly": 99,
+        "annualPerMonth": 79,
+        "per": "flat",
+        "limits": "Unlimited custom domains, pages, collaborators, blog posts, storage and bandwidth; agency white-label/client-billing features",
+        "notes": "$948/year; two-year and lifetime pricing are contact-sales/custom."
+      }
+    ],
+    "freeTierCaps": "no free tier; 7-day trial, with site count determined by the trialed plan",
+    "billingTerms": "monthly + annual; separate two-year and limited-time lifetime purchase options are also advertised",
+    "priceChanges": [],
+    "hiddenCosts": "Dorik does not sell domains; you must buy one separately. Lifetime Personal charges $199 one-time per additional website; Lifetime Business charges $149 per additional website and limits code export to 15/month.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://dorik.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

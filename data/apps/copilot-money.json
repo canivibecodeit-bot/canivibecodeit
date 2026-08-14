@@ -14,7 +14,26 @@
     "source": "https://apps.apple.com/us/app/copilot-track-budget-money/id1447330651",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Apple App Store pricing checked 2026-07-30; monthly subscription listed at $13 and yearly at $95."
+    "notes": "Apple App Store pricing checked 2026-07-30; monthly subscription listed at $13 and yearly at $95.",
+    "tiers": [
+      {
+        "name": "Copilot Money",
+        "monthly": 13,
+        "annualPerMonth": 7.92,
+        "per": "flat",
+        "limits": "All product features; 1 household subscription; no feature-based paid tiers",
+        "notes": "7-day free trial; annual price is $95/year."
+      }
+    ],
+    "freeTierCaps": "no free tier; interactive test drive before signup, then 7-day free trial",
+    "billingTerms": "monthly + annual (annual $95/year; 39% below monthly)",
+    "priceChanges": [],
+    "hiddenCosts": null,
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.copilot.money/#pricing-dark",
+      "https://apps.apple.com/us/app/copilot-track-budget-money/id1447330651"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

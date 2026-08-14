@@ -5,16 +5,58 @@
   "category": "no-code-apps",
   "subcategory": "app builder",
   "tagline": "No-code app builder for portals, dashboards, and mobile-style apps",
-  "priceMonthly": 60,
+  "priceMonthly": 25,
   "pricing": {
-    "plan": "Maker",
+    "plan": "GlideOS Solo",
     "basis": "monthly",
     "unit": "flat",
-    "native": "60 USD",
+    "native": "25 USD",
     "source": "https://www.glideapps.com/pricing",
-    "checkedOn": "2026-07-30",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
-    "notes": "Official pricing URL checked; public 2026 references list Maker around $49/month annual-effective and roughly $60/month monthly."
+    "notes": "Official pricing URL checked; public 2026 references list Maker around $49/month annual-effective and roughly $60/month monthly.",
+    "tiers": [
+      {
+        "name": "GlideOS Free",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "1 project; 1 app; 100 MB storage; 2 team members; credit allowance described only as limited",
+        "notes": "This is the current GlideOS product, separate from legacy Glide Classic subscriptions."
+      },
+      {
+        "name": "GlideOS Solo",
+        "monthly": 25,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "5 projects; unlimited apps; 25 GB storage; 2 team members; starts at 100 credits",
+        "notes": "Additional credit pricing is not publicly fixed on the page."
+      },
+      {
+        "name": "GlideOS Team",
+        "monthly": 125,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "20 projects; unlimited apps; 100 GB storage; 5 members; starts at 500 credits + 50 per extra member",
+        "notes": "Price includes 5 members."
+      },
+      {
+        "name": "GlideOS Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom projects, members, storage, credits, support and security",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "GlideOS: 1 project, 1 app, 100 MB storage and 2 team members; the official page calls the credit allowance 'limited' without a numeric cap",
+    "billingTerms": "monthly only on the current GlideOS page; no annual price shown",
+    "priceChanges": [],
+    "hiddenCosts": "GlideOS credits are a separate consumption meter and higher usage may require add-ons; the current GlideOS subscription is not the same product as Glide Classic, which can require a separate legacy subscription",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.glideapps.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

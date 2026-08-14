@@ -17,7 +17,49 @@
     "notes": "Official Basic monthly user price.",
     "native": "8 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 8,
+        "annualPerMonth": 6.67,
+        "per": "user",
+        "limits": "3 months of data history; core time tracking and reports.",
+        "notes": "Annual total $80/user."
+      },
+      {
+        "name": "Standard",
+        "monthly": 14,
+        "annualPerMonth": 11.67,
+        "per": "user",
+        "limits": "6 months of data history; expanded integrations and productivity features.",
+        "notes": "Annual total $140/user."
+      },
+      {
+        "name": "Premium",
+        "monthly": 20,
+        "annualPerMonth": 16.7,
+        "per": "user",
+        "limits": "2 years of data history; advanced monitoring, reporting, and controls.",
+        "notes": "Annual total $200/user."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom history, security, onboarding, and support.",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual; 14-day Premium trial; Enterprise custom",
+    "priceChanges": [],
+    "hiddenCosts": "Software Cost Insights is a separate $3/user/month add-on; other add-ons may be quote-based; taxes/Paddle charges can apply, and annual downgrades typically create account credit rather than a cash refund.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://timedoctor.com/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

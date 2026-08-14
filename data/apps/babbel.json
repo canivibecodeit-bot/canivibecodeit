@@ -6,18 +6,97 @@
   "category": "education",
   "subcategory": "learning, flashcards and language practice",
   "tagline": "Build a personal lesson and review tool from user-supplied material",
-  "priceMonthly": 14.95,
+  "priceMonthly": 8.95,
   "pricing": {
-    "plan": "Babbel subscription",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://babbel.com/prices",
-    "checkedOn": "2026-07-31",
+    "plan": "Individual, 12 months",
+    "basis": "annual billing, per user per month",
+    "unit": "per-seat",
+    "source": "https://my.babbel.com/en/prices",
+    "checkedOn": "2026-08-12",
     "confidence": "medium",
     "notes": "Typical one-month subscription price; regional offers vary.",
-    "native": "14.95 USD",
+    "native": "8.95 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free access",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "flat",
+        "limits": "1 introductory lesson from every course; free account; no full-course access",
+        "notes": "Babbel does not publish a fixed total lesson count because the number of courses varies by language."
+      },
+      {
+        "name": "Individual, 1 month",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 learner; full self-study content for the purchased language or all languages, depending on checkout offer",
+        "notes": "The official help center confirms a monthly renewal option, but the current US amount was not exposed in accessible official checkout content."
+      },
+      {
+        "name": "Individual, 3 months",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 learner; prepaid 3-month access; full self-study content for the purchased language or all languages, depending on checkout offer",
+        "notes": "The duration is officially offered, but the current US amount was not exposed in accessible official checkout content."
+      },
+      {
+        "name": "Individual, 6 months",
+        "monthly": 13.45,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 learner; billed $80.70 every 6 months; full self-study content for the purchased language or all languages, depending on checkout offer",
+        "notes": "Effective monthly rate on the live US pricing page; this is not a month-to-month plan."
+      },
+      {
+        "name": "Individual, 12 months",
+        "monthly": null,
+        "annualPerMonth": 8.95,
+        "per": "user",
+        "limits": "1 learner; billed $107.40 yearly; full self-study content for the purchased language or all languages, depending on checkout offer",
+        "notes": null
+      },
+      {
+        "name": "Individual, Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "1 learner; permanent access; one-time $299.99; 14 languages on the live US offer",
+        "notes": "One-time purchase, not a monthly or annual subscription."
+      },
+      {
+        "name": "Group, 1 month",
+        "monthly": 30.95,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Up to 6 learners; 14 languages; separate accounts and private progress",
+        "notes": "Flat price for the whole group."
+      },
+      {
+        "name": "Group, 12 months",
+        "monthly": null,
+        "annualPerMonth": 15.48,
+        "per": "flat",
+        "limits": "Up to 6 learners; 14 languages; billed $185.70 yearly",
+        "notes": "Flat price for the whole group; about $15.48/month."
+      }
+    ],
+    "freeTierCaps": "1 introductory lesson from every course; the number of courses varies by language",
+    "billingTerms": "1-, 3-, 6-, and 12-month prepaid auto-renewing terms + one-time Lifetime; Group monthly or annual; full term charged upfront",
+    "priceChanges": [],
+    "hiddenCosts": "Prices vary by location, platform, language-access bundle, tax, and promotion; Group members with an existing individual subscription must cancel it separately or both can run in parallel.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://my.babbel.com/en/prices",
+      "https://support.babbel.com/hc/en-gb/articles/19650417983378-Pricing",
+      "https://support.babbel.com/hc/en-gb/articles/205600328-Timing-of-subscription-payments",
+      "https://www.babbel.com/babbel-group-plan",
+      "https://support.babbel.com/hc/en-us/articles/33214529861266-Group-Plan-for-family-and-friends",
+      "https://www.babbel.com/"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -14,7 +14,72 @@
     "source": "https://todoist.com/pricing",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official pricing/help checked 2026-07-30; Pro monthly changed to $7/month and $5/month annually from Dec 10, 2025."
+    "notes": "Official pricing/help checked 2026-07-30; Pro monthly changed to $7/month and $5/month annually from Dec 10, 2025.",
+    "tiers": [
+      {
+        "name": "Beginner",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "5 personal projects; 3 filters; 1 week of activity history; 5 MB files; 5 people/project.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": 7,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "300 personal projects; 150 filters; 100 MB files; unlimited activity history; 5 people/project.",
+        "notes": null
+      },
+      {
+        "name": "Business",
+        "monthly": 10,
+        "annualPerMonth": 8,
+        "per": "user",
+        "limits": "300 personal projects/member; 500 team projects; 250 people/team project; 1,000 members + 1,000 guests.",
+        "notes": null
+      }
+    ],
+    "freeTierCaps": "5 personal projects; 3 filters; 1 week of activity history; 5 MB files; 5 people/project.",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [
+      {
+        "what": "Pro monthly",
+        "fromUsd": 5,
+        "toUsd": 7,
+        "when": "2025-12",
+        "source": "https://www.todoist.com/help/articles/todoist-pro-pricing-update-in-2025-bxBvHZuJZ"
+      },
+      {
+        "what": "Pro annual per month",
+        "fromUsd": 4,
+        "toUsd": 5,
+        "when": "2025-12",
+        "source": "https://www.todoist.com/help/articles/todoist-pro-pricing-update-in-2025-bxBvHZuJZ"
+      },
+      {
+        "what": "Business monthly",
+        "fromUsd": 8,
+        "toUsd": 10,
+        "when": "2025-12",
+        "source": "https://www.todoist.com/help/articles/todoist-business-plan-pricing-update-dF5in65YM"
+      },
+      {
+        "what": "Business annual per month",
+        "fromUsd": 6,
+        "toUsd": 8,
+        "when": "2025-12",
+        "source": "https://www.todoist.com/help/articles/todoist-business-plan-pricing-update-dF5in65YM"
+      }
+    ],
+    "hiddenCosts": "Business charges per member; taxes can apply.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://todoist.com/pricing",
+      "https://www.todoist.com/help/articles/todoist-pro-pricing-update-in-2025-bxBvHZuJZ",
+      "https://www.todoist.com/help/articles/todoist-business-plan-pricing-update-dF5in65YM"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

@@ -17,7 +17,33 @@
     "source": "https://blackbox.ai/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Pay as you go",
+        "monthly": 0,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "No monthly platform or seat commitment; prepaid token usage across 300+ models.",
+        "notes": "This is not free usage. Example published rates include GLM-5.2 at $1.40/M input tokens, $4.40/M output and $0.26/M cached input; exact rates vary by model."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom annual token commitment, procurement and volume pricing.",
+        "notes": "Published examples advertise discounts of at least 5% on closed models and at least 10% on open models."
+      }
+    ],
+    "freeTierCaps": "no free tier; the $0 pay-as-you-go commitment still requires prepaid metered usage",
+    "billingTerms": "prepaid pay as you go; Enterprise uses an annual committed-spend contract",
+    "priceChanges": [],
+    "hiddenCosts": "Every model has separate input, output and cache rates; unused Enterprise commitment expires at the end of the contract period.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.blackbox.ai/pricing"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "medium",

@@ -6,18 +6,85 @@
   "category": "dev-tools",
   "subcategory": "AI coding agents and developer workspaces",
   "tagline": "Build a VS Code extension that proposes and applies reviewed multi-file patches",
-  "priceMonthly": 15,
+  "priceMonthly": 20,
   "pricing": {
     "plan": "Pro",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://windsurf.com/pricing",
-    "checkedOn": "2026-07-31",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://devin.ai/blog/windsurf-pricing-plans",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Pro monthly tier; packaging can change rapidly.",
-    "native": "15 USD",
+    "native": "20 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Light daily and weekly agent quotas; exact numeric allowance is not published; unlimited inline edits and Tab.",
+        "notes": "Limited model selection."
+      },
+      {
+        "name": "Pro",
+        "monthly": 20,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Daily and weekly quotas; estimated daily messages vary by model: 7-27 Premium Plus, 8-101 Premium, or 47-190 Lightweight.",
+        "notes": "Additional usage is charged at the selected model's API price."
+      },
+      {
+        "name": "Teams",
+        "monthly": 40,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Same published model-dependent estimated daily ranges as Pro, with team administration.",
+        "notes": "Additional usage is charged at the selected model's API price."
+      },
+      {
+        "name": "Max",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Estimated daily messages: 42-170 Premium Plus, 47-631 Premium, or 291-1,190 Lightweight.",
+        "notes": "Additional usage is charged at the selected model's API price."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Custom ACU allocation, controls and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "light daily and weekly quotas with no published numeric amount; unlimited inline edits and Tab completion",
+    "billingTerms": "current public plans are monthly; legacy annual subscriptions may remain until renewal",
+    "priceChanges": [
+      {
+        "what": "Pro per user per month",
+        "fromUsd": 15,
+        "toUsd": 20,
+        "when": "2026-03",
+        "source": "https://devin.ai/blog/windsurf-pricing-plans"
+      },
+      {
+        "what": "Teams per user per month",
+        "fromUsd": 30,
+        "toUsd": 40,
+        "when": "2026-03",
+        "source": "https://devin.ai/blog/windsurf-pricing-plans"
+      }
+    ],
+    "hiddenCosts": "Daily and weekly quotas both apply and reset separately; extra usage is model-priced. Existing $15 Pro and $30 Teams customers were explicitly grandfathered, so two customers can pay different prices for the same named plan.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://devin.ai/blog/windsurf-pricing-plans",
+      "https://docs.devin.ai/desktop/accounts/quota",
+      "https://docs.devin.ai/desktop/accounts/usage"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

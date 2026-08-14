@@ -17,7 +17,33 @@
     "notes": "Official monthly Premium price.",
     "native": "5.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited saved articles, videos, pages, devices and folders; 5 notes/month.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 5.99,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "Unlimited notes; full-text search; permanent archive; PDF support.",
+        "notes": "Annual total is $59.99."
+      }
+    ],
+    "freeTierCaps": "unlimited saves, devices and folders; 5 notes/month",
+    "billingTerms": "monthly + annual",
+    "priceChanges": [],
+    "hiddenCosts": null,
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://www.instapaper.com/premium"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

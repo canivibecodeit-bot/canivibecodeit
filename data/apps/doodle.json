@@ -6,18 +6,63 @@
   "category": "scheduling",
   "subcategory": "booking links and calendar automation",
   "tagline": "Run group availability polls and convert the selected option into a calendar event",
-  "priceMonthly": 14.95,
+  "priceMonthly": 15,
   "pricing": {
     "plan": "Pro",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://doodle.com/en/pricing",
-    "checkedOn": "2026-07-31",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://help.doodle.com/en/articles/9457366-how-much-does-doodle-cost",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
     "notes": "Typical Pro monthly rate; annual billing can be lower.",
-    "native": "14.95 USD",
+    "native": "15 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "1 Booking Page, 1 one-to-one page, max 10 time slots/group poll, max 20 sessions/sign-up sheet and up to 1,000 participants/group poll",
+        "notes": "Invitations must be shared manually; sending invitations from Doodle requires paid Professional."
+      },
+      {
+        "name": "Pro",
+        "monthly": 15,
+        "annualPerMonth": 11,
+        "per": "user",
+        "limits": "1 user; unlimited group polls, one-to-ones, Booking Pages and sign-up sheets; up to 1,000 participants/group poll",
+        "notes": "Annual plan is billed $132/year."
+      },
+      {
+        "name": "Team",
+        "monthly": 21,
+        "annualPerMonth": 16,
+        "per": "user",
+        "limits": "2–100 seats, unlimited scheduling per user and up to 5 hosts per Booking Page",
+        "notes": "Minimum 2 paid users."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "More than 100 users, SSO/SAML, dedicated account management, advanced reporting and SLA",
+        "notes": "Custom quote."
+      }
+    ],
+    "freeTierCaps": "1 Booking Page, 1 one-to-one page, 10 time slots/group poll, 20 sessions/sign-up sheet and up to 1,000 participants/group poll",
+    "billingTerms": "monthly + annual; subscriptions auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Team has a 2-seat minimum. Annual subscribers can request a full refund within 14 days; monthly refunds are limited to rights required by law. Enterprise features and pricing require a quote.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://help.doodle.com/en/articles/9457366-how-much-does-doodle-cost",
+      "https://help.doodle.com/en/articles/10448913-doodle-free-and-doodle-professional-differences-at-a-glance",
+      "https://help.doodle.com/en/articles/13038481-team-plan-benefits-and-pricing-options",
+      "https://doodle.com/en/professional/enterprise/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

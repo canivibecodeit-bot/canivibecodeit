@@ -17,7 +17,57 @@
     "source": "https://gitkraken.com/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Community",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Maximum 1 seat; local repositories and public remotes; no bundled GitKraken AI credits.",
+        "notes": null
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Up to 2 seats; private repositories; up to 1,000,000 AI credits/user/week.",
+        "notes": "Annual-only standard price is $10/seat/month effective; the first seat displayed a temporary $6/month-equivalent promotion at verification."
+      },
+      {
+        "name": "Advanced",
+        "monthly": null,
+        "annualPerMonth": 14,
+        "per": "user",
+        "limits": "Up to 10 seats; 2,000,000 AI credits/user/week; 20% of each seat's weekly credits enters an organization pool.",
+        "notes": "Paid annually."
+      },
+      {
+        "name": "Business",
+        "monthly": null,
+        "annualPerMonth": 18,
+        "per": "user",
+        "limits": "Up to 100 seats; 3,000,000 AI credits/user/week; 20% of each seat's weekly credits enters an organization pool.",
+        "notes": "Paid annually."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "20+ seats; up to 4,000,000 AI credits/user/week; custom terms and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "1 seat; local repositories and public remotes only; 0 bundled GitKraken AI credits",
+    "billingTerms": "paid plans are annual only; new seats are prorated to the shared annual renewal date",
+    "priceChanges": [],
+    "hiddenCosts": "AI credits reset each Sunday UTC with no rollover; optional add-on credit pricing is not publicly stated; listed prices exclude tax.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.gitkraken.com/pricing"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "medium",

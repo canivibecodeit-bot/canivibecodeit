@@ -6,18 +6,53 @@
   "category": "seo-marketing",
   "subcategory": "SEO auditing",
   "tagline": "Website reviews, crawling, keyword tracking, competitive analysis, and reporting",
-  "priceMonthly": 99.99,
+  "priceMonthly": 89.99,
   "pricing": {
     "plan": "Pro",
     "kind": "fixed",
-    "basis": "monthly SEO plan",
+    "basis": "monthly",
     "unit": "flat",
     "currency": "USD",
-    "native": "$99.99/month",
-    "source": "https://woorank.com/pricing",
-    "checkedOn": "2026-07-31",
+    "native": "89.99 USD",
+    "source": "https://www.woorank.com/en/p/pricing",
+    "checkedOn": "2026-08-14",
     "confidence": "medium",
-    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication."
+    "notes": "Working normalization from the official public pricing structure. Recheck the source page immediately before publication.",
+    "tiers": [
+      {
+        "name": "Pro",
+        "monthly": 89.99,
+        "annualPerMonth": 53.25,
+        "per": "workspace",
+        "limits": "1 website; 50 tracked keywords; 2,500 crawl pages/site; 2,500 API calls/month; 100 page reviews.",
+        "notes": null
+      },
+      {
+        "name": "Premium",
+        "monthly": 199.99,
+        "annualPerMonth": 133.25,
+        "per": "workspace",
+        "limits": "5 websites; 250 tracked keywords; 10,000 crawl pages/site; 5,000 API calls/month.",
+        "notes": null
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Custom websites, users, keywords, crawl capacity, API calls, reporting, and support.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier (3-day trial only)",
+    "billingTerms": "monthly + annual; annual is billed upfront",
+    "priceChanges": [],
+    "hiddenCosts": "Additional users, higher API volume, and expanded site/keyword limits require Enterprise or a custom quote; public overage unit rates are not shown.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.woorank.com/en/p/pricing",
+      "https://www.woorank.com/en/release-notes/2024"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

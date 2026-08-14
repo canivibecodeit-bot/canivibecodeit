@@ -17,7 +17,41 @@
     "notes": "Typical Standard seat price; annual billing can be lower.",
     "native": "10 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": null,
+        "annualPerMonth": 10,
+        "per": "user",
+        "limits": "Unlimited documents; 200 MB per file; 5 GB storage/user; 30 Ask questions/seat/month; 30 AI edits/user/month.",
+        "notes": "Public page exposes $10/user/month billed annually; a month-to-month price was not exposed."
+      },
+      {
+        "name": "Pro",
+        "monthly": null,
+        "annualPerMonth": 20,
+        "per": "user",
+        "limits": "Unlimited file-upload size; 10 GB storage/user; 50 monthly AI credits/seat; unlimited AI edits.",
+        "notes": "Public page exposes $20/user/month billed annually; a month-to-month price was not exposed."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "10 GB storage/user; reader-only seats and enterprise security; numeric seat minimum and price are quote-based.",
+        "notes": "Contact sales."
+      }
+    ],
+    "freeTierCaps": "no free tier; 14-day trial with no card, then a paid plan is required",
+    "billingTerms": "monthly + annual; live public page exposes annual rates only",
+    "priceChanges": [],
+    "hiddenCosts": "seats added during a term are charged on the next invoice or prorated; removing seats reduces only the next renewal rather than the current annual commitment",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://slite.com/pricing"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

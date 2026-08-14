@@ -17,7 +17,51 @@
     "notes": "Typical Meet monthly licence price.",
     "native": "14.5 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Webex Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Meetings up to 40 minutes and 100 attendees; unlimited meetings; local recording",
+        "notes": null
+      },
+      {
+        "name": "Webex Meet",
+        "monthly": 14.5,
+        "annualPerMonth": 12,
+        "per": "user",
+        "limits": "Meetings up to 24 hours and 200 attendees; 10 GB cloud recording storage",
+        "notes": null
+      },
+      {
+        "name": "Webex Suite, Meet + Call",
+        "monthly": 25,
+        "annualPerMonth": 22.5,
+        "per": "user",
+        "limits": "Meetings up to 24 hours and 200 attendees; 10 GB cloud recording storage; cloud calling",
+        "notes": null
+      },
+      {
+        "name": "Webex Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Meetings up to 24 hours and 1,000 attendees; unlimited cloud recording storage",
+        "notes": "Contact sales"
+      }
+    ],
+    "freeTierCaps": "40 minutes per meeting; 100 attendees; unlimited meetings; local recording",
+    "billingTerms": "monthly + annual; annual Webex Meet is $144 per license and Meet + Call is $270 per license; annual plans are unavailable in Germany",
+    "priceChanges": [],
+    "hiddenCosts": "Each concurrent hosted meeting needs another host license. Real-Time Translation is $300/license/year; Call Me Domestic is $48/user/year and Call Me International is $429/user/year. International long-distance calling can also be metered per minute.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://pricing.webex.com/us/en/",
+      "https://pricing.webex.com/us/en/hybrid-work/meetings/all-features/",
+      "https://help.webex.com/en-us/article/nc4xp2eb/Upgrade-your-free-account-to-a-paid-plan"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

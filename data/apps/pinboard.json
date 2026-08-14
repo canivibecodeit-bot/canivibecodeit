@@ -17,7 +17,34 @@
     "notes": "Annual account price divided by 12; archival add-on costs extra.",
     "native": "1.83 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Regular account",
+        "monthly": null,
+        "annualPerMonth": 1.83,
+        "per": "user",
+        "limits": "Private bookmark archive with tags and notes; imports are capped at 40 MB/file.",
+        "notes": "Annual-only: $22/year."
+      },
+      {
+        "name": "Archiving account",
+        "monthly": null,
+        "annualPerMonth": 3.25,
+        "per": "user",
+        "limits": "Regular features plus saved page copies and full-text search.",
+        "notes": "Annual-only: $39/year."
+      }
+    ],
+    "freeTierCaps": "no free tier and no trial",
+    "billingTerms": "annual only; no month-to-month plan",
+    "priceChanges": [],
+    "hiddenCosts": "multi-year discounts may be offered at checkout but the current discount schedule is not published",
+    "tiersCheckedOn": "2026-08-13",
+    "tiersSources": [
+      "https://pinboard.in/tour/",
+      "https://pinboard.in/faq/"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",
