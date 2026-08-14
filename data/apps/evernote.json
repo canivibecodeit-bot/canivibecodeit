@@ -69,7 +69,26 @@
       "stars": 55800,
       "lastCommit": "2026-07",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Official desktop, mobile, or terminal package; optional Joplin Server via Docker",
+        "engines": null,
+        "dataFormat": "The app keeps notes and metadata in its local profile database, with Markdown bodies and resource attachments; JEX/raw exports are available, and optional sync copies encrypted items to Joplin Cloud, Dropbox, OneDrive, WebDAV, S3, or Joplin Server",
+        "gapVsPaid": "Joplin is less polished at document scanning, OCR, web clipping, email capture, and search across messy attachments than Evernote.",
+        "setupBlocker": "Local use installs cleanly; dependable multi-device use means choosing and configuring a sync target, then correctly enabling and preserving end-to-end-encryption keys",
+        "sources": [
+          "https://github.com/laurent22/joplin",
+          "https://github.com/laurent22/joplin/blob/dev/LICENSE",
+          "https://joplinapp.org/help/apps/import_export",
+          "https://joplinapp.org/help/apps/sync/",
+          "https://joplinapp.org/help/apps/sync/e2ee/",
+          "https://evernote.com/",
+          "https://evernote.com/compare-plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Notesnook",
@@ -89,7 +108,26 @@
       "stars": 14400,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0 (client); AGPL-3.0 (sync server)",
+        "runs": "both",
+        "install": "Hosted web/desktop/mobile app, or an experimental Docker self-hosted sync stack",
+        "engines": null,
+        "dataFormat": "Notes are encrypted on the device and the hosted or self-hosted sync service stores encrypted per-item data; local app data remains on-device and encrypted .nnbackupz backups can be exported",
+        "gapVsPaid": "Notesnook prioritizes encrypted notes but has a less mature task, calendar, scanning, web-clipping, and integration ecosystem than Evernote.",
+        "setupBlocker": "Hosted use installs cleanly; self-hosting is explicitly experimental and requires Docker plus MongoDB, MinIO/S3-compatible storage, secrets, backups, and client endpoint configuration",
+        "sources": [
+          "https://github.com/streetwriters/notesnook",
+          "https://github.com/streetwriters/notesnook/blob/master/LICENSE",
+          "https://github.com/streetwriters/notesnook-sync-server",
+          "https://github.com/streetwriters/notesnook-sync-server/blob/master/LICENSE",
+          "https://help.notesnook.com/self-hosting-notesnook/",
+          "https://evernote.com/",
+          "https://evernote.com/compare-plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "SiYuan",
@@ -108,7 +146,26 @@
       "stars": 45647,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0",
+        "runs": "both",
+        "install": "Desktop/mobile package, or Docker image for browser-based self-hosting",
+        "engines": "Built-in AI features connect to OpenAI-compatible APIs using a configured endpoint and key",
+        "dataFormat": "A workspace stores block documents as structured .sy JSON files plus assets on disk; SQLite files hold indexes and auxiliary state; documents can export to Markdown, HTML, PDF, and Word",
+        "gapVsPaid": "SiYuan is stronger at structured knowledge than frictionless capture, and its mobile scanning, web clipping, OCR, and turnkey sync are weaker than Evernote's.",
+        "setupBlocker": "The desktop app installs cleanly, but free cross-device sync is not a turnkey feature: official cloud sync is a paid membership feature and Docker hosting does not transparently become desktop/mobile sync",
+        "sources": [
+          "https://github.com/siyuan-note/siyuan",
+          "https://github.com/siyuan-note/siyuan/blob/master/LICENSE",
+          "https://github.com/siyuan-note/siyuan/blob/master/README.md",
+          "https://b3log.org/siyuan/en/pricing.html",
+          "https://github.com/siyuan-note/siyuan/tree/master/app",
+          "https://evernote.com/",
+          "https://evernote.com/compare-plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

@@ -66,7 +66,25 @@
       "stars": 3431,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup, or upload the PHP package to a web host and complete its browser installer",
+        "engines": null,
+        "dataFormat": "Site content and settings in a supported SQL database; images and other uploads in server storage",
+        "gapVsPaid": "Microweber gives up Squarespace's consistently polished templates, managed infrastructure and one-vendor support.",
+        "setupBlocker": "Self-hosting needs compatible PHP extensions, URL rewriting, a database and correct filesystem permissions",
+        "sources": [
+          "https://github.com/microweber/microweber",
+          "https://github.com/microweber/microweber/blob/master/LICENSE",
+          "https://github.com/microweber/microweber/blob/master/composer.json",
+          "https://microweber.com/download",
+          "https://github.com/microweber/microweber-user-guide",
+          "https://www.squarespace.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Odoo Community",
@@ -81,7 +99,24 @@
       "stars": 53527,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "LGPL-3.0-only",
+        "runs": "self-hosted",
+        "install": "Use Odoo's packaged installer, source install or Docker image, backed by PostgreSQL",
+        "engines": null,
+        "dataFormat": "Business and website records in PostgreSQL; uploaded attachments in Odoo's filestore",
+        "gapVsPaid": "Odoo Community is an enormous ERP with a less elegant site-design experience and much heavier administration than Squarespace.",
+        "setupBlocker": "A production deployment needs PostgreSQL, workers/reverse proxy configuration, backups and ongoing administration of a very large suite",
+        "sources": [
+          "https://github.com/odoo/odoo",
+          "https://github.com/odoo/odoo/blob/19.0/LICENSE",
+          "https://www.odoo.com/documentation/19.0/administration/on_premise/packages.html",
+          "https://www.odoo.com/documentation/19.0/administration/on_premise/source.html",
+          "https://www.squarespace.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Vvveb",
@@ -96,7 +131,24 @@
       "stars": 1200,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Download and upload the PHP release, open the site URL, and complete the browser installer",
+        "engines": null,
+        "dataFormat": "Content, products, orders and settings in MySQL/MariaDB, SQLite or PostgreSQL; media and downloadable files on the server filesystem",
+        "gapVsPaid": "Vvveb lacks Squarespace's template polish, managed hosting, integrated support and calm one-vendor experience.",
+        "setupBlocker": "PHP hosting, a database, writable files, mail and payment configuration, plus ongoing server updates",
+        "sources": [
+          "https://github.com/givanz/Vvveb",
+          "https://github.com/givanz/Vvveb/blob/master/LICENSE",
+          "https://www.vvveb.com",
+          "https://docs.vvveb.com/",
+          "https://www.squarespace.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "WooCommerce",

@@ -71,7 +71,24 @@
       "stars": 1300,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "LGPL-2.1-only",
+        "runs": "self-hosted",
+        "install": "Official Docker Compose stack, Debian package, or Java application-server distribution",
+        "engines": null,
+        "dataFormat": "Wiki documents, objects, users, metadata, and usually attachments in a relational database; configuration, extensions, caches, and optional attachment files in the permanent directory",
+        "gapVsPaid": "It can approach Confluence's depth, but doing so carries a much heavier Java/Solr/database administration burden and less seamless Atlassian ecosystem integration.",
+        "setupBlocker": "The production setup is a heavyweight Java service with a database, permanent storage, Solr, backups, and TLS to administer",
+        "sources": [
+          "https://github.com/xwiki/xwiki-platform",
+          "https://github.com/xwiki/xwiki-platform/blob/master/LICENSE",
+          "https://www.xwiki.org/xwiki/bin/view/Documentation/AdminGuide/Installation/",
+          "https://hub.docker.com/_/xwiki",
+          "https://www.atlassian.com/software/confluence/features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Docmost",
@@ -86,7 +103,24 @@
       "stars": 21300,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "both",
+        "install": "Hosted signup or Docker Compose with PostgreSQL and Redis",
+        "engines": null,
+        "dataFormat": "Pages, users, comments, and history in PostgreSQL; jobs/cache in Redis; attachments in a persistent local volume by default or S3/Azure Blob",
+        "gapVsPaid": "It is simpler and faster, but has fewer enterprise macros, workflow controls, templates, marketplace integrations and Jira-native connections than Confluence.",
+        "setupBlocker": "Self-hosting requires Docker, a strong APP_SECRET, database credentials, persistent volumes, and normally a domain, TLS reverse proxy, and SMTP",
+        "sources": [
+          "https://github.com/docmost/docmost",
+          "https://github.com/docmost/docmost/blob/main/LICENSE",
+          "https://github.com/docmost/docmost/blob/main/docker-compose.yml",
+          "https://docmost.com/docs/self-hosting/configuration/",
+          "https://www.atlassian.com/software/confluence/features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "BookStack",
@@ -101,7 +135,24 @@
       "stars": 18971,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Fresh Ubuntu install script or manual PHP/MySQL setup",
+        "engines": null,
+        "dataFormat": "Pages, users, permissions, and settings in MySQL/MariaDB; uploaded images and files in the server filesystem or configured object storage",
+        "gapVsPaid": "Its compulsory shelf/book/chapter structure and smaller extension surface are far less flexible than Confluence spaces, macros, databases, whiteboards and Jira-connected workflows.",
+        "setupBlocker": "The official script expects a fresh Ubuntu host; manual installs require PHP extensions, a database, writable storage, mail, and TLS",
+        "sources": [
+          "https://github.com/BookStackApp/BookStack",
+          "https://github.com/BookStackApp/BookStack/blob/development/LICENSE",
+          "https://www.bookstackapp.com/docs/admin/installation/",
+          "https://www.bookstackapp.com/docs/admin/filesystem-permissions/",
+          "https://www.atlassian.com/software/confluence/features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Wiki.js",
@@ -116,7 +167,24 @@
       "stars": 28700,
       "lastCommit": "2026-05",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "self-hosted",
+        "install": "Docker Compose with PostgreSQL, or a Node.js package plus a supported database",
+        "engines": null,
+        "dataFormat": "Pages, users, authentication data, and history in the configured database; optional storage modules can mirror content and assets to Git, local disk, or cloud storage",
+        "gapVsPaid": "It lacks Confluence's mature enterprise templates, macros, whiteboards, marketplace and Atlassian integrations, while shifting hosting and upgrades to you.",
+        "setupBlocker": "You must provision a database and persistent volumes, then configure backups and a TLS reverse proxy for public use",
+        "sources": [
+          "https://github.com/requarks/wiki",
+          "https://github.com/requarks/wiki/blob/main/LICENSE",
+          "https://docs.requarks.io/install/docker",
+          "https://github.com/requarks/wiki/blob/main/config.sample.yml",
+          "https://www.atlassian.com/software/confluence/features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

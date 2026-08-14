@@ -73,7 +73,26 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup or desktop app; Docker Compose for self-hosting",
+        "engines": "Self-hosted AFFiNE AI can be configured with OpenAI, Anthropic, Google Gemini, and FAL credentials",
+        "dataFormat": "Local-first clients keep workspace data locally and sync to AFFiNE Cloud or the operator's server; self-hosting uses PostgreSQL, Redis, and persistent blob storage",
+        "gapVsPaid": "AFFiNE's canvas is less visually refined and template-rich for moodboards, creative references, and client-ready project presentation than Milanote.",
+        "setupBlocker": "The hosted/desktop app installs cleanly; self-hosting is a multi-service Docker deployment that needs a domain, TLS, secrets, storage, backups, and AI-provider keys for AI features",
+        "sources": [
+          "https://github.com/toeverything/AFFiNE",
+          "https://github.com/toeverything/AFFiNE/blob/canary/LICENSE",
+          "https://docs.affine.pro/self-host-affine/",
+          "https://docs.affine.pro/self-host-affine/install/requirements",
+          "https://docs.affine.pro/self-host-affine/administer/ai",
+          "https://milanote.com/",
+          "https://milanote.com/plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Apple Freeform",
@@ -88,7 +107,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "both",
+        "install": "Built into supported Apple devices or installed from Apple's App Store",
+        "engines": null,
+        "dataFormat": "Boards live on the Apple device and, when iCloud sync is enabled, in the user's iCloud account; boards can be exported as PDF",
+        "gapVsPaid": "Freeform lacks Milanote's structured columns, task lists, project templates, board organization, and browser-accessible creative workflow.",
+        "setupBlocker": "An iPhone, iPad, or Mac is required, and real-time collaboration requires Apple Account/iCloud access",
+        "sources": [
+          "https://apps.apple.com/us/app/freeform/id6443742539",
+          "https://support.apple.com/en-in/guide/icloud/mm5e6cc7c61d/icloud",
+          "https://support.apple.com/en-in/guide/ipad/ipadfde4a50f/ipados",
+          "https://milanote.com/",
+          "https://milanote.com/plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Obsidian",
@@ -106,7 +142,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "local",
+        "install": "Official desktop or mobile installer",
+        "engines": null,
+        "dataFormat": "Each vault is an ordinary folder of Markdown files plus local attachments and configuration; optional paid Obsidian Sync stores end-to-end-encrypted replicas in Obsidian's service",
+        "gapVsPaid": "Obsidian Canvas has weaker media-board presentation, templating, card organization, and real-time collaboration than Milanote's purpose-built creative boards.",
+        "setupBlocker": null,
+        "sources": [
+          "https://obsidian.md/pricing",
+          "https://obsidian.md/download",
+          "https://help.obsidian.md/Files+and+folders/How+Obsidian+stores+data",
+          "https://help.obsidian.md/Obsidian+Sync/Security+and+privacy",
+          "https://milanote.com/",
+          "https://milanote.com/plans"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

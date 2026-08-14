@@ -66,7 +66,24 @@
       "stars": 21100,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "local",
+        "install": "Desktop installer",
+        "engines": "OpenAI, Anthropic, Google Gemini, OpenRouter-compatible providers and local Ollama",
+        "dataFormat": "Generated project source and app metadata stay on the computer; prompts and selected context go to the chosen provider unless a local model is used",
+        "gapVsPaid": "It has no managed browser sandbox, instant public hosting or one-click deployment comparable to Bolt, so you own the local environment and deployment.",
+        "setupBlocker": "A model-provider API key or a separately installed and configured local Ollama model",
+        "sources": [
+          "https://github.com/dyad-sh/dyad",
+          "https://github.com/dyad-sh/dyad/blob/main/LICENSE",
+          "https://github.com/dyad-sh/dyad/tree/main/src/pro",
+          "https://www.dyad.sh/docs",
+          "https://bolt.new/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Onlook",
@@ -81,7 +98,24 @@
       ],
       "desc": "Open source visual builder on a real React codebase; the grown-up sibling of the browser sandbox.",
       "selfHost": "docker",
-      "checkedOn": "2026-08-07"
+      "checkedOn": "2026-08-07",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Hosted signup, or self-host with Bun or Docker plus Supabase configuration",
+        "engines": "OpenRouter plus configurable code-edit services such as Morph or Relace",
+        "dataFormat": "Project code lives in the workspace or sandbox; application metadata and assets use the configured Supabase instance",
+        "gapVsPaid": "It is narrower and more design-first, with less mature prompt-to-full-stack generation and deployment than Bolt's browser workspace.",
+        "setupBlocker": "Hosted access may be gated; self-hosting needs Bun or Docker, Supabase and several environment variables",
+        "sources": [
+          "https://github.com/onlook-dev/onlook",
+          "https://github.com/onlook-dev/onlook/blob/main/LICENSE",
+          "https://docs.onlook.com/",
+          "https://onlook.com/",
+          "https://bolt.new/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "open-lovable",
@@ -96,7 +130,23 @@
       ],
       "desc": "Same prompt-to-app loop in a cloud sandbox, powered by your own model keys.",
       "selfHost": "ops",
-      "checkedOn": "2026-08-07"
+      "checkedOn": "2026-08-07",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Clone the repo, install with pnpm, add service keys to .env and run the Next.js development server",
+        "engines": "Gemini, Anthropic, OpenAI or Groq; Firecrawl for extraction; Vercel or E2B sandboxes; optional Morph",
+        "dataFormat": "Generated React source lives in the selected cloud sandbox; local configuration is in .env, and prompts or site content go to the selected services",
+        "gapVsPaid": "It is a developer-run example requiring several service keys, without Bolt's managed account, persistent workspace and integrated deploy experience.",
+        "setupBlocker": "Several model, extraction and sandbox service keys are needed before the complete workflow works",
+        "sources": [
+          "https://github.com/firecrawl/open-lovable",
+          "https://github.com/firecrawl/open-lovable/blob/main/LICENSE",
+          "https://github.com/firecrawl/open-lovable/blob/main/README.md",
+          "https://bolt.new/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

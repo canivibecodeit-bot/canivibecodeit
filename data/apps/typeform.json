@@ -66,7 +66,24 @@
       "stars": 8881,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Hosted signup or Docker self-hosting",
+        "engines": null,
+        "dataFormat": "Forms, logic and responses in MongoDB; queues and cache in Redis; uploads use configured server or object storage",
+        "gapVsPaid": "Its templates, visual refinement, analytics and integration ecosystem are less polished than Typeform's.",
+        "setupBlocker": "Self-hosting needs Docker, MongoDB, Redis, mail and persistent storage",
+        "sources": [
+          "https://github.com/heyform/heyform",
+          "https://github.com/heyform/heyform/blob/main/LICENSE",
+          "https://docs.heyform.net/open-source/self-hosting",
+          "https://heyform.net/",
+          "https://www.typeform.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Typebot",
@@ -81,7 +98,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "FSL-1.1-ALv2",
+        "runs": "both",
+        "install": "Hosted signup or Docker Compose",
+        "engines": "OpenAI blocks and other configured AI or API integrations",
+        "dataFormat": "Bots and responses in PostgreSQL; uploaded files in S3-compatible storage",
+        "gapVsPaid": "Its chatbot-first builder is excellent for branching conversations but weaker for conventional surveys, quizzes, reporting and Typeform-style presentation.",
+        "setupBlocker": "Self-hosting needs Docker, PostgreSQL, S3-compatible storage, SMTP and a public domain",
+        "sources": [
+          "https://github.com/baptisteArno/typebot.io",
+          "https://github.com/baptisteArno/typebot.io/blob/main/LICENSE",
+          "https://docs.typebot.io/self-hosting",
+          "https://typebot.io/",
+          "https://www.typeform.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Tally",
@@ -95,7 +129,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Forms and submissions live in Tally's cloud; submissions export as CSV or sync to Google Sheets",
+        "gapVsPaid": "Its free product is generous, but the presentation is less distinctly one-question-at-a-time and branding, custom domains and some team controls are paid.",
+        "setupBlocker": null,
+        "sources": [
+          "https://tally.so/help/plans-and-pricing",
+          "https://tally.so/help/export-form-submissions",
+          "https://tally.so/help/privacy-and-security",
+          "https://www.typeform.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "OpnForm",
@@ -110,7 +160,24 @@
       "stars": 3500,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Hosted signup or Docker Compose",
+        "engines": null,
+        "dataFormat": "Form data in PostgreSQL, sessions and queues in Redis, and uploads in local or S3-compatible storage",
+        "gapVsPaid": "Its conversational presentation, template polish, analytics and integration breadth are less mature than Typeform's.",
+        "setupBlocker": "Docker plus PostgreSQL, Redis, mail, a domain and persistent or object storage",
+        "sources": [
+          "https://github.com/OpnForm/OpnForm",
+          "https://github.com/OpnForm/OpnForm/blob/main/LICENSE",
+          "https://docs.opnform.com/deployment/docker",
+          "https://opnform.com/",
+          "https://www.typeform.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

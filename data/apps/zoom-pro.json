@@ -83,7 +83,26 @@
       "stars": 3100,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "both",
+        "install": "Use the public browser demo, or deploy the Ubuntu/Docker Compose stack with a domain, TLS, and exposed WebRTC ports",
+        "engines": null,
+        "dataFormat": "Live media is forwarded through the selected SFU and is not stored by default; optional recordings are WebM files in the configured recording directory or an S3-compatible bucket.",
+        "gapVsPaid": "MiroTalk has many meeting features, but it lacks Zoom's proven scale, native client ecosystem, dial-in network, enterprise administration, compliance portfolio, and managed support.",
+        "setupBlocker": "Self-hosting requires a public Ubuntu server, DNS/TLS, Docker or Node.js, a wide TCP/UDP media-port range, and usually TURN; free AGPL use also does not include unrestricted rebranding.",
+        "sources": [
+          "https://github.com/miroslavpejic85/mirotalksfu",
+          "https://github.com/miroslavpejic85/mirotalksfu/blob/main/LICENSE",
+          "https://docs.mirotalk.com/mirotalk-sfu/self-hosting/",
+          "https://docs.mirotalk.com/faq/",
+          "https://docs.mirotalk.com/overview/",
+          "https://github.com/miroslavpejic85/mirotalksfu/blob/main/.env.template",
+          "https://docs.mirotalk.com/mirotalk-sfu/rebranding/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Nextcloud Talk",
@@ -103,7 +122,25 @@
       "stars": 2200,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "self-hosted",
+        "install": "Enable the Talk app from the app store inside an existing Nextcloud server; add TURN and the High Performance Backend for harder networks or larger calls",
+        "engines": "Optional Nextcloud Assistant backends provide transcription, translation, and summaries; ordinary chat and calls do not require an AI model.",
+        "dataFormat": "Messages and call metadata live in the Nextcloud database, shared files live in the Nextcloud data store, and recordings/transcripts remain on the administrator's configured Nextcloud infrastructure.",
+        "gapVsPaid": "Nextcloud Talk is useful inside an existing Nextcloud, but large meetings, recording, dial-in, webinars, transcription, and enterprise-scale media reliability are well behind Zoom.",
+        "setupBlocker": "The apparent one-click install assumes a working Nextcloud server; reliable external calls then require TURN, while larger calls and webinars add the High Performance Backend and substantial networking work.",
+        "sources": [
+          "https://github.com/nextcloud/spreed",
+          "https://github.com/nextcloud/spreed/blob/main/COPYING",
+          "https://github.com/nextcloud/spreed#installing-for-production",
+          "https://nextcloud-talk.readthedocs.io/en/latest/TURN/",
+          "https://nextcloud-talk.readthedocs.io/en/latest/scalability/",
+          "https://nextcloud.com/talk/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

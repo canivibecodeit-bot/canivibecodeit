@@ -66,7 +66,27 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup, connect Google or Outlook Calendar, and install or authorize Fathom's meeting capture app or bot",
+        "engines": "Fathom's proprietary AI plus third-party subprocessors including Anthropic, OpenAI and Google; individual model names are not disclosed",
+        "dataFormat": "Meeting audio/video, transcripts, notes and calendar/attendee metadata in Fathom's US-hosted cloud; recordings remain until deleted on free plans and can be downloaded or exported",
+        "gapVsPaid": "Its free tier provides only a small number of advanced summaries each month, so structured notes and action-item extraction quickly become paid.",
+        "setupBlocker": "Authorizing calendar, microphone or screen capture and the visible meeting bot or beta bot-free recorder",
+        "sources": [
+          "https://www.fathom.ai/",
+          "https://www.fathom.ai/pricing",
+          "https://help.fathom.video/en/articles/5290881",
+          "https://help.fathom.video/en/articles/296448",
+          "https://help.fathom.video/en/articles/296512",
+          "https://fathom.video/privacy",
+          "https://help.fathom.video/en/articles/276608",
+          "https://minuteslink.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Muesli",
@@ -80,7 +100,25 @@
       "stars": 890,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "local",
+        "install": "Download the notarized macOS app, move it to Applications, grant audio/accessibility permissions and download an on-device model",
+        "engines": "Local ASR includes Parakeet, Nemotron, Cohere Transcribe, Whisper via WhisperKit, Qwen3 ASR, SenseVoice, Indic ASR and experimental Gemma; summaries use OpenAI, OpenRouter, ChatGPT OAuth or local Ollama",
+        "dataFormat": "Recordings, dictation history, transcripts, notes and model caches in local macOS app storage; optional iCloud sync sends text but not audio, and optional summary providers receive transcript text",
+        "gapVsPaid": "It is Apple-Silicon/macOS-only and the desktop app must be running, so it cannot replace a cross-platform calendar bot for a team.",
+        "setupBlocker": "Apple Silicon and several macOS permissions are mandatory; first use needs a model download, and cloud-quality summaries need an API key, ChatGPT login or local Ollama",
+        "sources": [
+          "https://muesli.works/",
+          "https://github.com/Muesli-HQ/muesli",
+          "https://github.com/Muesli-HQ/muesli/blob/main/LICENSE",
+          "https://muesli.works/local-first-ai",
+          "https://muesli.works/privacy",
+          "https://minuteslink.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "OpenWhispr",
@@ -96,7 +134,29 @@
       "stars": 5223,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Install the signed macOS DMG, Windows EXE or Linux package, grant audio/accessibility permissions and choose local, cloud or BYOK processing",
+        "engines": "Local Whisper via whisper.cpp; NVIDIA Parakeet and Nemotron via sherpa-onnx; local LLMs via llama.cpp; BYOK OpenAI, Groq, xAI, Mistral, Tinfoil, OpenRouter, Corti, Anthropic/Google and OpenWhispr Cloud",
+        "dataFormat": "Notes and history in local SQLite with recordings/model caches in app directories; optional sync uses OpenWhispr Cloud/Neon PostgreSQL, while cloud or BYOK audio goes to the selected provider",
+        "gapVsPaid": "Calendar-to-capture automation is narrower, and desktop audio permissions and routing can fail where a managed meeting bot would simply join.",
+        "setupBlocker": "Meeting capture needs OS audio permissions and a model download or cloud/API choice; macOS also needs Accessibility and Screen Recording/System Audio permission",
+        "sources": [
+          "https://openwhispr.com/",
+          "https://github.com/OpenWhispr/openwhispr",
+          "https://github.com/OpenWhispr/openwhispr/blob/main/LICENSE",
+          "https://docs.openwhispr.com/quickstart",
+          "https://docs.openwhispr.com/guides/cloud-vs-local",
+          "https://docs.openwhispr.com/guides/local-models",
+          "https://docs.openwhispr.com/guides/meeting-transcription",
+          "https://docs.openwhispr.com/faq",
+          "https://docs.openwhispr.com/platform/macos",
+          "https://minuteslink.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [],

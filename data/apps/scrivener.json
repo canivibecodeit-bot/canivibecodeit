@@ -69,7 +69,24 @@
       "stars": 53,
       "lastCommit": "2026-06",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "local",
+        "install": "Native macOS DMG, Windows MSI, or Linux AppImage/.deb",
+        "engines": null,
+        "dataFormat": "Each writing project is a local SQLite file; Kindling works offline and does not upload manuscripts, account data, analytics, or telemetry",
+        "gapVsPaid": "It is young and intentionally small, so it lacks Scrivener's mature research binder, corkboard, metadata, snapshots, targets and highly configurable Compile system.",
+        "setupBlocker": null,
+        "sources": [
+          "https://github.com/smith-and-web/kindling",
+          "https://github.com/smith-and-web/kindling/blob/main/LICENSE",
+          "https://kindlingwriter.com/download/",
+          "https://kindlingwriter.com/privacy/",
+          "https://www.literatureandlatte.com/scrivener/overview"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Manuskript",
@@ -85,7 +102,24 @@
       "stars": 2400,
       "lastCommit": "2026-07",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-or-later",
+        "runs": "local",
+        "install": "Windows portable ZIP, Linux .deb/.rpm/Flatpak/Snap, or source install on macOS",
+        "engines": null,
+        "dataFormat": "Projects save on local disk in Manuskript's open plain-text project format; the default single-file project is an archive, with an uncompressed-folder mode also available",
+        "gapVsPaid": "It imitates much of Scrivener's structure but is rougher and less reliable around editing polish, project stability and professional compile/export workflows.",
+        "setupBlocker": "Windows antivirus may flag the unsigned PyInstaller build; macOS has no current packaged app and requires running from source, while DOCX/EPUB export needs Pandoc",
+        "sources": [
+          "https://github.com/olivierkes/manuskript",
+          "https://github.com/olivierkes/manuskript/blob/develop/COPYING",
+          "https://github.com/olivierkes/manuskript/releases/tag/0.17.0",
+          "https://www.theologeek.ch/manuskript/",
+          "https://www.literatureandlatte.com/scrivener/overview"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "novelWriter",
@@ -101,7 +135,25 @@
       "stars": 3000,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-or-later",
+        "runs": "local",
+        "install": "Signed Windows installer or Linux AppImage/.deb; macOS currently requires pipx/PyPI",
+        "engines": null,
+        "dataFormat": "A project is a normal local directory containing many human-readable plain-text documents plus project metadata and configuration files",
+        "gapVsPaid": "Its plain-text, fiction-focused project model is more portable but offers a narrower research binder and far less configurable formatting and compilation than Scrivener.",
+        "setupBlocker": "As of release 2026.1 there is no macOS DMG, so Mac users must create a Python environment and install the package",
+        "sources": [
+          "https://github.com/vkbo/novelWriter",
+          "https://github.com/vkbo/novelWriter/blob/main/LICENSE.md",
+          "https://github.com/vkbo/novelWriter/blob/main/pyproject.toml",
+          "https://novelwriter.io/",
+          "https://novelwriter.io/download/",
+          "https://www.literatureandlatte.com/scrivener/overview"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

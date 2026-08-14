@@ -52,7 +52,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Open the hosted browser tool; no signup or download",
+        "engines": null,
+        "dataFormat": "The input image is loaded into BrandBird's browser editor and the result is exported as PNG, JPEG or WebP; the tool page does not document whether image bytes are uploaded or retained server-side",
+        "gapVsPaid": "It is a one-off browser editor rather than a native capture workflow, and free use lacks Shots/Xnapper's batch processing, saved presets and tighter desktop automation.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.brandbird.app/tools/screenshot-beautifier",
+          "https://shots.so/",
+          "https://xnapper.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "macshot",
@@ -66,7 +81,25 @@
       "stars": 2800,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-only",
+        "runs": "local",
+        "install": "Homebrew cask or signed macOS DMG dragged to Applications",
+        "engines": null,
+        "dataFormat": "Screenshots and recordings are normal files in the chosen folder, capture history lives under ~/Library/Application Support/com.sw33tlie.macshot/history/, and preferences use macOS UserDefaults; optional uploads go directly to the user's Drive, imgbb or S3 service",
+        "gapVsPaid": "It is macOS-only and has fewer reusable templates, batch operations and AI/redaction conveniences than the more mature paid screenshot tools.",
+        "setupBlocker": "macOS must grant Screen Recording permission on first capture",
+        "sources": [
+          "https://macshot.io/",
+          "https://github.com/sw33tLie/macshot",
+          "https://github.com/sw33tLie/macshot/blob/main/LICENSE",
+          "https://github.com/sw33tLie/macshot/blob/main/PRIVACY.md",
+          "https://shots.so/",
+          "https://xnapper.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "ScreenCharm",
@@ -80,7 +113,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "local",
+        "install": "Open the hosted page in a modern browser; no signup",
+        "engines": null,
+        "dataFormat": "The screenshot is held in browser memory, composited with HTML5 Canvas, and exported as a local PNG/JPG blob; the site says the image is never uploaded",
+        "gapVsPaid": "It beautifies an existing image but cannot capture, annotate or batch-process screenshots like a native Xnapper-style app.",
+        "setupBlocker": null,
+        "sources": [
+          "https://screencharm.com/free-tools/screenshot-beautifier",
+          "https://shots.so/",
+          "https://xnapper.com/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [],

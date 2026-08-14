@@ -68,7 +68,26 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Create a hosted account in the web app or install the iOS or Android app",
+        "engines": "A deterministic scheduling algorithm; FlowSavvy explicitly says it does not use machine learning to build schedules",
+        "dataFormat": "Tasks, events, and settings live in FlowSavvy's cloud database and synchronize with connected Google, Outlook, or iCloud calendars; the service currently provides no general calendar import or export",
+        "gapVsPaid": "FlowSavvy optimizes one person’s tasks and events, not the team-wide meeting negotiation and shared focus-time coordination Clockwise provided before shutting down.",
+        "setupBlocker": "Requires an internet connection; calendar synchronization requires OAuth or app-specific credentials",
+        "sources": [
+          "https://flowsavvy.app/",
+          "https://flowsavvy.app/pricing",
+          "https://help.flowsavvy.app/en/articles/8009170-miscellaneous-faqs",
+          "https://flowsavvy.app/privacy",
+          "https://help.flowsavvy.app/en/articles/6982421-can-i-import-or-export-my-calendar",
+          "https://help.flowsavvy.app/en/articles/13339919-sync-with-google-outlook-and-icloud-calendar",
+          "https://getclockwise.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Reclaim Lite",
@@ -96,7 +115,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Create a hosted web account and connect one supported calendar; the web app can be installed to a home screen",
+        "engines": "A private per-user deep-learning scheduling model; some language features use OpenAI, according to Trevor's documentation",
+        "dataFormat": "Tasks, calendar events, and scheduling state are processed and stored in Trevor's hosted infrastructure, with connected calendar data synchronized through provider APIs",
+        "gapVsPaid": "Trevor schedules one person’s tasks around one calendar but does not optimize meetings and focus blocks across an organization as Clockwise did.",
+        "setupBlocker": "No native desktop or mobile app; calendar integrations require OAuth, and the free tier is limited to one calendar account",
+        "sources": [
+          "https://www.trevorai.com/",
+          "https://www.trevorai.com/docs",
+          "https://www.trevorai.com/integrations/microsoft-calendars",
+          "https://www.trevorai.com/privacy-policy",
+          "https://getclockwise.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

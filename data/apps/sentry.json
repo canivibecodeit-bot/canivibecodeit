@@ -67,7 +67,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "PolyForm-Shield-1.0.0",
+        "runs": "both",
+        "install": "Hosted signup, or one Docker container / Python virtualenv",
+        "engines": null,
+        "dataFormat": "Hosted events live in Bugsink's managed EU service; self-hosted issues, events, users and settings live in SQLite at /data/db.sqlite3 by default, or MySQL/PostgreSQL",
+        "gapVsPaid": "It deliberately focuses on Sentry-compatible error ingestion and grouping, so it lacks Sentry's broad performance tracing, session replay, profiling and mature debugging ecosystem.",
+        "setupBlocker": "Self-hosting needs a persistent data volume, a long SECRET_KEY, an admin account, and production domain/TLS/email configuration",
+        "sources": [
+          "https://github.com/bugsink/bugsink",
+          "https://github.com/bugsink/bugsink/blob/main/LICENSE",
+          "https://www.bugsink.com/",
+          "https://www.bugsink.com/docs/installation/",
+          "https://www.bugsink.com/docs/settings/",
+          "https://sentry.io/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Exceptionless",
@@ -82,7 +100,26 @@
       "stars": 2452,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Hosted signup, or Docker Compose/all-in-one image; Kubernetes is recommended for production",
+        "engines": null,
+        "dataFormat": "Hosted events live in Exceptionless's service; self-hosted events and indexes live in Elasticsearch, with Redis used for queues/cache and configurable storage providers for files",
+        "gapVsPaid": "It is strongest for .NET and general event logging, with a smaller SDK/integration ecosystem and less sophisticated frontend tracing, replay and profiling than Sentry.",
+        "setupBlocker": "The first production obstacle is operating Elasticsearch and Redis with durable storage, backups, migrations, SMTP and TLS rather than merely starting the demo container",
+        "sources": [
+          "https://github.com/exceptionless/Exceptionless",
+          "https://github.com/exceptionless/Exceptionless/blob/main/LICENSE.txt",
+          "https://exceptionless.com/",
+          "https://exceptionless.com/docs/self-hosting/docker/",
+          "https://exceptionless.com/docs/self-hosting/kubernetes/",
+          "https://exceptionless.com/docs/self-hosting/upgrading-self-hosted-instance/",
+          "https://sentry.io/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "GlitchTip",
@@ -97,7 +134,25 @@
       "stars": 356,
       "lastCommit": "2026-07",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup, or Docker Compose with PostgreSQL; Helm and managed one-click hosts are also documented",
+        "engines": null,
+        "dataFormat": "Hosted events live in GlitchTip's US or EU service; self-hosted issue and event data live primarily in PostgreSQL, with persistent file/object storage used for uploads such as source maps",
+        "gapVsPaid": "It covers errors and basic performance monitoring but has fewer mature debugging controls, integrations, session-replay capabilities and high-scale operational tooling than Sentry.",
+        "setupBlocker": "Self-hosting starts with Docker plus PostgreSQL 14+, environment secrets and a reverse proxy/TLS; email and optional Valkey add more configuration",
+        "sources": [
+          "https://glitchtip.com/",
+          "https://glitchtip.com/pricing",
+          "https://glitchtip.com/documentation/install",
+          "https://gitlab.com/glitchtip/glitchtip-backend",
+          "https://gitlab.com/glitchtip/glitchtip-backend/-/blob/master/LICENSE",
+          "https://sentry.io/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

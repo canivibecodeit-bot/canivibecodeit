@@ -64,7 +64,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "both",
+        "install": "Built into supported iPhone, iPad and Mac operating systems",
+        "engines": "Apple on-device foundation models, Private Cloud Compute for larger requests, and optional ChatGPT",
+        "dataFormat": "Text is processed on-device when possible; larger requests can use stateless Private Cloud Compute, while optional ChatGPT sends the selected text to OpenAI",
+        "gapVsPaid": "It is restricted to supported Apple hardware and offers fewer continuous cross-app style, brand and writing analytics controls than Grammarly.",
+        "setupBlocker": "Requires Apple Intelligence-compatible hardware, a supported OS, language and region",
+        "sources": [
+          "https://support.apple.com/en-us/121582",
+          "https://support.apple.com/en-us/121115",
+          "https://security.apple.com/blog/private-cloud-compute/",
+          "https://www.grammarly.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Harper",
@@ -95,7 +111,23 @@
       "stars": 2400,
       "lastCommit": "2026-05",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-only",
+        "runs": "local",
+        "install": "Download the native or portable app, configure a provider or local model, then use the global hotkey",
+        "engines": "Gemini, OpenAI-compatible APIs, Ollama, llama.cpp, KoboldCPP, TabbyAPI and vLLM",
+        "dataFormat": "API keys and settings stay locally; selected text goes to the chosen provider or local model, and transient history is cleared when the app closes",
+        "gapVsPaid": "It is a manual select-text-and-hotkey workflow rather than Grammarly's continuous inline underlines and suggestions across supported apps.",
+        "setupBlocker": "A model API key or a separately running local model is required; some operating systems may warn about an unsigned or unrecognized binary",
+        "sources": [
+          "https://github.com/theJayTea/WritingTools",
+          "https://github.com/theJayTea/WritingTools/blob/main/LICENSE",
+          "https://github.com/theJayTea/WritingTools/blob/main/README.md",
+          "https://www.grammarly.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "WritingTool",
@@ -111,7 +143,23 @@
       "stars": 65,
       "lastCommit": "2026-07",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "LGPL-2.1-only",
+        "runs": "local",
+        "install": "Install Java 17 or newer, LibreOffice 24.2 or newer and the WritingTool extension",
+        "engines": "LanguageTool plus optional OpenAI-compatible services, especially a local LocalAI server",
+        "dataFormat": "Documents remain normal LibreOffice files; checking is local unless a remote LanguageTool or AI endpoint is configured",
+        "gapVsPaid": "It is centered on LibreOffice rather than working continuously across browsers, email and arbitrary desktop apps like Grammarly.",
+        "setupBlocker": "Java and LibreOffice are mandatory, and optional AI needs a separately configured service",
+        "sources": [
+          "https://github.com/writingtool-org/writingtool",
+          "https://github.com/writingtool-org/writingtool/blob/master/LICENSE",
+          "https://writingtool.org/",
+          "https://www.grammarly.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

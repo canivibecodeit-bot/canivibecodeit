@@ -66,7 +66,25 @@
       "stars": 2124,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Docker Compose with Endurain, PostgreSQL, and Redis; a bare-metal guide also exists",
+        "engines": null,
+        "dataFormat": "Imported GPX, TCX, and FIT activity files plus user/server images live in the persistent backend data directory; accounts, activity records, gear, health data, and settings live in PostgreSQL, with Redis persistence for rate limiting and authentication security",
+        "gapVsPaid": "It imports and analyzes your activities but cannot recreate Strava's global social feed, segment leaderboards, route popularity, challenges and vast device/integration network.",
+        "setupBlocker": "Docker Compose, an environment file with secrets, host directories owned by the container UID, and a reverse proxy or TLS setup for safe remote use",
+        "sources": [
+          "https://github.com/endurain-project/endurain",
+          "https://github.com/endurain-project/endurain/blob/master/LICENSE",
+          "https://docs.endurain.com/",
+          "https://docs.endurain.com/getting-started-easy/",
+          "https://github.com/endurain-project/endurain/blob/master/docker-compose.yml.example",
+          "https://www.strava.com/subscription"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "FitTrackee",
@@ -81,7 +99,24 @@
       "stars": 1100,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Docker Compose with FitTrackee and PostgreSQL/PostGIS; PyPI, source, YunoHost, and NixOS installs are also documented",
+        "engines": null,
+        "dataFormat": "Workout uploads, generated static-map cache, and logs live in host-mounted directories; accounts, workouts, routes, equipment, and other metadata live in PostgreSQL/PostGIS, with optional Redis storage for queued jobs",
+        "gapVsPaid": "It covers private activity maps and statistics, but has no Strava-scale social graph, competitive segments, heatmaps, clubs, challenges or integration ecosystem.",
+        "setupBlocker": "Docker or Python administration plus PostgreSQL 14+ with PostGIS 3.4+, secrets and writable volumes; multi-user email, exports, and archive jobs add Redis and SMTP",
+        "sources": [
+          "https://github.com/SamR1/FitTrackee",
+          "https://github.com/SamR1/FitTrackee/blob/main/LICENSE",
+          "https://docs.fittrackee.org/en/installation/index.html",
+          "https://github.com/SamR1/FitTrackee/blob/main/docker-compose.yml",
+          "https://www.strava.com/subscription"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "RUNALYZE",
@@ -95,7 +130,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted account signup, then upload activity files or connect a supported fitness service",
+        "engines": null,
+        "dataFormat": "Activities, health metrics, equipment, calculations, and account data live in RUNALYZE's hosted service; users can request a full archive and export basic datasets as CSV or individual activities in common fitness-file formats",
+        "gapVsPaid": "Its training analysis is deeper in places, but it deliberately lacks Strava's social feed, segment competition, clubs, route discovery and community motivation.",
+        "setupBlocker": null,
+        "sources": [
+          "https://runalyze.com/",
+          "https://runalyze.com/pricing",
+          "https://runalyze.com/help/article/features",
+          "https://runalyze.com/help/article/gdpr-backup",
+          "https://runalyze.com/en/legal/privacy",
+          "https://www.strava.com/subscription"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [],

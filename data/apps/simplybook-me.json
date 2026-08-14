@@ -65,7 +65,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Booking, customer, service and staff records live in Appointy's cloud, with connected calendar and payment data also handled by their respective providers",
+        "gapVsPaid": "Its 100-appointment and five-service limits are small, and it offers far less website, marketplace and add-on breadth than SimplyBook.me.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.appointy.com/pricing/",
+          "https://help.appointy.com/hc/en-us/articles/215053646-Is-My-Data-Secure-On-Appointy",
+          "https://www.appointy.com/appointy-privacy-policy/",
+          "https://simplybook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Setmore Free",
@@ -81,7 +97,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Booking, customer and staff records live in Setmore's cloud, with calendar and payment records also passing through connected providers",
+        "gapVsPaid": "It caps free bookings at 200 and has a much smaller add-on, website and advanced client-management ecosystem than SimplyBook.me.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.setmore.com/pricing",
+          "https://www.setmore.com/privacy",
+          "https://simplybook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Square Appointments Free",
@@ -97,7 +128,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Create or use a Square seller account and enable Appointments",
+        "engines": null,
+        "dataFormat": "Appointment, customer, staff and transaction records live in Square's cloud",
+        "gapVsPaid": "It is country-dependent and solo on the free plan, with a narrower website and add-on ecosystem than SimplyBook.me.",
+        "setupBlocker": "A Square seller account and identity verification, and the service must be available in the user's country",
+        "sources": [
+          "https://squareup.com/us/en/appointments",
+          "https://squareup.com/help/us/en/article/5355-set-up-online-booking-with-square-appointments",
+          "https://squareup.com/us/en/legal/general/privacy",
+          "https://simplybook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

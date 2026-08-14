@@ -66,7 +66,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Browser signup; projects can be hosted by Mobirise or exported as HTML, CSS and JavaScript",
+        "engines": "Proprietary text-to-site, copy, image and video generation; the underlying model providers are not disclosed",
+        "dataFormat": "Projects are saved in the hosted builder; export downloads ordinary HTML, CSS, JavaScript and asset files",
+        "gapVsPaid": "Mobirise AI lacks Unicorn Platform's startup-specific copy and conversion defaults, and the free generator is capped at three sites per month.",
+        "setupBlocker": "The permanent free allowance is capped at three distinct generated/exported projects per month",
+        "sources": [
+          "https://ai.mobirise.com/",
+          "https://mobirise.com/",
+          "https://unicornplatform.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Plasmic",
@@ -81,7 +96,24 @@
       "stars": 6900,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT AND AGPL-3.0-only",
+        "runs": "both",
+        "install": "Hosted signup; optional npm-installed Plasmic CLI for React code generation and deployment in your own repository",
+        "engines": "Plasmic AI (beta); the official site does not name its underlying model provider",
+        "dataFormat": "Hosted projects and CMS records in Plasmic Cloud; codegen writes React components plus plasmic.json and plasmic.lock into the user's repository",
+        "gapVsPaid": "Plasmic lacks Unicorn Platform's constrained startup copy, pricing, testimonial and lead-capture workflow, trading speed for control.",
+        "setupBlocker": "Free hosted output keeps Plasmic branding; codegen/self-deployment requires a Node/React project and deployment workflow",
+        "sources": [
+          "https://github.com/plasmicapp/plasmic",
+          "https://github.com/plasmicapp/plasmic/blob/master/LICENSE",
+          "https://www.plasmic.app/pricing",
+          "https://docs.plasmic.app/learn/codegen-guide/",
+          "https://unicornplatform.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Publii",
@@ -97,7 +129,24 @@
       "stars": 7300,
       "lastCommit": "2026-07",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-only",
+        "runs": "local",
+        "install": "Install the native Windows/macOS package or Linux AppImage",
+        "engines": null,
+        "dataFormat": "Source content and media in a user-selected local Sites Location; publishing generates static HTML, CSS and assets, with optional local backup archives",
+        "gapVsPaid": "Publii lacks startup-specific sections, lead-capture defaults and instant hosted publishing.",
+        "setupBlocker": "Publishing still needs separate hosting plus SFTP, GitHub or Netlify credentials/configuration",
+        "sources": [
+          "https://github.com/GetPublii/Publii",
+          "https://github.com/GetPublii/Publii/blob/master/LICENSE",
+          "https://getpublii.com/docs/install-publii.html",
+          "https://getpublii.com/docs/publii-global-settings.html",
+          "https://unicornplatform.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Silex",
@@ -112,7 +161,25 @@
       "stars": 2919,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Use the hosted editor with a GitLab login, install the desktop alpha, or run the official Docker setup",
+        "engines": "Optional desktop MCP workflow can connect to Ollama, OpenCode, Goose or Claude Code",
+        "dataFormat": "Project JSON and assets in GitLab, FTP or local storage; publishing produces ordinary static HTML, CSS and JavaScript",
+        "gapVsPaid": "Silex lacks the startup-specific components, copy prompts and lead-oriented defaults that make Unicorn Platform fast.",
+        "setupBlocker": "The stable hosted route starts with a GitLab account; the desktop build is still labelled alpha",
+        "sources": [
+          "https://github.com/silexlabs/Silex",
+          "https://github.com/silexlabs/Silex/blob/develop/LICENSE",
+          "https://docs.silex.me/en/dev/run",
+          "https://docs.silex.me/en/user/register",
+          "https://docs.silex.me/en/user/faq",
+          "https://unicornplatform.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

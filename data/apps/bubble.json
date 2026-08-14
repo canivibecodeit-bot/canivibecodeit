@@ -66,7 +66,26 @@
       "stars": 27902,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0",
+        "runs": "self-hosted",
+        "install": "Docker image or Docker Compose; Kubernetes is also supported",
+        "engines": "Model-agnostic; the agent builder supports bring-your-own AI provider credentials",
+        "dataFormat": "Built-in app data and app definitions are stored in CouchDB, files in MinIO/S3-compatible object storage, and connected external data remains in its source system",
+        "gapVsPaid": "Budibase's component and layout system is optimized for internal business screens and is far less flexible for polished public consumer interfaces than Bubble.",
+        "setupBlocker": "Requires Docker and persistent storage; production use also means owning upgrades, TLS, backups, and database/network access",
+        "sources": [
+          "https://github.com/Budibase/budibase",
+          "https://github.com/Budibase/budibase/blob/master/LICENSE",
+          "https://docs.budibase.com/docs/docker",
+          "https://docs.budibase.com/docs/budibase-architecture",
+          "https://budibase.com/pricing/",
+          "https://bubble.io/",
+          "https://bubble.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Corteza",
@@ -81,7 +100,24 @@
       "stars": 2100,
       "lastCommit": "2026-03",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "self-hosted",
+        "install": "Docker Compose with a configured MySQL or PostgreSQL database",
+        "engines": null,
+        "dataFormat": "Records and configuration live in the configured SQL database; uploaded attachments live in the server persistence directory",
+        "gapVsPaid": "Corteza is a record-and-workflow suite, not a pixel-flexible public web-app designer, so a consumer-facing Bubble product will look and behave much more constrained.",
+        "setupBlocker": "Docker, a database, secrets, persistent-volume permissions, and a reverse proxy/TLS are the first operational hurdle",
+        "sources": [
+          "https://github.com/cortezaproject/corteza",
+          "https://github.com/cortezaproject/corteza/blob/2024.9.x/LICENSE",
+          "https://docs.cortezaproject.org/corteza-docs/2024.9/devops-guide/index.html",
+          "https://bubble.io/",
+          "https://bubble.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Joget Community Edition",
@@ -99,7 +135,24 @@
       "stars": 607,
       "lastCommit": "2026-05",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0",
+        "runs": "self-hosted",
+        "install": "Download the Community Edition bundle or deploy its Docker image/on-premises package",
+        "engines": null,
+        "dataFormat": "Application definitions, workflow state, and records live in the configured relational database; uploaded files live on the Joget server",
+        "gapVsPaid": "Joget excels at forms and workflows but cannot approach Bubble's freedom for bespoke public-facing layouts, interactions, and responsive design.",
+        "setupBlocker": "The first real hurdle is administering a Java web stack and database rather than clicking through a managed signup",
+        "sources": [
+          "https://github.com/jogetworkflow/jw-community",
+          "https://dev.joget.org/community/display/DX8/Installation+Guide",
+          "https://dev.joget.org/community/display/DX8/Installing+Joget+DX+on+Docker",
+          "https://bubble.io/",
+          "https://bubble.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "NocoBase",
@@ -114,7 +167,25 @@
       "stars": 23600,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "LicenseRef-NocoBase-Community",
+        "runs": "self-hosted",
+        "install": "NocoBase CLI or Docker deployment with MySQL, MariaDB, or PostgreSQL",
+        "engines": "Built-in AI employees can connect to common LLMs; exact provider support depends on installed AI plugins",
+        "dataFormat": "Business data lives in standard relational tables in the configured MySQL, MariaDB, or PostgreSQL database; files use configured local or object storage",
+        "gapVsPaid": "NocoBase is fundamentally a database-backed administrative app builder, so it gives up Bubble's consumer-app design freedom and front-end plugin ecosystem.",
+        "setupBlocker": "Requires a database, secrets, and deployment administration; the community license also preserves NocoBase branding and restricts some uses",
+        "sources": [
+          "https://github.com/nocobase/nocobase",
+          "https://github.com/nocobase/nocobase/blob/main/LICENSE.txt",
+          "https://docs.nocobase.com/get-started/installation/git",
+          "https://www.nocobase.com/en/commercial",
+          "https://bubble.io/",
+          "https://bubble.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "REI3",
@@ -133,7 +204,24 @@
       "stars": 571,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Native Linux/Windows server package or Docker Compose, connected to PostgreSQL",
+        "engines": null,
+        "dataFormat": "Human-readable application records and configuration live in a PostgreSQL database controlled by the operator",
+        "gapVsPaid": "REI3's utilitarian forms, reports, and pages are a poor substitute for Bubble's highly customized public front ends and interaction design.",
+        "setupBlocker": "You must provision PostgreSQL and configure a server/reverse proxy; it is not a managed one-click workspace",
+        "sources": [
+          "https://github.com/r3-team/r3",
+          "https://github.com/r3-team/r3/blob/main/LICENSE.md",
+          "https://rei3.de/en/docs/admin",
+          "https://bubble.io/",
+          "https://bubble.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

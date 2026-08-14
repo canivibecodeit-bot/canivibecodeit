@@ -68,7 +68,25 @@
       "stars": 850,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Release ZIP to PHP hosting, create a MySQL/MariaDB database, then finish the browser installer",
+        "engines": null,
+        "dataFormat": "Pages, users, settings and block data in SQL; uploaded assets in the server file manager or a configured remote storage location",
+        "gapVsPaid": "Concrete CMS's block-and-theme model offers far less precise visual CSS, animation and interaction control than Webflow.",
+        "setupBlocker": "PHP hosting, a database, writable directories, and responsibility for updates, backups and outbound mail",
+        "sources": [
+          "https://github.com/concretecms/concretecms",
+          "https://github.com/concretecms/concretecms/blob/9.5.x/LICENSE.TXT",
+          "https://documentation.concretecms.org/9-x/developers/introduction/installing-concrete-cms",
+          "https://documentation.concretecms.org/9-x/developers/introduction/system-requirements",
+          "https://documentation.concretecms.org/9-x/developers/working-with-files-and-the-file-manager/file-storage-locations",
+          "https://webflow.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Microweber",
@@ -83,7 +101,25 @@
       "stars": 3431,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup, or upload the PHP package to a web host and complete its browser installer",
+        "engines": null,
+        "dataFormat": "Site content and settings in a supported SQL database; images and other uploads in server storage",
+        "gapVsPaid": "Microweber cannot match Webflow's fine-grained visual CSS and interaction tooling, especially for complex responsive animation.",
+        "setupBlocker": "Self-hosting needs compatible PHP extensions, URL rewriting, a database and correct filesystem permissions",
+        "sources": [
+          "https://github.com/microweber/microweber",
+          "https://github.com/microweber/microweber/blob/master/LICENSE",
+          "https://github.com/microweber/microweber/blob/master/composer.json",
+          "https://microweber.com/download",
+          "https://github.com/microweber/microweber-user-guide",
+          "https://webflow.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Plasmic",
@@ -98,7 +134,24 @@
       "stars": 6900,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT AND AGPL-3.0-only",
+        "runs": "both",
+        "install": "Hosted signup; optional npm-installed Plasmic CLI for React code generation and deployment in your own repository",
+        "engines": "Plasmic AI (beta); the official site does not name its underlying model provider",
+        "dataFormat": "Hosted projects and CMS records in Plasmic Cloud; codegen writes React components plus plasmic.json and plasmic.lock into the user's repository",
+        "gapVsPaid": "Plasmic's component-and-code mental model is less direct for visual designers than Webflow's CSS-first designer, and free sites remain branded.",
+        "setupBlocker": "Free hosted output keeps Plasmic branding; codegen/self-deployment requires a Node/React project and deployment workflow",
+        "sources": [
+          "https://github.com/plasmicapp/plasmic",
+          "https://github.com/plasmicapp/plasmic/blob/master/LICENSE",
+          "https://www.plasmic.app/pricing",
+          "https://docs.plasmic.app/learn/codegen-guide/",
+          "https://webflow.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Vvveb",
@@ -113,7 +166,24 @@
       "stars": 1200,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Download and upload the PHP release, open the site URL, and complete the browser installer",
+        "engines": null,
+        "dataFormat": "Content, products, orders and settings in MySQL/MariaDB, SQLite or PostgreSQL; media and downloadable files on the server filesystem",
+        "gapVsPaid": "Vvveb offers much less refined visual CSS, animation and interaction design than Webflow.",
+        "setupBlocker": "PHP hosting, a database, writable files, mail and payment configuration, plus ongoing server updates",
+        "sources": [
+          "https://github.com/givanz/Vvveb",
+          "https://github.com/givanz/Vvveb/blob/master/LICENSE",
+          "https://www.vvveb.com",
+          "https://docs.vvveb.com/",
+          "https://webflow.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Webstudio",
@@ -128,7 +198,24 @@
       "stars": 8800,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Hosted signup or desktop app; alternatively export the project or deploy the self-hosted builder/site",
+        "engines": "Webstudio Inception AI and MCP integrations; the hosted model provider is not named in official documentation",
+        "dataFormat": "Projects and assets live in Webstudio Cloud when hosted there; export/self-host routes produce source or static assets under the user's deployment",
+        "gapVsPaid": "Webstudio's CMS and collaboration ecosystem is less mature, and its free custom-domain route requires running the deployment yourself.",
+        "setupBlocker": "The free cloud plan publishes only to a Webstudio subdomain; a free custom domain requires export or self-hosting",
+        "sources": [
+          "https://github.com/webstudio-is/webstudio",
+          "https://github.com/webstudio-is/webstudio/blob/main/LICENSE",
+          "https://webstudio.is/pricing",
+          "https://docs.webstudio.is/university/self-hosting",
+          "https://webflow.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

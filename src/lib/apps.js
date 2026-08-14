@@ -322,6 +322,26 @@ export const SELF_HOST_LABELS = {
   ops: 'self-host, real ops',
 };
 
+// Where the free thing actually runs, for the verified fact block.
+export const FACT_RUNS_LABELS = {
+  local: 'on your machine',
+  cloud: 'their cloud',
+  both: 'your machine or their cloud',
+  'self-hosted': 'your server',
+};
+
+// SPDX ids stay as-is; the LicenseRef- and -only/-or-later plumbing is noise
+// to a reader deciding whether the thing is actually open.
+export function formatLicense(license) {
+  if (license == null) return null;
+  if (license === 'proprietary-free') return 'proprietary, free';
+  return license
+    .replace(/^LicenseRef-/, '')
+    .replace(/-only$/, '')
+    .replace(/-or-later$/, '+')
+    .replace(/(?<=[a-zA-Z])-(?=[A-Za-z][a-z])/g, ' ');
+}
+
 // Sitemap staging (decided 2026-08-06): a young domain shouldn't push all 350+
 // new pages at a search engine at once. The named slugs are the low-competition,
 // high-volume targets; the rest of the ~30 fill up by editorial weight. ALL

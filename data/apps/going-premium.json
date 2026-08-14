@@ -65,7 +65,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Open Google Flights in a browser; sign in to create tracked routes or specific-flight price alerts",
+        "engines": null,
+        "dataFormat": "Tracked routes, dates, flights, and notification settings live in the user's Google account; alerts arrive by email rather than as user-owned files.",
+        "gapVsPaid": "Google Flights gives excellent route and fare tracking, but it does not replace Going's human-curated stream of unusually good fares and mistake-deal judgement.",
+        "setupBlocker": "A Google account is required for durable alerts, and the user must define routes or dates instead of receiving a human-curated deal feed.",
+        "sources": [
+          "https://www.google.com/travel/flights",
+          "https://support.google.com/travel/answer/6235879",
+          "https://support.google.com/travel/answer/2475306",
+          "https://www.going.com/premium"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "KAYAK",

@@ -70,7 +70,26 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup or desktop app; Docker Compose for self-hosting",
+        "engines": "Self-hosted AFFiNE AI can be configured with OpenAI, Anthropic, Google Gemini, and FAL credentials",
+        "dataFormat": "Local-first clients keep workspace data locally and sync to AFFiNE Cloud or the operator's server; self-hosting uses PostgreSQL, Redis, and persistent blob storage",
+        "gapVsPaid": "AFFiNE combines documents, canvases, and databases but does not match Anytype's type-and-relation-first object graph or encrypted peer-space model.",
+        "setupBlocker": "The hosted/desktop app installs cleanly; self-hosting is a multi-service Docker deployment that needs a domain, TLS, secrets, storage, backups, and AI-provider keys for AI features",
+        "sources": [
+          "https://github.com/toeverything/AFFiNE",
+          "https://github.com/toeverything/AFFiNE/blob/canary/LICENSE",
+          "https://docs.affine.pro/self-host-affine/",
+          "https://docs.affine.pro/self-host-affine/install/requirements",
+          "https://docs.affine.pro/self-host-affine/administer/ai",
+          "https://anytype.io/",
+          "https://anytype.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "AppFlowy",
@@ -90,7 +109,26 @@
       "stars": 74999,
       "lastCommit": "2026-07",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0",
+        "runs": "both",
+        "install": "Official desktop/mobile package, hosted signup, or AppFlowy Cloud Docker Compose stack",
+        "engines": "Hosted AI offers provider models including OpenAI, Google Gemini, and Anthropic Claude; local/self-hosted AI availability depends on the selected deployment and configured service",
+        "dataFormat": "The local app keeps workspace data on the device; AppFlowy Cloud/self-hosted sync uses PostgreSQL, Redis, and MinIO or S3-compatible object storage; pages export to Markdown or HTML",
+        "gapVsPaid": "AppFlowy is a Notion-style page and table workspace, not Anytype's peer-synced typed object graph with relationship-driven collections.",
+        "setupBlocker": "The local app installs cleanly, but self-hosting requires a sizeable multi-service stack including PostgreSQL, Redis, object storage, authentication, secrets, domain, TLS, and backups",
+        "sources": [
+          "https://github.com/AppFlowy-IO/AppFlowy",
+          "https://github.com/AppFlowy-IO/AppFlowy/blob/main/LICENSE",
+          "https://appflowy.com/pricing",
+          "https://github.com/AppFlowy-IO/AppFlowy-Cloud/blob/main/docker-compose.yml",
+          "https://docs.appflowy.io/docs/documentation/appflowy-cloud/architecture",
+          "https://anytype.io/",
+          "https://anytype.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "SiYuan",
@@ -109,7 +147,26 @@
       "stars": 45647,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0",
+        "runs": "both",
+        "install": "Desktop/mobile package, or Docker image for browser-based self-hosting",
+        "engines": "Built-in AI features connect to OpenAI-compatible APIs using a configured endpoint and key",
+        "dataFormat": "A workspace stores block documents as structured .sy JSON files plus assets on disk; SQLite files hold indexes and auxiliary state; documents can export to Markdown, HTML, PDF, and Word",
+        "gapVsPaid": "SiYuan is a powerful local block database but lacks Anytype's encrypted peer-to-peer spaces, object-type UX, and relationship-centric collections.",
+        "setupBlocker": "The desktop app installs cleanly, but free cross-device sync is not a turnkey feature: official cloud sync is a paid membership feature and Docker hosting does not transparently become desktop/mobile sync",
+        "sources": [
+          "https://github.com/siyuan-note/siyuan",
+          "https://github.com/siyuan-note/siyuan/blob/master/LICENSE",
+          "https://github.com/siyuan-note/siyuan/blob/master/README.md",
+          "https://b3log.org/siyuan/en/pricing.html",
+          "https://github.com/siyuan-note/siyuan/tree/master/app",
+          "https://anytype.io/",
+          "https://anytype.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Trilium Notes",
@@ -128,7 +185,26 @@
       "stars": 37278,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Desktop release package, or Docker Compose/image for a server and browser client",
+        "engines": null,
+        "dataFormat": "Notes, hierarchy, attributes, revisions, and most attachments live in a local or server-side SQLite database named document.db; notes can be exported to HTML, Markdown, or OPML",
+        "gapVsPaid": "Trilium uses a hierarchical note tree and client-server sync rather than Anytype's typed object graph and encrypted peer-to-peer space model.",
+        "setupBlocker": "The desktop app is straightforward, but cross-device sync and browser access require operating a Trilium server, persisting document.db, and handling backups and upgrades",
+        "sources": [
+          "https://github.com/TriliumNext/Trilium",
+          "https://github.com/TriliumNext/Trilium/blob/main/LICENSE",
+          "https://docs.triliumnotes.org/user-guide/setup-and-hosting/installation",
+          "https://docs.triliumnotes.org/user-guide/setup-and-hosting/server-installation",
+          "https://docs.triliumnotes.org/user-guide/advanced-usage/database",
+          "https://anytype.io/",
+          "https://anytype.io/pricing"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

@@ -65,7 +65,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "self-hosted",
+        "install": "Install and activate the Forminator plugin from WordPress Admin",
+        "engines": null,
+        "dataFormat": "Forms and submissions are stored in the site's WordPress database; uploaded files are stored in WordPress uploads, and submissions can be exported as CSV.",
+        "gapVsPaid": "Forminator can build formula-driven quizzes and calculators, but it requires WordPress and offers less polished outcome templates, lead segmentation, and conversion reporting than Outgrow.",
+        "setupBlocker": "It only runs inside an existing WordPress site, so hosting, WordPress maintenance and mail delivery must already be solved.",
+        "sources": [
+          "https://wordpress.org/plugins/forminator/",
+          "https://wpmudev.com/docs/wpmu-dev-plugins/forminator/",
+          "https://plugins.trac.wordpress.org/browser/forminator/trunk/forminator.php",
+          "https://outgrow.co/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Tally",
@@ -79,7 +95,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": "Tally AI is available, but its underlying model provider is not publicly documented",
+        "dataFormat": "Forms and responses live in Tally's EU-hosted cloud; responses can be downloaded as CSV or synchronized to Google Sheets or Notion.",
+        "gapVsPaid": "Tally includes calculations and conditional pages, but it is weaker at personalized result experiences, lead-segment analytics, and removing vendor branding without payment.",
+        "setupBlocker": null,
+        "sources": [
+          "https://tally.so/help/faq",
+          "https://tally.so/help/file-uploads",
+          "https://tally.so/help/export-form-submissions",
+          "https://tally.so/help/tally-ai",
+          "https://outgrow.co/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Typebot",
@@ -94,7 +127,27 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "FSL-1.1-Apache-2.0",
+        "runs": "both",
+        "install": "Hosted signup, or Docker Compose/manual deployment of builder and viewer",
+        "engines": "Connects to OpenAI, Anthropic, Mistral, ElevenLabs and Dify through built-in integration blocks; API credentials are supplied by the user",
+        "dataFormat": "Hosted bots and results live in Typebot Cloud; self-hosted data lives in PostgreSQL and uploaded files in S3-compatible object storage.",
+        "gapVsPaid": "Typebot can calculate and branch without per-lead fees, but its conversational presentation is not as purpose-built for polished calculators, result pages, and conversion analytics as Outgrow.",
+        "setupBlocker": "Self-hosting requires PostgreSQL, S3-compatible storage, two web apps, DNS/TLS and mail/auth configuration; the licence is Fair Source rather than OSI open source.",
+        "sources": [
+          "https://github.com/baptisteArno/typebot.io",
+          "https://github.com/baptisteArno/typebot.io/blob/main/LICENSE",
+          "https://docs.typebot.io/self-hosting/get-started",
+          "https://docs.typebot.io/self-hosting/deploy/docker",
+          "https://docs.typebot.io/editor/blocks/integrations/openai",
+          "https://docs.typebot.io/editor/blocks/integrations/anthropic",
+          "https://docs.typebot.io/editor/blocks/integrations/mistral",
+          "https://outgrow.co/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

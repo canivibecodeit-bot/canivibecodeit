@@ -67,7 +67,24 @@
       "stars": 55600,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "both",
+        "install": "Hosted signup, or the official Docker/Kubernetes self-hosting stack",
+        "engines": null,
+        "dataFormat": "Self-hosted Plane keeps workspaces, projects, work items, users, comments, and settings in PostgreSQL; attachments, images, and exports live in MinIO or another S3-compatible object store, with RabbitMQ and optional OpenSearch alongside them. Plane Cloud stores the equivalent data in Plane's infrastructure.",
+        "gapVsPaid": "Plane is built around software-style work items and lacks Asana's mature goals, portfolios, workload planning, forms, rules, and broad cross-functional template ecosystem.",
+        "setupBlocker": "Self-hosting is a multi-service deployment: Docker or Kubernetes plus PostgreSQL, RabbitMQ, object storage, a domain, TLS, and usually email configuration.",
+        "sources": [
+          "https://github.com/makeplane/plane",
+          "https://github.com/makeplane/plane/blob/preview/COPYRIGHT.txt",
+          "https://developers.plane.so/self-hosting/overview",
+          "https://developers.plane.so/self-hosting/plane-architecture",
+          "https://developers.plane.so/self-hosting/manage/backup-restore"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "OpenProject",
@@ -82,7 +99,25 @@
       "stars": 15200,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-only",
+        "runs": "both",
+        "install": "Hosted Enterprise Cloud signup, or Community Edition via Docker Compose/all-in-one Docker or supported Linux packages",
+        "engines": null,
+        "dataFormat": "Self-hosted application data lives in PostgreSQL; uploaded attachments live on a persistent filesystem volume or configured S3-compatible object storage, while configuration and any linked repositories must be backed up separately. Cloud data lives in OpenProject's hosted infrastructure.",
+        "gapVsPaid": "OpenProject can model more formal project plans, but its denser interface and weaker no-code automation make ordinary team coordination slower than Asana.",
+        "setupBlocker": "The free Community Edition needs a Linux server; the recommended Docker setup still requires persistent database/file volumes, a hostname, TLS, and mail configuration.",
+        "sources": [
+          "https://github.com/opf/openproject",
+          "https://github.com/opf/openproject/blob/dev/LICENSE",
+          "https://www.openproject.org/docs/installation-and-operations/",
+          "https://www.openproject.org/docs/installation-and-operations/installation/docker/",
+          "https://www.openproject.org/docs/installation-and-operations/operation/backing-up/",
+          "https://www.openproject.org/docs/faq/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "YouTrack",
@@ -98,7 +133,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "both",
+        "install": "Hosted YouTrack Cloud signup, or the official Docker image for YouTrack Server",
+        "engines": null,
+        "dataFormat": "YouTrack Server stores issues, users, projects, and configuration in its own integrated on-disk database under the data directory, with separate configuration, logs, and backups directories; YouTrack Cloud keeps the data in JetBrains-managed infrastructure.",
+        "gapVsPaid": "YouTrack is developer-centric and free only through ten users, with much thinner goals, portfolio, workload, and cross-functional campaign planning than Asana.",
+        "setupBlocker": "The cloud edition installs cleanly; self-hosting requires Docker volume mapping, enough storage, a one-time setup token, and external HTTPS/reverse-proxy work for a public server.",
+        "sources": [
+          "https://www.jetbrains.com/youtrack/buy/",
+          "https://www.jetbrains.com/help/youtrack/server/youtrack-docker-installation.html",
+          "https://www.jetbrains.com/help/youtrack/server/changing-database-location.html",
+          "https://www.jetbrains.com/help/youtrack/server/youtrack-supported-environments.html",
+          "https://www.jetbrains.com/help/youtrack/cloud/server-configuration-settings.html"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Leantime",
@@ -113,7 +165,24 @@
       "stars": 10000,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Paid hosted signup, or the free open-source edition via Docker Compose/official image or a PHP release archive plus MySQL/MariaDB",
+        "engines": null,
+        "dataFormat": "Self-hosted project data lives in MySQL 8 or MariaDB 10.6+, while uploaded files use the local filesystem or configured S3-compatible storage; hosted-account data lives in Leantime's cloud.",
+        "gapVsPaid": "Leantime covers projects and goals but has fewer polished integrations, rules, mobile workflows, dashboards, and enterprise controls than Asana.",
+        "setupBlocker": "There is no longer a permanent free hosted tier: the free route means operating PHP, MySQL/MariaDB, persistent storage, backups, and a web-facing Docker or LAMP stack.",
+        "sources": [
+          "https://github.com/Leantime/leantime",
+          "https://github.com/Leantime/leantime/blob/master/LICENSE",
+          "https://docs.leantime.io/install/installation/",
+          "https://support.leantime.io/en/category/faqs-1bi3ww1/",
+          "https://support.leantime.io/en/article/are-there-any-differences-between-the-cloud-hosted-project-management-system-and-the-open-source-project-management-platform-qxlgoj/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Redmine",
@@ -128,7 +197,23 @@
       "stars": 6000,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "self-hosted",
+        "install": "Install the Ruby on Rails application against PostgreSQL, MySQL/MariaDB, or SQLite; packaged containers/appliances are third-party conveniences",
+        "engines": null,
+        "dataFormat": "Issues, users, projects, time entries, and configuration live in the configured SQL database; uploaded attachments live as files in Redmine's `files` directory.",
+        "gapVsPaid": "Redmine gives up Asana's modern collaboration, mobile experience, forms, automation, portfolio reporting, and real-time polish in exchange for a highly configurable server.",
+        "setupBlocker": "The official install is a real Rails deployment, Ruby and gem versions, database creation, migrations, a production web server, email, backups, and upgrades are all the operator's job.",
+        "sources": [
+          "https://www.redmine.org/",
+          "https://github.com/redmine/redmine",
+          "https://github.com/redmine/redmine/blob/master/LICENSE.txt",
+          "https://www.redmine.org/projects/redmine/wiki/redmineinstall"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

@@ -2753,6 +2753,46 @@ a.tile {
   color: var(--muted);
 }
 
+/* Verified fact rows on the full alternative card (research-backed entries). */
+.alt-facts {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  max-width: 76ch;
+}
+
+.alt-facts .af-row {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.alt-facts .af-k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  flex: 0 0 92px;
+  padding-top: 1px;
+}
+
+.alt-facts .af-v {
+  color: var(--fg);
+  min-width: 0;
+  /* research strings carry slash-joined tokens and file paths with no break
+     opportunities; without this they push the card past the phone viewport */
+  overflow-wrap: anywhere;
+}
+
+.alt-facts .af-verified {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
 .alt-card .alt-side {
   display: flex;
   flex-direction: column;

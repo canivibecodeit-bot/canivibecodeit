@@ -17,7 +17,26 @@
     "notes": "Official monthly price per computer.",
     "native": "9 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Computer Backup",
+        "monthly": 9,
+        "annualPerMonth": 8.25,
+        "per": "flat",
+        "limits": "Unlimited backup data for 1 computer plus directly attached external drives; NAS devices are excluded.",
+        "notes": "$99/year; a 2-year term is $189, equivalent to about $7.88/month."
+      }
+    ],
+    "freeTierCaps": "no permanent free tier; 15-day trial",
+    "billingTerms": "monthly + annual + 2-year; subscriptions are priced per computer",
+    "priceChanges": [],
+    "hiddenCosts": "30-day version history is standard; 1-year history can be enabled without an added recurring fee, while Forever Version History bills data older than 1 year at $0.006/GB/month. Shipped USB restores require an upfront device charge, refundable only if returned within the stated window.",
+    "tiersCheckedOn": "2026-08-11",
+    "tiersSources": [
+      "https://www.backblaze.com/cloud-backup/pricing",
+      "https://www.backblaze.com/cloud-backup/features/extended-version-history"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

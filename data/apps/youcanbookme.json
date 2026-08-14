@@ -72,7 +72,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account, availability, booking and integration records live in Cal.com's cloud and in the connected calendar, conferencing and payment providers",
+        "gapVsPaid": "The free plan is solo-only; shared routing, round-robin scheduling and team administration cost extra.",
+        "setupBlocker": null,
+        "sources": [
+          "https://cal.com/pricing",
+          "https://cal.com/privacy",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Calendly Free",
@@ -89,7 +104,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account, booking and calendar-integration records live in Calendly's cloud and connected calendar or conferencing providers",
+        "gapVsPaid": "The free plan permits only one event type and one calendar and omits payments and automated reminders.",
+        "setupBlocker": null,
+        "sources": [
+          "https://calendly.com/pricing",
+          "https://calendly.com/privacy",
+          "https://help.calendly.com/hc/en-us/articles/223145627-Getting-started-with-Calendly",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Koalendar Free",
@@ -104,7 +135,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account, booking and availability records live in Koalendar's cloud and connected calendar or conferencing providers",
+        "gapVsPaid": "Payments, booking-form questions, custom reminders, group sessions and team routing are paid features.",
+        "setupBlocker": null,
+        "sources": [
+          "https://koalendar.com/pricing",
+          "https://koalendar.com/pricing/free-forever-vs-pro-plan-guide",
+          "https://koalendar.com/privacy",
+          "https://koalendar.com/security",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "TidyCal Free",
@@ -118,7 +166,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account, connected-calendar, appointment and payment-integration records live in TidyCal and AppSumo's cloud services",
+        "gapVsPaid": "It connects one calendar and omits custom intake questions, advanced reminders, polls and approval workflows on the free plan.",
+        "setupBlocker": null,
+        "sources": [
+          "https://help.tidycal.com/article/739-faq",
+          "https://tidycal.com/privacy-policy",
+          "https://tidycal.com/",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "zcal Free",
@@ -132,7 +196,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account and booking records live in zcal's cloud; Stripe processes and stores payment details for paid bookings",
+        "gapVsPaid": "Team scheduling is paid and zcal takes a 3% commission on Stripe payments.",
+        "setupBlocker": null,
+        "sources": [
+          "https://zcal.co/pricing",
+          "https://help.zcal.co/pricing/free-forever-plan",
+          "https://help.zcal.co/integrations/stripe",
+          "https://zcal.co/privacy",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Zoho Bookings Free",
@@ -149,7 +230,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Account, booking and customer records live in Zoho's data centres and are synchronized with connected calendar and meeting providers",
+        "gapVsPaid": "The free plan offers one service and no payments and is less flexible for custom booking-page and polling workflows.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.zoho.com/bookings/pricing.html",
+          "https://www.zoho.com/bookings/free-appointment-scheduling-software.html",
+          "https://www.zoho.com/privacy.html",
+          "https://youcanbook.me/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

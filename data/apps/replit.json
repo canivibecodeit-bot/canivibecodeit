@@ -66,7 +66,24 @@
       "stars": 78643,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Install script, OS package or Docker container",
+        "engines": null,
+        "dataFormat": "Projects, extensions and VS Code settings live on the host or server filesystem",
+        "gapVsPaid": "It is only the browser IDE layer: agents, managed runtimes, databases, hosting and deployment are separate jobs.",
+        "setupBlocker": "Remote use requires authentication plus TLS or a reverse proxy, and you maintain the host, storage and updates",
+        "sources": [
+          "https://github.com/coder/code-server",
+          "https://github.com/coder/code-server/blob/main/LICENSE",
+          "https://coder.com/docs/code-server/install",
+          "https://coder.com/docs/code-server/guide",
+          "https://replit.com/products/agent"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Coder",
@@ -84,7 +101,24 @@
       "stars": 13300,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "self-hosted",
+        "install": "Install the control plane, connect PostgreSQL and define workspaces with Terraform",
+        "engines": "Coder AI Agents can connect to Anthropic, OpenAI, Google, Amazon Bedrock and self-hosted model endpoints",
+        "dataFormat": "Control-plane state in PostgreSQL; source code and tool state inside provisioned workspace volumes or repositories",
+        "gapVsPaid": "It is an infrastructure platform for engineering workspaces, not Replit's beginner-friendly instant IDE, agent and app-hosting service.",
+        "setupBlocker": "Terraform plus your own Docker, VM or Kubernetes infrastructure and a production PostgreSQL deployment",
+        "sources": [
+          "https://github.com/coder/coder",
+          "https://github.com/coder/coder/blob/main/LICENSE",
+          "https://coder.com/docs/install",
+          "https://coder.com/docs/ai-coder",
+          "https://replit.com/products/agent"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Eclipse Che",
@@ -99,7 +133,24 @@
       "stars": 7200,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "EPL-2.0",
+        "runs": "self-hosted",
+        "install": "Install the Che Operator or chectl into an existing Kubernetes or OpenShift cluster",
+        "engines": null,
+        "dataFormat": "Code and tools run in Kubernetes pods; durable workspace state uses persistent volumes and Devfile or Kubernetes resources",
+        "gapVsPaid": "It assumes Kubernetes and platform administration, while Replit turns a browser tab into an agent-built and deployed app with almost no infrastructure work.",
+        "setupBlocker": "A working Kubernetes or OpenShift cluster is required before the IDE can be installed",
+        "sources": [
+          "https://github.com/eclipse-che/che",
+          "https://github.com/eclipse-che/che/blob/main/LICENSE",
+          "https://eclipse.dev/che/docs/stable/administration-guide/installing-che/",
+          "https://eclipse.dev/che/docs/stable/end-user-guide/overview-of-workspaces/",
+          "https://replit.com/products/agent"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

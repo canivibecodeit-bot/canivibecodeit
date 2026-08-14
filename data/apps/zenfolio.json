@@ -66,7 +66,24 @@
       "stars": 4300,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Docker Compose with the Lychee image and MariaDB; prebuilt and source installs also exist",
+        "engines": null,
+        "dataFormat": "Uploaded originals and derivatives live in persistent uploads storage; albums, users, metadata and settings live in MariaDB (or another configured database), with separate logs and temporary-data volumes",
+        "gapVsPaid": "It handles portfolios and private downloads but lacks Zenfolio's client proofing, store, print fulfillment, booking and photographer-business automation.",
+        "setupBlocker": "Docker Compose, writable persistent volumes, a database, an APP_KEY, and domain/TLS setup for remote sharing",
+        "sources": [
+          "https://github.com/LycheeOrg/Lychee",
+          "https://github.com/LycheeOrg/Lychee/blob/master/LICENSE",
+          "https://github.com/LycheeOrg/Lychee/blob/master/docker-compose.yaml",
+          "https://lycheeorg.dev/docs/installation.html",
+          "https://zenfolio.com/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Photoview",
@@ -81,7 +98,24 @@
       "stars": 6497,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Docker Compose with SQLite, MariaDB, or PostgreSQL and one or more mounted media folders",
+        "engines": "Built-in dlib/go-face face detection and recognition; FFmpeg for video processing; optional Mapbox token for maps",
+        "dataFormat": "Original photos remain in the mounted folder tree; the database stores users, albums, indexes, and face metadata, while a media-cache directory stores thumbnails and optimized video",
+        "gapVsPaid": "Its design customization is sparse and it has none of Zenfolio's commerce, proofing, booking, marketing or managed-domain workflow.",
+        "setupBlocker": "Docker plus careful volume paths and host-file permissions; safe remote access also needs a reverse proxy or VPN and TLS",
+        "sources": [
+          "https://github.com/photoview/photoview",
+          "https://github.com/photoview/photoview/blob/master/LICENSE.txt",
+          "https://photoview.github.io/en/docs/installation-docker/",
+          "https://photoview.github.io/en/docs/installation-environment-variables/",
+          "https://zenfolio.com/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Piwigo",
@@ -98,7 +132,25 @@
       "stars": 3800,
       "lastCommit": "2026-05",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "self-hosted",
+        "install": "Upload the NetInstall script or release to PHP web hosting, then complete browser setup against MySQL or MariaDB",
+        "engines": null,
+        "dataFormat": "Originals live under the upload or galleries directories, generated derivatives and configuration stay in the Piwigo tree, and albums, users, metadata, and plugin state live in MySQL or MariaDB",
+        "gapVsPaid": "It can build a portfolio through themes and plugins, but sales, lab fulfillment, proofing and photographer-business automation remain separate projects.",
+        "setupBlocker": "Requires PHP web hosting, a database, writable directories, and ongoing web-server, TLS, and plugin maintenance",
+        "sources": [
+          "https://github.com/Piwigo/Piwigo",
+          "https://github.com/Piwigo/Piwigo/blob/master/COPYING",
+          "https://piwigo.org/get-piwigo",
+          "https://doc.piwigo.org/self-hosting-piwigo/move-your-piwigo-to-another-server",
+          "https://doc.piwigo.org/self-hosting-piwigo/importing-and-synchronizing-ftp-photos",
+          "https://zenfolio.com/features/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

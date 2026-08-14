@@ -71,7 +71,24 @@
       "stars": 1200,
       "lastCommit": "2026-07",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "both",
+        "install": "Docker Compose, with SUPER_ADMIN_EMAIL set before first start",
+        "engines": null,
+        "dataFormat": "Application records in MongoDB; production media uploads use MediaLit plus S3-compatible object storage",
+        "gapVsPaid": "CourseLit has no creator discovery network and its community/social experience is less mature than Patreon's.",
+        "setupBlocker": "Docker starts the app, but a production setup also needs SMTP for email login and MediaLit/S3-compatible storage for uploads",
+        "sources": [
+          "https://github.com/codelitdev/courselit",
+          "https://github.com/codelitdev/courselit/blob/main/LICENSE",
+          "https://docs.courselit.app/self-hosting/self-host/",
+          "https://github.com/codelitdev/courselit/blob/main/deployment/docker/docker-compose.yml",
+          "https://www.patreon.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Discourse",
@@ -86,7 +103,25 @@
       "stars": 47600,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "both",
+        "install": "Use the official Docker installer on a 64-bit Linux server; managed Discourse hosting is the paid alternative",
+        "engines": null,
+        "dataFormat": "Persistent records in PostgreSQL, Redis for cache/queues, and uploads/backups/logs in the Docker volume or S3-compatible storage",
+        "gapVsPaid": "Discourse has no creator discovery feed and is forum-first rather than a polished paid-content creator page.",
+        "setupBlocker": "Self-hosting needs a Linux VPS, Docker, DNS, TLS, working SMTP and regular upgrades",
+        "sources": [
+          "https://github.com/discourse/discourse",
+          "https://github.com/discourse/discourse/blob/main/LICENSE.txt",
+          "https://github.com/discourse/discourse/blob/main/docs/INSTALL.md",
+          "https://meta.discourse.org/t/self-hosting-index/308035",
+          "https://meta.discourse.org/t/configure-an-s3-compatible-object-storage-provider-for-uploads/148916",
+          "https://www.patreon.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Ghost",
@@ -101,7 +136,25 @@
       "stars": 54500,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Run Ghost-CLI on supported Ubuntu/MySQL hosting; the official Docker path is available but still documented as preview",
+        "engines": null,
+        "dataFormat": "Posts, members and settings in MySQL; images under Ghost's content directory by default or through a configured storage adapter",
+        "gapVsPaid": "Ghost has no Patreon discovery network or native group chat, so audience acquisition and community conversation remain separate.",
+        "setupBlocker": "Self-hosting needs a server, domain, DNS, TLS and transactional/newsletter mail, plus Ghost upgrades",
+        "sources": [
+          "https://github.com/TryGhost/Ghost",
+          "https://github.com/TryGhost/Ghost/blob/main/LICENSE",
+          "https://docs.ghost.org/install/ubuntu",
+          "https://docs.ghost.org/install/docker",
+          "https://docs.ghost.org/config",
+          "https://www.patreon.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "systeme.io",
@@ -115,7 +168,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup",
+        "engines": null,
+        "dataFormat": "Contacts, funnels, course/community content, orders, emails and uploaded files in systeme.io's vendor-managed cloud; the underlying storage format is not published",
+        "gapVsPaid": "systeme.io provides no Patreon discovery network or creator feed that can bring an audience.",
+        "setupBlocker": "Selling requires connecting a payment gateway; the free plan is capped at 2,000 contacts, three funnels, one course, one community and one custom domain",
+        "sources": [
+          "https://systeme.io/pricing",
+          "https://help.systeme.io/article/4455-how-to-manage-files-on-systeme-io",
+          "https://help.systeme.io/article/300-host-videos",
+          "https://www.patreon.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

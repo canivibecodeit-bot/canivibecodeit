@@ -65,7 +65,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Government-hosted browser signup followed by one deletion request",
+        "engines": null,
+        "dataFormat": "Personal identifiers encrypted before storage in CalPrivacy's DROP system and matched by registered data brokers",
+        "gapVsPaid": "It covers only eligible California residents and registered brokers, without Optery's discovery screenshots and individualized exposure tracking.",
+        "setupBlocker": "Only California residents are eligible, and the request requires personal identifiers for broker matching",
+        "sources": [
+          "https://privacy.ca.gov/drop/",
+          "https://privacy.ca.gov/drop/how-drop-works/",
+          "https://privacy.ca.gov/drop/personal-information-and-data-brokers/",
+          "https://privacy.ca.gov/drop-for-data-brokers/",
+          "https://www.optery.com/pricing/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Optery Free Basic",
@@ -79,7 +96,26 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup followed by identity and profile intake",
+        "engines": null,
+        "dataFormat": "Personal profile data, exposure findings and screenshots in Optery's AWS-hosted cloud account, encrypted in transit and at rest",
+        "gapVsPaid": "The free tier scans periodically and provides self-service links but does not run Optery's automated removals.",
+        "setupBlocker": "Providing enough sensitive identity and address history for accurate broker matching",
+        "sources": [
+          "https://www.optery.com/",
+          "https://www.optery.com/pricing/",
+          "https://help.optery.com/en/article/whats-the-difference-between-the-free-basic-core-extended-and-ultimate-plan-tiers-why-should-i-choose-ultimate-over-the-other-plans-tqye1o/",
+          "https://help.optery.com/en/article/what-are-the-self-service-removal-tools-available-in-free-basic-e3fwqm/",
+          "https://help.optery.com/en/article/how-often-does-optery-run-scans-and-opt-outs-z8xpc2/",
+          "https://www.optery.com/privacy-policy-2021-to-2024/",
+          "https://www.optery.com/subprocessors/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Permission Slip by DeleteMe",

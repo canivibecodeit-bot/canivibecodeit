@@ -66,7 +66,24 @@
       "stars": 57000,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Coolify Cloud signup or one-line install script on a fresh Linux server",
+        "engines": null,
+        "dataFormat": "Self-hosted control data is in an internal PostgreSQL container; deployed apps and databases remain in Docker containers, volumes, and configuration on the user's servers",
+        "gapVsPaid": "Coolify deploys apps and databases from Git, but it cannot match Railway's instant managed project experience, provider-run infrastructure, and low-friction database lifecycle.",
+        "setupBlocker": "A VPS with root SSH access, open ports, DNS, and responsibility for server patching and application-data backups",
+        "sources": [
+          "https://github.com/coollabsio/coolify",
+          "https://coolify.io/docs/get-started/installation",
+          "https://coolify.io/docs/get-started/internal-postgresql-upgrade",
+          "https://coolify.io/docs/knowledge-base/how-to/backup-restore-coolify",
+          "https://railway.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Dokku",
@@ -82,7 +99,24 @@
       "stars": 32100,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Bootstrap script on a fresh supported Ubuntu or Debian VM, then add an SSH key and domain",
+        "engines": null,
+        "dataFormat": "Application images, configuration, logs, and persistent Docker volumes live on the user's server; service data lives in installed database-plugin volumes",
+        "gapVsPaid": "Dokku can host the same containers, but its CLI-first single-server administration and plugin-managed databases are much rougher than Railway's integrated project UI.",
+        "setupBlocker": "A fresh Linux VM, sudo/SSH competence, DNS, and command-line-only administration",
+        "sources": [
+          "https://github.com/dokku/dokku",
+          "https://dokku.com/docs/getting-started/installation/",
+          "https://dokku.com/docs/advanced-usage/persistent-storage/",
+          "https://dokku.com/docs/deployment/application-deployment/",
+          "https://railway.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Dokploy",
@@ -97,7 +131,25 @@
       "stars": 36000,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Dokploy Cloud signup or one-line install script on a Linux VPS",
+        "engines": null,
+        "dataFormat": "Dokploy metadata is stored in PostgreSQL; application and database data lives in Docker named volumes or bind mounts on the deployment servers, with optional S3 backups",
+        "gapVsPaid": "Dokploy has a polished apps-and-databases control plane, but server security, capacity, backups, upgrades, and outages remain yours instead of Railway's.",
+        "setupBlocker": "A VPS with at least 2 GB RAM, free ports 80/443/3000, DNS, and ongoing Docker/server administration",
+        "sources": [
+          "https://github.com/Dokploy/dokploy",
+          "https://github.com/Dokploy/dokploy/blob/canary/LICENSE.MD",
+          "https://docs.dokploy.com/docs/core/installation",
+          "https://docs.dokploy.com/docs/core/architecture",
+          "https://docs.dokploy.com/docs/core/volume-backups",
+          "https://railway.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

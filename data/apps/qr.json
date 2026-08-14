@@ -60,7 +60,25 @@
       "stars": 2300,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-only",
+        "runs": "both",
+        "install": "Use the hosted PWA, or download one Docker Compose file and run the prebuilt image",
+        "engines": null,
+        "dataFormat": "QR settings are kept in browser localStorage unless disabled and can be saved as a configuration file; generated codes export as PNG, JPG, SVG, text, or batch files",
+        "gapVsPaid": "Its generated codes are static: after printing one you cannot change its destination or get QR TIGER's scan analytics, campaign management and retargeting controls.",
+        "setupBlocker": "None for the hosted PWA; self-hosting requires Docker or building the static Vite app",
+        "sources": [
+          "https://github.com/lyqht/mini-qr",
+          "https://github.com/lyqht/mini-qr/blob/main/LICENSE",
+          "https://github.com/lyqht/mini-qr/blob/main/SELF_HOSTING.md",
+          "https://mini-qr-code-generator.vercel.app/",
+          "https://www.qrcode-tiger.com/pricing",
+          "https://www.qrcode-tiger.com/qr-code-features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "QR TIGER Free",
@@ -76,7 +94,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Use the web generator; create a hosted account for saved or dynamic QR codes",
+        "engines": null,
+        "dataFormat": "Static QR payloads live inside the downloaded image; dynamic destinations, uploaded files, campaign settings, and scan analytics live in QR TIGER's cloud account",
+        "gapVsPaid": "The free plan preserves QR TIGER's interface but caps dynamic codes at three with 500 scans each and adds a popup, so sustained tracked campaigns still require payment.",
+        "setupBlocker": "An account is required for dynamic codes, and the free plan limits them to three codes with 500 scans each and a QR TIGER popup",
+        "sources": [
+          "https://www.qrcode-tiger.com/",
+          "https://enterprise.qrcode-tiger.com/payment",
+          "https://www.qrcode-tiger.com/what-is-the-difference-between-static-and-dynamic-qr-code",
+          "https://www.qrcode-tiger.com/privacy-policy",
+          "https://www.qrcode-tiger.com/pricing",
+          "https://www.qrcode-tiger.com/qr-code-features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "QRCode Monkey",
@@ -90,7 +126,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Open the website in a modern browser; no account or installation",
+        "engines": null,
+        "dataFormat": "The final static code is downloaded as PNG, SVG, PDF, or EPS; the service says entered data is not saved or reused and generated image files are cached for 24 hours",
+        "gapVsPaid": "It creates excellent static artwork but offers no editable destination, scan analytics, campaign dashboard, bulk dynamic management or retargeting.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.qrcode-monkey.com/",
+          "https://www.qrcode-monkey.com/qr-code-api-with-logo/",
+          "https://www.qrcode-tiger.com/pricing",
+          "https://www.qrcode-tiger.com/qr-code-features"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

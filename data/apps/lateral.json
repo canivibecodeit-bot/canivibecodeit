@@ -63,7 +63,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Register for the hosted service and create a review project in the browser",
+        "engines": null,
+        "dataFormat": "Review records and uploaded documents live on CADIMA's hosted servers; the service imports formats including RIS, PDF, Word, and Excel and exports review data in formats including XLSX, RIS, and DOCX",
+        "gapVsPaid": "It organizes a rigorous review, but provides no AI-assisted reading, semantic discovery, or automatic evidence synthesis comparable to Lateral.",
+        "setupBlocker": "Account registration is required; there is no local/offline edition",
+        "sources": [
+          "https://www.cadima.info/",
+          "https://www.cadima.info/index.php/area/downloadFile?filename=CADIMA_terms_and_conditions.pdf",
+          "https://link.springer.com/article/10.1186/s13750-018-0115-5",
+          "https://www.lateral.io/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "NotebookLM",
@@ -79,7 +95,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Sign in with a Google account in the hosted web app; optional mobile apps are available",
+        "engines": "Google Gemini models selected and operated by Google; the exact production model behind each notebook feature is not consistently exposed to the user",
+        "dataFormat": "Uploaded sources are copied or synced into Google's cloud and notebooks retain chats and generated artifacts; the free service limits a notebook to 50 sources, up to 500,000 words or 200 MB per source",
+        "gapVsPaid": "It reads and compares sources well, but has no systematic-review protocol, deduplication, screening queue, or evidence-extraction workflow.",
+        "setupBlocker": "A Google account and cloud upload or synchronization of the research sources are required",
+        "sources": [
+          "https://notebooklm.google.com/",
+          "https://notebooklm.google/",
+          "https://support.google.com/notebooklm/answer/16164461?hl=en",
+          "https://support.google.com/notebooklm/answer/16215270?hl=en",
+          "https://support.google.com/notebooklm/answer/17004255?hl=en",
+          "https://www.lateral.io/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Open Notebook",
@@ -94,7 +128,27 @@
       "stars": 36400,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "self-hosted",
+        "install": "Deploy the documented Docker Compose stack; source and manual installation paths are also available",
+        "engines": "More than a dozen configurable providers including OpenAI, Anthropic, Gemini/Vertex, OpenRouter, Ollama, and LM Studio, assigned separately to chat, embeddings, text-to-speech, and speech-to-text roles",
+        "dataFormat": "Uploaded sources, generated audio, and checkpoints live in the mounted ./data directory, while notebook records and indexes live in the mounted SurrealDB data directory",
+        "gapVsPaid": "It gives grounded chat, notes, and search, but lacks Lateral's literature-review-specific screening, extraction, and evidence-organization workflow.",
+        "setupBlocker": "Docker is the first hurdle, followed by supplying at least one provider API key or setting up Ollama and assigning models to the required roles",
+        "sources": [
+          "https://www.open-notebook.ai/",
+          "https://www.open-notebook.ai/get-started",
+          "https://www.open-notebook.ai/features/model-providers",
+          "https://github.com/lfnovo/open-notebook",
+          "https://github.com/lfnovo/open-notebook/blob/main/LICENSE",
+          "https://github.com/lfnovo/open-notebook/blob/main/docs/1-INSTALLATION/docker-compose.md",
+          "https://github.com/lfnovo/open-notebook/blob/main/docker-compose.yml",
+          "https://www.lateral.io/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

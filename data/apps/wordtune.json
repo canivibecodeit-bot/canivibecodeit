@@ -6,18 +6,54 @@
   "category": "writing-assistant",
   "subcategory": "grammar, editing and long-form writing",
   "tagline": "Rewrite selected sentences for tone, length, fluency, and clarity with side-by-side choices",
-  "priceMonthly": 13.99,
+  "priceMonthly": 6.99,
   "pricing": {
     "plan": "Advanced",
-    "basis": "annual-equivalent",
-    "unit": "flat",
+    "basis": "annual billing, per user per month",
+    "unit": "per-seat",
     "source": "https://wordtune.com/plans",
-    "checkedOn": "2026-07-31",
+    "checkedOn": "2026-08-12",
     "confidence": "medium",
     "notes": "Recorded as the advertised monthly equivalent on annual billing; monthly billing is higher.",
-    "native": "13.99 USD",
+    "native": "6.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "10 rewrites and AI suggestions/day; 3 AI summarizations/month; unlimited spelling and grammar checks",
+        "notes": "The page labels AI generations as limited daily use but does not publish a separate numeric generation cap."
+      },
+      {
+        "name": "Advanced",
+        "monthly": null,
+        "annualPerMonth": 6.99,
+        "per": "user",
+        "limits": "30 rewrites and AI suggestions/day; 15 AI summarizations/month; unlimited AI recommendations, spelling and grammar",
+        "notes": "Annual billing price shown; the live public page did not expose the exact monthly-billing amount to the crawler."
+      },
+      {
+        "name": "Unlimited",
+        "monthly": null,
+        "annualPerMonth": 9.99,
+        "per": "user",
+        "limits": "Unlimited rewrites, AI suggestions, AI summarizations, spelling, grammar, vocabulary, clarity and fluency",
+        "notes": "Annual billing price shown; the live public page did not expose the exact monthly-billing amount to the crawler."
+      }
+    ],
+    "freeTierCaps": "10 rewrites and AI suggestions/day, 3 AI summarizations/month, unlimited spelling corrections and grammar checks; separate AI-generation cap not numerically published",
+    "billingTerms": "monthly + annual (annual advertised as 50% off); paid plans offer a 3-day trial that requires payment details and auto-charges afterward",
+    "priceChanges": [],
+    "hiddenCosts": "No refunds; the 3-day trial converts automatically unless canceled. Academic/nonprofit discount is 30% but cannot stack with annual-billing savings.",
+    "tiersCheckedOn": "2026-08-12",
+    "tiersSources": [
+      "https://wordtune.com/plans",
+      "https://support.wordtune.com/en/articles/5310819-wordtune-s-billing-policy",
+      "https://support.wordtune.com/en/articles/5316519-wordtune-discount-offers-and-policy"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",

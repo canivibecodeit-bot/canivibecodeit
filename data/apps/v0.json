@@ -66,7 +66,24 @@
       "stars": 21100,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "local",
+        "install": "Desktop installer",
+        "engines": "OpenAI, Anthropic, Google Gemini, OpenRouter-compatible providers and local Ollama",
+        "dataFormat": "Generated project source and app metadata stay on the computer; prompts and selected context go to the chosen provider unless a local model is used",
+        "gapVsPaid": "It is a broader local app generator, but it is less polished for component-specific generation, design-system reuse and Vercel-native handoff than v0.",
+        "setupBlocker": "A model-provider API key or a separately installed and configured local Ollama model",
+        "sources": [
+          "https://github.com/dyad-sh/dyad",
+          "https://github.com/dyad-sh/dyad/blob/main/LICENSE",
+          "https://github.com/dyad-sh/dyad/tree/main/src/pro",
+          "https://www.dyad.sh/docs",
+          "https://v0.dev/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "OpenUI",
@@ -81,7 +98,24 @@
       ],
       "desc": "Describe a component and see it rendered live, with output as HTML, React, or Svelte.",
       "selfHost": "docker",
-      "checkedOn": "2026-08-07"
+      "checkedOn": "2026-08-07",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Docker image or Python and uv source installation",
+        "engines": "OpenAI, Groq, LiteLLM-compatible providers, LocalAI and Ollama",
+        "dataFormat": "Generated code and session state live in the running instance and browser; prompts go to the selected model backend",
+        "gapVsPaid": "It lacks v0's polished component library workflow, project persistence and direct Vercel deployment path.",
+        "setupBlocker": "Docker or a Python environment plus an API key, unless a compatible local model server is already running",
+        "sources": [
+          "https://github.com/wandb/openui",
+          "https://github.com/wandb/openui/blob/main/LICENSE",
+          "https://github.com/wandb/openui/blob/main/README.md",
+          "https://github.com/wandb/openui/pulls?q=is%3Apr+is%3Amerged+sort%3Aupdated-desc",
+          "https://v0.dev/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Onlook",
@@ -96,7 +130,24 @@
       ],
       "desc": "Visual AI editor for React apps: click an element, restyle it, let the model write the code.",
       "selfHost": "docker",
-      "checkedOn": "2026-08-07"
+      "checkedOn": "2026-08-07",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Hosted signup, or self-host with Bun or Docker plus Supabase configuration",
+        "engines": "OpenRouter plus configurable code-edit services such as Morph or Relace",
+        "dataFormat": "Project code lives in the workspace or sandbox; application metadata and assets use the configured Supabase instance",
+        "gapVsPaid": "It works best around a real React or Next.js codebase and is weaker than v0 at turning a brief directly into a polished standalone component.",
+        "setupBlocker": "Hosted access may be gated; self-hosting needs Bun or Docker, Supabase and several environment variables",
+        "sources": [
+          "https://github.com/onlook-dev/onlook",
+          "https://github.com/onlook-dev/onlook/blob/main/LICENSE",
+          "https://docs.onlook.com/",
+          "https://onlook.com/",
+          "https://v0.dev/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

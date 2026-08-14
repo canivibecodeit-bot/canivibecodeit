@@ -68,7 +68,25 @@
       "stars": 138,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0",
+        "runs": "both",
+        "install": "Desktop installer or local browser PWA; the Team Edition is separately self-hosted",
+        "engines": null,
+        "dataFormat": "Editable lessons live as .elpx project files; output exports as web pages, EPUB3 or SCORM/LMS packages, while Team Edition uses server storage",
+        "gapVsPaid": "It is an authoring and export tool, not Brilliant's polished ready-made adaptive STEM curriculum, guided learning path or motivation system.",
+        "setupBlocker": null,
+        "sources": [
+          "https://exelearning.net/en/home-2/",
+          "https://github.com/exelearning/exelearning",
+          "https://exelearning.github.io/exelearning/install/",
+          "https://github.com/exelearning/exelearning/releases",
+          "https://brilliant.org/premium/",
+          "https://brilliant.org/courses/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Oppia",
@@ -83,7 +101,26 @@
       "stars": 6800,
       "lastCommit": "2026-08",
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "both",
+        "install": "Use Oppia.org directly, or deploy the Python and Angular application on a Google App Engine-style stack",
+        "engines": null,
+        "dataFormat": "Explorations, skills, stories, questions and learner progress live in Oppia's hosted Google Cloud Datastore and Storage, or the equivalent self-hosted deployment",
+        "gapVsPaid": "Creating responsive branches is manual, and the result does not match Brilliant's broad authored catalog or production-quality interactive visuals.",
+        "setupBlocker": "None on Oppia.org; self-hosting is a developer-grade Google App Engine deployment",
+        "sources": [
+          "https://www.oppia.org/",
+          "https://github.com/oppia/oppia",
+          "https://oppia.github.io/",
+          "https://github.com/oppia/oppia/wiki/Installing-Oppia-%28Linux%3B-Python-3%29",
+          "https://github.com/oppia/oppia/wiki/Storage-models",
+          "https://brilliant.org/premium/",
+          "https://brilliant.org/courses/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Lumi",
@@ -99,7 +136,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0",
+        "runs": "local",
+        "install": "Windows Store or EXE, macOS Intel or Apple-silicon DMG, or Linux Snap, AppImage, deb or pacman package",
+        "engines": null,
+        "dataFormat": "Interactive content lives in local .h5p packages and can be exported as H5P, standalone HTML or SCORM",
+        "gapVsPaid": "It edits standalone H5P activities but supplies no sequenced curriculum, adaptive guided path or ready-made STEM library.",
+        "setupBlocker": "Windows may show SmartScreen, and current macOS builds have had unsigned or damaged-app Gatekeeper reports",
+        "sources": [
+          "https://lumi.education/en/lumi-h5p-offline-desktop-editor/",
+          "https://github.com/Lumieducation/Lumi",
+          "https://github.com/Lumieducation/Lumi/blob/master/package.json",
+          "https://github.com/Lumieducation/Lumi/releases",
+          "https://brilliant.org/premium/",
+          "https://brilliant.org/courses/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "GeoGebra",
@@ -118,7 +173,27 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "EUPL-1.2",
+        "runs": "both",
+        "install": "Use the hosted web apps or install native desktop or mobile apps",
+        "engines": null,
+        "dataFormat": "Activities can be saved locally as .ggb ZIP/XML files or to a GeoGebra cloud account as online resources",
+        "gapVsPaid": "It is excellent for interactive mathematics but becomes a much weaker substitute once the science is not mathematical, and it lacks Brilliant's guided curriculum.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.geogebra.org/",
+          "https://www.geogebra.org/download?lang=en",
+          "https://www.geogebra.org/license",
+          "https://github.com/geogebra/geogebra",
+          "https://geogebra.github.io/docs/reference/en/File_Format/",
+          "https://help.geogebra.org/hc/en-us/articles/10828122740765-Create-GeoGebra-Resources",
+          "https://brilliant.org/premium/",
+          "https://brilliant.org/courses/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Moodle",
@@ -135,7 +210,26 @@
       "stars": 7300,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-or-later",
+        "runs": "self-hosted",
+        "install": "Install PHP and a supported database and web server, create the moodledata directory, then run the web installer and cron",
+        "engines": null,
+        "dataFormat": "Course records and activity data live in a relational database; uploaded files, caches and sessions live under moodledata, with .mbz course backups",
+        "gapVsPaid": "It is an LMS shell rather than Brilliant's interactive pedagogy, so the author must build the lessons, feedback and activities from scratch.",
+        "setupBlocker": "Web hosting, PHP and database compatibility, cron, security hardening and upgrades all belong to the operator",
+        "sources": [
+          "https://moodle.org/",
+          "https://github.com/moodle/moodle",
+          "https://github.com/moodle/moodle/blob/main/COPYING.txt",
+          "https://docs.moodle.org/en/Installing_Moodle",
+          "https://docs.moodle.org/en/Installation_quick_guide",
+          "https://brilliant.org/premium/",
+          "https://brilliant.org/courses/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [],

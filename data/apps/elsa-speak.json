@@ -66,7 +66,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup or mobile-app install",
+        "engines": "Human pronunciation coaches plus proprietary speech processing; no acoustic model or backend is named publicly",
+        "dataFormat": "Recordings, practice history and coach feedback in the user's Speechling cloud account/audio journal; the underlying storage format is not published",
+        "gapVsPaid": "Speechling's strongest feedback is human and therefore delayed and rationed on the free service, not instant phoneme-level AI scoring after every attempt.",
+        "setupBlocker": null,
+        "sources": [
+          "https://speechling.com/",
+          "https://speechling.com/blog/speechling-white-paper/",
+          "https://speechling.com/blog/remote-workers-guide-on-how-to-improve-english-speaking-skills/",
+          "https://elsaspeak.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Anki",
@@ -83,7 +99,25 @@
       "stars": 29600,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-or-later",
+        "runs": "both",
+        "install": "Use the Windows installer, macOS DMG or official Linux launcher",
+        "engines": null,
+        "dataFormat": "Local profile files including collection.anki2, collection.media and backups; exports use .apkg/.colpkg, with optional AnkiWeb sync",
+        "gapVsPaid": "Anki can record and compare speech but provides no automatic phoneme-level diagnosis, personalized scoring or corrective coaching.",
+        "setupBlocker": null,
+        "sources": [
+          "https://apps.ankiweb.net/",
+          "https://github.com/ankitects/anki",
+          "https://github.com/ankitects/anki/blob/main/LICENSE",
+          "https://docs.ankiweb.net/files.html",
+          "https://docs.ankiweb.net/backups.html",
+          "https://elsaspeak.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "AnkiDroid",
@@ -97,7 +131,24 @@
       "stars": 11499,
       "lastCommit": "2026-08",
       "selfHost": "one-click",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-3.0-or-later",
+        "runs": "both",
+        "install": "Install from Google Play or F-Droid, or sideload the official APK",
+        "engines": null,
+        "dataFormat": "An Anki collection and media on the Android device, with .apkg import/export and optional AnkiWeb sync",
+        "gapVsPaid": "AnkiDroid records and replays speech but supplies no automatic phoneme diagnosis, score or corrective coaching.",
+        "setupBlocker": null,
+        "sources": [
+          "https://ankidroid.org/",
+          "https://github.com/ankidroid/Anki-Android",
+          "https://github.com/ankidroid/Anki-Android/blob/main/COPYING",
+          "https://docs.ankidroid.org/",
+          "https://elsaspeak.com"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [],

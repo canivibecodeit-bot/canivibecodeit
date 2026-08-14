@@ -71,7 +71,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup in a browser, or install the Adobe Express desktop/mobile app.",
+        "engines": "Adobe Firefly models power the generative features.",
+        "dataFormat": "Projects, uploads, libraries and brand assets live in Adobe's cloud; exports include image, PDF and video files.",
+        "gapVsPaid": "Adobe Express is shallower than BeFunky for dedicated photo retouching, artistic effects and fine collage control.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.adobe.com/express/pricing",
+          "https://helpx.adobe.com/express/web/adobe-express-subscription/free.html",
+          "https://www.adobe.com/express/feature",
+          "https://helpx.adobe.com/express/web/brands-libraries-projects/create-manage-brands/projects.html",
+          "https://www.befunky.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Canva Free",
@@ -87,7 +104,25 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup in a browser, or install Canva's desktop/mobile app.",
+        "engines": "Canva AI and Magic Studio provide generative tools; Canva does not publish a complete provider/model map for the free editor.",
+        "dataFormat": "Designs, uploads, folders and brand assets live in Canva's cloud; users export common image, PDF, presentation and video formats.",
+        "gapVsPaid": "Canva's photo tools are designed for quick layout work, not BeFunky's more focused retouching and effects workflow.",
+        "setupBlocker": null,
+        "sources": [
+          "https://www.canva.com/pricing/",
+          "https://www.canva.com/help/upload-media/",
+          "https://www.canva.com/help/manage-uploads/",
+          "https://www.canva.com/policies/privacy-policy/",
+          "https://www.canva.com/ai-assistant/",
+          "https://www.befunky.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "Desygner Free",
@@ -103,7 +138,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup in a browser, or install the mobile app.",
+        "engines": "Desygner's terms identify OpenAI-backed AI features.",
+        "dataFormat": "Projects, uploads, fonts and brand assets live in Desygner's cloud; designs export as image or PDF files.",
+        "gapVsPaid": "Desygner's photo editing and collage controls are more basic and less polished than BeFunky's.",
+        "setupBlocker": null,
+        "sources": [
+          "https://desygner.com/pricing/",
+          "https://desygner.com/",
+          "https://desygner.com/terms/",
+          "https://www.befunky.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     },
     {
       "name": "VistaCreate Starter",
@@ -119,7 +170,24 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup in a browser, or install the mobile app.",
+        "engines": null,
+        "dataFormat": "Projects, uploads and the single Brand Kit live in VistaCreate's cloud; exports include image, GIF and video files.",
+        "gapVsPaid": "VistaCreate is a marketing-template editor first, with much less detailed retouching and collage control than BeFunky.",
+        "setupBlocker": null,
+        "sources": [
+          "https://support.create.vista.com/hc/en-us/articles/360021367319-VistaCreate-Free-Starter-Plan",
+          "https://create.vista.com/",
+          "https://support.create.vista.com/hc/en-us/articles/6347917526940-What-VistaCreate-plans-are-available",
+          "https://create.vista.com/features/brand-kit/",
+          "https://www.befunky.com/"
+        ],
+        "checkedOn": "2026-08-10"
+      }
     }
   ],
   "rejectedAlternatives": [

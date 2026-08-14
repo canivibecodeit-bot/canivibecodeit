@@ -65,7 +65,26 @@
       "stars": 15700,
       "lastCommit": "2026-08",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "AGPL-3.0-only",
+        "runs": "self-hosted",
+        "install": "Official Docker image/Compose setup, or a PHP web-server installation",
+        "engines": null,
+        "dataFormat": "Feeds, articles, read state, tags, users, and settings live in SQLite by default or in PostgreSQL/MySQL/MariaDB; the persistent data directory also holds configuration, caches, and extensions.",
+        "gapVsPaid": "FreshRSS has capable filters and search but lacks Inoreader's managed high-scale polling, web feeds, monitoring streams, email/newsletter ingestion, mobile apps, and automation integrations.",
+        "setupBlocker": "The first obstacle is supplying a continuously running server, persistent storage, scheduled feed refreshes, HTTPS, backups, and upgrades; there is no first-party managed free account.",
+        "sources": [
+          "https://freshrss.org/",
+          "https://github.com/FreshRSS/FreshRSS",
+          "https://github.com/FreshRSS/FreshRSS/blob/edge/LICENSE.txt",
+          "https://freshrss.github.io/FreshRSS/en/admins/03_Installation.html",
+          "https://github.com/FreshRSS/FreshRSS/tree/edge/Docker",
+          "https://www.inoreader.com/",
+          "https://www.inoreader.com/pricing"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Miniflux",
@@ -80,7 +99,26 @@
       "stars": 9600,
       "lastCommit": "2026-05",
       "selfHost": "docker",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "Apache-2.0",
+        "runs": "self-hosted",
+        "install": "Install the published binary/package or run the official Docker image, with PostgreSQL",
+        "engines": null,
+        "dataFormat": "Users, subscriptions, fetched entries, read/star state, filters, sessions, and settings live in the operator's PostgreSQL database.",
+        "gapVsPaid": "Miniflux is intentionally narrow and does not match Inoreader's monitoring feeds, complex rules, web and social sources, newsletters, annotations, integrations, or mobile polish.",
+        "setupBlocker": "PostgreSQL is mandatory, so the first hurdle is not the binary but a database, migrations, scheduled refresh, a reverse proxy with TLS, backups, and upgrades.",
+        "sources": [
+          "https://miniflux.app/",
+          "https://github.com/miniflux/v2",
+          "https://github.com/miniflux/v2/blob/main/LICENSE",
+          "https://miniflux.app/docs/installation.html",
+          "https://miniflux.app/docs/docker.html",
+          "https://www.inoreader.com/",
+          "https://www.inoreader.com/pricing"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "NewsBlur",
@@ -98,7 +136,26 @@
       "stars": 7600,
       "lastCommit": "2026-08",
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "MIT",
+        "runs": "both",
+        "install": "Hosted signup for the free service, or clone the repository and start its Docker Compose stack",
+        "engines": "Optional AI/Discover features can use an OpenAI API key; NewsBlur also exposes an MCP server for compatible assistants.",
+        "dataFormat": "The hosted account stores feeds, stories, training signals, folders, comments, and read state in NewsBlur's cloud; self-hosting uses PostgreSQL for relational data, MongoDB for stories/read state, Redis caches, and persistent volumes.",
+        "gapVsPaid": "NewsBlur's free service is capped and its rule and automation ecosystem is narrower, while self-hosting is much heavier than simply paying for Inoreader.",
+        "setupBlocker": "None for the limited hosted plan; self-hosting is a serious PostgreSQL, MongoDB, Redis, worker, proxy, storage, backup, and monitoring stack rather than a single-container reader.",
+        "sources": [
+          "https://newsblur.com/",
+          "https://github.com/samuelclay/NewsBlur",
+          "https://github.com/samuelclay/NewsBlur/blob/master/LICENSE",
+          "https://github.com/samuelclay/NewsBlur#docker",
+          "https://newsblur.com/premium",
+          "https://www.inoreader.com/",
+          "https://www.inoreader.com/pricing"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [

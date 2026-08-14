@@ -1,10 +1,26 @@
 ---
 /* One curated free/OSS alternative. compact = the verdict-page row;
-   full = the dedicated-page card with platform icons and repo link. */
+   full = the dedicated-page card with platform icons, repo link and, when the
+   entry carries a verified `facts` block, the fact rows. */
 import { existsSync } from 'node:fs';
-import { formatStars, formatMonth, SELF_HOST_LABELS } from '../lib/apps.js';
+import { formatStars, formatMonth, formatLicense, SELF_HOST_LABELS, FACT_RUNS_LABELS } from '../lib/apps.js';
 
-const { alt, compact = false, i = 0 } = Astro.props;
+const { alt, compact = false, i = 0, appName = null } = Astro.props;
+
+// Verified fact rows (skip what wasn't verified; null setupBlocker IS a
+// finding: it means the install was verified clean).
+const f = alt.facts;
+const factRows = f
+  ? [
+      ['license', formatLicense(f.license)],
+      ['runs', FACT_RUNS_LABELS[f.runs]],
+      ['install', f.install],
+      ['engines', f.engines],
+      ['data', f.dataFormat],
+      [appName ? `vs ${appName}` : 'vs paid', f.gapVsPaid],
+      ['setup', f.setupBlocker ?? 'no real blockers; verified to install clean'],
+    ].filter(([, v]) => v != null)
+  : [];
 
 const host = (() => {
   try {
@@ -112,6 +128,17 @@ const ICONS = {
           </span>
         </div>
         <p class="alt-desc">{alt.desc}</p>
+        {factRows.length > 0 && (
+          <div class="alt-facts">
+            {factRows.map(([k, v]) => (
+              <p class="af-row">
+                <span class="af-k">{k}</span>
+                <span class="af-v">{v}</span>
+              </p>
+            ))}
+            <p class="af-verified">facts verified {f.checkedOn}</p>
+          </div>
+        )}
       </div>
       <div class="alt-side">
         {stars ? (

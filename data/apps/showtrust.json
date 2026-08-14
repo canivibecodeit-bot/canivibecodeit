@@ -52,7 +52,23 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "self-hosted",
+        "install": "Install and activate the plugin from WordPress Plugins → Add New",
+        "engines": null,
+        "dataFormat": "Testimonials, form submissions and display settings live in the site's WordPress database; reviewer images and other uploaded media live in the WordPress media library",
+        "gapVsPaid": "It only becomes simple after you already run WordPress, and it lacks ShowTrust's hosted share link and agent-assisted installation on an arbitrary site.",
+        "setupBlocker": "It only works inside a self-hosted WordPress site, so a non-WordPress site first needs an entire WordPress installation",
+        "sources": [
+          "https://wordpress.org/plugins/testimonial-free/",
+          "https://realtestimonials.io/",
+          "https://realtestimonials.io/free-vs-pro/",
+          "https://showtrust.to/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Shosay",
@@ -66,7 +82,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "hosted",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "proprietary-free",
+        "runs": "cloud",
+        "install": "Hosted signup, then paste an iframe/widget embed into the site",
+        "engines": null,
+        "dataFormat": "Testimonials and account data live in Shosay's hosted PostgreSQL service, while uploaded images/media use Cloudflare R2; users can export their testimonials",
+        "gapVsPaid": "It provides a generous hosted collector and widgets, but the free badge remains visible and installation, styling and site placement are still your responsibility.",
+        "setupBlocker": "You need permission to paste Shosay's embed code into the site, and every free widget carries a small Powered by Shosay pill",
+        "sources": [
+          "https://shosay.com/",
+          "https://www.shosay.com/pricing",
+          "https://showtrust.to/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     },
     {
       "name": "Strong Testimonials",
@@ -81,7 +112,22 @@
       "stars": null,
       "lastCommit": null,
       "selfHost": "ops",
-      "checkedOn": "2026-08-06"
+      "checkedOn": "2026-08-06",
+      "facts": {
+        "license": "GPL-2.0-or-later",
+        "runs": "self-hosted",
+        "install": "Install and activate from WordPress Plugins → Add New",
+        "engines": null,
+        "dataFormat": "Testimonials and front-end form submissions live in the site's WordPress database; images use the site's WordPress media storage, and optional notification emails can contain submitted fields",
+        "gapVsPaid": "It requires a self-hosted WordPress site and lacks ShowTrust's universal hosted collection link and done-for-you widget installation.",
+        "setupBlocker": "It requires a self-hosted WordPress site; the free edition has one collection form and lacks built-in captcha, so public forms may need another anti-spam layer",
+        "sources": [
+          "https://wordpress.org/plugins/strong-testimonials/",
+          "https://strongtestimonials.com/terms-of-service/",
+          "https://showtrust.to/"
+        ],
+        "checkedOn": "2026-08-11"
+      }
     }
   ],
   "rejectedAlternatives": [
