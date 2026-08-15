@@ -1,0 +1,51 @@
+{
+  "slug": "gitracer-io",
+  "name": "GitRacer.io",
+  "domain": "gitracer.io",
+  "category": "dev-tools",
+  "subcategory": "GitHub stats and leaderboards",
+  "tagline": "Turns public GitHub activity into a race: commit and contribution leaderboards for developers and their friends.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://gitracer.io/",
+    "checkedOn": "2026-08-15",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. May be free or free plus a small paid tier; treat the number as unknown rather than zero.",
+    "native": null
+  },
+  "verdict": "yes",
+  "verdictConfidence": "low",
+  "verdictSummary": "Everything this thing knows about you, it learned from the public GitHub API, which means you can learn it too with a token and an afternoon. Fetch contributions, rank them, animate a bar, ship. The interesting part is not the code, it is the leaderboard: a race with one runner is a jog, and the reason anyone opens a site like this is that other developers are already on it and posting screenshots. Your local build gives you the numbers and the charts and none of the audience, which is fine if what you actually wanted was your own stats and not a rank among strangers. One extra wrinkle: the submitter claims it is literally open source, and if that holds, the honest answer is not to vibe code a clone at all, it is to clone the repo and run it. Verdict confidence is low because we have not verified the product's pricing, feature surface, or license ourselves.",
+  "coreLoopDIY": "Pull public GitHub contribution and commit data for a list of usernames, cache it locally, and render an animated ranked race chart plus per-user stat cards.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "A GitHub personal access token with public read scope (unauthenticated rate limits will choke you)",
+    "Node 20+ and a place to run it, local is fine",
+    "A list of usernames you actually care about, since there is no community to join"
+  ],
+  "whatYouLose": [
+    "The leaderboard population: ranking yourself against three coworkers is not the same product as ranking against thousands of strangers",
+    "The social loop, meaning the shareable cards, X screenshots and the vague competitive dopamine that made anyone care",
+    "Whatever cached historical series they have accumulated, since the GitHub API will not retroactively hand you clean daily snapshots you never collected",
+    "Polish: their animation timing, badges and OG images are the actual craft here, and your first pass will look like a bar chart",
+    "Someone else eating the rate limits, caching layer and the day GitHub changes a response shape"
+  ],
+  "moatTags": [
+    "network-effects",
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is a good domain, a leaderboard with people already standing on it, and early X distribution. All real, none of it in the source code.",
+  "whyPeopleStillPay": "Because the value is being ranked in public, not computing a rank in private. If there is a paid tier it is almost certainly buying vanity: private repo stats, a fancier card, a spot near the top of a page other developers actually look at. None of that is something a local script can hand you, and none of it is a technical problem.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": null,
+  "prompt": "Build a local GitHub contribution race dashboard. Single project, no accounts, no hosted backend, no telemetry.\n\nStack, non negotiable: Next.js 15 with the App Router, TypeScript, Tailwind, and SQLite via better-sqlite3. No ORM, write the SQL. No auth, no user accounts, this runs on my machine.\n\nData: read GITHUB_TOKEN from .env.local and hit the GitHub REST and GraphQL APIs as an authenticated user. Use the GraphQL contributionsCollection query to get each user's daily contribution calendar for the last 365 days, and the REST search API for public repo and follower counts. Never commit the token; ship a .env.example.\n\nInput: a tracked.json file at the repo root holding an array of GitHub usernames. No UI for editing it, I will edit the file.\n\nSync: a route handler at /api/sync that fetches every tracked user, upserts one row per user per day into a contributions table, and writes a fetched_at timestamp per user. Skip users synced in the last 6 hours unless force=1 is passed. Handle rate limit responses by backing off and reporting which users failed, do not silently swallow errors.\n\nUI, one page at /:\n- an animated horizontal bar race showing cumulative contributions per user over a selectable window: 7 days, 30 days, 365 days. Use CSS transitions or Framer Motion, pick one and commit.\n- a ranked table: rank, avatar, username, contributions in window, current streak, longest streak, best single day.\n- a per user detail page at /u/[username] with a contribution heatmap for the year.\n\nOut of scope, do not build: OAuth login, private repo stats, shareable OG image generation, email digests, deployment config, Docker, a settings screen, dark mode toggles.\n\nDeliver a README with exactly the commands to install, add the token, run the sync, and start the dev server. Seed tracked.json with three well known usernames so the first run shows something. If the token is missing, fail loudly at startup with a one line explanation rather than rendering an empty page.",
+  "promptCurated": false
+}
