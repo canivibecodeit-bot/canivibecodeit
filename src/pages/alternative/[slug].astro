@@ -144,9 +144,8 @@ const jsonld = [
           <div class="alt-facts">
             <div class="af-grid">
               {ledgerRows.map(([k, v, cls]) => (
-                <p class:list={['af-lrow', String(v).length > 42 ? 'long' : String(v).length > 24 && 'mid']}>
+                <p class="af-lrow">
                   <span class="af-k">{k}</span>
-                  <span class="af-leader" />
                   <span class:list={['af-v', cls]}>{v}</span>
                 </p>
               ))}

@@ -143,6 +143,17 @@ h3 {
   color: var(--muted);
 }
 
+/* Dark theme: app/tool favicons sit on a light chip. Roughly a third of the
+   collected icons are dark glyphs on transparency — invisible on the dark
+   background — and light mode already proves every icon reads on a light
+   surface. box-sizing is border-box, so the padding shrinks the glyph
+   inside the declared width instead of growing the layout. */
+:root:not([data-theme='light']) img[src^='/icons/'] {
+  background: #f4f1e8;
+  padding: 3px;
+  border-radius: 8px;
+}
+
 /* ---------- header ---------- */
 
 .site-header {
@@ -2766,33 +2777,25 @@ a.tile {
 
 /* Verified fact rows on the full alternative card (research-backed entries). */
 .alt-facts {
-  margin-top: 4px;
-  border-top: 1px solid var(--border);
-  /* wide enough for the two-column ledger; still capped when it sits directly
-     on the page (the /alternative/ product pages) rather than in a card */
-  max-width: 860px;
-  padding-top: 13px;
+  margin-top: 6px;
+  max-width: 680px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* Spec-sheet ledger: label … dotted leader … value, two columns on desktop. */
+/* Spec sheet: one label column, one value column, both left-aligned. No
+   dotted leaders and no rules — research strings run long, and any line
+   drawn to the value ends up spanning most of the card. */
 .af-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 48px;
-  row-gap: 9px;
-  /* don't stretch a one-line dotted row to match a tall stacked neighbor */
-  align-items: start;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 18px;
+  align-items: baseline;
 }
 
 .af-lrow {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
+  display: contents;
 }
 
 .af-lrow .af-k {
@@ -2802,24 +2805,13 @@ a.tile {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
-  flex-shrink: 0;
-  padding-bottom: 1px;
-}
-
-.af-leader {
-  flex: 1;
-  min-width: 14px;
-  border-bottom: 1px dotted color-mix(in srgb, var(--muted) 45%, transparent);
-  margin-bottom: 4px;
 }
 
 .af-lrow .af-v {
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 12.5px;
+  line-height: 1.55;
   color: var(--fg);
-  text-align: right;
   min-width: 0;
-  max-width: 72%;
   /* research strings carry slash-joined tokens and file paths with no break
      opportunities; without this they push the card past the phone viewport */
   overflow-wrap: anywhere;
@@ -2829,41 +2821,19 @@ a.tile {
   color: var(--primary);
 }
 
-/* Prose-length values can't hang off a dotted leader — the label sinks to the
-   bottom of a 5-line wrap. Long rows stack label over value instead. */
-.af-lrow.long {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-}
-
-.af-lrow.long .af-leader {
-  display: none;
-}
-
-.af-lrow.long .af-v {
-  text-align: left;
-  max-width: 100%;
-}
-
-/* Inside the alt-card body (stars column eats the width) one column is all
-   that fits; two columns only on the wide /alternative/ product pages. */
-.alt-card .af-grid {
-  grid-template-columns: 1fr;
-}
-
-/* Prose facts (the catch, setup blockers) — left-bar callouts, not ledger rows. */
+/* Prose facts (the catch, setup blockers) — soft tinted callouts, no bars. */
 .af-catch {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  border-left: 2px solid var(--catch);
-  padding: 2px 0 2px 14px;
+  background: color-mix(in srgb, var(--catch) 8%, transparent);
+  border-radius: 8px;
+  padding: 10px 13px;
   margin: 0;
 }
 
 .af-catch.plain {
-  border-left-color: var(--border);
+  background: color-mix(in srgb, var(--muted) 9%, transparent);
 }
 
 .af-catch .af-ck {
@@ -2892,28 +2862,6 @@ a.tile {
   font-size: 10.5px;
   color: var(--muted);
   text-align: right;
-}
-
-@media (max-width: 640px) {
-  .af-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* mid-length values fit a leader line on desktop but wrap on phones */
-  .af-lrow.mid {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-  }
-
-  .af-lrow.mid .af-leader {
-    display: none;
-  }
-
-  .af-lrow.mid .af-v {
-    text-align: left;
-    max-width: 100%;
-  }
 }
 
 .alt-card .alt-side {
@@ -2959,10 +2907,6 @@ a.tile {
   color: var(--fg);
 }
 
-.alt-plat.selfhost {
-  border-left: 1px solid var(--border);
-  padding-left: 13px;
-}
 
 .alt-plat.one-click svg,
 .alt-plat.hosted svg {
