@@ -17,7 +17,68 @@
     "notes": "Annual Premium subscription divided by 12.",
     "native": "5 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Worldwide route planning plus 1 Single Region unlocked forever for turn-by-turn navigation and offline maps",
+        "notes": null
+      },
+      {
+        "name": "Single Region",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Permanent navigation and offline-map unlock for 1 region",
+        "notes": "One-time regional price is location-dependent and was not published on the public page."
+      },
+      {
+        "name": "Region Bundle",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Permanent navigation and offline-map unlock for 1 multi-region bundle",
+        "notes": "One-time bundle price is location-dependent and was not published on the public page."
+      },
+      {
+        "name": "World Pack",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Permanent worldwide voice navigation and offline maps",
+        "notes": "$29.99 one-time; a $19.99 welcome offer may be shown to eligible accounts."
+      },
+      {
+        "name": "Premium",
+        "monthly": 7.99,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "Worldwide maps/navigation, multi-day planner, personal collections, live tracking, route weather, sport maps, 3D maps, and Garmin map",
+        "notes": "$59.99 billed annually; exact price can vary by storefront and country."
+      },
+      {
+        "name": "Premium Family",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "flat",
+        "limits": "Family subscription exists; exact member cap and current USD billing periods were not exposed on the public pricing page",
+        "notes": "Public App Store listings show multiple family offers, but their duration-to-price mapping could not be verified."
+      }
+    ],
+    "freeTierCaps": "Free plan: worldwide planning and 1 Single Region unlocked forever; navigation/offline maps outside that region require a one-time map purchase or Premium.",
+    "billingTerms": "monthly + annual Premium, one-time regional/world map purchases, and a separately sold Family plan",
+    "priceChanges": [],
+    "hiddenCosts": "World Pack only unlocks maps/navigation and does not include Premium planning, weather, tracking, collection, or sport-map features. Storefront pricing and welcome offers vary.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.komoot.com/premium",
+      "https://support.komoot.com/hc/en-us/articles/10163258809626-komoot-plans-Maps-and-Premium",
+      "https://support.komoot.com/hc/en-us/articles/10163715766554-Manage-your-komoot-Premium-subscription",
+      "https://apps.apple.com/us/app/komoot-hike-bike-run/id447374873"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,68 @@
     "source": "https://imagine.art/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "100 credits/day",
+        "notes": "Daily credits refresh; public help does not publish a guaranteed image/video output count because cost varies by model and settings."
+      },
+      {
+        "name": "Basic",
+        "monthly": 13,
+        "annualPerMonth": 9.1,
+        "per": "user",
+        "limits": "3,000 credits/month; approximately 600 images or 97 videos; 4 concurrent generations",
+        "notes": "Annual equivalent is derived from the official 30% annual discount; billed annually."
+      },
+      {
+        "name": "Standard",
+        "monthly": 30,
+        "annualPerMonth": 21,
+        "per": "user",
+        "limits": "8,000 credits/month; approximately 1,600 images or 265 videos; private generations; 8 concurrent generations",
+        "notes": "Annual equivalent is derived from the official 30% annual discount; billed annually."
+      },
+      {
+        "name": "Ultimate",
+        "monthly": 50,
+        "annualPerMonth": 35,
+        "per": "user",
+        "limits": "16,000 credits/month; approximately 3,200 images or 530 videos",
+        "notes": "Annual equivalent is derived from the official 30% annual discount; billed annually."
+      },
+      {
+        "name": "Creator",
+        "monthly": 250,
+        "annualPerMonth": 175,
+        "per": "user",
+        "limits": "100,000 credits/month; approximately 20,000 images or 3,300 videos",
+        "notes": "Annual equivalent is derived from the official 30% annual discount; billed annually."
+      },
+      {
+        "name": "Enterprise",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "Flexible credit allocation and unlimited users",
+        "notes": "Contact sales; no public price."
+      }
+    ],
+    "freeTierCaps": "100 credits/day",
+    "billingTerms": "monthly + quarterly (-15%) + annual (-30%); quarterly and annual plans are prepaid while credits refresh monthly",
+    "priceChanges": [],
+    "hiddenCosts": "Unused subscription credits expire rather than roll over; top-up credits are sold separately and do not expire; output counts vary materially by model, resolution, and duration.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.imagine.art/subscription",
+      "https://help.imagine.art/subscription-plans-and-pricing/subscription-plans",
+      "https://help.imagine.art/overview/understanding-credits",
+      "https://help.imagine.art/frequently-asked-questions/credit-assignment-and-usage-policy"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

@@ -17,7 +17,61 @@
     "notes": "Official US monthly subscription; regional pricing differs.",
     "native": "11.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited-looking activity recording and sharing; 0 route creation/offline routes, 0 full leaderboards, and 0 advanced training analytics",
+        "notes": null
+      },
+      {
+        "name": "Individual",
+        "monthly": 11.99,
+        "annualPerMonth": 6.67,
+        "per": "user",
+        "limits": "Routes, segment leaderboards, goals, advanced analytics, and subscriber features; 30-day trial",
+        "notes": "$79.99 billed annually."
+      },
+      {
+        "name": "Family",
+        "monthly": null,
+        "annualPerMonth": 11.67,
+        "per": "flat",
+        "limits": "Up to 4 members in the same country",
+        "notes": "$139.99 billed annually; price is unchanged if fewer than 4 people join."
+      },
+      {
+        "name": "Student",
+        "monthly": null,
+        "annualPerMonth": 3.33,
+        "per": "user",
+        "limits": "Full individual subscription for an eligible verified student; 30-day trial",
+        "notes": "$39.99 billed annually."
+      },
+      {
+        "name": "Strava + Runna bundle",
+        "monthly": null,
+        "annualPerMonth": 12.5,
+        "per": "user",
+        "limits": "Annual access to both Strava subscription features and Runna",
+        "notes": "$149.99 billed annually; annual-only and not eligible for standard discounts."
+      }
+    ],
+    "freeTierCaps": "Free plan: no published activity-upload cap; 0 route creation/offline routes, 0 full leaderboards, and 0 advanced training analytics.",
+    "billingTerms": "Individual monthly + annual; Family, Student, and Runna bundle annual only",
+    "priceChanges": [],
+    "hiddenCosts": "Taxes can be added. Family remains $139.99 even with fewer than 4 people; the Runna bundle does not take Strava's teacher, military, medical, or student discounts.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.strava.com/pricing",
+      "https://www.strava.com/subscribe",
+      "https://www.strava.com/family",
+      "https://www.strava.com/student",
+      "https://www.strava.com/strava-runna"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

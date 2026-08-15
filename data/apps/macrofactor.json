@@ -17,7 +17,50 @@
     "notes": "Official monthly subscription.",
     "native": "11.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "MacroFactor Nutrition, monthly",
+        "monthly": 11.99,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "All nutrition logging, expenditure, coaching, trend, and analytics features",
+        "notes": "Monthly auto-renewing subscription."
+      },
+      {
+        "name": "MacroFactor Nutrition, 6 months",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "All nutrition features for a 6-month term",
+        "notes": "$47.99 every 6 months, equivalent to about $8.00/month."
+      },
+      {
+        "name": "MacroFactor Nutrition, annual",
+        "monthly": null,
+        "annualPerMonth": 6,
+        "per": "user",
+        "limits": "All nutrition features for 12 months",
+        "notes": "$71.99 billed annually."
+      },
+      {
+        "name": "MacroFactor Nutrition + Workouts bundle",
+        "monthly": null,
+        "annualPerMonth": 7.5,
+        "per": "user",
+        "limits": "Both MacroFactor Nutrition and MacroFactor Workouts after the first bundle year",
+        "notes": "$89.99/year after the introductory/transition period; Workouts is otherwise a separately priced app."
+      }
+    ],
+    "freeTierCaps": "no permanent free tier; a trial may be offered, but the current official public pages did not publish a numeric trial duration",
+    "billingTerms": "monthly, 6-month, and annual Nutrition subscriptions; Workouts is separate, with an annual bundle path",
+    "priceChanges": [],
+    "hiddenCosts": "MacroFactor Workouts is a separate subscription at the same listed price points unless bundled. The $89.99 combined annual price applies after the first bundle year; taxes/storefront pricing can vary.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://macrofactorapp.com/macrofactor/",
+      "https://help.macrofactorapp.com/en/articles/54-change-your-subscription-length"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

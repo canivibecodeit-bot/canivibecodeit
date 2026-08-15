@@ -17,7 +17,44 @@
     "notes": "Typical US monthly Premium rate.",
     "native": "19.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited-looking manual food and activity logs; 0 barcode scans and 0 Meal Planner recipes",
+        "notes": "Ads remain and several macro/analysis tools are paid."
+      },
+      {
+        "name": "Premium",
+        "monthly": 19.99,
+        "annualPerMonth": 6.67,
+        "per": "user",
+        "limits": "Barcode scanner, custom macros/calorie goals, advanced insights, fasting tools, and no ads",
+        "notes": "$79.99 billed annually; app stores still expose lower legacy/alternate $9.99 monthly and $49.99 annual products to some accounts."
+      },
+      {
+        "name": "Premium+",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Premium features plus Meal Planner with 1,500+ recipes and grocery-list tools",
+        "notes": "Monthly and annual billing exist, but the current public official pages did not expose a reliable USD price; 7-day trial advertised."
+      }
+    ],
+    "freeTierCaps": "Free plan: no published cap on manual meal/activity entries; 0 barcode scans and 0 Meal Planner recipes.",
+    "billingTerms": "Premium monthly + annual; Premium+ monthly + annual; paid plans auto-renew",
+    "priceChanges": [],
+    "hiddenCosts": "Legacy and platform-specific offers can be materially cheaper than the public rate. Premium+ pricing is shown only in some checkout contexts, and HSA/FSA purchase paths can have different trial treatment.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.myfitnesspal.com/premium",
+      "https://support.myfitnesspal.com/hc/en-us/articles/34889191368077-What-s-the-difference-between-Free-Premium-and-Premium",
+      "https://support.myfitnesspal.com/hc/en-us/articles/34347930588557-Premium",
+      "https://apps.apple.com/us/app/myfitnesspal-calorie-counter/id341232718"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

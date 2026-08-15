@@ -14,7 +14,51 @@
     "source": "https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans",
     "checkedOn": "2026-07-30",
     "confidence": "high",
-    "notes": "Official docs checked 2026-07-30; Basic is $10/month, Standard $30, Pro $60, Mega $120."
+    "notes": "Official docs checked 2026-07-30; Basic is $10/month, Standard $30, Pro $60, Mega $120.",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 10,
+        "annualPerMonth": 8,
+        "per": "user",
+        "limits": "3.3 Fast GPU hours/month (about 200 minutes); 0 Relax GPU time",
+        "notes": "Annual price is $96 paid upfront."
+      },
+      {
+        "name": "Standard",
+        "monthly": 30,
+        "annualPerMonth": 24,
+        "per": "user",
+        "limits": "15 Fast GPU hours/month; unlimited Relax-mode image generations",
+        "notes": "Annual price is $288 paid upfront."
+      },
+      {
+        "name": "Pro",
+        "monthly": 60,
+        "annualPerMonth": 48,
+        "per": "user",
+        "limits": "30 Fast GPU hours/month; unlimited Relax-mode images and SD video; Stealth Mode",
+        "notes": "Annual price is $576 paid upfront."
+      },
+      {
+        "name": "Mega",
+        "monthly": 120,
+        "annualPerMonth": 96,
+        "per": "user",
+        "limits": "60 Fast GPU hours/month; unlimited Relax-mode images and SD video; Stealth Mode",
+        "notes": "Annual price is $1,152 paid upfront."
+      }
+    ],
+    "freeTierCaps": "no free tier",
+    "billingTerms": "monthly + annual (-20%), with annual plans paid upfront and auto-renewing",
+    "priceChanges": [],
+    "hiddenCosts": "Unused monthly Fast GPU time does not roll over; extra Fast GPU time costs $4 per hour. Private/Stealth generation requires Pro or Mega. Companies with more than $1 million in annual gross revenue must use Pro or Mega.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans",
+      "https://docs.midjourney.com/hc/en-us/articles/31974654274573-How-to-Subscribe",
+      "https://docs.midjourney.com/hc/en-us/articles/27870428114317-Upgrading-or-Downgrading-Your-Plan"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

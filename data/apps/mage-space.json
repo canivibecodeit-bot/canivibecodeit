@@ -17,7 +17,59 @@
     "source": "https://mage.space/pricing",
     "checkedOn": "2026-07-31",
     "confidence": "low",
-    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked."
+    "notes": "The official pricing URL is recorded, but a stable current amount was not safely recoverable in this pass. Do not publish a number until rechecked.",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "300 Gems one-time at sign-up; limited feature access; base-generation rate cap not published",
+        "notes": "The site advertises free generation, but does not publish a stable numeric daily/monthly generation limit."
+      },
+      {
+        "name": "Basic",
+        "monthly": 10,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited generations on included models; 2 concurrent generations; 500 Gems/month",
+        "notes": "Monthly only; includes commercial use and private creations."
+      },
+      {
+        "name": "Pro",
+        "monthly": 30,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Unlimited image and video generations on included models; 4 concurrent generations; 1,500 Gems/month",
+        "notes": "Includes unlimited character creation."
+      },
+      {
+        "name": "Pro Plus",
+        "monthly": 60,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "3,500 Gems/month; premium video; 4K image upscaling; 5 LoRAs; queue of 10",
+        "notes": "Unlimited included-model generation."
+      },
+      {
+        "name": "Max",
+        "monthly": 200,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "15,000 Gems/month; 1080p and up to 10-second video; 2 video LoRAs",
+        "notes": "Unlimited included-model generation."
+      }
+    ],
+    "freeTierCaps": "300 one-time Gems at sign-up; free base generation is available, but no numeric recurring rate cap is published",
+    "billingTerms": "monthly only, no annual plan shown",
+    "priceChanges": [],
+    "hiddenCosts": "Premium models and some video features consume Gems; Gems expire after 90 days; additional Gems may therefore be required despite 'unlimited' included-model generations.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.mage.space/",
+      "https://www.mage.space/updates",
+      "https://blog.mage.space/article/ai-image-generator-pricing-comparison-2026/c39fd51a-1cec-4e3e-905c-be3fee3cc4ce"
+    ]
   },
   "verdict": "no",
   "verdictConfidence": "high",

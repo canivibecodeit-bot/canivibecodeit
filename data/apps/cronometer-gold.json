@@ -6,18 +6,54 @@
   "category": "wellness",
   "subcategory": "fitness, activity and general wellbeing",
   "tagline": "Log user-entered nutrition and show transparent nutrient totals without diagnosis",
-  "priceMonthly": 9.99,
+  "priceMonthly": 10.99,
   "pricing": {
     "plan": "Gold",
-    "basis": "monthly",
-    "unit": "flat",
-    "source": "https://cronometer.com/gold",
-    "checkedOn": "2026-07-31",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://cronometer.com/gold/index.html",
+    "checkedOn": "2026-08-14",
     "confidence": "high",
     "notes": "Official Gold monthly subscription.",
-    "native": "9.99 USD",
+    "native": "10.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Basic",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Track foods, exercise, biometrics, and notes; up to 84 nutrients; charts/reports limited to a 7-day window",
+        "notes": null
+      },
+      {
+        "name": "Gold",
+        "monthly": 10.99,
+        "annualPerMonth": 5,
+        "per": "user",
+        "limits": "Up to 95 nutrients, long-range charts/reports, fasting timer, recipe importer, and no ads",
+        "notes": "$59.99 billed annually."
+      },
+      {
+        "name": "Pro",
+        "monthly": 39.99,
+        "annualPerMonth": null,
+        "per": "workspace",
+        "limits": "10 client seats included; professional dashboard and client management; 30-day trial",
+        "notes": "Extra client seats cost $2.50 per client per month; an annual Pro rate was not publicly verified."
+      }
+    ],
+    "freeTierCaps": "Basic plan: up to 84 tracked nutrients and a 7-day chart/report window; no published food-diary entry cap.",
+    "billingTerms": "Gold monthly + annual; Pro monthly with a 30-day trial; subscriptions auto-renew and are paid in advance",
+    "priceChanges": [],
+    "hiddenCosts": "Cronometer Pro includes only 10 client seats; each additional client costs $2.50/month.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://cronometer.com/gold/index.html",
+      "https://support.cronometer.com/hc/en-us/articles/360028026971-Subscription-Types",
+      "https://cronometer.com/terms/"
+    ]
   },
   "verdict": "kinda",
   "verdictConfidence": "medium",

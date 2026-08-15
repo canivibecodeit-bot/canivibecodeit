@@ -17,7 +17,43 @@
     "notes": "Typical monthly Pro subscription.",
     "native": "4.99 USD",
     "kind": "fixed",
-    "currency": "USD"
+    "currency": "USD",
+    "tiers": [
+      {
+        "name": "Free",
+        "monthly": 0,
+        "annualPerMonth": 0,
+        "per": "user",
+        "limits": "Unlimited saved workout history and 3 custom workout templates",
+        "notes": null
+      },
+      {
+        "name": "Strong PRO",
+        "monthly": 4.99,
+        "annualPerMonth": 2.5,
+        "per": "user",
+        "limits": "Unlimited routines/templates plus all Pro features",
+        "notes": "$29.99 billed annually; a 6-month option costs $19.99 (about $3.33/month)."
+      },
+      {
+        "name": "Strong PRO Lifetime",
+        "monthly": null,
+        "annualPerMonth": null,
+        "per": "user",
+        "limits": "Lifetime PRO access",
+        "notes": "$99.99 one-time; app stores may still show lower legacy offers."
+      }
+    ],
+    "freeTierCaps": "Free plan: unlimited saved workouts and 3 custom workout templates.",
+    "billingTerms": "monthly + 6-month + annual + one-time Lifetime",
+    "priceChanges": [],
+    "hiddenCosts": "No Family Sharing. App-store legacy offers can show $3.99 monthly, $23.99 annual, or $79.99 Lifetime; buying a paid plan can forfeit any unused trial period.",
+    "tiersCheckedOn": "2026-08-14",
+    "tiersSources": [
+      "https://www.strong.app/",
+      "https://help.strongapp.io/article/105-about-templates",
+      "https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577"
+    ]
   },
   "verdict": "yes",
   "verdictConfidence": "high",
