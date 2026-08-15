@@ -416,11 +416,9 @@ export function productPageLink(name, url) {
   return count ? { slug, count } : null;
 }
 
-// Same staging discipline as the alternatives pages: the sitemap carries the
-// top pages first; the rest joins with sitemap stage 2.
-const ALT_PRODUCT_SITEMAP_LIMIT = 30;
+// Sitemap stage 2 (2026-08-15): every product page is in the sitemap.
 export function productsSitemap() {
-  return productsWithPage().slice(0, ALT_PRODUCT_SITEMAP_LIMIT);
+  return productsWithPage();
 }
 
 // Where the free thing actually runs, for the verified fact block.
@@ -443,28 +441,10 @@ export function formatLicense(license) {
     .replace(/(?<=[a-zA-Z])-(?=[A-Za-z][a-z])/g, ' ');
 }
 
-// Sitemap staging (decided 2026-08-06): a young domain shouldn't push all 350+
-// new pages at a search engine at once. The named slugs are the low-competition,
-// high-volume targets; the rest of the ~30 fill up by editorial weight. ALL
-// alternatives pages must join the sitemap ~6-8 weeks after launch.
-const ALT_SITEMAP_PRIORITY = [
-  'zapier', 'loom', 'calendly', 'intercom', 'grammarly',
-  'notion', 'mailchimp', 'docusign', 'typeform', '1password',
-  // 2026-08-07: the AI builder tools themselves, all low competition.
-  'replit', 'cursor', 'lovable', 'v0', 'bolt-new', 'windsurf',
-];
-const ALT_SITEMAP_LIMIT = 30;
-
+// Sitemap stage 2 (2026-08-15): the launch staging (top 30 by editorial
+// weight, decided 2026-08-06) is over; every alternatives page is listed.
 export function alternativesSitemapApps() {
-  const eligible = appsWithAlternativesPage();
-  const named = ALT_SITEMAP_PRIORITY.map((s) => eligible.find((a) => a.slug === s)).filter(Boolean);
-  const rest = eligible
-    .filter((a) => !named.includes(a))
-    .sort(
-      (x, y) =>
-        y.pagePriority - x.pagePriority || y.alternatives.length - x.alternatives.length
-    );
-  return [...named, ...rest].slice(0, ALT_SITEMAP_LIMIT);
+  return appsWithAlternativesPage();
 }
 
 export function formatStars(n) {
