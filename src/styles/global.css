@@ -2179,6 +2179,13 @@ a.tile {
   text-align: center;
 }
 
+/* The card's own padding overrides .wrap's 20px side padding on the same
+   element, so below the 1120px cap the bordered card ran flush to the
+   viewport edges. Give it explicit side breathing room instead. */
+.digest-card.wrap {
+  max-width: min(1120px, calc(100% - 32px));
+}
+
 .digest-card h2 {
   font-size: clamp(20px, 3vw, 28px);
 }
@@ -3073,6 +3080,15 @@ a.tile {
   font-size: 12px;
   font-weight: 500;
   color: var(--primary);
+  white-space: nowrap;
+}
+
+/* Below ~560px the full line wraps around the verdict badge; drop the tail so
+   badge + link stay on one line. */
+@media (max-width: 560px) {
+  .strip-verdict .sv-more {
+    display: none;
+  }
 }
 
 .alt-table-wrap {
@@ -3144,12 +3160,27 @@ a.tile {
     flex-wrap: wrap;
   }
 
+  /* Stars + activity share the first line; the link row gets its own full
+     line and wraps freely — space-between crammed all three groups onto one
+     line and clipped the last link off-screen. */
   .alt-card .alt-side {
     width: 100%;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    padding-top: 4px;
+    justify-content: flex-start;
+    gap: 6px 14px;
+    padding-top: 8px;
+  }
+
+  .alt-card .alt-active {
+    white-space: nowrap;
+  }
+
+  .alt-card .alt-links {
+    width: 100%;
+    flex-wrap: wrap;
+    row-gap: 6px;
   }
 }
 
