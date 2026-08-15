@@ -1,0 +1,52 @@
+{
+  "slug": "instatus",
+  "name": "Instatus",
+  "domain": "instatus.com",
+  "category": "uptime",
+  "subcategory": "status pages",
+  "tagline": "Hosted status pages with incident updates and subscriber notifications for your users.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://instatus.com/",
+    "checkedOn": "2026-08-15",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The page itself is the easy part: components, colored dots, an incident timeline, a 90 day uptime bar. An agent will hand you that in an afternoon and it will look fine. The submitter is right about where it gets annoying, but the fan-out is only half of it. Email to a few hundred subscribers is a Resend account and a loop, but you also inherit double opt-in, unsubscribe links, bounce handling, and the fun of explaining to your users why the incident email landed in spam during the outage. The other half is hosting: a status page that lives on the same infra as the thing it reports on is decoration, so you need a separate host, a separate domain, and the discipline to keep that boring. Plus the human workflow Instatus quietly gives you: writing an update on your phone at 2am without SSHing anywhere, templates, subscriber preferences per component, Slack and RSS and webhook outputs. Buildable in a weekend for a personal project or a small side business. Not the thing to hand-roll if a real customer contract mentions the words \"status page\".",
+  "coreLoopDIY": "A separately hosted status page that renders component health and incident updates from a small database, with an admin form to post updates and an email blast to confirmed subscribers.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A host that is not the infrastructure you are reporting on, ideally a different provider entirely",
+    "A separate domain or subdomain on separate DNS",
+    "A transactional email provider with a verified sending domain, e.g. Resend or Postmark",
+    "Somewhere to store subscribers that survives a reboot"
+  ],
+  "whatYouLose": [
+    "Deliverability someone else warms up and monitors: your first incident email is also your first send reputation test",
+    "Notification channels beyond email: SMS, Slack app, Teams, Discord, native webhooks, RSS, all of which Instatus ships out of the box",
+    "Per-component subscriptions, unsubscribe handling, and double opt-in that you do not have to think about",
+    "The polish: scheduled maintenance windows, incident templates, timezone handling, embeddable widgets, public API",
+    "Real independence, unless you actually do the work to host the page away from your own stack"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "scale-infra",
+    "brand-trust"
+  ],
+  "moatNotes": "The only genuinely hard-to-copy part is being reliably up and reliably in the inbox when everything else is on fire.",
+  "whyPeopleStillPay": "Because a status page is the one page that must work when nothing else does, and paying a third party is the cheapest way to buy that independence. It is also a page customers and auditors look at, so it being slightly ugly or slightly late costs more trust than the subscription costs money. Most teams that build their own end up with a page that is technically theirs and practically unmaintained, with an incident feed whose last entry is from fourteen months ago.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": null,
+  "prompt": "Build a self-hosted status page app in an empty folder. Stack, no substitutions: Node 20, Fastify, better-sqlite3, server-rendered HTML via Fastify's reply.type('text/html') and plain template literal functions, vanilla CSS in one file. No React, no build step, no ORM.\n\nWhat it does:\n1. Public page at / showing a list of components (name, description, status: operational, degraded, partial_outage, major_outage) with an overall banner computed from the worst component status.\n2. Under that, incidents newest first. An incident has a title, impact, current status (investigating, identified, monitoring, resolved), and an append-only list of timestamped updates.\n3. A 90 day uptime strip per component rendered from a daily_status table (one row per component per day, worst status seen that day). Fill it from the poller below.\n4. GET /api/status returning the same data as JSON, and GET /feed.rss as a valid RSS 2.0 feed of incident updates.\n5. Admin at /admin behind a single bearer token from ADMIN_TOKEN in .env, checked with a constant-time compare. Forms to: set component status, open an incident, append an update, resolve it. HTML forms, no JS framework.\n6. Subscribers: POST /subscribe takes an email, stores it unconfirmed with a random token, emails a confirm link. GET /confirm/:token confirms. Every email includes a working GET /unsubscribe/:token link. When an admin appends an incident update, queue one email per confirmed subscriber and send them sequentially with a small delay, logging failures to a sends table. Use Resend via fetch with RESEND_API_KEY from .env; if the key is absent, write the emails to ./outbox/ as .txt files instead so it runs offline.\n7. Optional poller: a setInterval that HTTP GETs each component's check_url if set, marks degraded on slow responses over 2s and major_outage on non-2xx or timeout, and writes daily_status.\n\nIn scope: SQLite schema created on boot with migrations as plain SQL strings, seed script with three components and one resolved incident, a README that says in one sentence to deploy this somewhere other than the infrastructure it monitors.\n\nOut of scope, do not build: multi-tenancy, SMS, Slack or Discord integrations, OAuth, custom domain automation, an analytics or telemetry call of any kind, Docker, a JS bundler.\n\nSecrets only in .env, with a .env.example committed and .env gitignored. Include npm scripts: dev, seed, poll. It must run with npm install and npm run dev on a clean machine.",
+  "promptCurated": false
+}
