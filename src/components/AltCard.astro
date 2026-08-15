@@ -11,18 +11,25 @@ const { alt, compact = false, i = 0, appName = null } = Astro.props;
 // one (it replaces 2+ apps), the full card links across to it.
 const prod = compact ? null : productPageLink(alt.name, alt.url);
 
-// Verified fact rows (skip what wasn't verified; null setupBlocker IS a
-// finding: it means the install was verified clean).
+// Verified facts (skip what wasn't verified; null setupBlocker IS a finding:
+// it means the install was verified clean). Short facts render as ledger rows;
+// prose facts (the catch, a real setup blocker) render as left-bar callouts.
 const f = alt.facts;
-const factRows = f
+const setupClean = f ? f.setupBlocker == null : false;
+const ledgerRows = f
   ? [
       ['license', formatLicense(f.license)],
       ['runs', FACT_RUNS_LABELS[f.runs]],
       ['install', f.install],
       ['engines', f.engines],
       ['data', f.dataFormat],
-      [appName ? `vs ${appName}` : 'vs paid', f.gapVsPaid],
-      ['setup', f.setupBlocker ?? 'no real blockers; verified to install clean'],
+      ...(setupClean ? [['setup', '✓ installs clean', 'ok']] : []),
+    ].filter(([, v]) => v != null)
+  : [];
+const proseRows = f
+  ? [
+      [appName ? `the catch vs ${appName}` : 'the catch vs paid', f.gapVsPaid, 'catch'],
+      ...(setupClean ? [] : [['setup', f.setupBlocker, 'plain']]),
     ].filter(([, v]) => v != null)
   : [];
 
@@ -132,12 +139,23 @@ const ICONS = {
           </span>
         </div>
         <p class="alt-desc">{alt.desc}</p>
-        {factRows.length > 0 && (
+        {(ledgerRows.length > 0 || proseRows.length > 0) && (
           <div class="alt-facts">
-            {factRows.map(([k, v]) => (
-              <p class="af-row">
-                <span class="af-k">{k}</span>
-                <span class="af-v">{v}</span>
+            {ledgerRows.length > 0 && (
+              <div class="af-grid">
+                {ledgerRows.map(([k, v, cls]) => (
+                  <p class:list={['af-lrow', String(v).length > 42 ? 'long' : String(v).length > 24 && 'mid']}>
+                    <span class="af-k">{k}</span>
+                    <span class="af-leader" />
+                    <span class:list={['af-v', cls]}>{v}</span>
+                  </p>
+                ))}
+              </div>
+            )}
+            {proseRows.map(([k, v, cls]) => (
+              <p class:list={['af-catch', cls === 'plain' && 'plain']}>
+                <span class="af-ck">{k}</span>
+                <span class="af-cv">{v}</span>
               </p>
             ))}
             <p class="af-verified">facts verified {f.checkedOn}</p>

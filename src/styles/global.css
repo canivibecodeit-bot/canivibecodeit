@@ -15,6 +15,9 @@
   --kinda-fg: #1a1200;
   --no-bg: #ff4444;
   --no-fg: #ffffff;
+  /* Amber as TEXT (fact-ledger "the catch" labels) — --kinda-bg is a chip
+     background and washes out as type on the light paper ground. */
+  --catch: #ffb000;
   /* The ticker counts money people kept, not money destroyed — so it's green.
      Red stays reserved for NOT REALLY verdicts. */
   --ticker: #33e667;
@@ -57,6 +60,7 @@
   --kinda-fg: #241800;
   --no-bg: #e03131;
   --no-fg: #ffffff;
+  --catch: #8f6400;
   --ticker: #0e9c47;
   --ticker-dim: #628a70;
   --ticker-label: #2f8a52;
@@ -2757,40 +2761,152 @@ a.tile {
 .alt-facts {
   margin-top: 4px;
   border-top: 1px solid var(--border);
-  max-width: 76ch;
+  /* wide enough for the two-column ledger; still capped when it sits directly
+     on the page (the /alternative/ product pages) rather than in a card */
+  max-width: 860px;
+  padding-top: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.alt-facts .af-row {
+/* Spec-sheet ledger: label … dotted leader … value, two columns on desktop. */
+.af-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 48px;
+  row-gap: 9px;
+  /* don't stretch a one-line dotted row to match a tall stacked neighbor */
+  align-items: start;
+}
+
+.af-lrow {
   display: flex;
-  gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12.5px;
-  line-height: 1.55;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
   margin: 0;
 }
 
-.alt-facts .af-k {
+.af-lrow .af-k {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--muted);
-  flex: 0 0 92px;
-  padding-top: 1px;
+  flex-shrink: 0;
+  padding-bottom: 1px;
 }
 
-.alt-facts .af-v {
+.af-leader {
+  flex: 1;
+  min-width: 14px;
+  border-bottom: 1px dotted color-mix(in srgb, var(--muted) 45%, transparent);
+  margin-bottom: 4px;
+}
+
+.af-lrow .af-v {
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--fg);
+  text-align: right;
   min-width: 0;
+  max-width: 72%;
   /* research strings carry slash-joined tokens and file paths with no break
      opportunities; without this they push the card past the phone viewport */
   overflow-wrap: anywhere;
 }
 
+.af-lrow .af-v.ok {
+  color: var(--primary);
+}
+
+/* Prose-length values can't hang off a dotted leader — the label sinks to the
+   bottom of a 5-line wrap. Long rows stack label over value instead. */
+.af-lrow.long {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.af-lrow.long .af-leader {
+  display: none;
+}
+
+.af-lrow.long .af-v {
+  text-align: left;
+  max-width: 100%;
+}
+
+/* Inside the alt-card body (stars column eats the width) one column is all
+   that fits; two columns only on the wide /alternative/ product pages. */
+.alt-card .af-grid {
+  grid-template-columns: 1fr;
+}
+
+/* Prose facts (the catch, setup blockers) — left-bar callouts, not ledger rows. */
+.af-catch {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-left: 2px solid var(--catch);
+  padding: 2px 0 2px 14px;
+  margin: 0;
+}
+
+.af-catch.plain {
+  border-left-color: var(--border);
+}
+
+.af-catch .af-ck {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--catch);
+}
+
+.af-catch.plain .af-ck {
+  color: var(--muted);
+}
+
+.af-catch .af-cv {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
 .alt-facts .af-verified {
-  margin: 6px 0 0;
+  margin: 0;
   font-family: var(--font-mono);
   font-size: 10.5px;
   color: var(--muted);
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .af-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* mid-length values fit a leader line on desktop but wrap on phones */
+  .af-lrow.mid {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .af-lrow.mid .af-leader {
+    display: none;
+  }
+
+  .af-lrow.mid .af-v {
+    text-align: left;
+    max-width: 100%;
+  }
 }
 
 .alt-card .alt-side {

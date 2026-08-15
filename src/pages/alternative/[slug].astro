@@ -41,18 +41,21 @@ const active = formatMonth(p.lastCommit);
 const cat = CATEGORIES[p.category];
 const spendYearly = p.spendMonthly * 12;
 
-// Verified product-level facts (the pairing-specific gap renders per app below).
+// Verified product-level facts (the pairing-specific gap renders per app
+// below). Short facts are ledger rows; a real setup blocker is a callout.
 const f = p.facts;
-const factRows = f
+const setupClean = f ? f.setupBlocker == null : false;
+const ledgerRows = f
   ? [
       ['license', formatLicense(f.license)],
       ['runs', FACT_RUNS_LABELS[f.runs]],
       ['install', f.install],
       ['engines', f.engines],
       ['data', f.dataFormat],
-      ['setup', f.setupBlocker ?? 'no real blockers; verified to install clean'],
+      ...(setupClean ? [['setup', '✓ installs clean', 'ok']] : []),
     ].filter(([, v]) => v != null)
   : [];
+const setupBlocker = f && !setupClean ? f.setupBlocker : null;
 
 // Sideways links: other multi-app products whose apps live in the same category.
 const siblings = productsWithPage()
@@ -135,16 +138,25 @@ const jsonld = [
     </p>
 
     {
-      factRows.length > 0 && (
+      ledgerRows.length > 0 && (
         <section class="seg">
           <span class="microlabel">the facts, verified</span>
           <div class="alt-facts">
-            {factRows.map(([k, v]) => (
-              <p class="af-row">
-                <span class="af-k">{k}</span>
-                <span class="af-v">{v}</span>
+            <div class="af-grid">
+              {ledgerRows.map(([k, v, cls]) => (
+                <p class:list={['af-lrow', String(v).length > 42 ? 'long' : String(v).length > 24 && 'mid']}>
+                  <span class="af-k">{k}</span>
+                  <span class="af-leader" />
+                  <span class:list={['af-v', cls]}>{v}</span>
+                </p>
+              ))}
+            </div>
+            {setupBlocker && (
+              <p class="af-catch plain">
+                <span class="af-ck">setup</span>
+                <span class="af-cv">{setupBlocker}</span>
               </p>
-            ))}
+            )}
             <p class="af-verified">facts verified {f.checkedOn}</p>
           </div>
         </section>
@@ -169,9 +181,9 @@ const jsonld = [
               </span>
               <p class="kill-desc">{desc}</p>
               {gapVsPaid && (
-                <p class="kill-gap">
-                  <span class="af-k">the catch</span>
-                  <span class="af-v">{gapVsPaid}</span>
+                <p class="af-catch kill-gap">
+                  <span class="af-ck">the catch</span>
+                  <span class="af-cv">{gapVsPaid}</span>
                 </p>
               )}
               <span class="kill-links">
@@ -325,25 +337,8 @@ const jsonld = [
   }
 
   .kill-gap {
-    display: flex;
-    gap: 12px;
-    margin: 0;
-    font-size: 12.5px;
-    line-height: 1.55;
     max-width: 76ch;
-  }
-
-  .kill-gap .af-k {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    flex: 0 0 92px;
-    padding-top: 1px;
-  }
-
-  .kill-gap .af-v {
-    min-width: 0;
-    overflow-wrap: anywhere;
+    margin: 3px 0;
   }
 
   .kill-links {
