@@ -14,6 +14,7 @@ export async function GET() {
     ...moatsInUse().map((m) => `${base}/moat/${m.tag}`),
     `${base}/moats`,
     `${base}/stats`,
+    `${base}/submit`,
     `${base}/best-vibe-coding-tools`,
     `${base}/vibecode-this-site`,
   ];

@@ -1,7 +1,10 @@
 # Contributing an app
 
 Every app on the death list is one JSON file in `data/apps/<slug>.json`, added by PR.
-No web form, no account — the repo is the admin panel.
+The repo is the admin panel. Don't feel like writing JSON? The
+[submit form](https://canivibecodeit.com/submit) drafts the entry and opens the
+PR for you — this document is the spec either way, and PRs are always welcome
+directly.
 
 ## Schema
 

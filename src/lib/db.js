@@ -139,6 +139,21 @@ const SCHEMA_SQLITE = `
     created_at INTEGER NOT NULL,
     PRIMARY KEY (user_id, app_slug)
   );
+  CREATE TABLE IF NOT EXISTS submissions (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL,
+    app_name TEXT NOT NULL,
+    app_url TEXT NOT NULL,
+    take TEXT,
+    submitter TEXT,
+    user_id TEXT,
+    status TEXT NOT NULL,
+    pr_url TEXT,
+    error TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS submissions_slug ON submissions (slug, status);
 `;
 
 const SCHEMA_PG = `
@@ -275,6 +290,21 @@ const SCHEMA_PG = `
     created_at BIGINT NOT NULL,
     PRIMARY KEY (user_id, app_slug)
   );
+  CREATE TABLE IF NOT EXISTS submissions (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL,
+    app_name TEXT NOT NULL,
+    app_url TEXT NOT NULL,
+    take TEXT,
+    submitter TEXT,
+    user_id TEXT,
+    status TEXT NOT NULL,
+    pr_url TEXT,
+    error TEXT,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS submissions_slug ON submissions (slug, status);
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -330,6 +360,24 @@ function updateParts(fields) {
 // Same rule for lookups: purchaseBy interpolates the column name, so it only
 // accepts the three identifiers the exported helpers actually use.
 const PURCHASE_LOOKUP_COLS = ['id', 'stripe_session_id', 'details_token'];
+
+// Submission columns the pipeline may rewrite after insert. Same rule as
+// PURCHASE_FIELDS: names reach SQL as identifiers, never from a request body.
+const SUBMISSION_FIELDS = ['status', 'pr_url', 'error', 'updated_at'];
+
+function submissionParts(fields) {
+  const keys = Object.keys(fields).filter((k) => SUBMISSION_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateSubmission: no writable fields');
+  return keys;
+}
+
+// Statuses that mean "this slug is already being worked": a second visitor
+// submitting the same app while these are live gets a duplicate answer.
+// Time-bounded: a pipeline killed mid-run (deploy, crash) leaves its row in a
+// non-terminal status forever, and without the cutoff that slug could never be
+// submitted again. Matches the API route's 10-minute stall horizon.
+const SUBMISSION_OPEN_STATUSES = ['queued', 'drafting', 'opening'];
+const SUBMISSION_STALL_MS = 10 * 60 * 1000;
 
 function lookupCol(column) {
   if (!PURCHASE_LOOKUP_COLS.includes(column)) {
@@ -601,6 +649,32 @@ async function pgDriver() {
         clicksSince: clk.rows[0].since == null ? null : Number(clk.rows[0].since),
       };
     },
+    async insertSubmission(s) {
+      await pool.query(
+        `INSERT INTO submissions (id, slug, app_name, app_url, take, submitter, user_id, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)`,
+        [s.id, s.slug, s.app_name, s.app_url, s.take, s.submitter, s.user_id, s.status, s.created_at]
+      );
+    },
+    async updateSubmission(id, fields) {
+      const keys = submissionParts(fields);
+      const params = [id, ...keys.map((k) => fields[k])];
+      await pool.query(
+        `UPDATE submissions SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        params
+      );
+    },
+    async submissionById(id) {
+      const r = await pool.query('SELECT * FROM submissions WHERE id = $1', [id]);
+      return r.rows[0] ?? null;
+    },
+    async openSubmissionBySlug(slug) {
+      const r = await pool.query(
+        'SELECT * FROM submissions WHERE slug = $1 AND status = ANY($2) AND updated_at > $3 LIMIT 1',
+        [slug, SUBMISSION_OPEN_STATUSES, Date.now() - SUBMISSION_STALL_MS]
+      );
+      return r.rows[0] ?? null;
+    },
   };
 }
 
@@ -819,6 +893,31 @@ async function sqliteDriver() {
         clicksSince: clk.since == null ? null : Number(clk.since),
       };
     },
+    async insertSubmission(s) {
+      db.prepare(
+        `INSERT INTO submissions (id, slug, app_name, app_url, take, submitter, user_id, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(s.id, s.slug, s.app_name, s.app_url, s.take, s.submitter, s.user_id, s.status, s.created_at, s.created_at);
+    },
+    async updateSubmission(id, fields) {
+      const keys = submissionParts(fields);
+      db.prepare(
+        `UPDATE submissions SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`
+      ).run(...keys.map((k) => fields[k]), id);
+    },
+    async submissionById(id) {
+      return db.prepare('SELECT * FROM submissions WHERE id = ?').get(id) ?? null;
+    },
+    async openSubmissionBySlug(slug) {
+      const marks = SUBMISSION_OPEN_STATUSES.map(() => '?').join(', ');
+      return (
+        db
+          .prepare(
+            `SELECT * FROM submissions WHERE slug = ? AND status IN (${marks}) AND updated_at > ? LIMIT 1`
+          )
+          .get(slug, ...SUBMISSION_OPEN_STATUSES, Date.now() - SUBMISSION_STALL_MS) ?? null
+      );
+    },
   };
 }
 
@@ -976,6 +1075,22 @@ export async function setUserNewsletter(userId, on) {
 
 export async function removeFromWaitlist(email) {
   return (await getDriver()).removeFromWaitlist(email);
+}
+
+export async function insertSubmission(s) {
+  return (await getDriver()).insertSubmission(s);
+}
+
+export async function updateSubmission(id, fields) {
+  return (await getDriver()).updateSubmission(id, { ...fields, updated_at: Date.now() });
+}
+
+export async function submissionById(id) {
+  return (await getDriver()).submissionById(id);
+}
+
+export async function openSubmissionBySlug(slug) {
+  return (await getDriver()).openSubmissionBySlug(slug);
 }
 
 // The headline number: total monthly cost of every subscription on the death list.
