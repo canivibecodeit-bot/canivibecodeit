@@ -142,18 +142,6 @@ h3 {
   text-transform: uppercase;
   color: var(--muted);
 }
-
-/* Dark theme: app/tool favicons sit on a light chip. Roughly a third of the
-   collected icons are dark glyphs on transparency — invisible on the dark
-   background — and light mode already proves every icon reads on a light
-   surface. box-sizing is border-box, so the padding shrinks the glyph
-   inside the declared width instead of growing the layout. */
-:root:not([data-theme='light']) img[src^='/icons/'] {
-  background: #f4f1e8;
-  padding: 3px;
-  border-radius: 8px;
-}
-
 /* ---------- header ---------- */
 
 .site-header {
