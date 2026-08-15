@@ -59,7 +59,7 @@ const jsonld = [
   <section class="hero">
     <h1>Can I vibecode <span class="blank">___</span>?</h1>
     <p class="sub">
-      {apps.length} apps. One question each: can AI build you a replacement today, or is it
+      {apps.length.toLocaleString('en-US')} apps. One question each: can AI build you a replacement today, or is it
       still worth paying for?
     </p>
     <div class="search-wrap">
@@ -72,7 +72,7 @@ const jsonld = [
         <input
           type="search"
           id="search"
-          placeholder={`type an app… (${apps.length})`}
+          placeholder={`type an app… (${apps.length.toLocaleString('en-US')})`}
           autocomplete="off"
           aria-label="Search apps"
           role="combobox"
