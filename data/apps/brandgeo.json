@@ -76,7 +76,8 @@
   "relatedSlugs": [
     "profound",
     "llm-pulse",
-    "100-questions"
+    "100-questions",
+    "rankwise"
   ],
   "pagePriority": 3,
   "verifiedOneShot": false,

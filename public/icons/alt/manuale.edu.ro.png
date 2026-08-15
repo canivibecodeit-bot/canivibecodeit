@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Manuale Digitale</title>
+    <base href="https://www.manuale.edu.ro/"/>
+    <link rel="shortcut icon" href="assets/img/favicon.png">
+
+
+    <!------------- CHECK TO SEE IF JS IS ACTIVE -------------->
+    <noscript>
+        <meta http-equiv="refresh" content="5;error_javascript.html">
+    </noscript>
+    <!------------- END JS CHECK  -------------->
+
+
+    <!-------------- START CSS ---------------------->
+    <link rel="stylesheet" type="text/css" href="assets/vendor/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/vendor/select2/css/select2.min.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/vendor/select2/css/select2-bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/vendor/flexslider/css/flexslider.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/prettyPhoto/prettyPhoto.css"/>
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/menu_style.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/jq.css"/>
+        <!-------------- END CSS ---------------------->
+
+
+    <!-------------- START JS ---------------------->
+    <script type="text/javascript" charset="utf-8" src="assets/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/vendor/select2/js/select2.full.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/vendor/select2/js/i18n/ro.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/vendor/flexslider/js/jquery.flexslider-min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/plugins/prettyPhoto/jquery.prettyPhoto.js"></script>
+    <script type="text/javascript" charset="utf-8" src="assets/js/plugins/scripts.js"></script>
+    
+    <script type="text/javascript">
+        var js_titles = {};
+
+        js_titles.title_error = "Eroare!";
+        js_titles.title_success = "";
+
+        var js_locations = {};
+    </script>
+    <!-------------- END JS ---------------------->
+
+</head>
+<body>
+
+<!-------------- START HEADER ---------------------->
+<header class="navbar mainMenu top-menu navbar-inverse navbar-fixed-top" id="headerArea">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://www.edu.ro">
+                <img src="assets/img/sigla_mec.png"/>
+            </a>
+        </div>
+
+
+    </div>
+</header>
+<!-------------- END HEADER ---------------------->
+
+
+<!-------------- START HEADING SECTION ---------------------->
+<section id="heading">
+    <div class="container" style="width: 75%; float: left;">
+        <h3>Centrul Na&#x21B;ional de Evaluare &#x15F;i Examinare</h3>
+    </div>
+</section>
+<!-------------- END HEADING SECTION---------------------->
+
+
+<div id="workArea">
+    <!--start panel-->
+    <div class="panel panel-danger col-sm-4 col-sm-offset-4">
+
+
+        <!--start panel heading-->
+        <div class="panel-heading">
+            <h3 class="panel-title text-center text-uppercase">
+                404
+            </h3>
+        </div>
+        <!--end panel heading-->
+
+
+        <!--start panel body-->
+        <div class="panel-body">
+            <div class="col-sm-12 col-xs-10 text-center">
+                Oops, an error has occurred. Page not found!
+            </div>
+        </div>
+        <!--end panel body-->
+
+
+    </div>
+    <!--end panel-->
+</div>
+
+
+<!-------------- END CONTENT ---------------------->
+
+<div id="spinner-overlay"></div>
+<div id="spinner" style="align-content: center">
+    <span id="ball_1" class="spinner_ball"></span>
+    <span id="ball_2" class="spinner_ball"></span>
+    <span id="ball_3" class="spinner_ball"></span>
+</div>
+
+<!-------------- END CONTENT ---------------------->
+
+
+<!-------------- START FOOTER ---------------------->
+<!--<footer id="footerArea">
+
+	<div class="container">
+		<div class="row">
+			<p>STS &copy; 2014</p>
+		</div>
+	</div>
+
+</footer>-->
+<!-------------- END FOOTER ---------------------->
+
+<noscript>
+    <meta http-equiv="refresh" content="5;error_javascript.html">
+</noscript>
+
+
+</body>
+</html>
