@@ -1,0 +1,53 @@
+{
+  "slug": "teamviewer",
+  "name": "TeamViewer",
+  "domain": "teamviewer.com",
+  "category": "dev-tools",
+  "subcategory": "remote desktop / remote access",
+  "tagline": "Remote desktop control and remote support sessions across machines and platforms.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "per-seat",
+    "source": "https://teamviewer.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "If you only need to reach your own machines, most of TeamViewer's value is reproducible: screen capture, a WebRTC pipe, and synthetic mouse and keyboard events are all solved problems with libraries. An agent can wire that into a working host agent plus browser viewer in a weekend, and on your own LAN it will feel fine. What breaks is everything outside your control: connecting through hostile double NAT without your own TURN server, waking a sleeping box, keeping latency sane over mobile networks, and surviving OS permission prompts on macOS after every update. It also stops being a support tool, because the whole point of TeamViewer for helping your parents is that they can install one thing and read you a nine digit number. Build it for your own boxes, keep paying if you support other people's.",
+  "coreLoopDIY": "A host agent on each of your machines streams its screen over WebRTC to a password-protected browser viewer that injects your mouse and keyboard events back.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 on every machine you want to control",
+    "ffmpeg installed on each host",
+    "A cheap always-on VPS for signaling and a coturn TURN server",
+    "Screen Recording and Accessibility permissions on macOS, or an X11/Wayland session that allows input injection on Linux",
+    "A domain with TLS, because getUserMedia and secure contexts will fight you otherwise"
+  ],
+  "whatYouLose": [
+    "Connections that just work through carrier grade NAT, corporate firewalls, and proxies without you operating relay infrastructure",
+    "Native clients for Windows, macOS, Linux, iOS, and Android, plus mobile device support",
+    "The support workflow: a one-click download and a session code a non-technical person can read to you over the phone",
+    "Unattended access extras: wake on LAN, reboot and reconnect, multi-monitor switching, file transfer, session recording, printing",
+    "Commercial licensing, audit logs, and the corporate compliance story that makes IT allow it at all"
+  ],
+  "moatTags": [
+    "scale-infra",
+    "brand-trust",
+    "execution-polish"
+  ],
+  "moatNotes": "The relay network and the fifteen years of codec and NAT traversal tuning are the product. The blue window is just the part you see.",
+  "whyPeopleStillPay": "Because remote access is only worth anything when it connects on the first try from a network you have never seen, to a machine you cannot physically touch, running an OS version you did not choose. TeamViewer sells that reliability plus the legal cover to use it at work. Personal self-hosted remote desktop is genuinely pleasant right up until you are in an airport and your TURN server is the thing that died.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine for your own three machines, useless for tech support duty on someone else's laptop.",
+  "prompt": "Build a self-hosted personal remote desktop system: a host agent I run on machines I own, and a browser viewer I open to control them.\n\nStack, no substitutions:\n- Node 20 + TypeScript for both host agent and signaling server.\n- WebRTC via the werift library on the host side, plain browser WebRTC on the viewer side.\n- ffmpeg (spawned as a child process) for screen capture and H.264 encoding.\n- @nut-tree-fork/nut-js for mouse and keyboard injection on the host.\n- Signaling over WebSocket (ws), single small server, no framework.\n- Viewer is one static HTML file with vanilla JS and a canvas/video element. No React, no build step for the viewer.\n\nStructure:\n- /signal: WebSocket signaling server. Hosts register with an ID and a shared secret from .env. Viewers authenticate with the same secret, then get relayed SDP and ICE.\n- /host: the agent. Captures the primary display with ffmpeg (avfoundation on macOS, gdigrab on Windows, x11grab on Linux), pipes encoded video into a WebRTC track, opens a data channel, and applies incoming input events with nut-js.\n- /viewer: static page. Shows available hosts, connects, renders the video track, captures mouse move/down/up/wheel and keydown/keyup, normalizes coordinates to the remote resolution, sends them over the data channel.\n\nRules:\n- All config in .env: SIGNAL_URL, SHARED_SECRET, HOST_ID, TURN_URL, TURN_USER, TURN_PASS. Ship .env.example. Never hardcode secrets.\n- No accounts, no database, no telemetry, no cloud services beyond the signaling server and TURN that I run.\n- Target 1080p at 25fps with a tunable bitrate and a keyframe interval short enough to recover fast. Prefer latency over quality.\n- Data channel messages are small JSON objects, unordered, unreliable for mouse moves and ordered/reliable for clicks and keys.\n- Include a --view-only flag on the host that ignores all input events.\n- Log connection state transitions clearly so I can tell whether ICE failed or the encoder died.\n\nExplicitly out of scope: file transfer, clipboard sync, multi-monitor selection, mobile clients, unattended wake, NAT traversal magic beyond standard STUN/TURN.\n\nDeliverables: working code, one README with exact setup commands per OS, the macOS Screen Recording and Accessibility permissions steps, and a coturn config snippet I can drop on a VPS.",
+  "promptCurated": false
+}
