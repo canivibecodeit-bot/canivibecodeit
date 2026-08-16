@@ -1,0 +1,51 @@
+{
+  "slug": "cluely",
+  "name": "Cluely",
+  "domain": "cluely.com",
+  "category": "ai-assistant",
+  "subcategory": "real-time screen and audio copilot",
+  "tagline": "An always-on-top desktop overlay that watches your screen and listens to your calls, then feeds you AI answers in real time.",
+  "priceMonthly": 19.99,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly",
+    "unit": "per-seat",
+    "source": "https://cluely.com/pricing",
+    "checkedOn": "2026-08-16",
+    "confidence": "high",
+    "notes": "AI-drafted from a site submission; price verified against the live pricing page at review.",
+    "native": "19.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The visitor is half right: the core loop here is genuinely thin. Capture a screenshot, transcribe whatever the mic hears, stuff both into a multimodal model, stream the answer into a transparent always-on-top window bound to a global hotkey. An agent can get that working in a session and something usable in a weekend, and it will feel uncomfortably close to the demo. The gaps are the unglamorous parts: capturing the other person's audio needs a virtual audio device on macOS and a loopback device on Windows, latency has to be low enough that the answer arrives while the question is still relevant, and Cluely's actual headline claim, that the overlay does not show up in screen shares or recordings, depends on platform window flags and capture exclusion behavior that varies by OS version and by conferencing app. Your DIY version will work fine when you are alone with your own screen, and may quietly betray you the one time it matters. Also worth saying out loud: the value proposition is helping you fake competence, so budget for the possibility that the thing you built works perfectly and you still get caught.",
+  "coreLoopDIY": "A local Electron overlay bound to a hotkey that screenshots your active display, transcribes recent audio, sends both to a multimodal LLM, and streams a short answer into a translucent window nobody else is supposed to see.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An OpenAI API key (or any multimodal chat endpoint) in .env",
+    "macOS or Windows desktop, plus screen recording and microphone permissions",
+    "A virtual audio device for other-party audio: BlackHole on macOS, VB-Cable or WASAPI loopback on Windows",
+    "Node 20 and willingness to sign or self-trust an unsigned Electron build"
+  ],
+  "whatYouLose": [
+    "Screen-share invisibility that has actually been tested against Zoom, Meet, Teams and OS screenshot tools",
+    "Sub-second latency and the prompt tuning that makes answers short enough to read while someone is talking",
+    "System audio capture that just works without you installing and routing a virtual audio device",
+    "Mobile and browser-extension coverage, plus a hosted account so your setup follows you to another machine",
+    "Somebody else's legal and PR exposure for a product whose pitch is 'cheat on everything'"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is stealth engineering and distribution notoriety, not technology. Nothing in the stack is proprietary.",
+  "whyPeopleStillPay": "Because the hard part is not the LLM call, it is the twenty small platform details that make an overlay silent, invisible and fast under pressure, and because people who reach for this tool are, by definition, not in the mood to debug a virtual audio driver ten minutes before an interview. Paying converts a fragile personal hack into something that mostly behaves on a laptop you did not configure yourself.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": null,
+  "prompt": "Build a local desktop AI overlay assistant called \"Peek\". Stack: Electron 30 with TypeScript, Vite for the renderer, no framework beyond plain TS and CSS. Target macOS first, keep Windows paths behind a small platform module. Everything runs locally except LLM calls.\n\nBehavior:\n1. On launch, create a frameless, transparent, always-on-top BrowserWindow, 420x520, positioned top-right of the primary display. No dock icon, no menu bar item beyond a tray icon with Quit.\n2. Set the window to ignore mouse events by default; hold a modifier hotkey to make it interactive.\n3. Global hotkeys: Cmd+Shift+Space asks a question from the current context, Cmd+Shift+H toggles visibility, Cmd+Shift+Enter follows up in the same thread.\n4. On ask: capture a PNG of the active display via Electron desktopCapturer at max 1600px wide, grab the last 30 seconds of rolling audio transcript, and send both to the model.\n5. Audio: capture from a configurable input device using the renderer's MediaRecorder in 5 second chunks, transcribe each chunk with OpenAI whisper-1, keep a rolling 60 second transcript buffer in memory only. Never write audio to disk.\n6. LLM: call the OpenAI chat completions endpoint with a multimodal message (screenshot plus transcript plus user intent), stream tokens into the overlay. System prompt: answer in under 60 words, lead with the answer, bullets only when listing, no preamble.\n7. Attempt screen-share exclusion: call setContentProtection(true) on the window, and on Windows use the SetWindowDisplayAffinity equivalent flag. Print a startup warning in the console that exclusion is best effort and must be verified manually.\n8. Settings: a small JSON config at userData/config.json for model name, input device id, hotkeys, and transcript window length. No settings UI beyond a tray menu item that opens the file.\n\nIn scope: the overlay, hotkeys, screenshot capture, rolling transcription, streaming answers, tray quit, README with macOS permission steps and BlackHole routing instructions for capturing other-party audio.\n\nOut of scope: accounts, login, cloud sync, telemetry, analytics, auto-update, code signing, mobile, browser extension, meeting integrations, transcript persistence, any database.\n\nSecrets: OPENAI_API_KEY in .env, loaded in the main process only. Never expose the key to the renderer; proxy all API calls through IPC. Commit a .env.example.\n\nDeliver: working npm scripts dev and build, a README with a 60 second setup, and a HONESTY.md file listing what will break, starting with screen-share invisibility and audio device routing.",
+  "promptCurated": false
+}
