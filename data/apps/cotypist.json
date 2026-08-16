@@ -1,0 +1,51 @@
+{
+  "slug": "cotypist",
+  "name": "Cotypist",
+  "domain": "cotypist.app",
+  "category": "productivity-utilities",
+  "subcategory": "system-wide text prediction",
+  "tagline": "A macOS app that suggests inline text completions as you type, in almost any app, using a local model.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://cotypist.app/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The idea is simple: watch what you type, predict the rest, show it as ghost text, accept with Tab. The prediction part is genuinely easy now, a small local model or even a personal n-gram table over your own writing gets you most of the way. The hard part is everything around it: reading the current text field and caret position through the macOS Accessibility API, drawing an overlay that tracks a moving cursor, and not breaking in Electron apps, Chrome, terminals, password fields, or anything that reimplements text editing. You can build something that works in native AppKit fields in a couple of long sessions and feels magic. Getting it to work everywhere, at typing latency, without eating keystrokes or leaking into your bank login, is where the actual product lives.",
+  "coreLoopDIY": "A menu bar app that watches keystrokes via the Accessibility API, asks a local model for the next few words, and paints an inline ghost suggestion you accept with Tab.",
+  "diyTimeEstimate": "multi-day",
+  "requirements": [
+    "macOS with Xcode and a Swift toolchain",
+    "Accessibility and Input Monitoring permissions granted manually",
+    "a small local model via llama.cpp or MLX, or a personal n-gram corpus built from your own text",
+    "Apple Silicon strongly preferred for latency"
+  ],
+  "whatYouLose": [
+    "Coverage: your build will work in native text fields and fail or misbehave in Electron apps, browsers, and terminals",
+    "Latency polish: suggestions that arrive after you already typed the words are worse than nothing",
+    "Safety rails: skipping password fields, secure input mode, and sensitive apps takes deliberate work",
+    "Personalization that actually improves over months of your writing rather than a one-off corpus dump",
+    "Signed, notarized, auto-updating distribution and the permission onboarding that makes it survive OS updates"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "proprietary-models"
+  ],
+  "moatNotes": "The moat is per-app text-field plumbing and latency tuning, not the model. Nobody wants to maintain that on their own machine.",
+  "whyPeopleStillPay": "Because a text predictor that works in nine apps and glitches in the tenth is a text predictor you turn off. The value here is invisible reliability across an entire OS, which means quietly handling every app that draws its own caret, every accessibility API quirk, and every macOS release that changes the rules. That is maintenance work, not a build, and it is worth a small license fee to hand off.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The prediction is the fun part and the least of your problems. Everything hard about this app is downstream of macOS not wanting you to know where the cursor is.",
+  "prompt": "Build a macOS menu bar app called GhostType that shows inline text predictions as I type.\n\nStack, no alternatives: Swift 5.9+, SwiftUI for the menu bar UI, AppKit for the overlay window, one Xcode project, no external services.\n\nCore loop:\n1. Register a CGEventTap for keyDown events so we can observe typing and intercept Tab and Escape.\n2. Use the Accessibility API (AXUIElement) to read the focused element's AXValue and AXSelectedTextRange, and AXBoundsForRange to get the caret rect in screen coordinates.\n3. Take the last 200 characters before the caret as context and request a completion of up to 6 words.\n4. Render the suggestion as dim gray ghost text in a borderless, non-activating NSPanel positioned at the caret rect. Never modify the target app's text until accepted.\n5. Tab accepts: insert the suggestion by posting synthetic key events. Escape dismisses. Any other keystroke re-predicts after a 120ms debounce.\n\nPrediction engine: ship two interchangeable providers behind a protocol.\n- Provider A, default: an on-device n-gram model built from a folder of my own .txt and .md files at first launch, stored in a SQLite file in Application Support.\n- Provider B: a local llama.cpp or MLX server at a URL from .env, called with a strict token limit and a 250ms timeout that is cancelled on the next keystroke.\n\nSafety, non-negotiable:\n- Never predict when secure input mode is active, when the focused element role is AXSecureTextField, or when the frontmost app bundle id is in a user-editable deny list.\n- No network calls except to the local provider URL. No telemetry, no accounts, no crash reporting.\n\nIn scope: native AppKit text fields and text views, a menu bar toggle, a deny list editor, a corpus folder picker.\nOut of scope: Electron and browser text fields, terminals, iOS, sync, cloud models, multi-language tuning. Detect unsupported contexts and stay silent rather than guessing.\n\nDeliverables: the Xcode project, a README with the exact Accessibility and Input Monitoring permissions to grant and where to click, .env.example, and a plain description of what fails in Chrome and VS Code and why.",
+  "promptCurated": false
+}
