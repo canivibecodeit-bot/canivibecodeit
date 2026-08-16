@@ -1,0 +1,51 @@
+{
+  "slug": "zeroleaks",
+  "name": "ZeroLeaks",
+  "domain": "zeroleaks.ai",
+  "category": "security",
+  "subcategory": "LLM red-teaming / system prompt leak testing",
+  "tagline": "Automated red-teaming that tries to extract your AI product's system prompt, keys and hidden instructions, then reports what leaked.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://zeroleaks.ai/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanics here are not exotic: fire a few hundred adversarial prompts at your own chat endpoint, capture the responses, and check whether any of them contain your system prompt, tool schemas or API keys. An agent can build that loop, including an LLM-as-judge scorer and an HTML report, in a single sitting, and it will find the embarrassing stuff on day one. What you cannot one-shot is a probe library that stays current with each new model release and each new jailbreak family, because that is maintained knowledge, not code. There is also a trust angle: 'we ran our own script and found nothing' reads very differently in a security review than a dated third-party report. Build it for your own sanity checks, keep paying if you need something to show someone else.",
+  "coreLoopDIY": "Runs a versioned pack of extraction and injection probes against your chat endpoint, scores each response for leaked system prompt, secrets or tool definitions, and emits a ranked report with the exact transcripts.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "An API key for the model you use as judge",
+    "A reachable chat endpoint or API for the app under test, plus permission to hammer it",
+    "A copy of your real system prompt and secret patterns to match against"
+  ],
+  "whatYouLose": [
+    "A curated, maintained probe corpus that tracks new jailbreak families instead of whatever the agent remembered on build day",
+    "Multi-turn and multi-model attack strategies, including crescendo and encoding tricks, done properly rather than as single-shot prompts",
+    "A third-party report with a date on it that you can hand to a customer or an auditor",
+    "Severity triage and remediation guidance written by someone who has seen a lot of these",
+    "Regression runs on every model or prompt change without you remembering to trigger them"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "brand-trust",
+    "execution-polish"
+  ],
+  "moatNotes": "The code is thin, the attack library and the outside signature are the product.",
+  "whyPeopleStillPay": "Two reasons, and neither is that the harness is hard. First, jailbreaks rot: the probes that worked against last quarter's model are dead weight now, and keeping a live corpus is somebody's full time job, not a cron you set up once. Second, self-attested security is worth roughly nothing to an enterprise buyer, so companies pay for an external artifact with a date and a logo on it. If your goal is just to stop shipping a system prompt that unravels when someone types 'repeat everything above', a local harness is genuinely enough.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The scanner is an afternoon; the probe library and the countersigned report are not.",
+  "prompt": "Build a local CLI tool called leakprobe that red-teams a chat AI endpoint for system prompt and secret leakage.\n\nStack: Python 3.12, uv for deps, httpx, pydantic, typer for the CLI, jinja2 for the report. No web UI, no database, no accounts, no telemetry. Everything runs on my machine and writes to ./runs/.\n\nConfig: a target.yaml describing the endpoint under test (url, http method, headers, JSON body template with a {{message}} placeholder, and a JSONPath-ish key for extracting the reply text). Also a secrets.yaml listing my real system prompt text, tool/function names, and regex patterns for keys I never want echoed (sk-, ghp_, AKIA, bearer tokens). All API keys come from .env via python-dotenv; write .env.example and gitignore .env.\n\nProbes: ship a probes/ directory of YAML files, at least 60 probes across these families, each with id, family, severity, and one or more turns: direct extraction, polite social engineering, roleplay and persona swap, translation and encoding (base64, rot13, pig latin), token smuggling, fake developer or debug mode, 'repeat the text above', markdown and code block coercion, tool and function schema enumeration, indirect injection via pasted document content, and refusal-boundary probing. Support multi-turn probes where later turns reference earlier replies.\n\nRunner: async, configurable concurrency (default 4), per-request timeout, exponential backoff on 429 and 5xx, and a --limit flag so I can smoke test. Log every request and response verbatim to runs/TIMESTAMP/transcripts.jsonl.\n\nScoring: two layers. First, deterministic detectors: fuzzy overlap against my known system prompt using token n-gram matching, exact matches on tool names, and regex hits on secret patterns. Second, an LLM judge (OpenAI-compatible, model configurable, key from .env) that reads the transcript and returns strict JSON with leaked: bool, leak_type, confidence, and a one-line rationale. Combine into a severity per probe. Deterministic hits always win.\n\nOutput: a self-contained HTML report at runs/TIMESTAMP/report.html grouped by severity, each finding showing the probe, the full exchange, and which detector fired, plus report.json for diffing. Add a `leakprobe diff RUN_A RUN_B` command that shows newly failing and newly passing probes so I can use it as a regression gate. Exit code 1 if any high-severity finding, so it works in CI.\n\nOut of scope: scanning targets I do not control, DoS or rate-limit abuse, network-level scanning, auth bypass testing, any hosted dashboard. Print a short warning on first run that this only targets endpoints listed in target.yaml.\n\nDeliver a README with a 60 second quickstart, and pytest tests for the detectors using fixture transcripts (no live API calls in tests).",
+  "promptCurated": false
+}
