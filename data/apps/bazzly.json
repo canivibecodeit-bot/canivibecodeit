@@ -1,0 +1,52 @@
+{
+  "slug": "bazzly",
+  "name": "Bazzly",
+  "domain": "bazzly.ai",
+  "category": "social-media",
+  "subcategory": "reddit marketing and monitoring",
+  "tagline": "AI tool that hunts Reddit for conversations where your product is relevant and drafts the reply, with aged posting accounts attached.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://bazzly.ai/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The listening half of this is not hard: Reddit exposes search and subreddit feeds, and an agent can rank hits for relevance and draft a comment in your voice by lunchtime. The half you cannot build is the account layer, meaning aged handles with real karma, subreddit-specific posting history, and enough trust to not get shadowbanned on the first link drop. If you are promoting one product from one account you actually own and post from, the DIY version covers most of the real value. If the reason you were paying is account inventory and rotation, no amount of code fixes that, because the scarce thing is time served on someone else's platform. Also worth saying out loud: the moment you are automating replies from accounts that are not yours, you are doing the thing Reddit bans people for, and no tool makes that safe.",
+  "coreLoopDIY": "Polls Reddit search and chosen subreddits on a schedule, scores each new post for how relevant it is to your product, and drafts a comment or DM you approve before anything is posted.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Reddit account and a script-type OAuth app with client id and secret",
+    "An LLM API key for relevance scoring and drafting",
+    "Somewhere to run a cron job, a laptop is fine",
+    "Willingness to read Reddit's API terms and each subreddit's self-promo rules"
+  ],
+  "whatYouLose": [
+    "Aged, high-karma accounts with credible posting history",
+    "Multi-account rotation, proxies, and whatever ban-avoidance heuristics they have learned the hard way",
+    "Their curated map of which subreddits tolerate product mentions and which will nuke you",
+    "A hosted dashboard, team seats, and shared approval queues",
+    "Someone else's problem when the API terms or rate limits change"
+  ],
+  "moatTags": [
+    "network-effects",
+    "scale-infra",
+    "proprietary-data"
+  ],
+  "moatNotes": "The moat is not the software, it is inventory: accounts with time and karma on them, plus accumulated knowledge of which subreddits swing the ban hammer.",
+  "whyPeopleStillPay": "Because karma cannot be compiled. People pay for the part of the product that is a stockpile of trusted accounts and a running list of which communities will let a link live for more than eleven minutes, and both of those are accumulated rather than built. There is also the boring reason: the DIY build gives you a feed of opportunities, and most people do not want a feed, they want the comment already posted, by something that looks like a person who has been on Reddit for six years.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Build the listener, post from your own account, and accept that you will be slower and less prolific than the people gaming this. The bought part is not intelligence, it is aged accounts.",
+  "prompt": "Build a local Reddit opportunity monitor called reddit-radar. No hosting, no accounts, no telemetry.\n\nStack, no substitutions:\n- TypeScript on Node 20, run with tsx\n- SQLite via better-sqlite3 for storage\n- snoowrap for the Reddit API\n- A single Hono server on port 8787 serving a plain server-rendered HTML review page, no React, no build step\n- Secrets in .env: REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN, REDDIT_USER_AGENT, OPENAI_API_KEY\n\nConfig lives in config.json at repo root: product name, one paragraph product description, list of subreddits to watch, list of search keywords, and a minimum relevance score from 0 to 100.\n\nWhat it does:\n1. A poll command fetches new posts from each watched subreddit and results for each keyword from Reddit search, deduping by post id against SQLite.\n2. For each new post, one LLM call returns strict JSON: relevance score 0-100, a one line reason, whether the post is actually asking for a recommendation, and a suggested reply of at most 120 words written as a normal human who happens to have built the thing.\n3. Store everything. Anything at or above the minimum score lands in a review queue.\n4. The web page lists the queue newest first: subreddit, title, score, reason, link to the thread, the draft reply in an editable textarea, and buttons for Copy, Dismiss, and Mark handled.\n\nExplicitly out of scope, do not build these: posting or commenting through the API, DM sending, multiple account support, proxy rotation, scheduling of posts. This tool suggests, the human posts. Print a warning at startup saying exactly that.\n\nAlso include: respect Reddit rate limits with a simple queue and backoff, an npm script for a cron style loop every 30 minutes, a seeded demo mode that works with fake data and no API keys, and a README with how to get a Reddit refresh token for a script app.\n\nWhen done, run the demo mode and show me the review page output.",
+  "promptCurated": false
+}
