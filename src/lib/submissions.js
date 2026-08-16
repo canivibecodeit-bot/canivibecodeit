@@ -81,7 +81,7 @@ Otherwise reply with ONE JSON object (no markdown fences, no commentary) with EX
   "pricing": { "plan": "plan name or null", "basis": "monthly per user etc or null", "unit": "flat | per-seat | usage | one-time | custom", "source": ${JSON.stringify(url)}, "checkedOn": "${today()}", "confidence": "low", "notes": "AI-drafted from a site submission; price unverified.", "native": null },
   "verdict": "yes | kinda | no",
   "verdictConfidence": "low | medium | high",
-  "verdictSummary": "One honest paragraph of reasoning shown on the page.",
+  "verdictSummary": "3-5 tight sentences of honest reasoning shown on the page.",
   "coreLoopDIY": "What the one-shot build actually does, in one sentence.",
   "diyTimeEstimate": "one sitting | a weekend | multi-day",
   "requirements": ["what the DIY build needs, [] if nothing"],
@@ -109,6 +109,7 @@ Verdict criteria:
 Prompt rules: genuinely runnable pasted into a coding agent in an empty folder; opinionated about stack (pick one, no menus); explicit about what's in and out; honest (no accounts/cloud/telemetry unless the app genuinely needs it, secrets in .env).
 
 Hard rules:
+- The entry is page copy for site readers. NEVER mention or address the submitter, "the visitor", their take, or this form in any field; let the take inform your judgment silently.
 - Use only knowledge you are confident about. If you don't know the app's pricing, set priceMonthly to null and keep pricing.confidence "low". Never invent numbers.
 - Leave priorArt, alternatives and rejectedAlternatives as [] — those are researched separately with live verification.
 - No "<" or ">" characters in any string except "prompt".
