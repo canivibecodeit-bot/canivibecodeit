@@ -1,0 +1,51 @@
+{
+  "slug": "bibgen",
+  "name": "BibGen",
+  "domain": "bib-gen.com",
+  "category": "education",
+  "subcategory": "citation and bibliography generator",
+  "tagline": "Generates formatted citations and bibliographies in APA, MLA, Chicago and friends from links, DOIs and book IDs.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://bib-gen.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "yes",
+  "verdictConfidence": "low",
+  "verdictSummary": "Citation formatting is one of the rare paid categories where the hard part is already open source. The Citation Style Language project maintains thousands of styles and locales as public XML, citeproc-js turns them into formatted output, and Crossref, OpenLibrary and DataCite hand out metadata for a DOI or ISBN for free. That means a one-shot build covers the actual loop: paste an identifier, pick a style, get a correctly formatted entry, export the whole list. What you do not get is the polish that makes students tolerate these tools: browser capture, a Word add-in, and graceful handling of the weird sources like a lecture, a tweet or a court filing. For a personal bibliography that is mostly papers and books, the DIY version is genuinely fine.",
+  "coreLoopDIY": "A local web app that resolves a DOI, ISBN or URL into structured metadata, formats it through real CSL styles, and keeps a per-project reference list you can export as text, BibTeX or RIS.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+ and a browser",
+    "Network access to Crossref, OpenLibrary and DataCite for metadata lookup",
+    "A vendored copy of the citation-style-language styles and locales repos"
+  ],
+  "whatYouLose": [
+    "No browser extension or word processor add-in, so no click-to-cite while you write",
+    "Messy sources (websites without metadata, interviews, statutes, films) still need manual field entry",
+    "Nobody is watching for style guide updates or fixing edge cases in your vendored CSL files",
+    "No cloud sync, shared libraries or mobile access unless you host it yourself",
+    "No hand holding when a professor insists your output is one comma off"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "The formatting engine and style definitions are open; the moat is the extension, the add-in, and being the name a panicking student types at 2am.",
+  "whyPeopleStillPay": "Most buyers are students on a deadline who do not want to think about the difference between a container title and a collection title, and they are paying for a box that never argues. The paid tiers also bundle the adjacent anxieties: plagiarism checks, grammar passes, saved projects across devices, a plugin that drops the citation into the document they already have open. A self-hosted CSL app matches the output but not the reflex, and reflex is what gets renewed.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "When the standards body publishes the hard part as XML, the SaaS is selling convenience, not capability.",
+  "prompt": "Build a local-first citation and bibliography manager as a single web app. No accounts, no cloud, no telemetry.\n\nStack, no substitutions: Vite + React + TypeScript, Tailwind for styling, SQLite via better-sqlite3 behind a small Express API in the same repo. Run both with one npm run dev script.\n\nCore features:\n1. An input box that accepts a DOI, an ISBN, an arXiv ID, a PubMed ID or a plain URL, autodetects which it is, and resolves metadata: DOI and journal articles via the Crossref REST API, DataCite for datasets, OpenLibrary for ISBNs, arXiv API for preprints, and for plain URLs fetch the page server side and parse Open Graph, schema.org JSON-LD and standard meta tags.\n2. Store every resolved item as CSL-JSON in SQLite. Show an editable form for all CSL fields so the user can fix bad metadata by hand, and allow creating an item from scratch with no lookup at all.\n3. Format output with citeproc-js. Vendor a subset of the citation-style-language styles repo (at minimum APA 7, MLA 9, Chicago author-date, Chicago note, Harvard, IEEE, Vancouver) plus the en-US locale file into public/csl and load them at runtime. Do not hardcode formatting rules yourself; the CSL engine does the work.\n4. Projects: items belong to named projects. A project view shows the rendered bibliography in the selected style, sorted per the style rules, with a copy button and a live style switcher.\n5. Exports: BibTeX, RIS, CSL-JSON, plain text and HTML for the whole project. Imports: BibTeX and CSL-JSON.\n6. In-text citation preview for the selected style next to each item.\n\nOut of scope, do not build: browser extension, Word or Google Docs plugin, plagiarism checking, grammar checking, user auth, multi-user sharing, PDF parsing.\n\nDetails: put any optional API contact email in .env as CROSSREF_MAILTO and send it in the Crossref User-Agent. Cache every external lookup response in SQLite so repeated resolves are offline. Handle lookup failures by dropping the user into the manual form prefilled with whatever was found. Ship a seed script with about ten sample items and a README covering setup, where the CSL files came from, and how to add another style by dropping in its XML file.\n\nWrite it to run entirely on localhost with no build step required for the CSL data.",
+  "promptCurated": false
+}
