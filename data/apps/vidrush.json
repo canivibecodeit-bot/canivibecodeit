@@ -1,0 +1,53 @@
+{
+  "slug": "vidrush",
+  "name": "Vidrush",
+  "domain": "vidrush.ai",
+  "category": "ai-video",
+  "subcategory": "short-form video generation and repurposing",
+  "tagline": "AI tool that turns scripts and long recordings into short vertical videos with voiceover, stock footage, and burned-in captions.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "usage",
+    "source": "https://vidrush.ai/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Nothing here is a mystery: transcribe, pick the good bits, crop to vertical, burn captions, maybe bolt on a synthetic voice and some stock B-roll. An agent can wire ffmpeg plus a local Whisper build into a working pipeline in a weekend, and the output will be recognizably the same genre of video. What you will not get in one sitting is the taste layer: the clip picker that reliably finds the hook, caption styling that does not look like a 2019 meme, and a render farm that returns a 4K vertical in ninety seconds instead of twenty minutes on your laptop fan. Voiceover and stock footage also mean third-party API keys, which is exactly the hard dependency that keeps this out of yes territory. Build it if you post a few clips a week and enjoy tuning ffmpeg filters; pay if video is the job and turnaround matters.",
+  "coreLoopDIY": "A local CLI that transcribes a video or script, scores and selects segments, then renders vertical clips with burned-in word-level captions and optional TTS voiceover.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "ffmpeg installed locally",
+    "Python 3.11 plus a local Whisper build (faster-whisper) for transcription",
+    "A GPU or patience for render times",
+    "Optional API key for a TTS voice, in .env",
+    "Optional stock footage source, or your own B-roll folder"
+  ],
+  "whatYouLose": [
+    "The hook detection that decides which 30 seconds are actually worth posting",
+    "Caption templates and animated text that look designed rather than defaulted",
+    "Fast cloud rendering: long exports move from a background job to your laptop",
+    "Built-in stock libraries with licensing already handled",
+    "Aspect-ratio-aware auto reframing that tracks a moving speaker instead of a static center crop"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "content-rights"
+  ],
+  "moatNotes": "The pipeline is commodity ffmpeg. The parts that are not commodity: caption design, reframing quality, and licensed footage you can legally publish.",
+  "whyPeopleStillPay": "Because short-form video is volume work, and volume work dies on friction. Paying means you upload, wait, and download something postable, without owning a render queue, a font licence, a stock footage subscription, and a caption renderer that breaks on emoji. The DIY build gets you 80 percent of the pixels and none of the speed, and the last 20 percent is exactly the part viewers notice in the first two seconds.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The pipeline is a weekend; the taste is the product. Build it if clips are a hobby, pay if they are a posting schedule.",
+  "prompt": "Build a local command line tool called clipper that turns a long video into short vertical clips with burned-in captions.\n\nStack, no substitutions:\n- Python 3.11, single repo, uv or venv for deps\n- faster-whisper for transcription, running locally on CPU by default\n- ffmpeg via subprocess calls, no wrapper library\n- typer for the CLI, rich for progress output\n- SQLite (stdlib sqlite3) to cache transcripts keyed by file hash\n\nCommands:\n1. clipper transcribe INPUT.mp4 : transcribe with word-level timestamps, cache the result as JSON in .cache/ and in SQLite.\n2. clipper suggest INPUT.mp4 --count 5 : from the cached transcript, propose clip windows between 20 and 60 seconds. Scoring heuristic: sentence density, presence of question marks, first-person statements, and avoidance of long silences. Print start, end, and the first line of each candidate. Do not call any LLM.\n3. clipper render INPUT.mp4 --start 00:01:12 --end 00:01:48 --out clips/ : cut the segment, scale and center-crop to 1080x1920, normalize audio to -14 LUFS with ffmpeg loudnorm, and burn in captions.\n4. clipper batch INPUT.mp4 --count 3 : run suggest then render for the top candidates.\n\nCaption rendering:\n- Generate an ASS subtitle file from the word timestamps, grouped into lines of at most 4 words\n- Highlight the currently spoken word in a second colour\n- Font, size, outline width, and both colours configurable in config.toml\n- Burn in with ffmpeg subtitles filter, do not attempt soft subs\n\nExplicitly out of scope: no web UI, no user accounts, no cloud upload, no telemetry, no stock footage library, no text to speech, no social platform publishing, no speaker tracking or auto-reframe beyond center crop.\n\nRequirements: ffmpeg must be on PATH and the tool should fail with a clear message if it is not. Any optional API keys go in .env read via os.environ, never committed. Ship a README with install steps, one example command, and an honest note that render time on CPU is roughly real-time or slower.",
+  "promptCurated": false
+}
