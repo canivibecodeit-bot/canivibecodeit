@@ -1,0 +1,52 @@
+{
+  "slug": "eqmac",
+  "name": "eqMac",
+  "domain": "eqmac.app",
+  "category": "audio",
+  "subcategory": "system-wide audio EQ for macOS",
+  "tagline": "A menu bar equalizer, volume booster and audio router that sits on top of everything macOS plays.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Pro",
+    "basis": null,
+    "unit": "custom",
+    "source": "https://eqmac.app/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The DSP is the easy part: a cascade of biquad filters driven by sliders is textbook, and an agent will write it correctly on the first try. The hard part is getting system audio into your process at all, which on macOS means a virtual output device and a Core Audio server plugin, signed and notarized, plus graceful handling of sample rate changes, device hotplug and headphone unplug. You can dodge most of that by installing BlackHole and building a loopback app that pulls from it and pushes to your real output, which is a genuine weekend project and works fine on your own machine. What you will not match in one sitting is the invisible-ness: no driver install prompts, no latency you can hear, no manual switching every time you plug in AirPods. Good build, mediocre replacement for something you want to forget exists.",
+  "coreLoopDIY": "A SwiftUI menu bar app that captures system audio via a BlackHole virtual device, runs it through a multiband biquad EQ plus gain stage, and plays it back out to your chosen physical output with saveable presets.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "macOS with Xcode and a Swift toolchain",
+    "BlackHole (or another virtual audio device) installed, e.g. via Homebrew",
+    "Willingness to set your system output to the virtual device and let the app do the routing",
+    "Microphone/audio permissions granted to the app",
+    "Basic tolerance for a few ms of added latency"
+  ],
+  "whatYouLose": [
+    "A first-party, notarized audio driver: you are borrowing someone else's virtual device instead",
+    "Automatic output-device following, so plugging in headphones means switching things by hand",
+    "Very low latency and rock-solid handling of sample rate mismatches and hotplug events",
+    "Extras like per-device presets, balance control, and a curated preset library",
+    "Updates, crash fixes, and someone else's problem when a macOS point release breaks audio"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is low-level Core Audio plumbing that has to be invisible, plus the trust required to let a stranger's kernel-adjacent audio driver sit between every app and your speakers.",
+  "whyPeopleStillPay": "System audio on macOS is hostile territory: Apple gives you no sanctioned tap on the output mix, so anything like this lives or dies on driver work, signing, notarization and years of edge cases with Bluetooth, multi-output devices and OS updates. A personal build that requires you to manually route through BlackHole is fine on a laptop you control, and annoying everywhere else. Paying is mostly paying for the audio path to never think about itself again.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The equalizer is a weekend of biquads; the driver is not.",
+  "prompt": "Build a macOS menu bar system audio equalizer in Swift, targeting macOS 13+, as an Xcode-less Swift Package with a SwiftUI app target is not possible, so scaffold a normal Xcode project via `xcodegen`-style project.yml or a plain SwiftPM executable using AppKit + SwiftUI if simpler. Pick one and commit to it.\n\nArchitecture:\n- Assume a virtual audio device named \"BlackHole 2ch\" exists and is the current system output. Print clear setup instructions in the README, including the Homebrew install command, and fail with a readable error if the device is missing.\n- Use AVAudioEngine: input node reads from the BlackHole aggregate/input device, output node writes to a user-selected physical output device enumerated via Core Audio (AudioObjectGetPropertyData on kAudioHardwarePropertyDevices).\n- Insert a DSP chain between them: 10 band peaking EQ (31.25 Hz to 16 kHz, octave spaced) implemented as cascaded biquad peaking filters, plus a preamp gain stage with a soft clipper so boosting cannot produce digital clipping.\n- Implement biquads yourself in a small `Biquad.swift` (RBJ cookbook coefficients), processed per channel in an AVAudioUnit tap or via AVAudioSourceNode. No third party DSP libraries.\n- Handle sample rate: read the device's actual rate, recompute coefficients on change, and log rate mismatches instead of crashing.\n\nUI:\n- Menu bar extra (NSStatusItem) with a SwiftUI popover: 10 vertical sliders in dB (-12 to +12), a preamp slider, a master bypass toggle, and an output device picker.\n- Named presets saved as JSON in ~/Library/Application Support/DIYEQ/presets.json. Ship Flat, Bass Boost, Vocal, Podcast.\n\nExplicitly out of scope: writing our own Core Audio server plugin or driver, code signing and notarization, per-app volume, spatial audio, auto updates, telemetry, accounts, any network calls at all.\n\nDeliver: working project, `make run` or an xcodebuild one-liner, and a README with the BlackHole setup steps, the known latency caveat, and how to restore normal audio if the app dies mid-session.",
+  "promptCurated": false
+}
