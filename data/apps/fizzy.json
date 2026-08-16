@@ -1,0 +1,50 @@
+{
+  "slug": "fizzy",
+  "name": "Fizzy",
+  "domain": "fizzy.do",
+  "category": "project-management",
+  "subcategory": "issue tracking",
+  "tagline": "A lightweight issue and task tracker for small teams, built around boards, cards, and fast keyboard-driven triage.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "per-seat",
+    "source": "https://fizzy.do/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "An issue tracker is one of the most one-shottable app shapes in existence: a table of items, a status column, a drag target, a filter box. An agent will hand you a working personal board in a single session and you will not miss much if you are the only person using it. The gaps show up the moment a second human arrives: presence, notifications, comment threads that people actually read, mobile access, and the invisible polish that makes triage feel quick instead of like data entry. Fizzy's pitch is largely that polish and the taste behind it, which is exactly the part a first draft does not reproduce. Build it for yourself, pay for it if you are coordinating other people.",
+  "coreLoopDIY": "A local web app where you create issues, drag them between status columns, filter by label or assignee, and keep everything in one SQLite file.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Ruby and a local machine, or a small VPS if you want it reachable from your phone browser",
+    "Basic auth or a tunnel if you expose it beyond localhost"
+  ],
+  "whatYouLose": [
+    "Real multiplayer: live cursors, presence, and updates that appear without a refresh",
+    "Native mobile apps and push notifications",
+    "Comment threads, mentions, and email notifications that route to the right person",
+    "Integrations with Git hosts, so no auto-closing issues from commits",
+    "The interaction polish and keyboard fluency that make triage fast rather than tedious"
+  ],
+  "moatTags": [
+    "collaboration",
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "Trackers are commodity data models with a very non-commodity feel. The differentiation lives in latency, keyboard handling, and defaults, plus an existing audience that trusts the shop shipping it.",
+  "whyPeopleStillPay": "Nobody pays for an issue tracker because the schema is hard. They pay because a team needs one shared place that everyone can reach from any device, that sends the right nudge to the right person, and that nobody has to maintain. A self-hosted board you built in an evening is genuinely better than a spreadsheet for solo work, and genuinely worse than a hosted tracker the second you need three people to agree on what is in progress.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The data model is a weekend of high school homework; the feel is the product.",
+  "prompt": "Build a single-user, self-hosted issue tracker called Board. No accounts, no cloud services, no telemetry.\n\nStack, non-negotiable:\n- Ruby on Rails 8, SQLite, Hotwire (Turbo + Stimulus), Tailwind via the rails tailwindcss gem.\n- Everything runs with `bin/rails server` on localhost. One SQLite file in db/.\n- No Redis, no background job service, no external APIs.\n\nData model:\n- Project: name, slug, archived boolean.\n- Issue: project, title, body (markdown text), status enum (triage, todo, doing, blocked, done), priority enum (none, low, high, urgent), assignee string, due_on date, position integer for ordering, created_at, closed_at.\n- Label: name, color hex. Join table for issues and labels.\n- Comment: issue, body markdown, created_at.\n\nUI, in scope:\n- Board view per project: five columns by status, cards showing title, labels, priority dot, due date. Drag and drop between columns and within a column, persisted via a Turbo request that updates status and position.\n- List view with sortable columns and a single filter bar that accepts text plus tokens like label:bug priority:urgent assignee:me status:doing.\n- Issue detail page with rendered markdown body, inline edit, labels, comments.\n- Keyboard shortcuts: c to create, / to focus filter, j and k to move selection, e to edit, x to close, 1 through 5 to set status on the selected card. Show a shortcut cheat sheet on ?.\n- Dark mode following the system preference.\n\nOut of scope, do not build:\n- Users, auth, invites, permissions, email, notifications, webhooks, Git integration, mobile apps, analytics.\n\nAlso deliver:\n- Seed data: one project, twenty issues spread across statuses, four labels.\n- Rake tasks: db:export writing all issues to JSON, and db:import reading it back.\n- Request specs for issue create, status change via drag endpoint, and the filter parser.\n- A README with setup in under five commands and one paragraph on backing up the SQLite file.\n- Any secret or config value goes in .env, loaded with dotenv-rails, with a committed .env.example. Do not commit .env.\n\nOptimize for input speed over feature count. If a choice is ambiguous, pick the one with fewer clicks and write it in the README.",
+  "promptCurated": false
+}
