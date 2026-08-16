@@ -1,0 +1,51 @@
+{
+  "slug": "vibecodinglist",
+  "name": "VibeCodingList",
+  "domain": "vibecodinglist.com",
+  "category": "dev-tools",
+  "subcategory": "tool directory",
+  "tagline": "A curated directory of AI coding tools, agents and vibe-coding resources, with paid placement for makers.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://vibecodinglist.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Directories like this typically monetize listings and sponsorship rather than user subscriptions.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The software here is a filterable list of tools with a submit form, which any competent agent will produce before your coffee gets cold. That is not what the site sells. What it sells is a room that already has people in it: makers who want to be seen and builders who show up to browse, plus whatever ranking and freshness the operators maintain by hand. A private clone is just a bookmarks file with better typography, and nobody needs a directory of one. Build the personal version if you want a tidy shelf for tools you actually use, but do not pretend it replaces the thing.",
+  "coreLoopDIY": "Paste a tool URL, get its title, description and favicon scraped into a local SQLite catalog you can tag, filter and search.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+",
+    "outbound internet access for metadata scraping",
+    "you supply and maintain every listing yourself"
+  ],
+  "whatYouLose": [
+    "The audience: a directory without visitors is a spreadsheet",
+    "Discovery of tools you have never heard of, which is the entire point of reading a list like this",
+    "Ongoing curation and dead-link pruning by someone other than you",
+    "Whatever ranking, badges and category taxonomy the operators have tuned over time",
+    "The submission side: makers coming to you instead of you hunting them down"
+  ],
+  "moatTags": [
+    "network-effects",
+    "proprietary-data",
+    "brand-trust"
+  ],
+  "moatNotes": "Thin moat by absolute standards, but it is a moat you cannot code: the value is accumulated listings plus inbound attention, and both take months of unglamorous work.",
+  "whyPeopleStillPay": "The people paying are mostly not readers, they are makers buying attention. A listing or a sponsored slot on a directory that already ranks and already gets clicked is cheaper than buying that traffic anywhere else, and it takes five minutes instead of a quarter of content marketing. Readers pay nothing and lose nothing, which is exactly why the directory model works: the free side is the inventory.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The site is a table with a submit form, which is a one-sitting build. The moat is the accumulated listings plus the inbound traffic that makers are willing to pay to sit in front of.",
+  "prompt": "Build a local-only personal catalog of dev and AI tools. No accounts, no cloud, no analytics, no telemetry.\n\nStack, non-negotiable: Node 20, TypeScript, Fastify for the server, better-sqlite3 for storage, server-rendered HTML via Fastify's view layer with EJS templates, plain CSS in one file. No React, no Tailwind, no ORM, no Docker.\n\nData model in SQLite: tools(id, name, url, domain, description, favicon_path, pricing_note, status enum of trying/keeping/dropped, notes, created_at, last_checked_at), tags(id, name), tool_tags join table.\n\nFeatures, in scope:\n1. POST /tools takes a URL, fetches the page with a 5 second timeout and a normal User-Agent, parses title, meta description, og:title, og:description and og:image using cheerio, downloads the favicon to ./data/icons, and inserts a row. On fetch failure, still insert with the bare domain and mark last_checked_at null.\n2. Home page: card grid of tools, newest first, with a text filter box and clickable tag chips. Filtering is server-side via query params, no client framework.\n3. Edit page per tool: rename, rewrite description, set pricing_note as free text, set status, edit tags as a comma separated field, delete.\n4. GET /export returns the whole catalog as JSON. POST /import accepts that same JSON and upserts by URL.\n5. A recheck script, npm run recheck, that walks every tool, re-fetches, and flags any URL returning non-2xx as possibly dead in the UI.\n\nOut of scope, do not build: public submission flow, user accounts, voting, sponsored placement, sitemap or SEO pages, screenshot generation, email.\n\nConfig: PORT and DATA_DIR in .env, read with process.env only, ship a .env.example. Store the SQLite file and icons under DATA_DIR, gitignored.\n\nDeliverables: working server on npm run dev, migrations run automatically on boot, a seed script that inserts five well-known tool URLs so the grid is not empty, and a README with the two commands that matter.",
+  "promptCurated": false
+}
