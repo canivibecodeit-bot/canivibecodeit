@@ -1,0 +1,51 @@
+{
+  "slug": "educamos",
+  "name": "Educamos",
+  "domain": "educamos.com",
+  "category": "education",
+  "subcategory": "school management platform",
+  "tagline": "School management and family communication platform used by K-12 schools, mostly in Spain and Latin America, covering grades, attendance, timetables and messaging.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://educamos.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Sold as an institutional license to schools, not as a self-serve subscription.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "This is not an app you own, it is the system of record your school runs on. The grades, attendance marks, timetables and official report cards live on the school's tenant, entered by teachers you do not employ, under student data rules you do not control. A personal replacement would have nothing authoritative to read from: there is no public API you can point at, and scraping a minor's school portal is a bad idea on several axes at once. Even if you rebuilt the parent-facing screens perfectly, the moment a teacher posts a notice it would appear in Educamos and not in your build. The honest DIY here is a private tracker that sits beside it, not a replacement for it.",
+  "coreLoopDIY": "A local family dashboard where you manually log grades, homework and school notices per child and get a simple trend view plus a weekly summary.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node and a local SQLite file",
+    "Manual entry, or copy-paste from whatever the school actually sends you",
+    "Nothing else, no school system access"
+  ],
+  "whatYouLose": [
+    "Authoritative data: teachers enter grades and attendance in Educamos, not in your app",
+    "Two-way messaging with teachers and the school office",
+    "Official documents: report cards, absence justifications, enrolment and billing flows",
+    "Timetable, room and substitution updates that come from the school's own scheduling",
+    "Everyone else on it: the school, other parents, the administration staff"
+  ],
+  "moatTags": [
+    "switching-costs",
+    "compliance-regulatory",
+    "integrations"
+  ],
+  "moatNotes": "The buyer is the school, the user is you, and those are not the same person. That gap is the whole product.",
+  "whyPeopleStillPay": "Nobody chooses Educamos as a consumer. The school buys it because it wires together academic records, attendance, timetabling, family communication and often billing into one tenant that the administration and the teaching staff both live in, with student data handling that a school's legal obligations require somebody to be accountable for. Parents pay in attention, not money, and use it because that is where the grades appear. Ripping it out means retraining a whole staff and migrating years of academic records, which is exactly the kind of project schools do once a decade at most.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can rebuild the parent dashboard in an afternoon and it will be empty forever. The moat is that the school, not you, owns the data and the staff who type it in.",
+  "prompt": "Build a local-only family school tracker called Boletin. Single user, no accounts, no cloud.\n\nStack, no substitutions:\n- Node 20, TypeScript, Fastify for the server\n- SQLite via better-sqlite3, file at ./data/boletin.db, schema created on first run\n- Server-rendered HTML with a single Pico.css CDN link, plus a little vanilla JS. No React, no build step beyond tsc.\n\nData model:\n- child: id, name, school_year\n- subject: id, child_id, name, teacher_name (optional), weight (optional)\n- grade: id, subject_id, date, label, score, max_score, notes\n- attendance: id, child_id, date, status (present, absent, late, excused), notes\n- note: id, child_id, date, source (teacher, school, me), title, body, pinned boolean\n- homework: id, subject_id, due_date, title, done boolean\n\nFeatures, in scope:\n- Child switcher in the header.\n- Dashboard per child: current average per subject (weighted if weights set), homework due in the next 7 days, last 5 notes, absence count this term.\n- Forms to add and edit every entity. Fast keyboard entry matters more than looks: one page per entity type with an inline add row at the top.\n- Subject detail page with a plain SVG line chart of grades over time, no chart library.\n- A weekly summary page rendered from the last 7 days of data, with a copy-to-clipboard plain text version.\n- CSV import for grades: columns subject,date,label,score,max_score. Show a preview and a row count before committing.\n- Export everything to JSON at /export, and a button that copies the SQLite file to ./backups with a timestamp.\n\nExplicitly out of scope, do not attempt:\n- Any connection to a school platform, no scraping, no login automation, no unofficial APIs\n- Multi-user, invites, or messaging\n- Push notifications, email, telemetry, analytics\n\nDetails:\n- npm start runs the server on PORT from .env, default 3000. Commit .env.example only.\n- Seed script with one fictional child and two subjects so the UI is not empty on first run.\n- README: what this is, what it is not, and one blunt line saying grades must be typed in by hand because the school's system is the source of truth.",
+  "promptCurated": false
+}
