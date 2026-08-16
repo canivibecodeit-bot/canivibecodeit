@@ -1,0 +1,52 @@
+{
+  "slug": "metorik",
+  "name": "Metorik",
+  "domain": "metorik.com",
+  "category": "analytics",
+  "subcategory": "WooCommerce reporting and email automation",
+  "tagline": "Reporting, customer segmentation, cart tracking and email automation layered on top of a WooCommerce store.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "monthly, tiered by store order volume",
+    "unit": "usage",
+    "source": "https://metorik.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The good news: every number Metorik shows you is already sitting in your own WooCommerce database, so nobody is gatekeeping your data. An agent can pull orders, customers and products through the Woo REST API into a local store and give you revenue charts, cohort and repeat-purchase views, product breakdowns and CSV exports in a weekend. The gap is everything that is not a chart: abandoned cart tracking needs a script on your storefront plus a capture endpoint, email automations need a sending domain and deliverability you do not have, and segment-driven campaigns need a rules engine that is a project of its own. Large stores also punish naive syncs, Metorik has spent years making that part boring. Build the dashboard, keep paying for the email side if that is why you signed up.",
+  "coreLoopDIY": "Syncs your WooCommerce orders, customers and products into a local database on a schedule and serves a dashboard with revenue, product, cohort and repeat-purchase reports plus CSV export.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A WooCommerce store with REST API consumer key and secret",
+    "Somewhere to run a small Node process and a database (a cheap VPS or your own machine)",
+    "Read access to the store over HTTPS",
+    "Optional: ability to add one script tag to the storefront if you want cart tracking"
+  ],
+  "whatYouLose": [
+    "Abandoned cart tracking and cart recovery emails, which need storefront instrumentation plus real email sending",
+    "Automated email flows tied to customer segments, with templates, throttling and unsubscribe handling",
+    "Battle-tested incremental sync for stores with hundreds of thousands of orders",
+    "Subscriptions, refunds and tax edge case handling that Metorik has already hit and fixed",
+    "Mobile-friendly polish, live order feed and the everything-in-one-place feel"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "scale-infra"
+  ],
+  "moatNotes": "The moat is not your data, it is the thousand WooCommerce data quirks and the email sending infrastructure bolted to the reports.",
+  "whyPeopleStillPay": "Because a store owner wants the abandoned cart email that actually sends, not a chart they built themselves. Reports are the easy half and they are the half you can replicate; the automation half means a warmed sending domain, unsubscribe compliance, segment rules and someone to blame when the flow misfires during a sale. Metorik also absorbs the pain of WooCommerce version drift, plugin conflicts and gigantic order tables, which is unglamorous work that quietly eats your weekends if you own it.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The reporting half is a genuine weekend win; the email half is where the money is.",
+  "prompt": "Build a self-hosted WooCommerce analytics dashboard. Single repo, no accounts, no cloud services, no telemetry.\n\nStack, no substitutions:\n- TypeScript, Node 20, Fastify for the API\n- SQLite via better-sqlite3 as the local warehouse\n- React with Vite for the dashboard, Recharts for charts, plain CSS\n- Zero auth: it binds to 127.0.0.1 and is meant to run behind your own network\n\nConfig in .env only: WOO_BASE_URL, WOO_CONSUMER_KEY, WOO_CONSUMER_SECRET, SYNC_INTERVAL_MINUTES, PORT. Ship .env.example, never commit real keys.\n\nSync worker:\n- Pull /wp-json/wc/v3 orders, customers, products with pagination and per_page=100\n- Incremental by modified_after, persisted watermark per resource in a sync_state table\n- Retry with exponential backoff on 429 and 5xx, log progress to stdout\n- Store raw JSON plus normalized tables: orders, order_items, customers, products\n- Normalize currency to store currency, keep refunds as negative rows, exclude cancelled and failed orders from revenue by default with a toggle\n\nDashboard pages:\n1. Overview: revenue, order count, average order value, refunds, all with date range picker and previous-period comparison\n2. Products: units and revenue by product and variation, sortable\n3. Customers: lifetime value, order count, first and last order, repeat vs one-time split\n4. Cohorts: monthly first-purchase cohorts with repeat purchase rate over following months\n5. Export: CSV download of any table for the selected date range\n\nExplicitly out of scope: abandoned cart tracking, email sending, segment automations, multi-store, user accounts, hosted deployment.\n\nDeliver: npm run sync, npm run dev, npm run build, a seed script that generates fake orders so the UI can be demoed without a live store, and a README that states plainly what this does not replace.",
+  "promptCurated": false
+}
