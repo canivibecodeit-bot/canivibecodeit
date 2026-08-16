@@ -1,0 +1,51 @@
+{
+  "slug": "1of10",
+  "name": "1of10",
+  "domain": "1of10.com",
+  "category": "social-media",
+  "subcategory": "YouTube outlier research",
+  "tagline": "YouTube research tool that surfaces outlier videos: clips that massively beat their channel's normal view count.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://1of10.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The core math is embarrassingly simple: pull a channel's uploads, compute a median or trailing baseline, divide each video's views by it, sort descending. The YouTube Data API hands you everything you need for that, and an agent can wire up a local outlier dashboard for a list of channels you care about in one sitting. Where it breaks down is scale: 1of10's real product is a pre-indexed corpus of millions of videos you can search across niches you have never heard of, with history that predates your interest. Your build can only see channels you thought to track, and the free API quota caps how many you can refresh per day. Good enough for watching 50 competitors, useless for open-ended idea mining.",
+  "coreLoopDIY": "Tracks a list of YouTube channels, computes each video's view multiple against its channel baseline, and shows a sortable outlier feed with thumbnails and titles.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "YouTube Data API v3 key (free tier, 10k units/day)",
+    "Python 3.11 and a machine or cheap VPS to run a daily refresh",
+    "A hand-curated list of channels to track"
+  ],
+  "whatYouLose": [
+    "Cross-channel discovery: you can only find outliers in channels you already listed",
+    "Historical depth, their index has view curves from before you started collecting",
+    "Quota headroom, refreshing thousands of channels daily needs paid access or many keys",
+    "Curated niche collections, thumbnail galleries and saved-idea workflows",
+    "Shorts vs long-form normalization and view-velocity nuance that took them iterations to get right"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "The index is not proprietary in a legal sense, it is all public API data, but assembling and continuously refreshing it at that breadth is the whole product.",
+  "whyPeopleStillPay": "Because the point of outlier research is finding formats in corners of YouTube you would never think to monitor, and that requires a crawler that has been running for years on someone else's quota budget. A personal tracker answers \"what is working for my competitors\" nicely. It cannot answer \"what format is quietly exploding in a niche adjacent to mine\", which is the question people actually pay for.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The formula is one line of arithmetic, the corpus is a crawler with a budget.",
+  "prompt": "Build a local YouTube outlier tracker: a self-hosted dashboard that flags videos massively outperforming their own channel's baseline.\n\nStack, no substitutions:\n- Python 3.11, FastAPI, Jinja2 templates, plain CSS, no JS framework\n- SQLite via sqlite3 stdlib, file at ./data/outliers.db\n- httpx for YouTube Data API v3 calls\n- API key from .env (YOUTUBE_API_KEY), python-dotenv, ship .env.example, never commit .env\n\nData model:\n- channels(id, handle, title, added_at)\n- videos(id, channel_id, title, published_at, thumbnail_url, duration_seconds, is_short, view_count, fetched_at)\n- snapshots(video_id, view_count, taken_at) for view velocity\n\nIngest (CLI: python -m app.sync):\n- For each tracked channel, resolve the uploads playlist, page playlistItems for up to the 200 most recent videos, then batch videos.list (50 ids per call) for statistics and contentDetails\n- Treat anything under 180 seconds as a Short and baseline Shorts separately from long-form\n- Baseline = median view_count of that channel's previous 10 videos of the same format that are at least 30 days old; outlier_score = views / baseline\n- Log estimated quota units used per run and stop cleanly before 9500\n\nWeb UI on localhost:8000:\n- Table sorted by outlier_score: thumbnail, title, channel, published date, views, baseline, score, link to the video\n- Filters: format (short/long), minimum score, published within N days, channel\n- A form to add or remove a tracked channel by handle or URL\n- A page per channel showing its videos and baseline curve as a simple inline SVG\n\nIn scope: sync CLI, dashboard, filters, CSV export of the current view.\nOut of scope: user accounts, auth, hosted deployment, telemetry, payments, cross-channel keyword search, thumbnail downloads, AI title suggestions.\n\nInclude a README with setup, how to get an API key, quota math, and a cron line for a daily sync. Handle API errors and deleted videos without crashing the run.",
+  "promptCurated": false
+}
