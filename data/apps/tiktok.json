@@ -1,0 +1,51 @@
+{
+  "slug": "tiktok",
+  "name": "TikTok",
+  "domain": "tiktok.com",
+  "category": "social-media",
+  "subcategory": "short-form video feed",
+  "tagline": "Endless algorithmic short-form video feed with creator tools, ads, and in-app purchases.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://tiktok.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "The app on your phone is a video player with a swipe gesture, which is genuinely a one-afternoon build. The product is a billion people uploading, a recommendation system trained on trillions of watch-time signals, and a CDN that streams vertical video to the entire planet without buffering. A personal replacement has nothing to recommend and nobody to watch. You can absolutely build a local vertical-feed player for your own downloaded videos, and it will feel eerily close for about four minutes, until you run out of content. Nothing you write in a weekend touches the actual machine.",
+  "coreLoopDIY": "A local swipeable vertical video player over a folder of files you already have, with watch-time logging and a crude re-rank so the loop feels familiar.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+",
+    "A folder of video files you legally have",
+    "A browser that supports HTML5 video and touch or wheel events"
+  ],
+  "whatYouLose": [
+    "The content: every video, every creator, every trend",
+    "The recommender, which is the actual product",
+    "Comments, duets, stitches, DMs, and any reason to open it twice",
+    "Streaming infra that plays instantly on hotel wifi",
+    "Discovery of anything you did not already download yourself"
+  ],
+  "moatTags": [
+    "network-effects",
+    "proprietary-data",
+    "scale-infra"
+  ],
+  "moatNotes": "Two-sided: creators go where the viewers are, viewers go where the feed is good, and the feed is good because of watch data from both.",
+  "whyPeopleStillPay": "Most people never pay TikTok a cent, which is the point: the value is entirely the supply of content and the machine that ranks it, and both are funded by advertisers and coin-buyers rather than a subscription. Creators pay in time, brands pay in ad spend, and viewers pay in attention. Nobody is paying for the video player, so replacing the video player replaces nothing.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The swipe feed is a one-sitting build; the feed itself is not. The moat is a billion uploaders plus the watch-time corpus that decides what you see next.",
+  "prompt": "Build a local-only vertical video feed player called \"soloscroll\". Stack: Next.js 15 App Router, TypeScript, Tailwind, better-sqlite3. No accounts, no cloud, no telemetry, no external APIs.\n\nWhat it does:\n1. On startup, scan the directory in VIDEO_DIR (from .env, default ./videos) recursively for .mp4, .webm, .mov files.\n2. Index each file in SQLite: id, path, filename, duration, width, height, tags (parsed from the filename, splitting on dashes and underscores), addedAt.\n3. Generate a poster frame per video using ffmpeg if it is on PATH; skip silently if it is not.\n4. Serve video bytes from a route handler that supports HTTP Range requests so seeking works.\n\nThe feed:\n- Full-viewport vertical scroll-snap container, one video per screen, autoplay muted on enter, pause on exit, using IntersectionObserver.\n- Keyboard (arrow up/down, space to mute toggle), wheel, and touch swipe all move between videos.\n- Overlay: filename, tags, a like button, a mute button. That is all the chrome.\n- Loop the playlist forever so it never dead-ends.\n\nThe fake algorithm:\n- Log every view: videoId, secondsWatched, completed, likedAt, timestamp.\n- Score each video as (completion rate * 2) + likes - (recent repeats penalty), add a small random jitter, and re-rank the upcoming queue after every 5 views.\n- Add a /stats page: total watch time, top tags by completion rate, and your longest session. Be blunt about what that number means.\n\nExplicitly out of scope: uploading, comments, sharing, following, any network calls, any model, any mobile app.\n\nDeliver: .env.example with VIDEO_DIR, a README with setup in under 10 lines, a seed script that indexes the folder, and npm run dev working on a clean clone.",
+  "promptCurated": false
+}
