@@ -15,10 +15,16 @@ const user = Astro.locals.user ?? null;
   <main class="wrap submit-wrap">
     <div class="submit-card">
       <h1>Submit an app</h1>
-      <p class="submit-sub">
-        name a paid app that isn't on the list yet. the bot drafts the full
-        entry (verdict, moat tags, one-shot prompt), opens a public pull
-        request, and a human reviews it before it goes live.
+      {/* the whole pitch in one breadcrumb; steps stay unbroken and the row
+          wraps at step boundaries on narrow screens */}
+      <p class="pipeline" aria-label="How submitting works">
+        <span>name it</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span>bot drafts the verdict</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span>PR opens</span>
+        <span class="arrow" aria-hidden="true">→</span>
+        <span>human merges</span>
       </p>
 
       <form id="submit-form" novalidate>
@@ -32,10 +38,13 @@ const user = Astro.locals.user ?? null;
         </div>
         <div class="field">
           <label for="sub-take">your take <span class="opt">optional</span></label>
-          <textarea id="sub-take" name="take" maxlength="1000" rows="3" placeholder="yes / kinda / no, and why. the bot reads this before drafting."></textarea>
+          <textarea id="sub-take" name="take" maxlength="1000" rows="3" placeholder="yes / kinda / no, and why"></textarea>
         </div>
         <div class="field">
-          <label for="sub-submitter">credit <span class="opt">optional</span></label>
+          <div class="label-row">
+            <label for="sub-submitter">credit <span class="opt">optional</span></label>
+            {!user && <a class="signin-hint" href="/signin" data-signin>sign in → auto-credit</a>}
+          </div>
           <input id="sub-submitter" name="submitter" type="text" maxlength="60" placeholder="name or handle for the PR" value={user?.name ?? ''} autocomplete="off" />
         </div>
         {/* honeypot: invisible to people, irresistible to bots */}
@@ -43,7 +52,12 @@ const user = Astro.locals.user ?? null;
           <label for="sub-website">leave this empty</label>
           <input id="sub-website" name="website" type="text" tabindex="-1" autocomplete="off" />
         </div>
-        <button class="btn primary" type="submit" id="submit-go">draft the entry →</button>
+        <div class="submit-row">
+          <button class="btn primary" type="submit" id="submit-go">draft the entry →</button>
+          <p class="submit-fine">
+            human-reviewed · <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">prefer git?</a>
+          </p>
+        </div>
       </form>
 
       <div class="submit-status" id="submit-status" role="status" aria-live="polite" hidden>
@@ -57,11 +71,6 @@ const user = Astro.locals.user ?? null;
         <a class="result-app" id="submit-result-app" hidden></a>
       </div>
 
-      <p class="submit-fine">
-        entries are AI-drafted and human-reviewed before merge; prices get
-        checked by hand. prefer git? <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">open the PR yourself</a> ·
-        it's all free, forever.
-      </p>
       <noscript>
         <p class="submit-fine">the form needs JavaScript to talk to the drafting bot. without it, <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">the PR route</a> works fine.</p>
       </noscript>
@@ -98,11 +107,36 @@ const user = Astro.locals.user ?? null;
     letter-spacing: -0.02em;
     margin: 0;
   }
-  .submit-sub {
+  .pipeline {
     margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
     color: var(--muted);
-    font-size: 13.5px;
-    line-height: 1.65;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .pipeline span {
+    white-space: nowrap;
+  }
+  .pipeline .arrow {
+    color: var(--primary);
+  }
+  .label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .signin-hint {
+    font-size: 11px;
+    color: var(--primary);
+    white-space: nowrap;
+  }
+  .signin-hint:hover {
+    text-decoration: underline;
   }
   form {
     display: flex;
@@ -159,8 +193,14 @@ const user = Astro.locals.user ?? null;
     height: 1px;
     overflow: hidden;
   }
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    flex-wrap: wrap;
+  }
   #submit-go {
-    align-self: flex-start;
     border: none;
     cursor: pointer;
     font-family: inherit;
@@ -241,8 +281,11 @@ const user = Astro.locals.user ?? null;
     .submit-card {
       padding: 24px 20px;
     }
+    .submit-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
     #submit-go {
-      align-self: stretch;
       justify-content: center;
     }
   }
