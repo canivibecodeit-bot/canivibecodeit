@@ -224,6 +224,13 @@ const user = Astro.locals.user ?? null;
     line-height: 1.6;
     color: var(--muted);
   }
+  /* same treatment as .site-footer a: links read as links */
+  .submit-fine a {
+    color: var(--primary);
+  }
+  .submit-fine a:hover {
+    text-decoration: underline;
+  }
   @media (max-width: 640px) {
     .field input,
     .field textarea {

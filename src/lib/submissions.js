@@ -94,7 +94,7 @@ Otherwise reply with ONE JSON object (no markdown fences, no commentary) with EX
   "rejectedAlternatives": [],
   "pagePriority": 3,
   "verifiedOneShot": false,
-  "notes": null,
+  "notes": "One-line editorial aside, or null. REQUIRED (never null) when verdict is no: exactly two short sentences, the second naming what the moat actually is, e.g. 'The judge is a weekend build; the corpus is not. the moat is fifteen years of curated problems and everyone practicing on them.'",
   "prompt": "The one-shot build prompt, 15-30 lines in one string with \\n line breaks.",
   "promptCurated": false
 }
@@ -168,6 +168,12 @@ export async function draftEntry(input) {
     parsed.verifiedOneShot = false;
     parsed.promptCurated = false;
     const problems = validateApp(parsed);
+    // Site-side constraint the schema can't know: the app page's FAQ for a
+    // "no" verdict reads notes.split('.') — a null there is a 500, so the
+    // draft must carry real notes for every "no".
+    if (parsed.verdict === 'no' && !(typeof parsed.notes === 'string' && parsed.notes.includes('.'))) {
+      problems.push('verdict "no" requires "notes": two short sentences, the second naming the moat');
+    }
     if (problems.length === 0) return { entry: parsed };
     feedback = problems.map((p) => `- ${p}`).join('\n');
   }
