@@ -1,0 +1,52 @@
+{
+  "slug": "vortex",
+  "name": "Vortex",
+  "domain": "nexusmods.com",
+  "category": "productivity-utilities",
+  "subcategory": "game mod manager",
+  "tagline": "Nexus Mods' official mod manager: installs, deploys and orders mods across hundreds of games.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Nexus Mods Premium",
+    "basis": null,
+    "unit": "flat",
+    "source": "https://www.nexusmods.com/vortex",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Vortex itself is free; the money is the Nexus Mods membership that unlocks in-app downloads and ad-free browsing.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The mechanical core of a mod manager is unglamorous and very buildable: extract archive into a staging folder, hardlink files into the game directory, keep a manifest of what came from where, report conflicts, write a load order file. For one game you play, an agent can get that working in a weekend and it will be faster and less opinionated than Vortex. What you cannot rebuild is the part you actually pay for: Nexus Mods hosting, the API that hands out download links to Premium members, and the nxm:// handoff from browser to manager. You also lose FOMOD scripted installers, LOOT-quality load order sorting, Collections, and the per-game knowledge baked into Vortex's extensions for hundreds of titles. Fine for a single stable Skyrim or Fallout setup, painful the moment you want a 300-mod list with conditional installers.",
+  "coreLoopDIY": "Extracts mod archives into a staging tree, hardlinks them into the game folder with per-mod ownership tracking, and lets you enable, disable, order and cleanly uninstall from a CLI.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Local game install and mod archives you already downloaded",
+    "Staging folder on the same volume as the game so hardlinks work",
+    "Node 20 and 7-Zip on PATH",
+    "Optional Nexus API key in .env for metadata lookups, and Premium if you want in-app download links"
+  ],
+  "whatYouLose": [
+    "One-click downloads from the mod site and browser nxm:// handoff",
+    "FOMOD and scripted installers, so conditional mods must be unpacked by hand",
+    "LOOT-grade load order sorting and conflict rules maintained by other people",
+    "Collections: someone else's tested 200-mod list installed in one go",
+    "Per-game support for hundreds of titles, plus a GUI your future self will thank you for"
+  ],
+  "moatTags": [
+    "marketplace-liquidity",
+    "content-rights",
+    "integrations"
+  ],
+  "moatNotes": "Vortex is a free client for a paid content network. The client is copyable; the mod library and its uploaders are not.",
+  "whyPeopleStillPay": "Nobody pays for Vortex, they pay Nexus Mods, and Vortex exists to make that membership feel worth it. The membership buys download speed, no ad wall, and the in-app download flow that makes a 200-mod list assembleable in an evening instead of a weekend of manual file shuffling. A DIY manager still points at the same servers and still respects the same rate limits, so you save nothing on the actual bottleneck. The honest DIY win is control: a small deterministic deploy tool you understand, on top of mods you already have on disk.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Rebuilding the manager is a weekend; rebuilding the mod site is not the same project.",
+  "prompt": "Build a local, single-user game mod manager as a CLI tool. Empty folder, no cloud, no accounts, no telemetry.\n\nStack, no substitutions:\n- Node 20 + TypeScript, ESM.\n- commander for the CLI, better-sqlite3 for state, node:fs for deployment.\n- 7-Zip via child_process for archive extraction (assume 7z is on PATH).\n- vitest for tests.\n\nData model in SQLite (mods.db):\n- mods: id, name, version, archive_path, staged_dir, enabled, priority, installed_at.\n- files: mod_id, relative_path, deployed (bool), overwritten_by (nullable mod_id).\n- profiles: id, name, active; profile_mods: profile_id, mod_id, enabled, priority.\n\nCommands:\n- init --game-dir PATH --staging PATH : validate both paths are on the same volume, warn loudly if not, store config in config.json.\n- install ARCHIVE [--name] : extract into staging/<mod-id>/, detect and strip a redundant top-level Data or game-name folder, record the file list.\n- enable NAME / disable NAME, priority NAME N.\n- deploy : hardlink every file of every enabled mod into the game dir in priority order; on collision, the higher-priority mod wins and the loser is recorded in overwritten_by; back up any pre-existing vanilla file to a .vortexlike-backup sibling before overwriting.\n- purge : remove all links this tool created, restore backups, leave the game dir vanilla. Must be exact, verified by the files table, never a recursive delete of the game dir.\n- conflicts : print a table of file paths claimed by more than one enabled mod, with winner and losers.\n- plugins : read and rewrite plugins.txt for a Bethesda-style game, ordering .esp/.esm/.esl by mod priority, preserving manual pins from a plugins.pins file.\n- profile create/switch/list.\n\nRules:\n- Every destructive command supports --dry-run and prints exactly what it would do.\n- Deployment is idempotent: running deploy twice changes nothing.\n- Config and any Nexus API key live in .env / config.json, never hardcoded. If NEXUS_API_KEY is set, add a metadata NAME command that fetches mod name and version only; do not attempt downloads.\n\nExplicitly out of scope: GUI, FOMOD/scripted installers, LOOT-style rule sorting, collections, nxm:// protocol handling, multi-game extension system. Support exactly one game, configured at init.\n\nDeliver: src/, a README with a five-line quickstart, and vitest tests covering collision resolution, idempotent deploy, and a purge that provably restores the original file set.",
+  "promptCurated": false
+}
