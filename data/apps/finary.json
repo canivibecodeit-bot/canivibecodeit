@@ -1,0 +1,52 @@
+{
+  "slug": "finary",
+  "name": "Finary",
+  "domain": "finary.com",
+  "category": "personal-finance",
+  "subcategory": "net worth and portfolio tracking",
+  "tagline": "Aggregates bank accounts, brokerages, crypto and real estate into one net worth and asset allocation dashboard.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://finary.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The dashboard half of Finary is a weekend project: a table of holdings, a price fetcher, a few charts, a history table so you can see net worth over time. The hard half is the plumbing, connecting to hundreds of European banks and brokers through PSD2 aggregators, which needs either a licensed provider or a lot of scraping you do not want to maintain. You can get most of the way with CSV imports from your broker plus public price APIs for equities and crypto, refreshed on a cron. That gets you honest numbers with a monthly chore attached. If the chore is the reason you were paying, this is not a replacement.",
+  "coreLoopDIY": "A local dashboard that tracks manually entered or CSV imported holdings, refreshes prices from public APIs, and charts net worth and allocation over time.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a machine that can run a cron job or scheduled task",
+    "CSV exports or manual entry for each account you hold",
+    "A free crypto price API key and a source for equity and ETF quotes",
+    "Manual valuations for illiquid assets like property"
+  ],
+  "whatYouLose": [
+    "Automatic bank and broker sync across hundreds of institutions",
+    "Mobile apps with push updates and Face ID",
+    "Automated real estate valuation estimates and loan tracking",
+    "Benchmarking against other users and the community and content layer",
+    "Someone else fixing the connector the day your bank changes its API"
+  ],
+  "moatTags": [
+    "integrations",
+    "compliance-regulatory",
+    "execution-polish"
+  ],
+  "moatNotes": "Open banking access is the product. The chart library is not.",
+  "whyPeopleStillPay": "Because nobody actually keeps a spreadsheet updated for two years. Finary's pitch is that you connect once and then your net worth is just correct every morning, including the accounts you forget about, and that only works if someone maintains regulated connections to your specific bank in your specific country. The DIY build is honest and private and free, but it asks you for fifteen minutes of CSV wrangling a month, and most people quietly stop doing that around month three.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The dashboard is trivial; the bank connectors are a regulated business with a support queue.",
+  "prompt": "Build a local personal net worth tracker. Single user, runs on my machine, no accounts, no cloud, no telemetry.\n\nStack, non negotiable: Next.js 15 with the App Router and TypeScript, Tailwind for styling, SQLite through better-sqlite3 with plain SQL migrations in /db, Recharts for charts. No ORM, no auth library, no external UI kit.\n\nData model:\n- accounts: id, name, institution, type (cash, brokerage, retirement, crypto, property, loan), currency\n- holdings: id, account_id, symbol (nullable), quantity, manual_value (nullable), cost_basis (nullable)\n- prices: symbol, date, close, currency\n- snapshots: date, total_value, breakdown_json\n\nFeatures:\n1. CRUD pages for accounts and holdings. Holdings are either priced by symbol or carry a manual value for things like property and cash.\n2. CSV import at /import: paste or upload a CSV, map columns to symbol, quantity, cost basis, pick the target account, preview before commit.\n3. A price refresh route that pulls crypto quotes from CoinGecko and equity or ETF quotes from a single configurable HTTP quote endpoint. Cache into the prices table, never hit the network on page render.\n4. A snapshot script, npm run snapshot, that recomputes total net worth and writes one row to snapshots. Document how to run it daily with cron or Task Scheduler.\n5. Dashboard: total net worth, net worth line chart from snapshots, allocation donut by asset type, table of holdings with value, weight, and gain versus cost basis.\n6. Multi currency: store a base currency in .env, fetch FX rates in the same refresh job, convert everything to base for display.\n\nOut of scope, do not attempt: bank or broker account linking, open banking or PSD2 aggregators, credential scraping, mobile apps, multi user support, tax reporting.\n\nSecrets in .env.example: BASE_CURRENCY, COINGECKO_API_KEY, QUOTE_API_URL, QUOTE_API_KEY, FX_API_URL. Never commit real keys.\n\nSeed the database with three fake accounts and eight holdings so the dashboard is not empty on first run. Write a README with setup, refresh, and snapshot instructions in under thirty lines.",
+  "promptCurated": false
+}
