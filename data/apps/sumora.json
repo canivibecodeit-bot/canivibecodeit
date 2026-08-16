@@ -1,0 +1,53 @@
+{
+  "slug": "sumora",
+  "name": "Sumora",
+  "domain": "trysumora.com",
+  "category": "automation",
+  "subcategory": "AI business agents",
+  "tagline": "AI agents that run multi-step business workflows like prospect research and outreach, with browser automation and integrations.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://trysumora.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The visible surface, a prompt box that produces a researched, personalized outreach message, is a one-sitting build. What takes real work is everything that keeps an agent from quietly going insane on step seven: persistent memory about your business and each contact, retries, browser sessions that survive logins and captchas, cost ceilings, and a human approval gate before anything is actually sent. For one person automating their own pipeline, you can get to genuinely useful in a weekend because you are allowed to be the approval step and the error handler. The gap widens fast the moment you want it unattended, multi-user, or connected to a real CRM and mailbox over OAuth. The failure mode also matters: a broken personal script wastes your evening, a broken agent emails the wrong prospect from your domain.",
+  "coreLoopDIY": "A local agent loop that takes a target company or list, researches it with search plus a headless browser, drafts a personalized outreach message against your stored business context, and queues it for your approval before sending.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An LLM API key",
+    "Playwright and a machine willing to run a real browser",
+    "A search API or scraping tolerance",
+    "SMTP credentials or a mail API if you want it to actually send",
+    "Patience for step-level debugging"
+  ],
+  "whatYouLose": [
+    "Unattended reliability: retries, resumable runs, and recovery when a step fails halfway through",
+    "Maintained integrations and OAuth to CRMs, mailboxes, and calendars, plus keeping them working when those APIs shift",
+    "Sandboxed execution and guardrails so a confused agent cannot take a real action against a real person",
+    "Cost control and model routing, so one runaway loop does not become a surprise bill",
+    "Deliverability and sending reputation work, which is its own unglamorous specialty"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is not the prompt, it is the boring reliability scaffolding plus being trusted enough that a business points revenue-critical actions at it.",
+  "whyPeopleStillPay": "Because the demo is the easy 20 percent and the remaining 80 percent is failure handling nobody enjoys writing. A business paying for this is buying the assumption that the agent will not send the wrong message to the wrong contact at 2am, and that when something does break, someone else's on-call rotation deals with it. A solo operator who is happy to review every draft can absolutely self-host their version and get most of the leverage. A team of ten with a shared pipeline and a reputation to protect generally decides that the subscription is cheaper than owning an agent orchestration layer.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The prompt-to-message part is a demo you can build before dinner; the part that makes it safe to leave running is the actual product.",
+  "prompt": "Build a local, single-user AI outreach agent runner. No accounts, no cloud, no telemetry.\n\nStack: TypeScript, Node 20, better-sqlite3 for storage, Playwright for browsing, Hono for a tiny local HTTP server, and a plain server-rendered HTML UI with htmx. No React, no Next, no ORM. Secrets in .env: OPENAI_API_KEY, SMTP_URL.\n\nData model in SQLite:\n- business_context: freeform notes about my company, offer, tone, and hard rules (one editable blob)\n- targets: company name, domain, contact name, contact email, status\n- runs: target_id, state (queued, running, needs_approval, approved, sent, failed), created_at\n- steps: run_id, index, tool, input, output, error, tokens, cost_cents\n- drafts: run_id, subject, body, revision\n\nAgent loop per target, each step written to the steps table before and after execution so a crashed run is resumable:\n1. fetch the target's homepage and one about or pricing page with Playwright, extract readable text\n2. summarize what the company does and one specific hook\n3. draft a short outreach email using business_context plus the hook\n4. run a self-check pass: is the claim supported by the fetched text, is any name or fact invented, is it under 150 words\n5. set state to needs_approval and stop\n\nHard rules to implement, not just mention:\n- nothing is ever sent without an explicit approve click in the UI\n- per-run and per-day cost ceilings from .env, abort the loop when exceeded\n- exponential backoff with max 3 attempts on fetch and model calls, then mark the step failed and leave the run resumable\n- a resume command that picks up any run stuck in running and replays from the first incomplete step\n- dry-run mode is the default; sending requires SMTP_URL to be set and a --live flag\n\nUI at localhost:8787: paste or import targets as CSV, edit business_context, list runs with their step timeline, view and edit a draft, approve or reject, see spend to date.\n\nOut of scope: CRM integrations, OAuth, multi-user, LinkedIn or any logged-in site automation, scheduling, deliverability warmup, analytics.\n\nInclude a README with setup, an .env.example, a seed CSV of three fake targets, and one integration test that runs the full loop against a local fixture HTML page with the model call stubbed.",
+  "promptCurated": false
+}
