@@ -1,0 +1,50 @@
+{
+  "slug": "lahjty",
+  "name": "Lahjty",
+  "domain": "lahjty.com",
+  "category": "localization",
+  "subcategory": "arabic dialects",
+  "tagline": "Arabic dialect tooling: the name reads as \"my dialect,\" and the product sits around dialect translation and practice rather than textbook Modern Standard Arabic.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://lahjty.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Anything that is a dialect-aware prompt wrapper over a frontier model is a weekend build, and a decent agent will get you a working Egyptian/Levantine/Gulf switcher with RTL layout and a phrase deck in one sitting. What you cannot conjure is trustworthy dialect data: general models are strong in MSA, uneven in Maghrebi, and confidently wrong in ways a learner cannot detect. If the paid product ships native speaker audio, curated regional phrasebooks, or a tuned dialect model, the DIY version is a plausible-sounding tutor with no ground truth. Treat the build as a personal practice sandbox, not a reference. Our confidence here is low: this is a small product and the specifics of what it actually ships are thin from the outside.",
+  "coreLoopDIY": "A local web app that takes English or MSA input, rewrites it into a chosen Arabic dialect with a transliteration and a short usage note, and saves keepers into a reviewable deck.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An LLM API key (Anthropic or OpenAI)",
+    "Node 20 and a browser that speaks Arabic fonts",
+    "Enough Arabic to sanity check output, otherwise you are trusting a guesser"
+  ],
+  "whatYouLose": [
+    "Native speaker audio and any real pronunciation feedback",
+    "Curated, verified dialect phrasing instead of model guesswork",
+    "Coverage parity across dialects: your build will be weak exactly where dialects are low resource",
+    "A mobile app and offline review on the commute",
+    "Someone accountable when the phrase you learned is wrong or rude"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "execution-polish"
+  ],
+  "moatNotes": "Dialect data is the whole game. Verified regional phrasing and audio is expensive to collect and cannot be prompted into existence.",
+  "whyPeopleStillPay": "Because correctness matters more than features here. A dialect tool is only useful if you can trust it, and a learner has no way to audit a model's Levantine output. Paying for a product that at least claims editorial review, or that hired speakers to record audio, buys you the one thing your local build cannot generate: someone else's confidence that the sentence is right.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Small product, thin public detail, so read the verdict as provisional rather than a ruling.",
+  "prompt": "Build a local Arabic dialect practice app. Single project, no accounts, no cloud, no telemetry.\n\nStack, non negotiable: Next.js 15 App Router with TypeScript, Tailwind, SQLite via better-sqlite3. One repo, `npm install && npm run dev` starts it on localhost.\n\nCore loop:\n1. A single page input where I type English or Modern Standard Arabic.\n2. A dialect selector: Egyptian, Levantine, Gulf, Iraqi, Maghrebi, plus MSA as the control.\n3. On submit, call an LLM (Anthropic Messages API, model from env) and return strict JSON: dialect_text, latin_transliteration, literal_back_translation, register (casual, neutral, formal), one short usage note, and a confidence field where the model must say low when the dialect is low resource.\n4. Render the Arabic in a proper RTL block with a large readable Arabic font stack. Do not mirror the whole page, only the Arabic text blocks.\n5. A \"save\" button writes the card to SQLite.\n\nReview mode:\n- A /review route that serves saved cards with a dead simple SM-2 style interval (again, hard, good, easy) stored in the DB.\n- Browser SpeechSynthesis for playback if an ar voice exists, with a visible warning that the voice is MSA and not the dialect.\n\nExplicitly in scope: local SQLite persistence, JSON export of all cards, a seed script with about 30 everyday phrases, and a banner on every page saying output is model generated and unverified.\n\nExplicitly out of scope: user accounts, hosted deployment, payments, native mobile, speech recognition, pronunciation scoring, fine tuning.\n\nSecrets: ANTHROPIC_API_KEY and MODEL in .env.local, read server side only, never exposed to the client. Commit a .env.example.\n\nWrite a README that states plainly which dialects the model handles poorly and that this tool is not a reference for anything you will say out loud to a stranger.",
+  "promptCurated": false
+}
