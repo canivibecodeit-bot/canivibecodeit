@@ -1,0 +1,51 @@
+{
+  "slug": "bevel",
+  "name": "Bevel",
+  "domain": "bevel.health",
+  "category": "wellness",
+  "subcategory": "wearable data analytics",
+  "tagline": "iOS app that pulls your Apple Health and wearable data into readable scores, trends and correlations.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://www.bevel.health/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Bevel is not sitting on secret data: it reads the same HealthKit records your watch already wrote, then does math and draws charts. An agent can absolutely build you a local dashboard over an Apple Health export that computes rolling averages, sleep and HRV trends, and lag correlations between habits and recovery. The gap is delivery, not analysis: real HealthKit access means an actual iOS app, Xcode, a developer account and background sync, and manual export zips get stale fast. You also lose the part Bevel spends most of its effort on, which is turning noisy sensor data into something you glance at once a day and actually understand. Fine for a curious quantified-self person, annoying for anyone who wants a phone widget.",
+  "coreLoopDIY": "Ingest an Apple Health export zip into a local database and serve a dashboard of daily metrics, rolling trends and correlations between behaviour and recovery.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An Apple Health export zip (Health app, profile, Export All Health Data)",
+    "Python 3.12 locally",
+    "Patience with a multi-hundred-megabyte export.xml",
+    "An Apple Developer account and Xcode if you want live HealthKit sync instead of manual exports"
+  ],
+  "whatYouLose": [
+    "Live background sync; you are re-exporting a zip by hand",
+    "A phone app, widgets and notifications",
+    "Their opinionated composite scores and plain-English daily readouts",
+    "Non-Apple device integrations and whatever normalisation they do across sources",
+    "Charts that a designer looked at"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "The analysis is undergraduate statistics. The moat is that it runs on your wrist data continuously without you doing anything, and looks good doing it.",
+  "whyPeopleStillPay": "Because the value of health metrics collapses if you have to go fetch them. Bevel's job is to be already updated when you open your phone, with a number you trust and a sentence that explains it. A local notebook that needs a manual export every two weeks answers different questions: interesting once, abandoned by month two. People pay for the part that keeps running when their curiosity does not.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The stats are easy, the staying-updated is not. If you already live in a terminal, the DIY version is genuinely fine.",
+  "prompt": "Build a local Apple Health analytics dashboard. Single machine, no accounts, no cloud, no telemetry.\n\nStack, non negotiable: Python 3.12, DuckDB for storage, Streamlit for the UI, uv for dependency management. No web framework, no Docker, no database server.\n\nProject layout:\n- ingest.py: CLI that takes a path to an Apple Health export.zip\n- app.py: Streamlit dashboard\n- health.duckdb: local database file, gitignored\n- .env for anything configurable (default export path), read with python-dotenv\n\nIngest requirements:\n- Read export.xml directly from inside the zip, streaming, using xml.etree.ElementTree.iterparse and clearing elements as you go. The file can be 500MB+, never load it into memory.\n- Extract Record elements and Workout elements. Normalise into two DuckDB tables: records(type, source, unit, start_ts, end_ts, value) and workouts(activity_type, start_ts, end_ts, duration_min, energy_kcal).\n- Strip the HK prefixes off type names so they read as sleep_analysis, heart_rate_variability_sdnn, resting_heart_rate, step_count, active_energy_burned, respiratory_rate, oxygen_saturation, body_mass.\n- Idempotent: re-running on the same export replaces the tables, does not duplicate.\n- Print a summary of row counts per type and the date range found.\n\nDashboard requirements:\n- Date range picker, defaults to last 180 days.\n- Daily aggregate table built in SQL: steps sum, active energy sum, resting HR mean, HRV mean, sleep hours from sleep_analysis asleep intervals, workout minutes.\n- One chart per metric with a 7 day rolling mean drawn over the raw daily points.\n- A correlation panel: pick metric A and metric B, pick a lag of 0 to 3 days, show the Pearson r, the n, and a scatter plot. Print a blunt caption saying this is correlation on a tiny sample and means nothing on its own.\n- A weekday breakdown: mean of each metric by day of week.\n- No composite \"scores\", no AI summaries, no advice text. Numbers only.\n\nDeliver a README with the exact export steps from the iPhone Health app, the uv commands to run ingest and the dashboard, and one paragraph stating clearly that this needs a manual re-export to stay current and is not medical advice.",
+  "promptCurated": false
+}
