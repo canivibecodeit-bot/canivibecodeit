@@ -1,0 +1,51 @@
+{
+  "slug": "gomotion",
+  "name": "GoMotion AI",
+  "domain": "gomotionai.com",
+  "category": "ai-video",
+  "subcategory": "AI motion and video generation",
+  "tagline": "An AI tool that generates motion: animated video and character movement from prompts or reference footage.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://gomotionai.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The UI around a motion generator is genuinely easy: a prompt box, a job queue, a gallery, a download button. The part that matters is the model that turns text or a reference clip into coherent movement, and nobody one-shots that in a session, or a month, on a laptop. What you can build is a wrapper that calls somebody else's hosted model, which means you have not replaced the product, you have replaced its checkout page with an API key that bills you per second of video. If the underlying generation is a fine-tuned in-house model, the gap is permanent; if it is a thin layer over a public model, the gap is smaller but the polish, presets and failure handling are most of what you were paying for. Either way the honest verdict is no, with a consolation wrapper below.",
+  "coreLoopDIY": "A local web app where you type a prompt or drop a reference clip, it fires a generation job at a hosted video model, then stores and browses the results on your own disk.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A hosted generative video model API key (fal.ai, Replicate or similar) with real per-second billing",
+    "Node 20+ and a few GB of disk for output files",
+    "Patience: generation is slow and most takes are unusable"
+  ],
+  "whatYouLose": [
+    "The actual model: motion coherence, temporal stability, whatever tuning they did on top of the base weights",
+    "Preset pipelines and sane defaults that hide how bad raw prompt-to-motion output usually is",
+    "Any rigging, retargeting or export-to-animation-tool path, if the product has one",
+    "Predictable pricing: you now pay raw inference cost per attempt, including the failed ones",
+    "Queue management, GPU capacity and someone else's problem when the provider is down"
+  ],
+  "moatTags": [
+    "proprietary-models",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "Generative media products are only as good as their weights and their GPU bill. The app shell is a weekend; the inference is the company.",
+  "whyPeopleStillPay": "Because a flat subscription on top of somebody's tuned motion model is cheaper and far less annoying than renting GPUs and burning credits on takes you throw away. People buying this are buying output quality per attempt, not features. The defaults, the presets and the fact that it usually works on the second try are the product, and none of that lives in the interface you would clone.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The frontend is a weekend and the frontend is not the thing. The moat is the model weights plus the GPU capacity to serve them at a flat monthly price.",
+  "prompt": "Build a local-first \"motion studio\" web app that wraps a hosted generative video model. Single user, runs on localhost, no accounts, no telemetry, no cloud database.\n\nStack, no substitutions:\n- Next.js 15 with App Router and TypeScript\n- Tailwind for styling, no component library\n- SQLite via better-sqlite3 for job metadata, file at ./data/app.db\n- Generated files written to ./data/output, served through a local route handler\n- fal.ai as the inference provider, key in .env as FAL_KEY, read server-side only\n\nFeatures in scope:\n1. A prompt page: text prompt, optional image or reference video upload, duration and aspect ratio selectors, model picker limited to two hardcoded model ids in a config file.\n2. Submitting creates a job row with status queued, then calls the provider and polls for completion in a server-side background loop. Persist provider job id so a restart resumes polling.\n3. A gallery page listing jobs newest first with thumbnail, prompt, model, cost estimate, status and errors. Click to open a detail page with an HTML5 video player, the exact request payload, and a \"run again with tweaks\" button that prefills the prompt form.\n4. Download and delete per job. Delete removes the file and the row.\n5. A settings page showing provider key presence (not the key), output directory size, and a total spend estimate summed from stored per-job costs.\n\nOut of scope, do not build: authentication, multi-user, payments, video editing or timeline UI, rigging or retargeting, model training, deployment configs, analytics.\n\nRequirements: type-safe API routes with zod validation, handle provider failures by storing the error string on the job instead of crashing, no secrets in client bundles, a README with setup steps and a blunt warning that every generation costs real money.\n\nSeed nothing. On first run the gallery should be empty with a one-line empty state.",
+  "promptCurated": false
+}
