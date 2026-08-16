@@ -1,0 +1,52 @@
+{
+  "slug": "daily-dough",
+  "name": "Daily Dough",
+  "domain": "dailydough.co.uk",
+  "category": "finance-accounting",
+  "subcategory": "invoicing for freelancers",
+  "tagline": "Invoicing app for UK freelancers and contractors: build an invoice, send it, chase it, see what got paid.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://dailydough.co.uk/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Invoicing for one person is mostly a form, a PDF template, and a paid/unpaid flag, and an agent will get you there in a session. What eats the weekend is everything around it: reliable email delivery so your invoice does not land in spam, sequential invoice numbering you never break, VAT handling if you are registered, and a template that looks like a business rather than a school project. Payment links mean a Stripe account and webhook handling, which is real work but not hard work. Where a DIY build genuinely hurts is at tax time, when your accountant wants exports and you want to trust the numbers. If you invoice a handful of clients on repeat, self-hosting is fine; if invoicing is how you get paid rent, the annoyance budget matters.",
+  "coreLoopDIY": "A local web app where you store clients and line items, generate a numbered branded PDF invoice, email it, and mark it paid or overdue.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node and a local Postgres or SQLite file",
+    "A transactional email provider API key, Postmark or Resend, in .env",
+    "Optional Stripe account if you want pay-by-link",
+    "Somewhere to run it if you want access away from your laptop"
+  ],
+  "whatYouLose": [
+    "Deliverability that has been tuned so invoices reach clients instead of spam folders",
+    "Polished invoice templates and a UI you do not have to keep fixing",
+    "Automatic payment reminders and chasing that actually fire on schedule",
+    "Accounting exports and MTD-adjacent tidiness your accountant will ask for",
+    "Mobile access and backups you did not have to think about"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "Nothing here is technically defensible. The defence is that an invoice is a document a stranger has to trust and pay, so ugly and unreliable costs real money.",
+  "whyPeopleStillPay": "Because invoicing is a chore attached directly to income, and people will pay a small monthly fee to never wonder whether the email sent, whether the numbering skipped, or whether the PDF looked cheap. A self-built invoicer works right up to the evening you are tired, a client is chasing, and something silently broke. The paid product is buying the absence of that evening, plus a clean export when your accountant asks for one.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Invoicing is the classic weekend build that quietly becomes a maintenance job the moment money depends on it.",
+  "prompt": "Build a single-user invoicing app for a freelancer. Local-first, no accounts, no signup, no telemetry.\n\nStack, no substitutions:\n- Next.js with the App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, one file at ./data/app.db, with a small migration script.\n- PDF generation with Playwright: render an HTML invoice template to PDF server-side.\n- Email sending via the Resend API. Key in .env as RESEND_API_KEY. If the key is missing, log the email to stdout instead of failing.\n\nData model:\n- settings: business name, address, email, optional logo path, VAT number, VAT rate, currency, payment terms in days, bank details text, next invoice number, invoice number prefix.\n- clients: name, contact email, billing address, optional default hourly rate, notes.\n- invoices: client, issue date, due date, status (draft, sent, paid, overdue), reference number, notes, and line items (description, quantity, unit price).\n- payments: invoice, date, amount, method note.\n\nBehaviour:\n- Invoice numbers are assigned once, at the moment a draft is sent, taken from settings and incremented atomically. Never renumber, never reuse.\n- Totals computed server-side: subtotal, VAT line if a VAT rate is set, total, amount paid, balance.\n- Overdue is derived from due date plus unpaid balance, not a field a human sets.\n- One clean, printable invoice template. Serif headings, generous whitespace, right-aligned totals block, bank details footer. It must look like a business sent it.\n- Sending emails the client a short message with the PDF attached, and records sent_at.\n- Dashboard: outstanding total, overdue total, paid this month, and a list sorted by oldest unpaid first.\n- CSV export of all invoices and payments for an accountant.\n\nExplicitly out of scope: multi-user, Stripe or any payment processing, expense tracking, time tracking, recurring invoices, quotes, multi-currency conversion, mobile apps.\n\nDeliver: a seed script with one fake client and one paid invoice, a README with setup in five steps, and .env.example. Everything runnable with npm install then npm run dev.",
+  "promptCurated": false
+}
