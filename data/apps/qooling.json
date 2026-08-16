@@ -1,0 +1,52 @@
+{
+  "slug": "qooling",
+  "name": "Qooling",
+  "domain": "qooling.com",
+  "category": "legal",
+  "subcategory": "QHSE and ISO compliance management",
+  "tagline": "Cloud platform for quality, health, safety and environment management: documents, risks, incidents, audits and ISO certification evidence in one place.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://qooling.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "You can absolutely build a register: incidents in, corrective actions out, documents with version numbers, a dashboard that looks convincing. What you cannot build in a session is the thing anyone actually buys, which is an evidence trail an external ISO auditor will accept without argument, plus a mobile flow that a warehouse worker will actually use to report a near miss. Compliance software lives or dies on immutable audit logs, controlled document approval with signatures, retention rules and the fact that the vendor, not you, is the one explaining the system during a certification audit. A personal replacement also makes little sense here: this is inherently multi-user, and the value appears only when an entire site logs into it. Build the register if you want to understand your own processes; do not put your certification on top of it.",
+  "coreLoopDIY": "A local single-tenant QHSE register: log incidents and risks, attach corrective actions with owners and due dates, keep versioned controlled documents, and export a read-only evidence pack per standard clause.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A machine or small VPS to host it",
+    "File storage for document attachments and photos",
+    "Someone willing to define the clause-to-evidence mapping by hand",
+    "Backups you actually test, since this data is the audit"
+  ],
+  "whatYouLose": [
+    "Auditor familiarity: external certification bodies have seen the commercial tools and know what to click",
+    "Immutable, tamper-evident audit logging and controlled document sign-off, which is the whole point of the category",
+    "A field-usable mobile app for incident and near-miss reporting with photos, offline",
+    "Prebuilt ISO 9001 / 14001 / 45001 / 27001 templates, risk matrices and clause mappings you would otherwise write from scratch",
+    "Someone else being accountable when the system fails during an audit or a serious incident investigation"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "collaboration",
+    "switching-costs"
+  ],
+  "moatNotes": "The product is not the database, it is the defensibility of the records inside it and the org-wide habit of putting them there.",
+  "whyPeopleStillPay": "Because compliance is a social process, not a data model. Getting fifty people across three sites to report incidents, sign off documents and close corrective actions requires a tool that everyone tolerates, a mobile app that works in a loading bay, and a paper trail that survives an auditor picking a random clause and asking for proof. Companies also pay for someone to blame: if the certification audit goes badly, a vendor with ISO-shaped templates and support is a better story than a spreadsheet-plus-side-project maintained by whoever built it before they left.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The register is a weekend build; the audit is not. The moat is compliance-regulatory: auditor-accepted evidence trails, controlled document sign-off, and a vendor who stands behind them.",
+  "prompt": "Build a self-hosted single-organisation QHSE register. This is a learning and internal-tracking tool, not a certification system, and it should say so on the dashboard.\n\nStack, no substitutions:\n- Next.js (App Router) with TypeScript and Tailwind\n- SQLite via Prisma, file at ./data/qhse.db\n- Local disk storage for attachments under ./data/uploads\n- Single shared password from AUTH_PASSWORD in .env, cookie session, no user accounts, no OAuth, no cloud services, no telemetry\n\nData model:\n- Person: name, email, site\n- Incident: type (incident, near miss, unsafe situation), date, site, reporter, description, severity 1-5, photos, status (open, investigating, closed)\n- Risk: hazard, activity, likelihood 1-5, impact 1-5, computed score, existing controls, owner, review date\n- Action: title, source (incident or risk or audit), owner, due date, status, closure note, closed date\n- Document: title, code, current version number, category, owner, review date, uploaded file per version, status (draft, approved, retired)\n- AuditLog: append-only table, every create and update writes actor, timestamp, entity, field-level before and after JSON. Never allow deletes on this table in application code.\n\nScreens:\n- Dashboard: open incidents, overdue actions, risks above score 15, documents past review date\n- List and detail views for each entity, with inline forms, no modals-only flows\n- Risk matrix view: 5x5 grid, colour by score, click a cell to see the risks in it\n- Evidence pack: pick a date range, get a single printable HTML page with all incidents, actions, risks and document versions in it, plus the relevant audit log rows\n\nIn scope: seed script with two sites, five people, sample incidents and risks. CSV export for every list. Overdue highlighting.\nOut of scope: mobile app, offline capture, email notifications, e-signatures, multi-tenant, ISO clause libraries, permissions and roles.\n\nOn the dashboard, print a fixed banner: \"Internal tracking only. Not an audited compliance system.\"\nInclude README with setup, .env.example with AUTH_PASSWORD, and a backup script that copies ./data to a timestamped folder.",
+  "promptCurated": false
+}
