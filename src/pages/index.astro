@@ -85,7 +85,7 @@ const jsonld = [
     </div>
     <p class="search-miss" id="no-results" role="status">
       <span class="badge kinda" style="font-size: 10px;">NOT LISTED YET</span>
-      <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">submit it as a PR ↗</a>
+      <a href="/submit">submit it → the bot drafts the verdict</a>
       <span class="miss-note">verdicts are added daily · thousands more on the way</span>
     </p>
     <nav class="chips" aria-label="Categories">
@@ -189,12 +189,29 @@ const jsonld = [
         ))
       }
     </div>
+    {/* The mobile path to /submit: the header drops the nav link below 980px,
+        so the list itself carries it at the point of "it's not here". */}
+    <p class="list-tail">missing an app? <a href="/submit">submit it →</a></p>
   </main>
 
   <DigestCard source="home" />
 </Base>
 
 <style>
+  .list-tail {
+    margin: 0;
+    padding: 20px 10px 4px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .list-tail a {
+    color: var(--primary);
+  }
+  .list-tail a:hover {
+    text-decoration: underline;
+  }
+
   /* Category dropdown: the site's own take on a select, sitting where the
      filtering actually happens (next to the list), not up in the hero. */
   .cat-dd {
