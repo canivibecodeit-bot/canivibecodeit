@@ -1,0 +1,52 @@
+{
+  "slug": "appthetics",
+  "name": "Appthetics",
+  "domain": "appthetics.com",
+  "category": "seo-marketing",
+  "subcategory": "app store optimization / competitor tracking",
+  "tagline": "App store intelligence: track competitor app listings, keywords, screenshots and metadata changes over time.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://appthetics.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanical core here is a scraper plus a diff engine: pull a competitor's store listing on a schedule, snapshot title, subtitle, description, screenshots, version notes and rating, then show what changed. An agent can build that in a weekend against the public iTunes lookup API and Play Store pages, and honestly the alert-on-change loop is where most of the day-to-day value lives. What you cannot conjure is history: a paid tool hands you two years of past listing changes on day one, your build starts with an empty table and gets useful in month three. Keyword volume, difficulty and ranking estimates are modelled numbers built from data you do not have, so skip them rather than fake them. Fine as a personal watchlist for five to twenty competitors, not a replacement if you actually need the retrospective corpus.",
+  "coreLoopDIY": "Cron-scrapes a watchlist of App Store and Play Store listings, stores dated snapshots in SQLite, and shows a diff feed of every metadata, screenshot and version change.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Somewhere to run a daily cron: a small VPS, a Raspberry Pi or a scheduled GitHub Action",
+    "Tolerance for scrapers breaking when Google changes Play Store markup",
+    "Object storage or a local disk for screenshot snapshots",
+    "Optional: an email or Slack webhook for change alerts"
+  ],
+  "whatYouLose": [
+    "Historical data before the day you hit run; the paid product's back catalogue is the product",
+    "Keyword volume, difficulty and ranking estimates, which are modelled from data you cannot scrape",
+    "Category ranking and download/revenue estimates",
+    "Someone else maintaining the scrapers when store HTML shifts",
+    "Cross-market coverage: doing 30 countries per app multiplies your request volume and your breakage"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "The data is public, but continuously collected public data compounds into something you cannot backfill.",
+  "whyPeopleStillPay": "Because the answer to \"what did this competitor's screenshots look like before their big Q2 update\" is either in someone's database or it is gone forever, and no amount of clever code recovers it. Paid tools also absorb the maintenance tax of scraping two hostile-ish storefronts across dozens of locales, which is boring, constant work with no upside when it goes right. If you only care about being notified when three rivals change their listing, your own build is genuinely fine. If you are doing ASO as a job and need trend lines and keyword estimates, you are buying the corpus, not the UI.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The diff engine is a weekend; the archive is not. Start collecting now and your build gets better exactly as fast as time passes.",
+  "prompt": "Build a local app store listing tracker. Stack: TypeScript, Node 20, SQLite via better-sqlite3, Fastify for the server, plain server-rendered HTML with a little vanilla JS. No React, no accounts, no cloud services, no telemetry.\n\nWhat it does:\n1. A watchlist of apps stored in SQLite. Each row: platform ('ios' or 'android'), store id (bundle id or package name), country code, friendly label.\n2. A fetcher module per platform. For iOS use the public iTunes lookup endpoint (https://itunes.apple.com/lookup?id=...&country=us) and parse the JSON. For Android fetch the Play Store details page HTML and extract fields with cheerio, isolating all selectors in one file called play-selectors.ts so breakage is easy to fix.\n3. Fields captured per snapshot: title, subtitle or short description, full description, version string, release notes, price, rating value, rating count, developer name, icon URL, ordered list of screenshot URLs, raw payload hash, fetched_at.\n4. Screenshots and icons: download each new or changed image to ./data/media/{storeId}/{date}/ and record the local path. Skip download if the URL is unchanged since the last snapshot.\n5. Store every snapshot. Compute a diff against the previous snapshot for that app and country and write structured change rows: field name, old value, new value, detected_at. Treat screenshot list changes as ordered adds, removes and reorders, not one blob diff.\n6. A daily scheduler using node-cron, plus 'npm run fetch' to run all watchlist targets once on demand. Randomise request order, one request at a time, 2 to 5 second jitter between requests, a real User-Agent, retry twice on failure, and log failures to a fetch_errors table instead of crashing the run.\n\nUI, server-rendered at localhost:3000:\n- /: reverse-chronological change feed across all tracked apps, each entry showing app label, field, before and after, with long text diffs rendered word-level.\n- /app/:id: timeline for one app, current metadata, and a screenshot gallery grouped by snapshot date so visual changes are obvious.\n- /watchlist: add and remove tracked apps by pasting a store URL; parse the id and country out of the URL.\n\nAlerts: optional. If ALERT_WEBHOOK is set in .env, POST a compact JSON summary of new changes at the end of each run. If unset, do nothing and say so in the README.\n\nExplicitly out of scope: keyword volume, keyword difficulty, category rank tracking, download or revenue estimates. Do not fabricate or model these numbers. If you want a keywords page, only show literal keyword occurrence counts in the title, subtitle and description, clearly labelled as raw counts.\n\nDeliver: .env.example (ALERT_WEBHOOK, PORT), migrations run automatically on boot, a seed script that adds two example apps, and a README stating plainly that the tool has no history before its first run and that Play Store selectors will eventually break.",
+  "promptCurated": false
+}
