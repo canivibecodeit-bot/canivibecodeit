@@ -1,0 +1,53 @@
+{
+  "slug": "netflix",
+  "name": "Netflix",
+  "domain": "netflix.com",
+  "category": "audio-video",
+  "subcategory": "streaming",
+  "tagline": "Subscription streaming service for licensed and original film and TV.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "monthly per household",
+    "unit": "flat",
+    "source": "https://netflix.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "You can absolutely build a Netflix, the software part is the easy part. A video catalog, transcoding pipeline, adaptive streaming player, watch progress, and profiles is a genuinely fun weekend of work, and self-hosted media servers already prove it. What you cannot build is the thing you were actually paying for: thousands of hours of licensed content plus originals you legally cannot obtain. A media server pointed at an empty disk is a very nice empty shelf. The honest DIY move is Jellyfin or a hand-rolled version of it over media you already own, which changes what the product is rather than replacing it.",
+  "coreLoopDIY": "A self-hosted streaming site that scans a local media folder, pulls metadata and artwork, and plays it back in the browser with per-profile resume.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Media files you actually have the right to store",
+    "A machine with disk space and enough CPU or a GPU for transcoding",
+    "ffmpeg installed",
+    "A metadata API key, for example TMDB",
+    "Bandwidth if you want to stream outside your own network"
+  ],
+  "whatYouLose": [
+    "The entire catalog: licensed films, TV, and originals you cannot legally acquire",
+    "Global CDN delivery that does not stutter on hotel wifi",
+    "Native apps on every TV, console, phone, and streaming stick",
+    "Downloads with DRM, offline playback, and multi-device sync that just works",
+    "Recommendations built on hundreds of millions of viewing histories"
+  ],
+  "moatTags": [
+    "content-rights",
+    "scale-infra",
+    "brand-trust"
+  ],
+  "moatNotes": "Netflix is a licensing and production company with a very good CDN attached. The app layer is the thinnest part of it.",
+  "whyPeopleStillPay": "Nobody subscribes for the UI, they subscribe for the shelf. Netflix spends billions a year producing and licensing things you cannot buy, torrent legally, or approximate, and then delivers them at a bitrate that holds up on a TV over a mediocre connection through apps that already exist on the hardware in your living room. A self-hosted player solves playback, which was never the bottleneck. The moment your build needs content, you are either buying discs, buying digital copies, or committing crimes, and none of those are cheaper or more convenient than the subscription.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The player is a weekend; the catalog is a decade of checks with a lot of zeros. The moat is content rights, plus a CDN that makes 4K feel like a local file.",
+  "prompt": "Build a self-hosted personal media streaming server and web player. Single project, runs on my own machine, no accounts service, no cloud, no telemetry.\n\nStack, no substitutions:\n- Node.js with TypeScript, Fastify for the API\n- SQLite via better-sqlite3 for the library database\n- React with Vite for the frontend, plain CSS, no component library\n- ffmpeg and ffprobe invoked as child processes\n- hls.js in the browser for playback\n\nWhat it does:\n1. Reads MEDIA_ROOT from .env and recursively scans it for video files (mp4, mkv, avi, mov). Parses filenames into title, year, and optional season/episode.\n2. Runs ffprobe on each file to record duration, resolution, codecs, and audio tracks.\n3. Optionally enriches each title with metadata and poster art from the TMDB API using TMDB_API_KEY from .env. If the key is missing, skip enrichment gracefully and show a generated placeholder poster.\n4. Serves a library browse UI: poster grid, search, filter by movie vs series, series drilldown to seasons and episodes.\n5. Plays video at /watch/:id. If the source is browser-friendly h264/aac, stream it directly with HTTP range support. Otherwise transcode on the fly to HLS with ffmpeg, segmenting into a cache directory, and serve the playlist to hls.js. Reuse cached segments on repeat plays.\n6. Tracks watch progress per profile. Local profiles are just names in SQLite, no passwords, no auth provider. Resume where you left off, mark watched at 90 percent, and show a Continue Watching row.\n7. Extracts embedded subtitle tracks with ffmpeg, converts to WebVTT, and exposes them as selectable tracks in the player.\n8. A CLI command \"npm run scan\" for rescanning, plus a watcher that picks up new files while running.\n\nExplicitly out of scope: any content acquisition, downloading, scraping, or DRM. No native mobile or TV apps. No recommendation engine beyond a recently-added row. No multi-user auth or public internet exposure; bind to localhost by default and document that exposing it is my problem.\n\nDeliver a README with setup steps, a .env.example listing MEDIA_ROOT, TMDB_API_KEY, PORT, and TRANSCODE_CACHE_DIR, and seed the database on first run. Keep the whole thing runnable with npm install then npm run dev.",
+  "promptCurated": false
+}
