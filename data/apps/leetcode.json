@@ -1,0 +1,52 @@
+{
+  "slug": "leetcode",
+  "name": "LeetCode",
+  "domain": "leetcode.com",
+  "category": "career",
+  "subcategory": "coding interview prep",
+  "tagline": "A graded problem bank and judge for practicing coding interviews, plus company-tagged questions and editorials behind a paid tier.",
+  "priceMonthly": 35,
+  "pricing": {
+    "plan": "Premium",
+    "basis": "monthly, single user",
+    "unit": "flat",
+    "source": "https://leetcode.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "high",
+    "notes": "AI-drafted from a site submission; $35/mo Premium verified against the live subscribe page at review (annual $159).",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The submitter is right about the easy 80 percent and wrong about which 80 percent matters. An agent can absolutely produce a Monaco editor, a problem list, a submissions table, and a sandbox on Judge0 or Piston in a session, and none of that is the product. LeetCode is a content and coordination asset: roughly three thousand curated problems with hidden test cases that actually catch off-by-one and TLE, editorials, company frequency tags scraped from real interview loops, and the discussion threads where someone explains why your O(n log n) got rejected. Also the social fact that interviewers pull questions from it, which is a moat you cannot self-host. You can clone the harness, then you sit there staring at an empty ./problems directory, and authoring good problems with adversarial test cases is the actual job. Build the trainer if you want a private drill rig over problems you have already seen, but do not pretend it replaces the bank.",
+  "coreLoopDIY": "A local judge that runs your submitted Python or JavaScript against test cases in Docker, stores every attempt, and resurfaces solved problems on a spaced repetition schedule.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Docker installed and a willingness to trust your own container flags with untrusted code",
+    "Your own problem statements and test cases, written by hand or from openly licensed sets",
+    "Python 3.11 and Node for the app itself",
+    "Time budget for the boring part: authoring adversarial test cases, not the UI"
+  ],
+  "whatYouLose": [
+    "The problem bank itself, thousands of problems with hidden tests tuned to catch the specific ways people get it wrong",
+    "Company tags and frequency data, which is the main reason people pay for Premium",
+    "Editorials and the discussion threads where the actual learning happens",
+    "Contests, ratings, and the mild public humiliation that makes you keep showing up",
+    "Any signal that you are practicing the same questions your interviewer will ask"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "network-effects",
+    "brand-trust"
+  ],
+  "moatNotes": "The judge is a commodity, the test cases are not. Company frequency tags only exist because millions of users self-report loops.",
+  "whyPeopleStillPay": "Because thirty-five dollars for the month before an onsite is trivially cheap against the salary delta, and because nobody wants to author their own curriculum while also preparing for interviews. Premium buys company-filtered lists and editorials, which is a shortcut through the one resource candidates are actually short on: time. A self-hosted drill app competes on none of that. It competes on being a nicer place to redo problems you already understand, which is a real but much smaller need.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": "The judge and editor are a weekend build; the corpus and the crowd are not. the moat is fifteen years of curated problems, editorials and company tags, plus everyone else practicing on the same set.",
+  "prompt": "Build a local coding interview trainer. One repo, single user, no accounts, no cloud, no telemetry. It runs on my machine.\n\nStack, not negotiable: Python 3.11 with FastAPI on the backend, SQLite through SQLAlchemy, a Vite + React + TypeScript frontend using the Monaco editor, Docker for code execution. Do not add auth. Do not add a hosted judge API.\n\nProblems live on disk, not in the database. Each problem is a folder under ./problems/<slug>/ containing problem.md (the statement), meta.yaml (title, difficulty, topic tags, language stubs) and tests.json (an array of {input, expected} objects, including at least one large case for timing). Write 12 seed problems yourself covering arrays, two pointers, a stack, binary search, BFS on a grid, interval merging, and one small DP. Do not scrape or reproduce LeetCode content.\n\nExecution: POST /api/run accepts {slug, language, code} and runs it in a throwaway Docker container. Only python:3.11-slim and node:20-slim images. Flags: --network none, --memory 256m, --cpus 0.5, --pids-limit 64, read-only root filesystem, non-root user, 5 second wall clock kill. Wrap the submitted function with a harness that feeds each test case and compares output. Return per-test pass or fail, stderr, and runtime in milliseconds. Never execute submitted code outside Docker, not even in dev mode, not even as a fallback.\n\nStore every submission in SQLite: slug, language, code, verdict, runtime, timestamp. I want to diff my third attempt against my first.\n\nReview queue: SM-2 style spaced repetition over solved problems. Correct solve pushes the next due date out, a failure resets it. GET /api/due feeds a Today view that tells me what to redo.\n\nUI, three routes: problem list with difficulty, last verdict and next due date · problem view with statement left, Monaco right, Ctrl+Enter to run, results panel below · stats page with a solve calendar and per-topic pass rate.\n\nExplicitly out of scope: contests, leaderboards, other people's solutions, discussion threads, company tags, languages beyond Python and JavaScript, mobile layout, deployment.\n\nShip a README with a single make dev command and a .env holding only PORT and DOCKER_HOST. Before you claim it works, prove the sandbox survives an infinite loop, a fork bomb, a 2 GB allocation, and an outbound HTTP request, and paste the output.",
+  "promptCurated": false
+}
