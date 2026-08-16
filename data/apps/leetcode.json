@@ -12,8 +12,8 @@
     "unit": "flat",
     "source": "https://leetcode.com/",
     "checkedOn": "2026-08-16",
-    "confidence": "low",
-    "notes": "AI-drafted from a site submission; price unverified.",
+    "confidence": "high",
+    "notes": "AI-drafted from a site submission; $35/mo Premium verified against the live subscribe page at review (annual $159).",
     "native": null
   },
   "verdict": "no",
@@ -46,7 +46,7 @@
   "rejectedAlternatives": [],
   "pagePriority": 2,
   "verifiedOneShot": false,
-  "notes": null,
+  "notes": "The judge and editor are a weekend build; the corpus and the crowd are not. the moat is fifteen years of curated problems, editorials and company tags, plus everyone else practicing on the same set.",
   "prompt": "Build a local coding interview trainer. One repo, single user, no accounts, no cloud, no telemetry. It runs on my machine.\n\nStack, not negotiable: Python 3.11 with FastAPI on the backend, SQLite through SQLAlchemy, a Vite + React + TypeScript frontend using the Monaco editor, Docker for code execution. Do not add auth. Do not add a hosted judge API.\n\nProblems live on disk, not in the database. Each problem is a folder under ./problems/<slug>/ containing problem.md (the statement), meta.yaml (title, difficulty, topic tags, language stubs) and tests.json (an array of {input, expected} objects, including at least one large case for timing). Write 12 seed problems yourself covering arrays, two pointers, a stack, binary search, BFS on a grid, interval merging, and one small DP. Do not scrape or reproduce LeetCode content.\n\nExecution: POST /api/run accepts {slug, language, code} and runs it in a throwaway Docker container. Only python:3.11-slim and node:20-slim images. Flags: --network none, --memory 256m, --cpus 0.5, --pids-limit 64, read-only root filesystem, non-root user, 5 second wall clock kill. Wrap the submitted function with a harness that feeds each test case and compares output. Return per-test pass or fail, stderr, and runtime in milliseconds. Never execute submitted code outside Docker, not even in dev mode, not even as a fallback.\n\nStore every submission in SQLite: slug, language, code, verdict, runtime, timestamp. I want to diff my third attempt against my first.\n\nReview queue: SM-2 style spaced repetition over solved problems. Correct solve pushes the next due date out, a failure resets it. GET /api/due feeds a Today view that tells me what to redo.\n\nUI, three routes: problem list with difficulty, last verdict and next due date · problem view with statement left, Monaco right, Ctrl+Enter to run, results panel below · stats page with a solve calendar and per-topic pass rate.\n\nExplicitly out of scope: contests, leaderboards, other people's solutions, discussion threads, company tags, languages beyond Python and JavaScript, mobile layout, deployment.\n\nShip a README with a single make dev command and a .env holding only PORT and DOCKER_HOST. Before you claim it works, prove the sandbox survives an infinite loop, a fork bomb, a 2 GB allocation, and an outbound HTTP request, and paste the output.",
   "promptCurated": false
 }
