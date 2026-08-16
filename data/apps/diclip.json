@@ -1,0 +1,51 @@
+{
+  "slug": "diclip",
+  "name": "diclip",
+  "domain": "diclip.com",
+  "category": "ai-video",
+  "subcategory": "clip generation",
+  "tagline": "Web tool that chops long video into short vertical clips with captions.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://diclip.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanical part of a clip tool is now commodity: transcribe with Whisper, ask a model which 40 second stretches are self contained, cut with ffmpeg, burn in captions. An agent will get you a working local pipeline in a sitting, and for one person clipping their own podcast or stream that is often enough. What does not fall out of a one-shot build is the boring polish: speaker tracking so the crop follows the face, caption styles that do not look like a 2013 meme generator, and a render queue that does not lock your laptop for twenty minutes. Highlight selection is also the part that quietly separates good tools from bad ones, and yours will pick some duds. Verdict is kinda mostly because the last 20 percent is where all the actual product lives.",
+  "coreLoopDIY": "Transcribes a long video locally, has an LLM pick candidate highlight ranges, then cuts vertical clips with burned-in captions via ffmpeg.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "ffmpeg installed",
+    "a machine that can run faster-whisper (GPU strongly preferred)",
+    "an LLM API key for highlight selection",
+    "disk space for source video and renders"
+  ],
+  "whatYouLose": [
+    "Auto reframing that tracks the speaker instead of a fixed center crop",
+    "Caption templates and word-level animation that look designed rather than default",
+    "Cloud rendering, so long videos block your own machine",
+    "One click posting or scheduling to TikTok, Shorts and Reels",
+    "Highlight ranking tuned on real engagement data rather than an LLM's guess"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "Everything here is off the shelf; the difference is whether the output is postable without touching it.",
+  "whyPeopleStillPay": "Because clipping is a volume activity. If you ship ten clips a week, the difference between a tool that renders clean captions and a correctly framed face and a script that centers the crop and hardcodes Arial is an hour of manual fixing per batch. People pay to skip the fixing, not the ffmpeg.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Public detail on this one is thin, so treat the category read as the read and the specifics as unverified.",
+  "prompt": "Build a local command line tool called clipper that turns one long video into short vertical clips. No web app, no accounts, no telemetry, no cloud storage.\n\nStack: Python 3.11, typer for the CLI, faster-whisper for transcription, ffmpeg via subprocess for all media work, an OpenAI compatible chat API for highlight selection. Keep it to one repo with a pyproject.toml, no Docker.\n\nPipeline, in order:\n1. `clipper transcribe INPUT` extracts 16kHz mono wav with ffmpeg, runs faster-whisper with word timestamps, writes transcript.json next to the input and caches it so reruns are free.\n2. `clipper find INPUT` sends the timestamped transcript (chunked if long) to the LLM and asks for 5 to 15 candidate clips, each with start, end, title, and a one sentence reason. Enforce 20 to 70 second durations. Validate the JSON with pydantic and retry once on bad output. Write clips.json.\n3. `clipper render INPUT` cuts each candidate: trim, scale and center crop to 1080x1920, burn in captions from the word timestamps as an ASS subtitle file (max 4 words per line, bold sans, white text, black outline, positioned at 60 percent height), re-encode h264 + aac, write out/NN-slug.mp4.\n4. `clipper run INPUT` does all three.\n\nRules:\n- Secrets in .env, loaded with python-dotenv. Read OPENAI_API_KEY and OPENAI_BASE_URL. Never hardcode keys.\n- Show real progress: which stage, which clip, and the ffmpeg command being run at verbose level.\n- Idempotent: skip work whose output already exists unless --force.\n\nExplicitly out of scope: face tracking or dynamic reframing, multi speaker diarization, animated caption templates, social posting, any GUI. Do not stub these; leave them out and note them in the README.\n\nFinish with a README that lists install steps, the ffmpeg requirement, one worked example command, and a short honest section on the known limits of fixed center cropping.",
+  "promptCurated": false
+}
