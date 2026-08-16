@@ -1,0 +1,51 @@
+{
+  "slug": "batchbot",
+  "name": "BatchBot",
+  "domain": "batchbot.io",
+  "category": "automation",
+  "subcategory": "bulk AI job runs",
+  "tagline": "Runs one prompt or task across a whole list of rows and hands back the filled-in results.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "usage",
+    "source": "https://batchbot.io/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "yes",
+  "verdictConfidence": "low",
+  "verdictSummary": "The core loop here is a for-loop with retries, a progress bar and a CSV writer. An agent can produce a local batch runner that reads a spreadsheet, fans out concurrent model calls with a prompt template, and writes results back with resume-on-crash in a single sitting. You pay model costs directly instead of a markup, which usually makes the DIY version cheaper per thousand rows. What you give up is the hosted UI, the shared team workspace and the fiddly work of never losing a job halfway through. If your batches are occasional and your data already lives in a CSV, the hosted layer is convenience, not capability.",
+  "coreLoopDIY": "Reads a CSV, renders a prompt template per row, runs the calls concurrently against an LLM API with retries and checkpointing, and writes a new CSV with the outputs.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Python 3.12 and a terminal",
+    "An API key for an OpenAI-compatible model endpoint",
+    "Your input data as CSV or JSONL",
+    "Willingness to pay token costs directly"
+  ],
+  "whatYouLose": [
+    "A web UI your non-technical colleagues can use without asking you",
+    "Managed queues that survive your laptop closing mid-run",
+    "Prebuilt connectors to sheets, CRMs and storage buckets",
+    "Cost dashboards, run history and per-job audit trails",
+    "Someone else's rate-limit and retry tuning across many providers"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "Batch tooling lives or dies on error handling and resumability, which is exactly the part hobby scripts skip until the third failed 4,000-row run.",
+  "whyPeopleStillPay": "Because the interesting part of batch work is not the loop, it is everything around it: a run that dies at row 3,812 without losing money, a teammate who can kick off a job without touching a terminal, and connectors that pull the rows from wherever they actually live. A hosted runner also absorbs provider flakiness and rate limits so you do not become the person who maintains a retry backoff policy. If batching is central to how a team operates rather than a monthly chore, paying for that reliability is rational.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Bulk LLM runners are the modern equivalent of a shell script with xargs, and they price like a platform.",
+  "prompt": "Build a local batch LLM runner as a Python CLI. No web app, no accounts, no telemetry, no cloud services beyond the model API.\n\nStack, non-negotiable:\n- Python 3.12, uv for dependency management\n- typer for the CLI, httpx for HTTP, tenacity for retries, rich for progress output\n- SQLite (stdlib sqlite3) as the run ledger, one file per run in ./runs/\n- Config from .env only: OPENAI_API_KEY, OPENAI_BASE_URL, MODEL\n\nCommands:\n1. `batch run --input data.csv --template prompt.txt --output out.csv --concurrency 8`\n   - prompt.txt is a Jinja2-style template rendered per row using column names\n   - each row gets a stable job id from a hash of the rendered prompt plus the row index\n   - insert all jobs into SQLite as pending, then process with an asyncio worker pool\n   - retry on 429 and 5xx with exponential backoff and jitter, max 6 attempts, honor Retry-After\n   - record status, attempts, latency, prompt tokens, completion tokens, error text per job\n   - write out.csv as the input columns plus `output`, `status`, `error`\n2. `batch resume --run RUN_ID` reprocesses only pending and failed jobs, never redoes completed ones\n3. `batch status --run RUN_ID` prints counts by status, total tokens, elapsed time, rough cost using a price table in a local JSON file\n4. `batch export --run RUN_ID --output out.csv`\n\nRules:\n- Ctrl+C must stop cleanly and leave the run resumable\n- support `--dry-run` that renders the first 3 prompts and exits without calling the API\n- support `--json-mode` that asks the model for JSON and stores parse failures as errors rather than crashing\n- cap output size per job, truncate and flag anything absurd\n- include a `--limit N` flag for cheap test passes\n\nDeliver: pyproject.toml, README with a 60 second quickstart, sample data.csv and prompt.txt, and pytest tests that cover templating, retry backoff and resume using a fake HTTP transport. No real network calls in tests.",
+  "promptCurated": false
+}
