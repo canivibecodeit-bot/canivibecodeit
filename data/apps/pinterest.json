@@ -1,0 +1,52 @@
+{
+  "slug": "pinterest",
+  "name": "Pinterest",
+  "domain": "pinterest.com",
+  "category": "social-media",
+  "subcategory": "visual discovery and image bookmarking",
+  "tagline": "Visual bookmarking and discovery: save images to boards, get fed more images like them.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Free, ad-supported",
+    "basis": null,
+    "unit": "usage",
+    "source": "https://www.pinterest.com/",
+    "checkedOn": "2026-08-16",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "The mechanical part of Pinterest, saving an image with a link into a themed board and browsing it as a masonry grid, is a genuinely small build. That is also the part nobody actually opens Pinterest for. The reason people go there is the billion-image corpus other people already curated, plus a recommender that turns one saved kitchen photo into forty more kitchens you will like. Your self-hosted board starts empty and stays exactly as interesting as the effort you put into it, which is the opposite of the value proposition. Build the board if you want a private, ad-free, non-rotting archive of things you already found, not if you want discovery.",
+  "coreLoopDIY": "A local web app plus bookmarklet that saves any image on the web into tagged boards, caches the file so it survives link rot, and browses it as a searchable masonry grid.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20 and a machine to run it on",
+    "Disk space for cached images",
+    "A browser that supports bookmarklets or a small extension",
+    "Optional: local CLIP model if you want similar-image search"
+  ],
+  "whatYouLose": [
+    "Discovery: the recommendation feed that surfaces images you would never have searched for",
+    "Everyone else's curation, which is the entire supply side of the product",
+    "Native mobile apps, camera search, offline sync across devices",
+    "Shopping links, product tagging, and the creator side of the ecosystem",
+    "Search over a corpus of billions of images rather than the few hundred you saved"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "network-effects",
+    "scale-infra"
+  ],
+  "moatNotes": "The interest graph is built from a decade of billions of saves, and each save both trains the recommender and adds inventory. A private board contributes to neither.",
+  "whyPeopleStillPay": "Consumers do not pay Pinterest, advertisers do, and they pay because it is one of the few places where the user is already in a planning-and-buying mood with declared visual taste. For the end user the price is attention, and the product they get in exchange, an endless supply of relevant images sourced and sorted by strangers, cannot be self-hosted at any effort level. That is not a software feature, it is an inventory problem.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": "The board is an afternoon; the feed that fills it is not. The moat is a decade of other people's saves and the interest graph trained on them.",
+  "prompt": "Build a local, single-user visual bookmarking app called \"Shelf\". No accounts, no cloud, no telemetry.\n\nStack, pick these and do not ask:\n- Next.js 15 with App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, file at ./data/shelf.db.\n- Images cached to ./data/images as content-hashed files. Sharp for thumbnails.\n- Runs with `npm run dev` on port 3000. No Docker required.\n\nData model:\n- boards: id, name, slug, description, created_at.\n- pins: id, board_id, source_url, source_page_title, image_path, thumb_path, width, height, note, created_at.\n- tags and pin_tags join table.\n\nFeatures in scope:\n1. POST /api/pins accepting { imageUrl, pageUrl, pageTitle, note, boardId, tags[] }. It downloads the image server side, hashes it, writes original plus a 400px webp thumbnail, stores the row. Reject non-image content types and anything over 20MB.\n2. A bookmarklet served at /bookmarklet that, when clicked on any page, overlays every image larger than 200x200 with a \"Save\" button and posts the chosen one to the API along with the page URL and title.\n3. Board pages at /b/[slug]: masonry grid of thumbnails, infinite scroll, click a pin for a detail panel with the note, tags, original source link, and delete.\n4. Full text search across note, page title, and tags. SQLite FTS5.\n5. Filter by tag. Move a pin between boards. Rename and delete boards.\n6. Export: GET /api/export writes a zip of the images plus a JSON manifest so the archive is not trapped in this app.\n\nExplicitly out of scope: any recommendation feed, any social features, any external API, auth, mobile apps, or shopping integrations. There is no discovery here, only retrieval of things the user already saved.\n\nConfig via .env: SHELF_DATA_DIR, SHELF_MAX_IMAGE_MB. Commit a .env.example, never a .env.\n\nWrite a README that states plainly what this replaces and what it does not.",
+  "promptCurated": false
+}
