@@ -1,0 +1,50 @@
+{
+  "slug": "skriptr",
+  "name": "Skriptr",
+  "domain": "skriptr.ai",
+  "category": "ai-writing",
+  "subcategory": "AI script generation",
+  "tagline": "An AI tool for drafting scripts: video, short-form, and other spoken-word formats, from a prompt or outline.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://skriptr.ai/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "yes",
+  "verdictConfidence": "low",
+  "verdictSummary": "Skriptr sits in the very crowded lane of AI writing tools aimed at scripted content, where the product is essentially a good system prompt, a few format templates, and a place to keep your drafts. That stack is the single most reproducible thing an AI coding agent can build: one model API call, a prompt library, a length-and-tone control panel, a SQLite table for versions. You supply your own API key and you pay actual token cost instead of a subscription markup, which for occasional use is usually cheaper by an order of magnitude. The honest caveat is that a paid tool has probably spent months tuning prompts to stop scripts sounding like a press release, and your first weekend build will sound like a press release. If you write scripts daily and care about hook quality, budget real time on prompt tuning rather than on the app shell.",
+  "coreLoopDIY": "Takes a topic, format, target length, and tone, generates a structured script with hook, body beats, and outro, and keeps every revision locally so you can diff and reroll individual sections.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "An LLM API key (Anthropic or OpenAI) in .env",
+    "Node 20+",
+    "Willingness to iterate on prompts, which is where the actual quality lives"
+  ],
+  "whatYouLose": [
+    "Tuned prompt engineering that someone else already A/B tested against real scripts",
+    "Format presets for platforms you have not thought about yet",
+    "Any browser-anywhere access unless you deploy it yourself",
+    "Teleprompter, export, and collaboration niceties if the paid product has them",
+    "Someone else's problem when the model provider changes behaviour overnight"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The defensible part is prompt craft and output taste, which is real work but is not infrastructure and does not compound against you.",
+  "whyPeopleStillPay": "Because most people who need scripts are not going to maintain a prompt library, and the difference between a mediocre AI script and a usable one is entirely in prompt tuning that a vendor has already done. Paying a monthly fee to skip that iteration, plus getting presets, exports, and a UI that works on a phone, is a rational trade if scripting is a weekly job rather than a hobby. The moment you start rewriting every output anyway, the subscription stops earning its keep.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The app shell is a one-sitting build; the prompt quality is the part you will actually spend a month on.",
+  "prompt": "Build a local-first AI script writing studio called Scriptbench. Empty folder, single project, no accounts, no telemetry, no cloud.\n\nStack, non-negotiable:\n- Next.js 15 with the App Router and TypeScript\n- Tailwind CSS, no component library\n- SQLite via better-sqlite3, file at ./data/scriptbench.db, schema created on first boot\n- Anthropic Messages API called from server routes only, key read from ANTHROPIC_API_KEY in .env.local\n\nFeatures in scope:\n1. New script form: topic or rough outline (textarea), format picker (youtube-long, short-form-vertical, podcast-segment, ad-spot, explainer), target duration in seconds, tone (free text), audience (free text).\n2. Server route that builds a structured prompt from those fields and asks the model to return JSON: title, hook, an array of beats with heading plus spoken copy plus estimated seconds, outro, and a word count.\n3. Render the script as editable sections. Each beat has a Reroll button that regenerates only that beat, passing the surrounding beats as context so it stays coherent.\n4. Estimate spoken duration at 150 words per minute and show target versus actual, red when off by more than 15 percent.\n5. Every generation and every manual edit writes a new row in a versions table. A history sidebar lets you view any prior version and restore it.\n6. Prompt library page: named, editable system prompts stored in SQLite, one marked default per format. Seed with reasonable starting prompts and make it obvious these are meant to be rewritten.\n7. Export buttons: plain text, markdown, and a simple teleprompter view (large text, dark background, arrow keys to scroll).\n\nExplicitly out of scope: auth, multi-user, payments, voice synthesis, video export, sharing links, analytics.\n\nDeliver a README with setup steps, .env.example, and seeded demo data so npm run dev shows a working script immediately.",
+  "promptCurated": false
+}
