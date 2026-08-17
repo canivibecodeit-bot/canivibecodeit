@@ -1,0 +1,49 @@
+{
+  "slug": "feather-3d",
+  "name": "Feather 3D",
+  "domain": "feather.art",
+  "category": "design",
+  "subcategory": "3D scene design",
+  "tagline": "Browser-based 3D creation tool for building, lighting and rendering scenes without living inside a full DCC suite.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://www.feather.art/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "3D authoring tools are the category where one-shot builds go to die. An agent will happily hand you a Three.js scene with a transform gizmo and an orbit camera in an afternoon, and it will feel great for about ten minutes. Then you want snapping, a real undo stack, material editing, HDRI lighting that does not blow out, UVs, glTF import that survives weird exporters, and a viewport that stays at 60fps with more than a dozen objects, and you are now writing a DCC app instead of using one. None of that is conceptually hard, all of it is thousands of small interaction decisions plus GPU tuning, and that is exactly what you are paying for here. Build the toy if you want a scene composer for one specific job, not if you want a 3D tool you enjoy opening.",
+  "coreLoopDIY": "A local Three.js scene composer: drop in glTF assets, move and rotate them with a gizmo, tweak lights and environment, then export the scene or a PNG render.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node and a browser with WebGL2",
+    "Your own glTF/GLB assets, nothing is generated for you",
+    "An HDRI file for environment lighting"
+  ],
+  "whatYouLose": [
+    "Actual modeling: you can arrange assets, you cannot make them",
+    "A trustworthy undo/redo history across every operation",
+    "Material and shader editing beyond a handful of sliders",
+    "Viewport performance work: shadows, culling, LOD, big scenes",
+    "Whatever asset library, templates or generation features ship with the paid product"
+  ],
+  "moatTags": [
+    "execution-polish"
+  ],
+  "moatNotes": "The moat is not a feature list, it is the fact that a 3D viewport has to feel right under the mouse. That part does not come out of a code generator.",
+  "whyPeopleStillPay": "Because the alternative is Blender, and for a large group of people Blender is a cliff. A focused 3D tool that opens fast, gives you sensible defaults and gets a decent render out the other side is worth money precisely because someone else absorbed the tedium of making a viewport pleasant. A DIY composer is fine for a repeated, narrow task like laying out product shots from assets you already own. It is a bad trade if 3D is something you want to actually get better at.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You will get a scene graph and a gizmo in a day, and a tool you avoid opening on day two. The moat is execution polish: a real-time viewport that feels good is a long grind of small interaction and performance decisions, not a feature you can spec.",
+  "prompt": "Build a local-only 3D scene composer as a web app. This is a personal tool, not a product.\n\nStack, no substitutions: Vite + TypeScript + vanilla Three.js (latest). No React, no framework. No backend, no accounts, no telemetry, no network calls at all.\n\nWhat it does:\n1. Full-window WebGL canvas with an orbit/pan/zoom camera (OrbitControls) and a grid helper.\n2. Drag and drop .glb or .gltf files onto the canvas to add them to the scene. Use GLTFLoader and fit the camera to the new object's bounding box on first load.\n3. Click an object to select it. Show TransformControls with keyboard shortcuts: W translate, E rotate, R scale, X toggle world/local space, Delete removes the selection.\n4. Left sidebar: scene outliner listing objects by name, click to select, double click to rename, visibility toggle per object.\n5. Right sidebar: numeric inputs for position, rotation (degrees) and scale of the selection, kept in sync with the gizmo in both directions.\n6. Lighting panel: one directional light with intensity, color and a draggable azimuth/elevation, plus ambient intensity. Drag and drop an .hdr file to set the environment via RGBELoader and PMREMGenerator, with an exposure slider.\n7. Shadows: soft shadow map from the directional light, plus a toggleable ground plane that receives shadows only.\n8. Undo/redo (Ctrl+Z / Ctrl+Shift+Z) for add, delete, transform and rename. Implement it as a plain command stack, do not try to diff the whole scene graph.\n9. Save/load the scene as a JSON file: asset filenames plus transforms plus light settings. On load, re-prompt for any asset files it cannot find instead of failing silently.\n10. Render button: renders the current view at a chosen resolution (up to 4x canvas size) and downloads a PNG. Also an Export glTF button using GLTFExporter.\n\nExplicitly out of scope, do not build these: mesh editing or sculpting, UV tools, material/shader authoring beyond base color and roughness sliders, animation, physics, any AI generation, any multi-user or cloud sync.\n\nDeliver: working dev server on npm run dev, a README with the shortcut list, and no .env because there are no secrets. Keep it to a handful of files with a clear scene-state module; do not invent an architecture.",
+  "promptCurated": false
+}
