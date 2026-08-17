@@ -1,0 +1,52 @@
+{
+  "slug": "masterchannel",
+  "name": "Masterchannel",
+  "domain": "masterchannel.ai",
+  "category": "ai-audio",
+  "subcategory": "AI mastering",
+  "tagline": "Upload a mix, get back an AI-mastered track that is loud, balanced and ready for streaming platforms.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://masterchannel.ai/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "Mastering is signal processing, and the open source world already solved a big chunk of it: reference matching, loudness normalization and true peak limiting are all off the shelf. An agent can wire matchering, pyloudnorm and ffmpeg into a local CLI that takes your mix plus a commercial reference and spits out a competitive master in an afternoon. What it cannot do is decide, with no reference, what your track should sound like: that judgment is the part these services trained on thousands of masters to fake. So the DIY build is genuinely usable if you already know which records you want to sound like, and mediocre if you don't. Also expect to babysit sample rates, mono compatibility and the occasional inter-sample peak.",
+  "coreLoopDIY": "A local CLI that analyzes a reference master, matches your mix's spectrum and dynamics to it, then normalizes to a chosen LUFS target with a true peak ceiling and exports streaming-ready files.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Python 3.11 and ffmpeg installed locally",
+    "At least one commercial reference track in a lossless format",
+    "Headphones or monitors you actually trust",
+    "Basic willingness to A/B and re-run with different references"
+  ],
+  "whatYouLose": [
+    "Reference-free mastering: the service guesses a target for you, your script needs you to pick one",
+    "Genre-aware presets and the taste baked into a trained model",
+    "Stem mastering, vocal-forward variants and other per-track intelligence",
+    "A clean web UI with instant previews and revision history",
+    "Anything resembling a second opinion when your mix is the actual problem"
+  ],
+  "moatTags": [
+    "proprietary-models",
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The model is trained on masters they have licensed or collected, and the product decision of what 'good' sounds like per genre is not something you can pip install.",
+  "whyPeopleStillPay": "Most people paying for AI mastering are not chasing the last two percent of fidelity, they are avoiding a decision. They have a mix, a release date, and no interest in learning about multiband compression or inter-sample true peaks. A web upload that returns something loud and balanced in ninety seconds is worth real money against that, and the reference-free convenience is exactly the part a local script does worst. Engineers and people with a strong reference library will get most of the value from the DIY build; everyone else will keep paying to skip the taste problem.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Reference matching is a solved problem with a good Python library behind it; deciding what to reference is not.",
+  "prompt": "Build a local command line audio mastering tool in Python 3.11. No web UI, no accounts, no cloud, no telemetry.\n\nStack: Python 3.11, matchering for reference matching, pyloudnorm for loudness measurement, soundfile and numpy for IO and DSP, ffmpeg via subprocess for format conversion and MP3 export. Use a venv and a requirements.txt. No Docker.\n\nCLI, using argparse:\n  master --input mix.wav --reference ref.wav --target-lufs -14 --true-peak -1.0 --out ./out\n\nBehavior:\n1. Decode input and reference to 44.1kHz stereo 32-bit float WAV in a temp dir using ffmpeg, accepting wav, aiff, flac and mp3 inputs.\n2. Print a before report for the input: integrated LUFS, loudness range, sample peak, estimated true peak, stereo correlation, and a rough 8-band spectral balance in dB.\n3. Run matchering to match the input's spectrum and dynamics to the reference.\n4. Apply a final loudness stage: measure integrated LUFS with pyloudnorm, apply gain to hit --target-lufs, then apply a simple lookahead true peak limiter (5ms lookahead, 50ms release) so estimated true peak never exceeds --true-peak.\n5. Print an after report in the same format as the before report, plus the total gain applied and the number of limiter gain reduction events.\n6. Export three files to --out: master_24bit.wav at 44.1kHz, master_16bit.wav dithered with TPDF, and master.mp3 at 320kbps via ffmpeg.\n7. Write report.json next to them with all measured values for both stages.\n\nAlso support --no-reference, which skips matchering and does loudness plus limiting only. Print a warning that this is a normalizer, not a master.\n\nSafety: never clip. Refuse to run and exit non-zero if the input is already above -6 LUFS integrated or if its estimated true peak is above 0.0 dBTP, with a message telling the user to export a quieter mix with headroom.\n\nInclude a README with install steps, one worked example, and a short note that the reference track choice matters more than any flag. Ship three pytest tests: gain math hits the LUFS target within 0.3 dB, the limiter never exceeds the ceiling on a synthetic clipping signal, and the headroom guard exits non-zero. No stems, no batch mode, no plugin hosting, no genre presets.",
+  "promptCurated": false
+}
