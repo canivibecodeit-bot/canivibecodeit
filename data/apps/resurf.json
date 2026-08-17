@@ -1,0 +1,51 @@
+{
+  "slug": "resurf",
+  "name": "Resurf",
+  "domain": "resurf.so",
+  "category": "bookmarks",
+  "subcategory": "browsing history search and resurfacing",
+  "tagline": "A browser tool that indexes the pages you actually read and brings the useful ones back later.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://resurf.so/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The core mechanic is unglamorous and very buildable: capture the text of pages you spend real time on, embed it, store it locally, then search and resurface it. An agent can get a Chrome extension doing that in a weekend, and because the corpus is your own browsing, there is no data moat to lose. Where the DIY version cracks is everything around the loop: cross-device sync, mobile and Safari, capture quality on SPAs and paywalled or auth-gated pages, and the taste of deciding what deserves to come back. Also the honest failure mode of every personal recall tool, which is that you stop opening it after week three. Buildable, yes; pleasant enough that you keep it, less certain.",
+  "coreLoopDIY": "A local Chrome extension that captures readable text from pages you dwell on, embeds it on-device, and gives you a semantic search box plus a daily resurface list.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Chrome or any Chromium browser you are willing to load an unpacked extension into",
+    "Node and pnpm for the build",
+    "Disk space for a few hundred MB of page text and vectors",
+    "Optional OpenAI key if you want better embeddings than the on-device model"
+  ],
+  "whatYouLose": [
+    "Sync across devices and browsers, so your phone reading never enters the index",
+    "Capture on anything that is not desktop Chrome: Safari, mobile apps, in-app browsers",
+    "Robust extraction on SPAs, infinite scrolls, PDFs, and anything behind a login wall",
+    "Curation judgment: your version will resurface plenty of pricing pages and airline confirmations",
+    "Someone else maintaining it against Chrome manifest changes that break extensions on a schedule"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "The index is yours, not theirs, which is the whole reason this is copyable. What is hard to copy is capture coverage across every surface you read on and a ranking model that surfaces the three things you wanted instead of forty you did not.",
+  "whyPeopleStillPay": "Because the value only shows up after months of quiet, correct capture, and a homegrown extension that silently stops recording on a Chrome update fails invisibly. Paying for it means the capture layer is somebody's job, the mobile gap is at least on a roadmap, and the ranking has been tuned against more browsing than yours. Personal recall tools are also the classic case where the build is fun and the upkeep is not.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Personal memory tools are easy to build and hard to keep using; budget your enthusiasm accordingly.",
+  "prompt": "Build a local-only Chrome extension called \"Recall\" that indexes pages I actually read and lets me search and resurface them. Empty folder, start from scratch.\n\nStack, no substitutions: TypeScript, Vite with @crxjs/vite-plugin, Chrome Manifest V3, Dexie for IndexedDB, Preact for UI, @xenova/transformers running all-MiniLM-L6-v2 fully in the extension for embeddings.\n\nIn scope:\n- Content script that waits until a tab has been visible and scrolled for at least 20 seconds, then extracts readable text using Mozilla Readability. Skip if under 300 words.\n- Store per page: url, canonical url, title, site, extracted text, word count, first seen, last seen, visit count, dwell seconds total. Dedupe on canonical url and update rather than insert.\n- Chunk text into roughly 500 token pieces, embed each chunk in a background service worker queue, store vectors as Float32Array in Dexie. Never block browsing.\n- New tab page replacement with: a search box doing cosine similarity over chunks, results grouped by page showing title, site, the best matching snippet, and dates.\n- A \"Resurface\" panel on the same page: 5 items per day chosen by a simple score mixing age, dwell time, and revisit count, with buttons for open, snooze 30 days, and never again.\n- Options page with a blocklist of domains and url patterns, defaulting to blocking localhost, mail, banking, and any url containing \"logout\" or \"checkout\".\n- Export everything to a single JSON file and import it back.\n\nOut of scope, do not build: accounts, any server, cloud sync, telemetry, analytics, payment, sharing, mobile.\n\nOptional: if OPENAI_API_KEY exists in .env, offer it in options as an alternative embedding backend. Default stays on-device. Never commit .env.\n\nDeliver a README with load-unpacked instructions, a note on where the data lives, and one command to wipe the whole index.",
+  "promptCurated": false
+}
