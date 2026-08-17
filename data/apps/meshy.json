@@ -1,0 +1,53 @@
+{
+  "slug": "meshy",
+  "name": "Meshy",
+  "domain": "meshy.ai",
+  "category": "generative-media",
+  "subcategory": "text/image to 3D model generation",
+  "tagline": "Turns text prompts or reference images into textured 3D meshes you can drop into a game engine.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "usage",
+    "source": "https://www.meshy.ai/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Tiered subscriptions with a credit allowance, free tier included.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The UI here is a thin shell over the actual product: generative 3D models trained on large mesh corpora, plus the GPU fleet that runs them in under a minute. You can absolutely wire up a local pipeline with open weights like Hunyuan3D or TRELLIS, and for hobby props it will get you surprisingly far. What you will not reproduce in a session is the topology cleanliness, the PBR texture quality, the remesh/retopology passes, or the auto-rigging that makes output usable without a cleanup artist. Also, one decent generation on your own hardware needs 16 to 24GB of VRAM and patience, which is exactly the cost the subscription is hiding from you. Build the local version if you enjoy the process, not because it is cheaper.",
+  "coreLoopDIY": "A local web app that takes a prompt or a reference image, runs an open-weights image-to-3D model on your own GPU, and hands back a viewable, downloadable GLB.",
+  "diyTimeEstimate": "multi-day",
+  "requirements": [
+    "An NVIDIA GPU with 16GB+ VRAM, ideally 24GB",
+    "CUDA toolkit and a working PyTorch install",
+    "Tens of GB of disk for model weights",
+    "Tolerance for dependency hell in the 3D generation ecosystem",
+    "Optional: an image model or API key if you want text-to-image as the first stage"
+  ],
+  "whatYouLose": [
+    "Clean quad topology and low-poly remeshing; open pipelines give you dense, messy triangles",
+    "PBR material maps and texture upscaling that hold up under a real light rig",
+    "Auto-rigging and animation of humanoid output",
+    "Sub-minute generation, plus the ability to fire off ten variations without your machine seizing up",
+    "Any commercial-use clarity around the model weights you are running"
+  ],
+  "moatTags": [
+    "proprietary-models",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "The genuinely hard parts are the unglamorous ones: retopology, UV unwrapping, and texture baking that produce assets an engine will accept without manual repair.",
+  "whyPeopleStillPay": "Because the alternative is either a 3D artist or a week of your own time per asset, and neither is cheap. People paying for this are usually indie game devs or product folks who need a prop, a placeholder, or a printable model right now, and the credit cost is trivially less than the labor it replaces. The self-hosted route is real but it is a hobby, not a substitution: you inherit the CUDA errors, the VRAM ceiling, and the cleanup work the paid pipeline quietly absorbs.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can run open 3D generators locally and get shapes out in an afternoon. The moat is not the shape, it is the retopology, texture baking, and rigging that make the shape usable, plus a GPU fleet that does it in forty seconds.",
+  "prompt": "Build a local single-user web app called \"meshlab\" that generates 3D meshes from a prompt or an image on my own GPU.\n\nStack, no substitutions:\n- Python 3.11, FastAPI backend, plain HTML + vanilla JS frontend served by FastAPI\n- SQLite via sqlite3 for the job table, no ORM\n- three.js loaded from a CDN for the model viewer\n- A single background worker thread with an in-process job queue. No Celery, no Redis.\n\nGeneration pipeline:\n- Image to 3D is the primary path. Use an open-weights image-to-3D model from Hugging Face (Hunyuan3D-2 or TRELLIS, pick one and commit to it in the code and README). Load it lazily on first job and keep it resident.\n- Text to 3D is a two stage path: call a local Stable Diffusion checkpoint via diffusers to make a single reference image, then feed that image into the same 3D pipeline. If no SD checkpoint is present, disable the text path in the UI with a clear message instead of failing.\n- Export GLB. Also write the raw OBJ if the pipeline produces one.\n\nUI, one page:\n- Left: a text prompt box, an image upload dropzone, a \"generate\" button, and a seed field.\n- Right: a job list with status (queued, running, done, failed), newest first, polling every 2 seconds.\n- Clicking a done job loads its GLB into a three.js canvas with orbit controls, a grid floor, and one directional plus one ambient light. Add a wireframe toggle and a \"download GLB\" link.\n- Show generation time and peak VRAM per job.\n\nIn scope: local file storage under ./outputs/{job_id}/, a jobs table, graceful failure with the traceback saved to the job row, a .env for MODEL_ID and SD_MODEL_PATH, a README that states the VRAM requirement bluntly.\n\nOut of scope, do not build: user accounts, cloud storage, telemetry, retopology, UV unwrapping, PBR texture baking, rigging, animation, multi-GPU, payment, sharing links.\n\nThe README must include a short \"limitations\" section stating that output is dense triangle soup with baked vertex colors or a single texture, that it needs cleanup in Blender before engine use, and that model weight licenses must be checked before any commercial use.",
+  "promptCurated": false
+}
