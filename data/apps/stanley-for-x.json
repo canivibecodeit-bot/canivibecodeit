@@ -1,0 +1,52 @@
+{
+  "slug": "stanley-for-x",
+  "name": "Stanley for X",
+  "domain": "getstanley.ai",
+  "category": "social-media",
+  "subcategory": "X ghostwriting and scheduling",
+  "tagline": "AI ghostwriter and growth console for X: drafts posts in your voice, watches real-time chatter, schedules, cross-posts and automates DMs.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://x.getstanley.ai/ideate",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The ghostwriting half is a solved problem: feed a model your own post archive, define a voice rubric, generate drafts, keep a review queue. The hard part is not intelligence, it is access. Real-time reading of X, keyword monitoring, trend surfacing and DM handling all sit behind the X API, where the free tier is essentially write-only and the cheapest read tier costs more per month than most tools of this shape. So a weekend build gets you a genuinely good drafting and scheduling console, then stalls at the exact feature people signed up for, which is knowing what is happening right now. Also worth saying out loud: automated DMs are a good way to get an account limited, whoever writes the code.",
+  "coreLoopDIY": "A local console that learns your voice from your X archive, drafts and queues posts, and fires them on a schedule through the X API.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "X developer account with an app configured for OAuth 2.0 user context",
+    "Your X data archive export, for voice training material",
+    "An LLM API key",
+    "A machine or cheap VPS that stays awake so scheduled posts actually publish",
+    "A paid X API tier if you want search, mentions or real-time monitoring"
+  ],
+  "whatYouLose": [
+    "Real-time trend and keyword monitoring, unless you pay X for read access",
+    "DM automation and inbox triage",
+    "Cross-posting to LinkedIn, Threads, Bluesky and friends",
+    "A phone-shaped interface for drafting while you are away from your desk",
+    "Someone else babysitting rate limits, token refresh and failed publishes"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish"
+  ],
+  "moatNotes": "The moat is not really theirs, it is X's API price list. Anyone building on top of the firehose pays the same toll, they just amortize it across customers.",
+  "whyPeopleStillPay": "Because they are paying for read access they cannot economically buy alone, plus the boring reliability layer: token refresh, retries, queue that does not silently drop a post at 9am, cross-network fan-out. The drafting quality is the visible feature and the easiest to replicate; the plumbing and the API bill are the actual product. If you post a few times a day and do your own trend-spotting by, you know, scrolling, the paid tier buys you very little.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Build the drafting and scheduling console locally, skip the DM automation, and decide separately whether real-time monitoring is worth an API invoice.",
+  "prompt": "Build a local, single-user X posting console. Stack: Node 20 + TypeScript, Next.js App Router, SQLite via better-sqlite3, Tailwind. No auth, no accounts, no telemetry, no hosted services. Runs with `npm run dev` on localhost.\n\nFeatures in scope:\n1. Archive import: a page that accepts the tweets.js or tweets.json file from an X data export, parses it, and stores my own past posts in SQLite (text, timestamp, likes, replies, reposts if present).\n2. Voice profile: a job that samples my top 200 posts by engagement and asks the LLM to write a reusable style guide (sentence length, punctuation habits, openers to avoid, recurring themes). Store the guide as editable text I can hand-tune.\n3. Draft generation: a text box where I paste a topic, link or rough note. Generate 5 candidate posts using the style guide plus 10 retrieved similar past posts as few-shot examples. Show character counts and flag anything over 280.\n4. Review queue: accept, edit or kill each candidate. Accepted drafts go to a queue with a scheduled timestamp. Simple week-view calendar of what is queued.\n5. Threads: allow a draft to be split into an ordered thread, published as a reply chain.\n6. Publisher: a worker started by `npm run worker` that polls SQLite every 60 seconds and posts anything due via the X API v2 using OAuth 2.0 user context with PKCE and refresh tokens. Store tokens in SQLite, secrets in .env (X_CLIENT_ID, X_CLIENT_SECRET, LLM_API_KEY). Retry failed publishes 3 times with backoff, then mark failed and surface it in the UI.\n7. After publishing, backfill engagement metrics for posted items if the configured API tier allows it, and mark the feature disabled if it 403s.\n\nExplicitly out of scope: DM automation, cross-posting to other networks, follower analytics dashboards, real-time keyword monitoring (leave a documented stub interface for it and a README note that this needs a paid X API tier), multi-account support, mobile UI.\n\nWrite a README that lists exactly which X API endpoints are used, which tier each one requires, and what breaks on the free tier. Include a seed script with fake posts so the UI is usable before any API credentials exist.",
+  "promptCurated": false
+}
