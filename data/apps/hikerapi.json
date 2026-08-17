@@ -1,0 +1,52 @@
+{
+  "slug": "hikerapi",
+  "name": "HikerAPI",
+  "domain": "hikerapi.com",
+  "category": "dev-tools",
+  "subcategory": "social data scraping API",
+  "tagline": "A pay-per-request API for Instagram and TikTok data: profiles, posts, followers, hashtags, stories, without touching the official platform APIs.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "per request, usage based",
+    "unit": "usage",
+    "source": "https://hikerapi.com/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The code here is the easy part: instagrapi and friends are open source, and an agent can wrap them in a REST API in an afternoon. What you cannot one-shot is a farm of aged accounts, residential proxy rotation, fingerprint churn, and a team that patches the client every time Instagram quietly changes an internal endpoint or ships a new challenge flow. Your single account behind your home IP will hit rate limits, then checkpoints, then a permanent ban, usually in that order and usually on the day you need data. A personal build is fine for pulling a few hundred profiles once. It is not fine for anything that has to keep working next month.",
+  "coreLoopDIY": "A local FastAPI service that wraps instagrapi with one logged-in session, a proxy, aggressive request pacing, and a SQLite cache so you never fetch the same profile twice.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A throwaway Instagram account you are willing to lose",
+    "A residential or mobile proxy, datacenter IPs get flagged fast",
+    "Python 3.11 and patience for session challenge prompts",
+    "Acceptance that any of this can break without warning"
+  ],
+  "whatYouLose": [
+    "An account pool that absorbs bans so yours does not",
+    "Residential proxy rotation and device fingerprint management",
+    "Same-day fixes when the platform changes internal endpoints",
+    "Real throughput: concurrent requests instead of one polite call every few seconds",
+    "Coverage beyond Instagram, including TikTok and other networks"
+  ],
+  "moatTags": [
+    "scale-infra",
+    "execution-polish",
+    "proprietary-data"
+  ],
+  "moatNotes": "The moat is operational, not technical: accounts, IPs, and someone whose job is to keep an unofficial client alive against a hostile moving target.",
+  "whyPeopleStillPay": "Because scraping Instagram at any real volume is a maintenance job, not a coding job. The client library is free, but the accounts get burned, the IPs get blocked, the login flow adds a new challenge, and suddenly your pipeline is dead and you are the one on call. Paying per request outsources the entire ban surface to someone who has already amortized it across thousands of customers, and it converts an unpredictable ops liability into a line item. The moment your use case involves more than a few thousand lookups or needs to run unattended, the math flips hard against DIY.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The wrapper is a weekend; the account farm is not. The moat is a pool of burnable accounts and residential IPs plus continuous patching against a platform actively trying to stop you.",
+  "prompt": "Build a local, single-user Instagram data service in an empty folder. Stack: Python 3.11, FastAPI, uvicorn, instagrapi, SQLite via sqlite3 (no ORM), httpx only if needed.\n\nGoal: a small REST API on localhost that returns Instagram profile, media, and follower data for personal research, with heavy caching so I never fetch the same thing twice.\n\nEndpoints:\n- GET /user/{username} : profile info (id, full name, bio, counts, is_private, profile pic url)\n- GET /user/{username}/media?limit=N : recent posts (id, code, caption, like/comment counts, taken_at, media urls)\n- GET /user/{username}/followers?limit=N : follower list, capped at 200 per call\n- GET /hashtag/{tag}/top : top media for a hashtag\n- GET /cache/stats : row counts and cache hit counters\n\nRules:\n- Credentials and proxy come from .env: IG_USERNAME, IG_PASSWORD, IG_PROXY. Ship a .env.example, never commit secrets.\n- Persist the instagrapi session to session.json and reuse it on boot. Only re-login if the session is dead.\n- One global request queue with a single worker. Sleep a random 4 to 12 seconds between platform calls. No concurrency, ever.\n- Cache every response in SQLite keyed by endpoint plus params, with a fetched_at timestamp and a TTL of 24 hours for profiles and 6 hours for media. Serve cache on hit and mark the response with a \"cached\": true field.\n- On login challenge, 429, or ChallengeRequired, return HTTP 503 with a clear message telling me to log in manually in a browser on the same proxy. Do not retry in a loop.\n- Log every platform call to a requests table so I can see exactly how much I hammered them.\n\nOut of scope: no posting, liking, following, or DMs. No web UI beyond FastAPI's built-in docs. No account rotation, no proxy pool, no cloud deploy, no telemetry.\n\nDeliverables: main.py, db.py, client.py, .env.example, requirements.txt, and a README that says plainly that this account will probably get banned and that the TTLs and sleeps are the only thing keeping it alive.",
+  "promptCurated": false
+}
