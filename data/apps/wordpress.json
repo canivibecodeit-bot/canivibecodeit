@@ -1,0 +1,52 @@
+{
+  "slug": "wordpress",
+  "name": "WordPress",
+  "domain": "wordpress.org",
+  "category": "website-builder",
+  "subcategory": "self-hosted CMS",
+  "tagline": "Open source CMS that runs a huge chunk of the web, plus a paid hosted tier and an infinite plugin economy.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://wordpress.org/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Core software is free; money goes to hosting, themes, plugins, or WordPress.com plans."
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The thing people actually use WordPress for on a personal site, write posts, upload images, publish, have an RSS feed, is a weekend build and always has been. An agent can hand you a SQLite-backed CMS with a markdown editor, media uploads, drafts, tags, and a sitemap in one sitting, and it will be faster and less hackable than the real thing. What you cannot one-shot is the other 90 percent of WordPress: 60,000 plugins, WooCommerce, Yoast, Elementor, the block editor, and the fact that any freelancer on earth can pick up your site. Also worth noting that core WordPress is already free and self-hostable, so the honest question is whether you want to maintain your own CMS instead of someone else's. If your site has a contact form, a store, or a client who needs to log in, stop reading and just install WordPress.",
+  "coreLoopDIY": "A single-admin, self-hosted CMS that stores posts in SQLite, edits them as markdown, uploads images to local disk, and serves fast static-ish HTML with an RSS feed.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 22 and a machine or VPS to run it on",
+    "A domain and TLS if you want it public",
+    "Local disk or an S3 bucket for media",
+    "Your own backup habit"
+  ],
+  "whatYouLose": [
+    "The plugin ecosystem: SEO, forms, caching, memberships, analytics, backups, all one click away in WordPress and all your problem in the DIY build",
+    "WooCommerce and anything resembling commerce",
+    "Gutenberg block editing and the visual page builders non-technical people actually like",
+    "A theme marketplace, so your site looks like whatever the agent felt like that day",
+    "Any hope of handing the site to a developer who already knows the stack",
+    "Security updates and managed hosting done by someone who is not you"
+  ],
+  "moatTags": [
+    "integrations",
+    "switching-costs",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is not the software, which is free. It is the plugin and agency economy stacked on top of it for twenty years.",
+  "whyPeopleStillPay": "Almost nobody pays for WordPress the software. They pay for managed hosting so the site stays up and patched, for the three or four plugins that quietly run their business, and for the person who knows how to fix it when the theme update explodes. A personal CMS you built yourself removes the hosting bill and adds an on-call rotation of one. That trade is fine for a blog and terrible for anything that takes money.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Replacing WordPress for a personal blog is easy; replacing it for a site with a checkout is a career change.",
+  "prompt": "Build a self-hosted personal CMS for a single author. Empty folder, no cloud services, no telemetry, no accounts beyond one local admin.\n\nStack, non-negotiable:\n- Node 22 with TypeScript, Fastify for the server\n- SQLite via better-sqlite3, single file at ./data/cms.db, schema created on first boot\n- Server-rendered HTML with Eta templates, no client framework\n- Plain CSS in one stylesheet, readable typography, dark mode via prefers-color-scheme\n- markdown-it for rendering, with a syntax highlight pass and HTML sanitization on output\n\nFeatures in scope:\n- Posts and standalone pages: title, slug, markdown body, excerpt, tags, status (draft, scheduled, published), publish timestamp\n- Admin at /admin behind cookie session auth: one admin user, password hash from ADMIN_PASSWORD_HASH in .env, argon2 or bcrypt\n- Admin editor: textarea with live preview pane, save as draft, publish, unpublish, delete with confirm\n- Media upload to ./data/uploads, images resized to a max width with sharp, served with long cache headers, insert-into-post button that pastes markdown\n- Public routes: home with paginated post list, /posts/:slug, /:pageSlug, /tags/:tag\n- /feed.xml RSS 2.0, /sitemap.xml, per-post OpenGraph and Twitter card meta tags\n- Full text search over posts using SQLite FTS5\n- Scheduled posts appear automatically based on publish timestamp, checked on request, no cron needed\n- Import script that reads a folder of markdown files with YAML frontmatter and inserts them, so a WordPress export converted to markdown can be loaded\n- npm run backup that copies the db and uploads into a timestamped tarball\n\nExplicitly out of scope: plugins, themes, comments, multi-user roles, multisite, e-commerce, a block editor, and any hosted API.\n\nSecrets in .env with a committed .env.example. Ship a README with setup, the password hash generator command, and how to run it behind Caddy with TLS. Include a seed script with three sample posts and a page so the site is not empty on first run.",
+  "promptCurated": false
+}
