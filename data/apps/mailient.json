@@ -1,0 +1,52 @@
+{
+  "slug": "mailient",
+  "name": "Mailient",
+  "domain": "mailient.xyz",
+  "category": "email",
+  "subcategory": "AI inbox triage",
+  "tagline": "An AI layer over your inbox that sorts, summarizes and drafts replies to email.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://mailient.xyz/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The core trick here, pull mail, classify it, summarize threads, draft replies, is genuinely a weekend of work now that an LLM does the hard part. An agent can wire IMAP plus SQLite plus a cheap web UI and have working triage before dinner. The gaps are all the unglamorous parts: Gmail and Outlook OAuth, push sync instead of polling, threading edge cases, and the fact that you will read this thing on a phone and your build has no app. Nothing here is protected by data or network, so a personal version keeps most of the value if you accept that you are now the ops team for your own mail pipeline. Product details and pricing are thin from the outside, so treat the specifics as unverified.",
+  "coreLoopDIY": "Polls your IMAP inbox, classifies and summarizes each thread with an LLM, and parks suggested replies in a local review queue you approve before sending.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An email account with IMAP/SMTP access and an app password, or patience for OAuth",
+    "An LLM API key, and acceptance that your mail text goes to that provider",
+    "A machine or small VPS that stays awake to poll",
+    "Basic comfort debugging MIME, threading and character encodings"
+  ],
+  "whatYouLose": [
+    "A mobile app and real push notifications, which is where most email actually gets read",
+    "Managed OAuth with Google and Microsoft, including the review process and token refresh pain",
+    "Someone else absorbing provider API changes, rate limits and broken threading",
+    "Polish: keyboard shortcuts, fast search, snooze, undo send, offline behavior",
+    "Any sending reputation work if the product handles outbound at scale"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish",
+    "switching-costs"
+  ],
+  "moatNotes": "The moat in email tooling is rarely the AI, it is provider auth, sync reliability and a client people tolerate on a phone.",
+  "whyPeopleStillPay": "Because email is the one app that has to work at 7am on a phone with two bars of signal, and a self-hosted poller on a home server does not clear that bar. People pay to skip OAuth verification, token refresh, IMAP quirks and the slow realization that their triage cron died four days ago and they missed an invoice. The AI part is commodity; the boring reliability around it is what the subscription actually buys.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The classifier is the easy half; keeping a mail client trustworthy on a phone is the other 90 percent.",
+  "prompt": "Build a local AI email triage tool called Inbox Warden in this empty folder.\n\nStack, no substitutions: TypeScript on Node 20, Fastify for the server, server-rendered HTML with htmx for the UI, better-sqlite3 for storage, imapflow for reading mail, nodemailer for sending, and one OpenAI-compatible chat completions endpoint for the AI. No React, no Next, no Docker, no cloud services, no telemetry, no user accounts. This runs on localhost for exactly one person.\n\nSecrets in .env, read with a tiny loader, and ship a .env.example with: IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASS, SMTP_HOST, SMTP_PORT, LLM_BASE_URL, LLM_API_KEY, LLM_MODEL. Never log credentials or full message bodies.\n\nWhat is in scope:\n- A sync job that connects over IMAP, fetches messages from INBOX since a stored high water mark, and stores id, thread key, from, to, subject, date, plain text body and raw headers in SQLite. Dedupe on Message-ID. Make sync idempotent and resumable.\n- Strip HTML to text and truncate long bodies before sending anything to the model.\n- For each new thread: one LLM call returning strict JSON with category (one of urgent, needs-reply, fyi, newsletter, junk), a two sentence summary, and a suggested reply draft when category is needs-reply or urgent. Validate the JSON with zod and retry once on parse failure.\n- Cache results keyed by thread and message count so restarts do not re-bill you.\n- A web UI at / with a triage queue grouped by category, thread detail view, and an editable draft box with Approve and Send, Skip, and Mark Junk. Nothing is ever sent without an explicit click.\n- Sending via SMTP with correct In-Reply-To and References headers so replies thread properly.\n- A rules table for cheap deterministic overrides by sender or subject substring, applied before any LLM call.\n- npm run sync, npm run dev, and a --dry-run flag that classifies without sending.\n\nExplicitly out of scope: OAuth flows, mobile app, push notifications, multi-account support, calendar, attachments beyond recording filenames, search beyond a SQL LIKE query.\n\nWrite a README with setup steps, an honest limitations section that says polling is not push and that message text leaves the machine for the model, and a cost note estimating tokens per hundred emails. Include a fixture-based test for the classifier JSON parser that does not hit the network.",
+  "promptCurated": false
+}
