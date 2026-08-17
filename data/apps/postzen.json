@@ -1,0 +1,51 @@
+{
+  "slug": "postzen",
+  "name": "PostZen",
+  "domain": "postzen.dev",
+  "category": "social-media",
+  "subcategory": "post scheduling and publishing",
+  "tagline": "A hosted tool for writing, queueing and publishing social posts on a schedule.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://postzen.dev/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The part people imagine is hard, a queue that fires posts at set times, is a table, a cron tick and an HTTP call. The part that actually eats the weekend is every platform's auth and publishing API: app review, token refresh, rate limits, media upload endpoints that want chunked multipart, and rules that change without warning. A local build gets you drafting, threading, a calendar view and a working queue for whichever accounts you can get tokens for, which in practice is fewer than you hoped. Analytics, link previews and mobile drafting all quietly disappear. Worth building if you post to one or two platforms and enjoy reading API docs, not if you need six.",
+  "coreLoopDIY": "A local app where you compose and thread posts, drop them on a calendar, and a cron worker publishes each one at its scheduled time through whatever platform tokens you supplied.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Developer accounts and API credentials for every platform you want to post to",
+    "A machine or small VPS that stays awake for the scheduler",
+    "Object storage or a local folder for media, plus per-platform upload handling",
+    "Tolerance for re-auth when tokens expire or a platform changes its terms"
+  ],
+  "whatYouLose": [
+    "Approved platform apps: your own dev app may be rate limited, sandboxed, or rejected for the endpoints you need",
+    "Mobile composing and push reminders, so drafts happen only where your laptop is",
+    "Per-post analytics and best-time suggestions",
+    "Preview fidelity: matching how each network actually renders your text, links and images",
+    "Someone else fixing it the morning an API breaks"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish"
+  ],
+  "moatNotes": "The moat is not the scheduler, it is the maintained pile of platform integrations and the app review approvals behind them.",
+  "whyPeopleStillPay": "Because the value is not the queue, it is that someone else keeps twelve fragile publishing integrations alive and re-approved while you write. A self-hosted scheduler works beautifully until a platform rotates its token flow or deprecates an upload endpoint, and then it is your Saturday. Paying a few dollars a month to never think about that is a rational trade for most people who post more than they tinker.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine weekend project if you post to one platform; a slow-motion maintenance contract if you post to five.",
+  "prompt": "Build a local-first social post scheduler called \"queue\". Single user, no accounts, no telemetry, no cloud services beyond the social platform APIs themselves.\n\nStack, no substitutions: TypeScript, Node 20, Hono for the HTTP server, SQLite via better-sqlite3, server-rendered HTML with a single stylesheet and a little vanilla JS. No React, no ORM, no Docker.\n\nData model in SQLite:\n- accounts: id, platform, handle, access_token, refresh_token, expires_at\n- posts: id, body, media_paths (JSON array), account_id, scheduled_at (UTC), status (draft|queued|published|failed), remote_id, error, published_at\n- threads: posts may have parent_post_id so a thread posts in order with a short delay between parts\n\nUI, three pages:\n1. Composer: textarea with live character count per target platform, media file picker that saves into ./media, account picker, datetime picker, Save as draft / Queue buttons.\n2. Calendar: month grid of scheduled posts, click to edit, drag not required, a simple \"move to\" datetime field is enough.\n3. Log: published and failed posts with the error text and a Retry button.\n\nScheduler: a worker started in the same process that ticks every 30 seconds, selects queued posts where scheduled_at is in the past, and publishes them one at a time with retry and exponential backoff up to 3 attempts. Never publish the same post twice: use a status transition guarded by a SQL update returning affected rows.\n\nPublishing: define a Publisher interface with publish(post, account) and implement exactly two adapters. First, MastodonPublisher, real and working, using a personal access token against the statuses endpoint including media upload. Second, DryRunPublisher that logs the exact payload it would send. Wire the interface so adding X, LinkedIn or Bluesky later is one file, but do not stub half-working adapters.\n\nSecrets: all tokens in .env, loaded with node:process, never committed. Ship .env.example. Store the SQLite file at ./data/queue.db.\n\nAlso include: a CLI entry `npm run post -- --body \"...\" --at \"2026-01-01T09:00Z\"` that queues a post without the UI, and a README with setup, how to get a Mastodon token, and a warning that timezone handling is UTC internally with display in the machine's local zone.\n\nOut of scope, do not build: analytics, AI writing suggestions, multi-user auth, best-time recommendations, hashtag research, image editing.",
+  "promptCurated": false
+}
