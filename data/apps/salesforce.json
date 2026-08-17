@@ -1,0 +1,50 @@
+{
+  "slug": "salesforce",
+  "name": "Salesforce",
+  "domain": "salesforce.com",
+  "category": "crm",
+  "subcategory": "enterprise CRM platform",
+  "tagline": "The enterprise CRM and application platform that most sales, service and marketing orgs are built around.",
+  "priceMonthly": 25,
+  "pricing": {
+    "plan": "Starter Suite",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://salesforce.com/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Real-world Salesforce spend is usually Enterprise-tier seats plus add-ons plus implementation, not the entry price.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "You can absolutely one-shot a contacts-and-deals tracker, and for one person that is often better than Salesforce. But nobody pays Salesforce for a pipeline table. They pay for the thing everything else in the company already points at: the ETL jobs, the marketing automation, the support queue, the finance reports, the twelve years of closed-won history, the admin who wrote 400 validation rules, and the auditors who accept it. A personal replacement replaces the part of Salesforce that was never the expensive part. If you are a solo operator or a two-person shop, build it; if you are trying to leave an existing org, this is a migration project, not a coding session.",
+  "coreLoopDIY": "A local web app with contacts, companies, deals on a drag-across pipeline, activity notes, and next-action reminders, backed by SQLite.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node runtime and a place to run it, local or a small VPS",
+    "Optional: an IMAP or Gmail API credential if you want email logging, which is where the weekend goes"
+  ],
+  "whatYouLose": [
+    "Every integration: marketing automation, support cases, quoting, billing, BI tooling, and the hundred connectors vendors ship for Salesforce and nothing else",
+    "Multi-user permissions, sharing rules, field-level security, and audit trails that survive a compliance review",
+    "Reporting, forecasting and dashboards that leadership already knows how to read",
+    "The admin ecosystem: consultants, AppExchange, and a hiring pool that already knows the object model",
+    "Historical data with lineage, which is the actual asset in any CRM older than a year"
+  ],
+  "moatTags": [
+    "switching-costs",
+    "integrations",
+    "compliance-regulatory"
+  ],
+  "moatNotes": "Salesforce is less a product than a system of record other systems agree to trust. Once your billing, marketing and support all read from it, leaving means renegotiating with all three.",
+  "whyPeopleStillPay": "Because the CRM is the seam the whole revenue org is stitched along. Marketing scores leads into it, support reads accounts out of it, finance reconciles against it, and the board deck is generated from its reports. Ripping it out means rebuilding all of that at once with no downtime, while the sales team is mid-quarter. That risk is worth more per year than the license, which is exactly why the license costs what it does. A solo consultant tracking forty relationships is in a completely different situation and is mostly paying for guilt.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "A personal pipeline tracker is a weekend; a system of record is not. The moat is that finance, marketing and support all already read from it, so leaving is a migration with three other departments attached.",
+  "prompt": "Build a single-user personal CRM that runs locally. No accounts, no cloud, no telemetry.\n\nStack, non-negotiable:\n- Next.js (App Router) with TypeScript\n- SQLite via better-sqlite3, file at ./data/crm.db\n- Drizzle ORM for schema and migrations\n- Tailwind CSS, no component library\n- Runs with `npm run dev` on port 3000 and nothing else needs to be installed\n\nData model:\n- companies: id, name, domain, notes, createdAt\n- contacts: id, companyId (nullable), name, email, phone, role, notes, createdAt\n- deals: id, title, companyId, contactId (nullable), amountCents, currency (default USD), stage, expectedCloseDate, createdAt, closedAt, outcome (won|lost|null)\n- activities: id, kind (call|email|meeting|note), subject, body, occurredAt, contactId, dealId, createdAt\n- tasks: id, title, dueDate, done, contactId, dealId\n- Stages are a fixed list in code: lead, qualified, proposal, negotiation, closed.\n\nScreens:\n1. /pipeline: kanban board, one column per stage, deal cards showing title, company, amount. Drag between columns persists the stage. Column headers show count and summed amount.\n2. /contacts and /companies: searchable tables, click through to a detail page showing linked deals, activity timeline newest first, and open tasks.\n3. /deals/[id]: edit fields inline, log an activity, mark won or lost.\n4. /today: tasks due today or overdue, plus deals with no activity in 14 days, labelled \"going cold\".\n\nAlso build:\n- One global search box (cmd+K) over contacts, companies and deals, using SQLite LIKE queries. No vector search, no AI.\n- A GET /api/export route that dumps everything as JSON, and a CSV import for contacts that maps columns in the UI before committing.\n- Seed script with about 20 fake contacts, 8 companies and 12 deals so the board is not empty on first run.\n\nExplicitly out of scope: email sending or syncing, OAuth, multi-user or permissions, workflow automation, reporting beyond the pipeline totals, mobile app, any third-party API. If you want any secret later, read it from .env and commit .env.example only.\n\nWrite a README with setup in under five commands and a one-paragraph note on how to back up the SQLite file.",
+  "promptCurated": false
+}
