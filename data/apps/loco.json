@@ -1,0 +1,51 @@
+{
+  "slug": "loco",
+  "name": "Loco",
+  "domain": "localise.biz",
+  "category": "localization",
+  "subcategory": "translation management",
+  "tagline": "Hosted translation management for app strings: a web editor for keys and locales, plus export to the dozens of file formats platforms actually expect.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://localise.biz/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The core of Loco is a keyed string store with a locale matrix on top, and that part is genuinely a one-sitting build: SQLite, a table view, an import and an export. What eats the weekend is the format layer, because gettext PO with plural headers, Apple .strings and .stringsdict, Android plurals XML, ICU messages and flat JSON all disagree about pluralization and escaping in ways that only show up in production. Machine translation fill-in is a single API call if you already have a DeepL or provider key. If you are the only translator, a local build is fine and arguably faster to work with. If you send links to freelance translators and rely on the hosted API in CI, you are rebuilding a service, not a tool.",
+  "coreLoopDIY": "A local web app that stores translation keys per project, shows a locale-by-key grid you can edit, imports and exports JSON, PO and Android XML, and optionally machine-translates empty cells.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a local folder to run in",
+    "Optional machine translation API key (DeepL or similar) in .env",
+    "Your existing locale files to import as a starting point"
+  ],
+  "whatYouLose": [
+    "Format breadth: Loco reads and writes a long tail of formats, including the awkward Apple and Qt ones, with plural rules per locale already correct",
+    "A shareable editor for non-technical translators, with roles, comments and progress tracking",
+    "A stable public API and CLI that CI pipelines can pull from at build time",
+    "Translation history, who changed what, and the ability to roll a string back",
+    "Glossary and translation memory suggestions that improve as the project grows"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish",
+    "collaboration"
+  ],
+  "moatNotes": "The moat is not the database, it is the hundreds of small correctness decisions in the import and export adapters, plus being a URL you can hand to a translator who will never install anything.",
+  "whyPeopleStillPay": "Because localization is a pile of edge cases someone else already ate. Plural categories vary by language, every platform escapes strings differently, and one bad export ships mangled text to users in a language nobody on the team reads. Paying also buys a link you can send to a contractor and an API your build can hit, which a folder on your laptop cannot do. Solo developers with two or three locales tend to outgrow the need for that rather than into it.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine to self-host if you are your own translator; the moment a human you do not employ needs edit access, the hosted version starts earning its keep.",
+  "prompt": "Build a local translation management app called Strings. No accounts, no cloud, no telemetry.\n\nStack, non negotiable:\n- Node 20 with Express and TypeScript\n- SQLite via better-sqlite3, file at ./data/strings.db\n- Server rendered EJS templates plus a little vanilla JS, no React, no bundler\n- Runs with `npm run dev` on localhost:4321\n\nData model:\n- projects: id, name, source_locale\n- locales: id, project_id, code (BCP 47)\n- keys: id, project_id, name (dot notation allowed), context note, created_at\n- translations: key_id, locale_id, plural_category (one of other, one, two, few, many, zero), value, updated_at\n- history: translation_id, old_value, new_value, changed_at\n\nUI:\n- Project list, then a grid page per project: rows are keys, columns are locales, cells are inline editable textareas that save on blur via fetch\n- Filters: untranslated only, search by key or value substring\n- Per key detail drawer showing context note, plural forms, and history\n- Progress bar per locale showing percent of keys with a non empty value\n\nImport and export, implement exactly these three formats and be strict:\n- Flat and nested JSON\n- gettext PO, including Plural-Forms header parsing and msgid_plural\n- Android strings.xml, including plurals blocks with quantity attributes\nUse the CLDR plural categories for each locale code; hardcode a small lookup table for the twenty most common locales and fall back to other plus one.\n\nAlso ship a CLI: `npm run export -- --project=X --locale=fr --format=po --out=./out` so a build script can use it.\n\nOptional machine translation: if DEEPL_API_KEY is set in .env, add a \"fill empty cells\" button per locale that batches untranslated source strings through DeepL and marks results as machine translated with a flag shown in the grid. If the key is missing, hide the button rather than erroring.\n\nOut of scope: multi user auth, sharing links, webhooks, screenshots, glossary, TMX.\n\nInclude a README with setup, a `.env.example`, and seed data for one project with English, French and Polish so plural handling is exercised on day one.",
+  "promptCurated": false
+}
