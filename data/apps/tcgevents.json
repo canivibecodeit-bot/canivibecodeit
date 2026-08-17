@@ -1,0 +1,51 @@
+{
+  "slug": "tcgevents",
+  "name": "tcgevents",
+  "domain": "tcgevents.net",
+  "category": "community",
+  "subcategory": "trading card game event discovery",
+  "tagline": "Finds and lists trading card game tournaments and local store events so players know where to show up.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://tcgevents.net/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The software here is a searchable list with a map and some filters, which an agent can produce before your coffee cools. The product is not the list, it is the fact that events are in it: store owners posting schedules, organizers keeping dates current, players trusting it enough to check it weekly. Scrape it and you own a snapshot that starts rotting the moment a shop moves its Friday night draft. Official publisher locators exist, but they are partial, rate limited, and hostile to bulk use, and the small local scene stuff never appears there at all. Build the personal tracker if you play in two cities, but do not pretend it replaces the directory.",
+  "coreLoopDIY": "A local event tracker where you paste or manually add tournaments, then browse them by game, date and distance with calendar and ICS export.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Somewhere to actually get event data: official store locators, store Discords, Facebook pages, or your own typing",
+    "Optional geocoding API key in .env if you want distance filtering",
+    "Ongoing willingness to maintain your own listings, which is the entire catch"
+  ],
+  "whatYouLose": [
+    "Coverage: every store you did not personally enter is invisible",
+    "Freshness: cancellations, venue changes and date shifts arrive nowhere",
+    "Organizer side: shops have no reason to tell your laptop about their new league night",
+    "Discovery for travel: the whole point of a directory is events in cities you do not know",
+    "Whatever normalization the real site does across games, formats and regional naming chaos"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "network-effects",
+    "marketplace-liquidity"
+  ],
+  "moatNotes": "Event directories are two sided and boring about it: organizers post because players look, players look because organizers post. The code is the least interesting part.",
+  "whyPeopleStillPay": "Because the alternative is checking six store Facebook pages, two Discords and a publisher locator that has not been updated since the last set rotation. Anyone paying here is paying for someone else to do the tedious aggregation and keep it current, or, if they are a store, paying to be seen by players who already have the habit of checking. Neither of those is a software problem. A self hosted clone gives you the interface and none of the reason to open it.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The map, the filters and the calendar export are an afternoon; the events in them are not. The moat is every local store that already posts its schedule there and every player who already checks.",
+  "prompt": "Build a local-first trading card game event tracker. Single Python project, no accounts, no cloud, no telemetry.\n\nStack, non negotiable:\n- Python 3.11, FastAPI, Jinja2 templates, SQLite via sqlite3 stdlib\n- Plain server rendered HTML plus a little vanilla JS, no build step, no npm\n- Leaflet from a CDN for the map, OpenStreetMap tiles\n\nData model (events): id, game (magic, pokemon, yugioh, lorcana, other), title, format, venue_name, address, city, country, lat, lon, starts_at (UTC), ends_at nullable, entry_fee nullable, url nullable, notes, source (manual or paste), created_at, updated_at.\nAlso a settings row for home_lat, home_lon, default_radius_km.\n\nFeatures, in scope:\n1. Add and edit events through a simple HTML form. Manual entry is the primary path, treat it as first class.\n2. A \"paste dump\" page: textarea where I paste messy text from a store Discord or Facebook post, plus a parser that extracts candidate title, date, time and fee with regex and dateutil, then shows an editable pre-filled form. No LLM call. If parsing fails, say so and let me fill it in.\n3. List view: filter by game, date range, city, and distance from home using haversine on stored lat/lon. Sort by starts_at.\n4. Map view: pins for filtered events, popup with title, time, venue, link.\n5. Calendar: current month grid, events per day.\n6. Export: /export.ics returns a valid VCALENDAR of the current filter. Also /export.json.\n7. Geocoding: optional. If GEOCODE_PROVIDER and GEOCODE_API_KEY are set in .env, geocode addresses on save; otherwise leave lat/lon null and hide distance filters gracefully.\n8. Recurring events: a weekly repeat option that materializes the next 8 occurrences, each editable and cancellable individually.\n\nOut of scope, do not build: user accounts, multi tenancy, scraping any third party site, push notifications, a mobile app, anything that pretends to have nationwide coverage.\n\nDeliverables: app.py, db.py, parse.py, templates/, static/, schema.sql, .env.example, seed.py with 12 fake events across 3 cities, and a README with run instructions (uvicorn, one command). Include pytest tests for the parser and the ICS output. Timezones: store UTC, display in a TZ set in .env, default America/New_York.",
+  "promptCurated": false
+}
