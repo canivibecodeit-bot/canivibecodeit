@@ -1,0 +1,50 @@
+{
+  "slug": "svgator",
+  "name": "SVGator",
+  "domain": "svgator.com",
+  "category": "design",
+  "subcategory": "SVG animation editor",
+  "tagline": "Browser-based timeline editor for animating SVG files and exporting them as CSS, SMIL, or JavaScript.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://svgator.com/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "There is no network here and no data moat: it is a single-player editor that turns your own SVG into an animated SVG. An agent can absolutely build the spine in a session: parse the file, list the elements, keyframe transform and opacity on a timeline, emit CSS keyframes inside the SVG. What eats the weekend and then some is everything after transform: path morphing, stroke draw-on, motion along a path, a real bezier easing editor, group transform origins, and an export pipeline that does not break in Safari. The core loop survives DIY; the last 20 percent of the feature list is where the actual product lives. Build it if you animate two or three properties and hand-tune the rest, buy it if you ship illustrated micro-animations for a living.",
+  "coreLoopDIY": "Load an SVG, pick elements, set keyframes for transform and opacity on a timeline, scrub the preview, and export a self-contained animated SVG with inline CSS keyframes.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A modern browser",
+    "Node for the local dev server",
+    "SVG files you actually own, ideally with sensible element ids"
+  ],
+  "whatYouLose": [
+    "Path morphing, stroke draw-on, and motion-along-path, which are the effects people buy this for",
+    "A polished easing curve editor with presets that look intentional instead of linear",
+    "Export targets beyond CSS: SMIL, JS runtime, Lottie, video",
+    "Cross-browser export sanity checks and the fixes for Safari's transform-origin quirks",
+    "Built-in shape and text editing, so every asset change means a round trip to your vector editor"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "switching-costs"
+  ],
+  "moatNotes": "The moat is a thousand small interaction decisions in a timeline UI plus project files you cannot open anywhere else.",
+  "whyPeopleStillPay": "Animation tooling is unforgiving about details: a timeline that snaps wrong, an easing curve you cannot tweak, or an export that jitters in Safari makes the whole thing useless, and none of those are things you notice until you are three hours into a client deadline. SVGator has absorbed years of those bugs, and the effects catalog beyond simple transforms is genuine work. Paying is a way of buying someone else's cross-browser scar tissue instead of growing your own.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine DIY target if your animations are moves, fades, and rotations; the moment you want a line to draw itself, go pay.",
+  "prompt": "Build a local, single-page SVG animation editor. No accounts, no backend, no telemetry, no cloud.\n\nStack, no substitutions: Vite + React + TypeScript, Tailwind for styling, Zustand for state. Everything runs in the browser. Persist projects to IndexedDB via idb-keyval.\n\nCore behavior:\n1. Drag-and-drop or file-pick an .svg file. Parse it into the DOM, do not rasterize it. Auto-assign stable ids to any element that lacks one.\n2. Left panel: a tree of the SVG's elements (g, path, rect, circle, text, etc). Clicking a node selects it and outlines it in the canvas.\n3. Center: the live SVG, scaled to fit, with a zoom control and a checkerboard background.\n4. Bottom: a timeline. Fixed duration set by the user (default 3s), a scrubber, play/pause/loop, and one row per animated element.\n5. For a selected element, the right panel exposes animatable properties: translateX, translateY, scale, rotate, opacity. Setting a value at the current playhead position creates a keyframe diamond on that element's timeline row. Keyframes can be dragged horizontally and deleted.\n6. Per-keyframe easing: linear, ease-in, ease-out, ease-in-out, plus a cubic-bezier text input. Store easing on the outgoing segment.\n7. Preview must be exact: apply interpolated transforms live while scrubbing, using the same math the export uses so the preview never lies.\n\nExport:\n- One button: \"Export animated SVG\". Produce a single self-contained .svg file with a <style> block of @keyframes generated from the keyframes, one animation per animated element, plus transform-box: fill-box and an explicit transform-origin on every animated element so browsers agree.\n- Second button: \"Copy CSS only\".\n- Compose transforms in a fixed order (translate, rotate, scale) and document that order in the UI.\n\nExplicitly out of scope, and say so in a README: path morphing, stroke draw-on animation, motion along a path, shape or text editing, filters, SMIL output, Lottie output, video export.\n\nAlso ship: a sample .svg in /public to test with, a Save/Load project list backed by IndexedDB, and a README with run instructions and the known Safari transform-origin caveat. No .env is needed since there are no secrets.",
+  "promptCurated": false
+}
