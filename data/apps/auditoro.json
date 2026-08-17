@@ -1,0 +1,51 @@
+{
+  "slug": "auditoro",
+  "name": "Auditoro",
+  "domain": "auditoro.de",
+  "category": "finance-accounting",
+  "subcategory": "audit and compliance workflow",
+  "tagline": "Audit workflow software: plan audits, work through checklists, collect evidence, track findings, and produce reports.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://auditoro.de/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanical core of audit software is unglamorous and very buildable: audit records, reusable checklist templates, findings with severity and owner and due date, attached evidence, and a printable report. An agent can produce a local single-user version of that in a weekend, and for one person running internal checks it will genuinely work. What it will not produce is the part auditors actually get judged on: tamper-evident history, defensible retention, role separation between auditor and auditee, and standard clause libraries that map findings to the framework someone external is asking about. Public detail on this product is thin, so treat the verdict as a read on the category rather than a teardown of the specific feature set. If your audits are internal hygiene, build it; if a certifier or regulator reads the output, do not.",
+  "coreLoopDIY": "A local app where you create an audit from a checklist template, walk the items, log findings with severity, owner, due date and attached evidence files, and export a printable report.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+ and a local machine or small VPS",
+    "Disk space for evidence files and a backup habit for the SQLite file",
+    "Your own checklist content: clause libraries and standard question sets are not included"
+  ],
+  "whatYouLose": [
+    "Tamper-evident audit trails: your version has an edit log at best, not something that survives a hostile reviewer",
+    "Role separation and permissions, so auditor, auditee and reviewer are all just you",
+    "Prebuilt standards content and question catalogues mapped to actual frameworks",
+    "Multi-user scheduling, reminders and follow-up nudges for corrective actions owned by other people",
+    "Hosted backups, retention policies and the ability to point at a vendor when someone asks who keeps the records"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "collaboration",
+    "switching-costs"
+  ],
+  "moatNotes": "Audit tooling sells confidence to the person signing off, not features. The signature is the product.",
+  "whyPeopleStillPay": "Because an audit is a social artifact, not a data model. The findings have to be assigned to people who do not use your side project, corrective actions have to be chased on a schedule, and the whole thing has to look credible to a certifier, an insurer or a board member who has seen a hundred of these. Paying a vendor also outsources retention, access control and the awkward question of who could have edited the record after the fact. A DIY build covers the checklist and the report, which is most of the typing and none of the accountability.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine for internal hygiene audits you run on yourself. The moment a third party reads the output, the vendor's paper trail is the feature you were actually buying.",
+  "prompt": "Build a local, single-user audit management app. No accounts, no cloud, no telemetry.\n\nStack, non-negotiable:\n- Next.js (App Router, TypeScript) with Tailwind for UI\n- SQLite via Drizzle ORM, file at ./data/audits.db\n- Evidence files stored on local disk under ./data/evidence, referenced by row id\n- No auth, no external APIs, no analytics\n\nData model:\n- templates: name, description, version, list of checklist items (text, category, guidance, required boolean)\n- audits: title, scope, auditee, auditor, template id, start date, status (planned, in progress, closed)\n- responses: audit id, item id, result (conform, minor, major, not applicable), note\n- findings: audit id, response id (nullable), title, severity (observation, minor, major, critical), owner name, due date, status (open, in progress, resolved, verified), resolution note\n- evidence: finding or response id, original filename, stored path, uploaded at\n- events: append-only table logging every insert and update with timestamp, table, row id and a JSON diff. Never delete rows from it.\n\nScreens:\n1. Dashboard: open audits, findings past due, counts by severity\n2. Template editor: create and clone templates, reorder items by drag or up/down buttons\n3. Audit runner: one item per row, keyboard-friendly, set result, add note, attach evidence, spawn a finding inline\n4. Findings list: filter by audit, severity, owner, status; edit status and resolution\n5. Report page at /audits/[id]/report: header, scope, per-item results table, findings table, print stylesheet so browser print-to-PDF looks acceptable\n\nAlso include:\n- Seed script with one generic 15-item internal review template so the app is usable on first run\n- CSV export of findings and a JSON export of a whole audit including evidence filenames\n- npm run backup that copies the SQLite file and evidence folder to ./backups with a timestamp\n\nOut of scope, do not build: multi-user roles, email reminders, e-signatures, standards clause libraries, anything claiming certification readiness. Put secrets, if you ever add any, in .env and gitignore ./data and ./backups. Write a short README that says plainly this is not a compliance-grade system of record.",
+  "promptCurated": false
+}
