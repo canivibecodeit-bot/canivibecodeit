@@ -1,0 +1,52 @@
+{
+  "slug": "postpeer-dev",
+  "name": "Postpeer.dev",
+  "domain": "postpeer.dev",
+  "category": "dev-tools",
+  "subcategory": "peer review",
+  "tagline": "A small dev-facing tool for posting work and collecting peer feedback on it.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://postpeer.dev/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "This is a thin-footprint indie product, so treat the specifics as unverified: the shape is post a thing, invite peers, collect structured feedback. The software half of that is genuinely a weekend build: a submissions table, threaded comments, invite tokens, markdown with code highlighting, done. The half you cannot build is the part where competent strangers actually show up and leave useful notes, and if that is where the product's value lives, a self-hosted clone is a very tidy empty room. Build it if you already have a group chat full of people who owe you reviews. Skip it if the whole point was borrowing someone else's reviewer pool.",
+  "coreLoopDIY": "Self-hosted board where you post an item (code, draft, link) with a prompt, share an invite link, and collect threaded, markdown-formatted feedback in one place.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+",
+    "A small VPS or Fly.io instance if peers need to reach it from outside your laptop",
+    "Peers who will actually open the link",
+    "SMTP or a transactional email key if you want notification emails instead of pasting links manually"
+  ],
+  "whatYouLose": [
+    "A ready-made pool of reviewers who are not your friends doing you a favor",
+    "Moderation and any norms about what counts as a useful review",
+    "Notifications, mobile-friendly polish, and the nudges that keep threads from dying",
+    "Whatever integrations it has with GitHub, editors, or social accounts",
+    "Reputation signals: someone else's judgment on who is worth listening to"
+  ],
+  "moatTags": [
+    "network-effects",
+    "collaboration",
+    "execution-polish"
+  ],
+  "moatNotes": "Anything shaped like peer review is a two-sided supply problem wearing a CRUD app as a costume.",
+  "whyPeopleStillPay": "Because the annoying part of peer feedback is never the form, it is the people. Paying gets you a room that already has reviewers in it, plus the mild social pressure of a public-ish venue where leaving a lazy comment looks bad. A self-hosted board is technically identical and socially inert: you will post twice, get one reply, and forget the domain renewal. If the product's reviewer pool is real and active, the subscription is buying attention, not features.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The build is easy and the hard part is not code. Worth a weekend only if you already have people willing to read your stuff.",
+  "prompt": "Build a self-hosted peer review board as a single Next.js app. No SaaS backend, no telemetry, no analytics.\n\nStack, non-negotiable:\n- Next.js 15, App Router, TypeScript\n- SQLite via better-sqlite3, schema created on boot with plain SQL migrations in /db\n- Tailwind for styling, no component library\n- Deployable with `npm run build && npm start` on a single small box\n\nData model:\n- items: id, title, body_markdown, kind (code | writing | link), status (open | closed), created_at\n- reviews: id, item_id, author_name, body_markdown, created_at, parent_id (nullable, for one level of replies)\n- invites: token, label, expires_at, revoked (bool)\n\nBehavior:\n- Owner auth is a single password from .env (OWNER_PASSWORD), signed httpOnly cookie session. No user accounts, no OAuth.\n- Owner can create, edit, close, and delete items, and generate or revoke invite links.\n- Anyone holding a valid invite token can view items and post reviews, entering a display name once (stored in a cookie). No signup.\n- Markdown rendering with fenced code blocks and Shiki syntax highlighting, sanitized HTML output.\n- Each item page shows the prompt, the diff-free body, and reviews sorted oldest first, with one level of replies.\n- Simple per-item review count and \"unread since last owner visit\" badge on the index.\n- Optional email notification to OWNER_EMAIL on new review, only if SMTP_URL is set in .env; silently skipped otherwise.\n\nExplicitly out of scope: public discovery feed, reviewer reputation, payments, GitHub integration, mobile app, real-time updates, file uploads.\n\nDeliver: working app, /db seed script with two example items, .env.example listing OWNER_PASSWORD, OWNER_EMAIL, SMTP_URL, INVITE_SIGNING_SECRET, and a README with setup, backup (copy the .sqlite file), and deploy notes.",
+  "promptCurated": false
+}
