@@ -1,0 +1,52 @@
+{
+  "slug": "heygrc",
+  "name": "heyGRC",
+  "domain": "heygrc.com",
+  "category": "security",
+  "subcategory": "GRC and compliance automation",
+  "tagline": "AI-assisted governance, risk and compliance workspace: policies, controls, evidence and security questionnaires in one place.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://heygrc.com/",
+    "checkedOn": "2026-08-17",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The visible surface of a GRC tool is unglamorous: a control register, a policy library, an evidence folder with dates on it, and a way to answer the same 300 security questions again. An agent can build that in a weekend, and a retrieval layer over your own policies handles questionnaire drafting surprisingly well. What it cannot build is the boring half: live integrations that pull evidence out of your cloud, identity provider and ticketing system on a schedule, framework crosswalks that stay current as SOC 2 and ISO revisions land, and the quiet fact that auditors have seen the vendor's exports before and know how to read them. If compliance is a real revenue blocker for you, the DIY version becomes a second job you did not budget for. If you are pre-audit and just need to stop losing deals to a questionnaire PDF, the DIY version is genuinely fine.",
+  "coreLoopDIY": "A local control register plus policy library with dated evidence attachments and an AI drafter that answers security questionnaires from your own documents.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An LLM API key for drafting and retrieval",
+    "Your own policy documents to seed the corpus",
+    "A framework control list you paste in yourself, no vendor crosswalk included",
+    "Somewhere to keep the SQLite file backed up, since it is now your audit trail"
+  ],
+  "whatYouLose": [
+    "Automated evidence collection from AWS, Okta, GitHub, HR and MDM, which is most of the actual product",
+    "Framework content that someone else maintains when standards get revised",
+    "An auditor-friendly export that the auditor has already seen fifty times",
+    "Vendor risk and subprocessor tracking, which quietly grows into its own module",
+    "Anyone to blame but yourself when the evidence has a six month gap in it"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "The moat is less the software than the maintenance contract on other people's rules, plus a hundred read-only API connections nobody wants to write twice.",
+  "whyPeopleStillPay": "Because compliance work is deadline work with a stranger grading it. The value being purchased is not the table of controls, it is the confidence that when an auditor or an enterprise buyer asks for twelve months of access review evidence, it exists, it is timestamped, and it came out of a system that pulled it automatically rather than a person who remembered to. That confidence is worth real money to a company mid-deal, and it is exactly the part a weekend build quietly skips.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The register is a weekend, the evidence pipeline is a year. Fine for pre-audit hygiene, not for the week the auditor shows up.",
+  "prompt": "Build a local, single-user GRC workspace called \"grcdesk\". No accounts, no cloud, no telemetry.\n\nStack, non negotiable: Next.js with the App Router and TypeScript, Tailwind for styling, SQLite via better-sqlite3, Drizzle for schema and migrations. Everything runs with `npm run dev` on localhost. File uploads go to ./storage on local disk. Secrets live in .env, read via process.env, and .env is gitignored.\n\nData model:\n- frameworks (id, name, version)\n- controls (id, framework_id, ref, title, description, owner, status: not_started | in_progress | met | not_applicable, review_frequency_days, last_reviewed_at)\n- policies (id, title, version, body_markdown, approved_at, next_review_at)\n- evidence (id, control_id, filename, path, collected_at, note)\n- questionnaires (id, name, created_at) and questions (id, questionnaire_id, prompt, draft_answer, final_answer, cited_source_ids)\n\nFeatures, all in scope:\n1. Import a framework as CSV (ref, title, description) and see a control register table with filters by status and owner.\n2. Control detail page: edit status and owner, attach evidence files with a collected_at date and note, show a warning badge when last_reviewed_at is older than review_frequency_days.\n3. Policy library with markdown editing, version bumping, approval date, and a dashboard list of policies past next_review_at.\n4. Questionnaire mode: paste a list of questions, one per line. For each question, retrieve the most relevant policy and control text and draft an answer with an LLM, showing the sources it used. Draft answers are editable and never auto-final.\n5. Retrieval: chunk policies and control descriptions, embed them with the OpenAI embeddings API, store vectors as JSON blobs in SQLite, cosine similarity in TypeScript. No vector database.\n6. Export: one button that writes a timestamped folder to ./exports containing controls.csv, policies as markdown, an evidence manifest CSV, and copies of the evidence files.\n7. Dashboard: counts by control status, overdue reviews, evidence coverage per control.\n\nExplicitly out of scope, do not build or stub: integrations with AWS, Okta, GitHub, Jira or any HR system; multi-user roles or auth; an auditor portal; automated evidence collection; vendor risk management; any framework content you did not import yourself.\n\nSeed the database with one small example framework of about ten controls and two example policies so the app is usable on first run. Include a README with setup steps, the required OPENAI_API_KEY line, a one paragraph note that this is a personal tracker and not an audit-ready system of record, and a reminder to back up grcdesk.db and ./storage.",
+  "promptCurated": false
+}
