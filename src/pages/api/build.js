@@ -214,31 +214,42 @@ export async function POST({ request, locals, clientAddress }) {
   return json({ ok: true, id, url: `/builds/${handle}/${slug}` }, 201);
 }
 
-/* "posted by the repo owner": true only when the repo lives on github.com
-   and its owner login matches the poster's linked GitHub account, resolved
-   id -> login via GitHub's public API. Silent on any failure — no match is
-   never an accusation, so it is never an error either. */
+/* "posted by the repo owner": true when the repo lives on github.com and
+   its owner is either the poster's linked GitHub login, or an org that
+   login is a PUBLIC member of (private membership is invisible to us by
+   GitHub's design, so it can't count). Resolved id -> login via the public
+   API. Silent on any failure — no match is never an accusation, so it is
+   never an error either. */
+const GH_HEADERS = () => ({
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+  'User-Agent': 'canivibecodeit-builds',
+  ...(process.env.GITHUB_BOT_TOKEN
+    ? { Authorization: `Bearer ${process.env.GITHUB_BOT_TOKEN}` }
+    : {}),
+});
+
 async function repoOwnerMatch(repoUrl, userId) {
   try {
     if (repoUrl.hostname.toLowerCase() !== 'github.com') return 0;
     const owner = repoUrl.pathname.split('/').filter(Boolean)[0];
-    if (!owner) return 0;
+    if (!owner || !/^[A-Za-z0-9-]+$/.test(owner)) return 0;
     const accountId = await githubAccountOf(userId);
     if (!accountId || !/^\d+$/.test(String(accountId))) return 0;
     const res = await fetch(`https://api.github.com/user/${accountId}`, {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'canivibecodeit-builds',
-        ...(process.env.GITHUB_BOT_TOKEN
-          ? { Authorization: `Bearer ${process.env.GITHUB_BOT_TOKEN}` }
-          : {}),
-      },
+      headers: GH_HEADERS(),
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return 0;
     const login = (await res.json()).login;
-    return typeof login === 'string' && login.toLowerCase() === owner.toLowerCase() ? 1 : 0;
+    if (typeof login !== 'string' || !login) return 0;
+    if (login.toLowerCase() === owner.toLowerCase()) return 1;
+    // Org-owned repo: public membership in the owning org counts too.
+    const org = await fetch(
+      `https://api.github.com/orgs/${owner}/public_members/${login}`,
+      { headers: GH_HEADERS(), signal: AbortSignal.timeout(8000) }
+    );
+    return org.status === 204 ? 1 : 0;
   } catch {
     return 0;
   }

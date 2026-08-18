@@ -94,6 +94,69 @@
      the site-wide .copy-group markup (CopyGroup.astro) and app.js's delegate
      handles them exactly as on the verdict pages. */
 
+  /* ---------- build page: screenshot carousel ---------- */
+
+  const initCarousel = () => {
+    const wrap = $('[data-bd-carwrap]');
+    if (!wrap || wrap.dataset.wired) return;
+    wrap.dataset.wired = '1';
+    const car = $('.bd-carousel', wrap);
+    const prev = $('[data-car-prev]', wrap);
+    const next = $('[data-car-next]', wrap);
+    const step = () => {
+      const img = $('img', car);
+      return (img ? img.getBoundingClientRect().width : car.clientWidth * 0.86) + 12;
+    };
+    const syncArrows = () => {
+      prev.hidden = car.scrollLeft < 10;
+      next.hidden = car.scrollLeft > car.scrollWidth - car.clientWidth - 10;
+    };
+    prev.addEventListener('click', () => car.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next.addEventListener('click', () => car.scrollBy({ left: step(), behavior: 'smooth' }));
+    car.addEventListener('scroll', syncArrows, { passive: true });
+    syncArrows();
+
+    /* Mouse drag-to-scroll. Touch already pans natively; snap is parked
+       during the drag so the strip follows the cursor, and re-engages on
+       release (the browser then settles on the nearest slide). */
+    let drag = null;
+    car.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: car.scrollLeft };
+      car.classList.add('dragging');
+      car.setPointerCapture(e.pointerId);
+    });
+    car.addEventListener('pointermove', (e) => {
+      if (drag) car.scrollLeft = drag.left - (e.clientX - drag.x);
+    });
+    const release = () => {
+      if (!drag) return;
+      const delta = car.scrollLeft - drag.left;
+      drag = null;
+      /* Mandatory snap would yank a sub-slide drag back where it started;
+         commit the drag's direction once it's past a fifth of a slide. The
+         .dragging class (snap off) stays on until the commit scroll lands —
+         re-enabling snap first lets the browser race it back to the old
+         slide. */
+      const s = step();
+      const target =
+        Math.abs(delta) < s * 0.2
+          ? Math.round(car.scrollLeft / s)
+          : delta > 0
+            ? Math.ceil(car.scrollLeft / s)
+            : Math.floor(car.scrollLeft / s);
+      const done = () => {
+        car.classList.remove('dragging');
+        car.removeEventListener('scrollend', done);
+      };
+      car.addEventListener('scrollend', done);
+      setTimeout(done, 700); // scrollend fallback
+      car.scrollTo({ left: target * s, behavior: 'smooth' });
+    };
+    car.addEventListener('pointerup', release);
+    car.addEventListener('pointercancel', release);
+  };
+
   /* ---------- /post-a-build ---------- */
 
   const initPost = () => {
@@ -566,6 +629,7 @@
 
   const init = () => {
     initIndex();
+    initCarousel();
     initPost();
   };
   document.addEventListener('astro:page-load', init);

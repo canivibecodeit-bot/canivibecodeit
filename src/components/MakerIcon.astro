@@ -1,0 +1,59 @@
+---
+// Deterministic maker identicon: a 5x5 mirrored cell pattern seeded from
+// the handle, drawn as green cells on the standard tile background — the
+// same visual family as the app icon tiles, no uploads, no external
+// avatar hosts. Same handle = same icon everywhere, forever.
+const { handle, size = 36 } = Astro.props;
+
+let h = 5381;
+const s = String(handle ?? '').toLowerCase();
+for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+const rand = () => {
+  h ^= h << 13;
+  h >>>= 0;
+  h ^= h >> 17;
+  h ^= h << 5;
+  h >>>= 0;
+  return h;
+};
+
+// Left three columns are random, right two mirror them (identicon symmetry
+// is what makes a random grid read as a face-like mark).
+const cells = [];
+for (let y = 0; y < 5; y++) {
+  for (let x = 0; x < 3; x++) {
+    if (rand() % 5 < 2) {
+      cells.push([x, y]);
+      if (x < 2) cells.push([4 - x, y]);
+    }
+  }
+}
+// A hash that comes up near-empty still deserves a mark.
+if (cells.length < 4) cells.push([2, 1], [1, 2], [3, 2], [2, 3]);
+
+const pad = 0.62;
+const cell = (5 - pad * 2) / 5;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 5 5"
+  class="maker-icon"
+  role="img"
+  aria-label={`${s} avatar`}
+>
+  <rect width="5" height="5" rx="0.85" fill="var(--surface-2)" stroke="var(--border)" stroke-width="0.1"></rect>
+  {
+    cells.map(([x, y]) => (
+      <rect
+        x={pad + x * cell + 0.06}
+        y={pad + y * cell + 0.06}
+        width={cell - 0.12}
+        height={cell - 0.12}
+        rx="0.12"
+        fill="var(--primary)"
+      ></rect>
+    ))
+  }
+</svg>

@@ -4632,7 +4632,9 @@ a.bd-row:hover {
 
 .bd-fact .k {
   color: var(--muted);
-  width: 70px;
+  /* Wide enough for the longest label ("affiliation") — a fixed lane
+     narrower than its text overprints the value beside it. */
+  width: 84px;
   flex-shrink: 0;
 }
 

@@ -8,6 +8,7 @@
 // for their owner only (with a note), so the post-submit redirect works.
 import Base from '../../../layouts/Base.astro';
 import CopyGroup from '../../../components/CopyGroup.astro';
+import MakerIcon from '../../../components/MakerIcon.astro';
 import VerdictBadge from '../../../components/VerdictBadge.astro';
 import { buildsLive } from '../../../lib/flags.js';
 import { buildByUserSlug, buildUserNames, liveBuilds, userByHandle } from '../../../lib/db.js';
@@ -97,10 +98,14 @@ const chatLine = chatFactLine(build);
     }
     {
       media.length > 1 && (
-        <div class="bd-carousel" tabindex="0" aria-label={`${media.length} screenshots, scrollable`}>
-          {media.map((m, i) => (
-            <img src={m} alt={i === 0 ? `screenshot of ${build.name}` : ''} loading="lazy" />
-          ))}
+        <div class="bd-carwrap" data-bd-carwrap>
+          <button class="bd-car-arrow prev" data-car-prev type="button" hidden aria-label="previous screenshot">‹</button>
+          <div class="bd-carousel" tabindex="0" aria-label={`${media.length} screenshots, scrollable`}>
+            {media.map((m, i) => (
+              <img src={m} alt={i === 0 ? `screenshot of ${build.name}` : ''} loading="lazy" draggable="false" />
+            ))}
+          </div>
+          <button class="bd-car-arrow next" data-car-next type="button" hidden aria-label="next screenshot">›</button>
         </div>
       )
     }
@@ -223,13 +228,14 @@ const chatLine = chatFactLine(build);
 
         <div class="bd-card">
           <span class="bd-label">maker</span>
-          <div class="bd-builder">
-            <span class="bd-avatar">{builder.trim().charAt(0).toUpperCase()}</span>
+          <a class="bd-builder" href={`/builds/${maker.handle}`}>
+            <MakerIcon handle={maker.handle} size={36} />
             <span class="bd-builder-txt">
               <b>{builder}</b>
               <span>{mine.length || 1} build{(mine.length || 1) === 1 ? '' : 's'}{build.by_owner === 1 && ' · posted by the repo owner'}</span>
             </span>
-          </div>
+            <span class="bd-builder-go">all their builds →</span>
+          </a>
         </div>
 
         {
@@ -333,17 +339,64 @@ const chatLine = chatFactLine(build);
   }
 
   /* Multi-shot: one horizontal scroll-snap strip. Each slide takes most of
-     the column so the next screenshot peeks in from the right — the peek IS
-     the affordance, no arrows needed. */
+     the column so the next screenshot peeks in from the right; JS adds
+     arrows and mouse drag on top, touch scrolls natively either way. */
+  .bd-carwrap {
+    position: relative;
+    margin-top: 26px;
+  }
+
+  .bd-car-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 22px;
+    line-height: 1;
+    padding: 0 0 3px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+
+  .bd-car-arrow:hover {
+    border-color: var(--muted);
+  }
+
+  .bd-car-arrow.prev {
+    left: 12px;
+  }
+
+  .bd-car-arrow.next {
+    right: 12px;
+  }
+
+  .bd-car-arrow[hidden] {
+    display: none;
+  }
+
   .bd-carousel {
     display: flex;
     gap: 12px;
-    margin-top: 26px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding-bottom: 8px;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    cursor: grab;
+  }
+
+  .bd-carousel.dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
   }
 
   .bd-carousel::-webkit-scrollbar {
@@ -444,20 +497,24 @@ const chatLine = chatFactLine(build);
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
   }
 
-  .bd-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--primary);
+  .bd-builder :global(.maker-icon) {
+    border-radius: 8px;
     flex-shrink: 0;
+  }
+
+  .bd-builder-go {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  a.bd-builder:hover .bd-builder-go,
+  a.bd-builder:hover b {
+    color: var(--primary);
   }
 
   .bd-builder-txt {
