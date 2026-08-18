@@ -1,0 +1,52 @@
+{
+  "slug": "shadowphone",
+  "name": "Shadowphone",
+  "domain": "shadowphone.io",
+  "category": "security",
+  "subcategory": "burner phone numbers",
+  "tagline": "A second, disposable phone number for texts and calls you would rather not attach to your real line.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://shadowphone.io/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The app layer here is genuinely thin: buy a number, route inbound SMS and voice to yourself, send from that number, keep threads in a database. An agent can build that in a weekend on top of a telephony API, and for a single person with one or two numbers it works fine. What you cannot one-shot is the telephony itself, because numbers come from carriers and messaging at any volume drags you into registration paperwork. So you end up with a real replacement that is permanently renting the hard part from someone else. The gaps are mobile: no native app, no reliable push, and MMS plus voicemail are each their own small project.",
+  "coreLoopDIY": "Provisions a phone number from a telephony API, receives and sends SMS and forwards calls through a webhook, and stores every thread in a local database with a simple web inbox.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A telephony provider account with API access and a funded balance for numbers and per-message fees",
+    "A publicly reachable HTTPS URL for inbound webhooks, a cheap VPS or a tunnel works",
+    "A phone that can receive forwarded calls",
+    "Willingness to do carrier messaging registration if you send more than a trickle"
+  ],
+  "whatYouLose": [
+    "A real mobile app with push notifications, so texts arrive whenever you happen to open the browser",
+    "Number churn: burning and replacing numbers is one API call for you but a tidy flow in a product",
+    "MMS, group texts, voicemail transcription and call recording, each of which is its own build",
+    "Any pretense of an audited privacy story, since your logs, your database and your provider account are all pointed at you",
+    "Someone else handling carrier filtering, spam scoring and the paperwork when a number stops delivering"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "execution-polish"
+  ],
+  "moatNotes": "Numbers are a regulated, rented resource. You are always downstream of a carrier, whether you build this or buy it.",
+  "whyPeopleStillPay": "Because the value is not the inbox, it is the number supply and the fact that texts land on your phone without you thinking about it. Paying a few dollars a month for a maintained app beats keeping a webhook endpoint alive, watching a provider balance, and discovering at the worst moment that your DIY number got filtered into oblivion. If you need one throwaway number for a marketplace listing, the DIY build is fine and probably cheaper. If you rely on it for anything that matters, the subscription is buying you deliverability and someone to blame.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Public detail on this one is thin, so treat the pricing and feature notes as unverified until someone checks. The build advice holds regardless: the app is easy, the telephony is rented.",
+  "prompt": "Build a self-hosted second-phone-number web app called \"burnerbox\".\n\nStack, no substitutions:\n- Next.js (App Router) with TypeScript, Tailwind for styling.\n- SQLite via better-sqlite3, schema created on first boot, file at ./data/burnerbox.db.\n- Twilio Node SDK for telephony. No other providers, no abstraction layer.\n- Single user, no auth beyond a shared password from .env checked in middleware.\n\nSecrets in .env only, with a .env.example committed:\nTWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, PUBLIC_BASE_URL, FORWARD_TO_NUMBER, APP_PASSWORD.\n\nFeatures in scope:\n1. Numbers page: search available Twilio numbers by area code, buy one, list owned numbers, release a number with a confirm step. On purchase, set the voice and SMS webhooks to PUBLIC_BASE_URL routes automatically.\n2. POST /api/webhooks/sms: verify the Twilio signature, store the inbound message, group by (owned number, counterparty number) into a thread.\n3. POST /api/webhooks/voice: return TwiML that dials FORWARD_TO_NUMBER with the burner number as caller ID, and record nothing.\n4. Inbox UI: thread list with last message preview and unread count, thread view, send a reply from the correct owned number.\n5. Per-number label and notes so you remember why you bought it.\n\nExplicitly out of scope: MMS, group messaging, voicemail, transcription, contacts import, mobile apps, push notifications, telemetry, analytics, any cloud service other than Twilio.\n\nDeliverables: working app, README covering how to expose PUBLIC_BASE_URL for local dev with a tunnel, a note that Twilio charges per number and per message, and a note that sustained outbound messaging in the US requires A2P 10DLC registration or messages will be filtered.\n\nKeep it under 15 files. Do not add a signup flow. Do not add a database migration framework.",
+  "promptCurated": false
+}
