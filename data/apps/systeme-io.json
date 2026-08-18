@@ -1,0 +1,53 @@
+{
+  "slug": "systeme-io",
+  "name": "Systeme.io",
+  "domain": "systeme.io",
+  "category": "creator-commerce",
+  "subcategory": "all-in-one funnel, email and course platform",
+  "tagline": "Bundled funnel builder, email marketing, course hosting, checkout and affiliate program for solo online businesses.",
+  "priceMonthly": 27,
+  "pricing": {
+    "plan": "Startup",
+    "basis": "monthly, flat, contact-count limited",
+    "unit": "flat",
+    "source": "https://systeme.io/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "None of the individual pieces here are hard: a landing page, an opt-in form, a contacts table, a Stripe checkout, a gated video page, a ref-code cookie. An agent can wire all of that into one self-hosted app in a weekend and you will own the list outright. What you cannot one-shot is the boring operational layer: domain authentication, bounce and complaint handling, unsubscribe compliance, and the fact that sending 20,000 emails from your own setup means you now care about deliverability as a personal hobby. You also lose the drag-and-drop editor, which sounds cosmetic until you want to change a headline at 11pm without opening an editor. Verdict lands at kinda because the value survives the rebuild but the maintenance does not disappear.",
+  "coreLoopDIY": "Serves your funnel and course pages, captures opt-ins into a local database, sells access through Stripe Checkout, and drips emails plus tracks affiliate referrals from a cron worker.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Stripe account for checkout and webhooks",
+    "Transactional email provider with a verified sending domain, for example Resend or SES",
+    "A VPS or serverless host plus your own domain",
+    "Video hosting for course content, or accept large local files",
+    "Willingness to handle unsubscribe and bounce logic yourself"
+  ],
+  "whatYouLose": [
+    "Visual page and email editors, plus the template library that makes launching a funnel a copy-paste job",
+    "Managed deliverability: shared sending reputation, bounce suppression, spam complaint handling",
+    "Affiliate program plumbing at the level people expect, including payouts and dashboards for your affiliates",
+    "Webinars, blogs, and the odd extras that come free in the bundle",
+    "One vendor to blame when checkout breaks on launch day"
+  ],
+  "moatTags": [
+    "switching-costs",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "The lock-in is that your list, your pages, your course and your affiliate ledger all live in one account, and moving any single piece breaks the links in the others.",
+  "whyPeopleStillPay": "Because the business being run on top of it is usually worth more per hour than the infrastructure underneath it. A solo course seller wants to change a price, add an upsell, and send a broadcast in the same twenty minutes, and a bundled tool does that with no deploy step and no deliverability anxiety. The generous free tier also means many users are paying only once the thing is already making money, which is a hard offer to argue with. Self-hosting makes sense if you are technical, plan to stay small, and specifically want to own the contact list and the checkout data.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Rebuild the funnel and the course, rent the email sending. That split is the honest answer here.",
+  "prompt": "Build a self-hosted, single-operator funnel and course platform. One person runs it, no multi-tenancy.\n\nStack, no substitutions:\n- Next.js 15, App Router, TypeScript, Tailwind\n- SQLite via better-sqlite3, single file at ./data/app.db, migrations as plain SQL in ./migrations\n- Stripe Checkout plus webhooks for payments\n- Resend for outbound email\n- No auth provider: magic-link email login for buyers, single admin password from .env\n\nWhat to build:\n1. Funnel pages defined as MDX files in ./content/pages. Each has frontmatter: slug, title, headline, subhead, cta, optional priceId. Render server-side with a clean default layout.\n2. Opt-in form component posting to /api/optin. Store contacts in SQLite: email, name, tags, source page, created_at, unsubscribed_at. Double opt-in optional via env flag.\n3. Email engine: broadcasts and sequences. A sequence is a JSON file in ./content/sequences with steps (delay in hours, subject, MDX body). A worker script (npm run worker) runs every minute via node-cron, sends due steps through Resend, logs every send in an email_events table. Every email gets a one-click unsubscribe link with a signed token, and List-Unsubscribe headers.\n4. Checkout: /api/checkout creates a Stripe Checkout Session for a given priceId. Webhook handler grants a course entitlement on checkout.session.completed, and revokes on refund.\n5. Course area at /learn: modules and lessons from MDX in ./content/course, gated by entitlement, video via an embed URL field. Track lesson completion per contact.\n6. Affiliate tracking: /r/CODE sets a 60 day first-party cookie, attributes the sale on webhook, writes rows to a commissions table with status pending. Admin page lists commissions. No payouts.\n7. Admin at /admin behind the env password: contacts list with search, broadcast composer with a test-send, sales list, commissions list, CSV export of contacts and sales.\n\nOut of scope, do not build: drag-and-drop editors, webinars, blog CMS, tax handling, affiliate payouts, IP warmup, analytics beyond page-view counts stored locally.\n\nRules: all secrets in .env (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, ADMIN_PASSWORD, APP_URL). No telemetry, no external analytics. Seed the database with two demo contacts, one demo course and one demo sequence so npm run dev shows a working funnel immediately. Include a README with setup steps, a Stripe CLI webhook command, and a deploy note for a single VPS with a persistent volume.",
+  "promptCurated": false
+}
