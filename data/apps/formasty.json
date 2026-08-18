@@ -1,0 +1,52 @@
+{
+  "slug": "formasty",
+  "name": "Formasty",
+  "domain": "formasty.com",
+  "category": "forms",
+  "subcategory": "no-code form builder",
+  "tagline": "Hosted no-code form builder for building forms, embedding them, and collecting responses.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://formasty.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "A form builder is one of the most one-shottable categories there is: a schema, a renderer, a responses table, a CSV export. An agent will get you a working multi-step form with conditional fields and an embed snippet in a single session, and for a personal signup form or client intake that is genuinely enough. The gaps are the boring parts nobody thinks about until they bite: email that actually lands in inboxes, spam that gets past a honeypot, file uploads you have to back up, and the dozen integrations that turn a response into a row in someone else's tool. You also inherit uptime, because a form that is down is a lead you never knew existed. Build it if the form is yours and the volume is low; pay if the form is a business process.",
+  "coreLoopDIY": "Define a form as a JSON schema in an admin UI, render it publicly as a multi-step page or embeddable iframe, and store every submission in SQLite with email notification and CSV export.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "a small VPS or always-on box to host it",
+    "SMTP credentials for notification email",
+    "disk space and a backup habit for uploads and the SQLite file",
+    "your own domain if you want the embed to look credible"
+  ],
+  "whatYouLose": [
+    "Deliverability: their notification email is warmed and authenticated, your SMTP box is not",
+    "The integration shelf: Sheets, Slack, Notion, CRM, Zapier style webhooks with retries and mapping UI",
+    "Template library and builder polish, which is most of what you are paying for in a form tool",
+    "Payment fields, e-signature, and anything that needs a compliance story like a signed DPA",
+    "Uptime and CDN edge delivery, so a form on a busy page fails silently when your box does"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "No network effect here at all. The moat is that the builder UI is finicky to get right and that the destination integrations are endless plumbing.",
+  "whyPeopleStillPay": "Because forms are load-bearing. The moment a form is collecting real leads, applications, or client files, the cost of it quietly breaking exceeds any subscription, and you stop wanting to own the email deliverability, spam waves, and file storage yourself. Paid form tools also sell speed: a decent one gets a branded, conditional, multi-step form live in ten minutes with a template, which is faster than reviewing an agent's output. The self-hosted version wins when it is one form you control on a site you already run.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Forms are the canonical 'I could build that in a weekend' app, and mostly you can, right up until you have to explain where a submission went.",
+  "prompt": "Build a single-user, self-hosted form builder and response collector. Stack: Next.js 15 App Router, TypeScript, Tailwind, SQLite via better-sqlite3. No other hosted services.\nData model: forms(id, slug, title, schema JSON, theme JSON, createdAt), responses(id, formId, payload JSON, meta JSON, createdAt), deliveries(id, responseId, url, status, attempts).\nAdmin builder at /admin/forms/[id]: add, reorder, duplicate and delete fields. Field types: short text, long text, email, number, single select, multi select, dropdown, date, rating 1 to 5, file upload, consent checkbox, hidden field.\nPer field: label, help text, required flag, placeholder, and simple conditional visibility (show this field when field X equals value Y).\nMulti-step forms: fields grouped into steps, one step per screen, progress bar, back button, answers held in client state until final submit.\nPublic form at /f/[slug]: server-rendered, mobile-first, keyboard navigable, and revalidated on the server so client validation is never the only check.\nPersist in-progress answers to localStorage keyed by form slug so a refresh does not wipe the form.\nFile uploads write to ./uploads with a size cap and mime allowlist defined in the schema; store the relative path in the response payload.\nSpam control: hidden honeypot field, reject submissions completed in under 2 seconds, and a per-IP rate limit table in SQLite. No captcha, no third party.\nNotifications: on submit, send a plain text digest of the response over SMTP with nodemailer using SMTP_HOST, SMTP_USER, SMTP_PASS, NOTIFY_TO from .env. If those are unset, log and continue instead of erroring.\nOptional per-form webhook URL: POST the response JSON, 3 retries with backoff, log every attempt in deliveries.\nResponses view at /admin/forms/[id]/responses: table with one column per field, text search, date range filter, detail drawer, delete, and CSV export of the current filter.\nEmbedding: an /embed/[slug] route plus a small public/embed.js that injects an iframe and auto-resizes it via postMessage.\nTheming per form: accent color, one of three system font stacks, light or dark, optional cover image, custom thank-you message, optional redirect URL.\nAuth: a single ADMIN_PASSWORD from .env and a signed httpOnly cookie session for all /admin routes. No user accounts, no OAuth, no analytics, no telemetry.\nSeed script creating two demo forms: a three-step onboarding survey with conditional fields, and a one-page contact form.\nOut of scope: payments, e-signatures, team accounts, template marketplace, A/B testing, AI form generation.\nDeliver a README with setup steps, a .env.example, a note on backing up form.db plus ./uploads, and a Dockerfile listening on port 3000.\nShip working code, not scaffolding: npm install, npm run seed, npm run dev must yield a fillable form at /f/contact and a visible row in the responses table.",
+  "promptCurated": false
+}
