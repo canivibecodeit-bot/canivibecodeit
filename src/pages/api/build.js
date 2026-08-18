@@ -82,7 +82,9 @@ export async function POST({ request, locals, clientAddress }) {
   const oneLiner = clean(body.one_liner, 140);
   if (oneLiner.length < 5) return json({ error: 'one line on what it is' }, 400);
 
-  if (!Object.hasOwn(GOES, body.goes)) return json({ error: 'how many goes did it take?' }, 400);
+  if (typeof body.goes !== 'string' || !Object.hasOwn(GOES, body.goes)) {
+    return json({ error: 'how many goes did it take?' }, 400);
+  }
   const goes = body.goes;
 
   const prompt = cleanBlock(body.prompt, 20000) || null;

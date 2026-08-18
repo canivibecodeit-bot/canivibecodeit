@@ -14,6 +14,12 @@ if (!BUILD_ID_RE.test(id ?? '')) return new Response(null, { status: 404 });
 const build = await buildById(id);
 if (!build) return new Response(null, { status: 404 });
 
+// Same visibility bar as the pretty URL: live for everyone, pending for its
+// owner. Anything else 404s so an id never confirms an unapproved build.
+const viewer = Astro.locals.user ?? null;
+const ownerPreview = build.status === 'pending' && viewer?.id === build.user_id;
+if (build.status !== 'live' && !ownerPreview) return new Response(null, { status: 404 });
+
 const names = await buildUserNames([build.user_id]);
 const target = buildHref(names, build);
 if (target === `/builds/${build.id}`) return new Response(null, { status: 404 });
