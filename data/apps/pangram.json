@@ -1,0 +1,51 @@
+{
+  "slug": "pangram",
+  "name": "Pangram",
+  "domain": "pangram.com",
+  "category": "ai-writing",
+  "subcategory": "AI text detection",
+  "tagline": "A classifier that scores whether a piece of text was written by an AI model.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://pangram.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The interface is a text box and a percentage, which is exactly the kind of thing that tricks you into thinking it is a weekend project. The product is not the text box: it is a classifier trained on a very large, continuously refreshed corpus of human writing paired with output from every model release, tuned hard against false positives because accusing a real person of cheating is the failure mode that ends the company. You can absolutely build a local detector from perplexity and burstiness features in an afternoon, and it will be confidently wrong often enough to be useless for any decision that matters. Nobody outside your own head will accept your homemade score, and the calibration drifts every time a new frontier model ships. Build it to understand the problem, not to rely on it.",
+  "coreLoopDIY": "Paste text, score it locally with a small language model's token log-probabilities plus a few style statistics, and get a hand-wavy human-or-machine guess with a loud accuracy disclaimer.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Local Python with torch and transformers",
+    "A couple of GB of disk for small model weights, CPU works but is slow",
+    "Your own labelled samples of human and AI text if you want any idea of accuracy"
+  ],
+  "whatYouLose": [
+    "Calibration: a real false positive rate you can quote, instead of a vibe",
+    "Coverage of new models, which changes every few weeks whether you update or not",
+    "Sentence-level and mixed-authorship detection rather than one blunt document score",
+    "Any external credibility, since a self-built score persuades exactly zero teachers, editors or clients",
+    "Throughput, batch uploads, API access and document parsing"
+  ],
+  "moatTags": [
+    "proprietary-models",
+    "proprietary-data",
+    "brand-trust"
+  ],
+  "moatNotes": "Detection is an arms race with a moving target: the moat is the pipeline that keeps retraining on fresh model output, not the algorithm.",
+  "whyPeopleStillPay": "Because the number has to be defensible to someone else. Institutions and publishers are not buying a classifier, they are buying a third party willing to stand behind a false positive rate, plus continuous retraining against whatever model came out last month. A local heuristic detector gives you a plausible-sounding percentage with no error bars, which is worse than nothing when the outcome is an accusation.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The scoring UI is an afternoon; the confidence you can put behind the score is not. The moat is a constantly retrained corpus of human and model text plus a reputation strong enough that other people accept the verdict.",
+  "prompt": "Build a local AI-text-detection playground so I can see how weak naive detection actually is. No cloud calls, no accounts, no telemetry.\n\nStack, no substitutions: Python 3.11, FastAPI + uvicorn, transformers + torch, a single server-rendered HTML page with vanilla JS. No build step, no database, no Docker.\n\nCore loop:\n1. One page with a large textarea and an Analyze button.\n2. POST /analyze takes the text and returns a JSON report.\n3. Scoring runs entirely locally with gpt2 (small) loaded once at startup via transformers. Download on first run and cache it.\n\nFeatures to compute per submission:\n- Mean token log-probability and perplexity under gpt2.\n- Burstiness: standard deviation of per-sentence mean log-probability.\n- Rank-based signal: fraction of tokens that were in the model's top-10 predictions.\n- Style stats: sentence length mean and variance, type-token ratio, punctuation counts, count of common LLM filler phrases from a hardcoded list.\n\nOutput: a 0-100 score from a simple weighted formula over those features with the weights in a single WEIGHTS dict at the top of the file, per-sentence heat colouring in the page, and a full feature table so I can see what drove the score.\n\nCalibration, and be honest about it:\n- Add a CLI command: python calibrate.py --human dir --ai dir that runs the features over two folders of .txt files, prints mean and spread per class, and prints the ROC AUC of the current weights.\n- The web page must show a fixed banner: this is an uncalibrated heuristic, not evidence, false positives are common.\n\nExplicitly out of scope: user accounts, saved history, PDF or DOCX parsing, any hosted API, model fine-tuning, mixed-authorship segmentation, batch uploads.\n\nDeliver: main.py, calibrate.py, features.py, templates/index.html, requirements.txt, and a README with run instructions and one paragraph stating plainly why this cannot match a trained commercial detector. No .env needed since there are no secrets; say so in the README.",
+  "promptCurated": false
+}
