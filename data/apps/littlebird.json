@@ -1,0 +1,50 @@
+{
+  "slug": "littlebird",
+  "name": "Littlebird",
+  "domain": "littlebird.ai",
+  "category": "ai-assistant",
+  "subcategory": "AI agent product",
+  "tagline": "An AI assistant product sold under the Littlebird name, positioned around letting an agent do the boring reading and drafting for you.",
+  "priceMonthly": 20,
+  "pricing": {
+    "plan": "Plus",
+    "basis": "monthly per user",
+    "unit": "flat",
+    "source": "https://littlebird.ai/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Plus is $20/mo billed monthly or $17/mo billed annually; Power $50/mo ($42 annual), Pro from $100/mo, Team from $17/seat/mo, Enterprise custom. Students get Plus at $15/mo with two months free on a .edu address.",
+    "native": "20 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Public detail on this one is thin, so treat this entry as a first pass rather than a teardown. Anything in the \"AI assistant that reads and drafts for you\" shape is mostly a wrapper: a model API, a place to put your context, and a loop that runs on a schedule. A coding agent can rebuild that shape in an evening and you keep the API bill instead of the subscription. What you will not rebuild in an evening is the polish, the mobile surface, and whatever integrations the paid product ships against your actual accounts. Verdict stays \"kinda\" until someone confirms whether the real value here is the agent loop or the connectors underneath it.",
+  "coreLoopDIY": "A local web app where you chat with a model over your own uploaded notes and links, plus a scheduled job that produces a digest of anything you told it to watch.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An LLM API key (OpenAI or Anthropic) in .env",
+    "Node 20+ and a machine or small VPS that stays awake for the cron job",
+    "Willingness to paste your own context in instead of having connectors do it"
+  ],
+  "whatYouLose": [
+    "Mobile app and notifications; your version is a browser tab",
+    "Prebuilt connectors to email, calendar, Slack and whatever else the paid product authenticates against",
+    "Someone else tuning prompts and swapping models when a better one ships",
+    "Reliability: your cron job dies silently and nobody pages you",
+    "Any team or sharing features, if the product has them"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "For assistant products the defensible part is almost never the model call, it is the OAuth plumbing and the hundred small decisions about when to bother you.",
+  "whyPeopleStillPay": "Because assembling the loop is the easy 20 percent and living with it is the other 80. A paid assistant already has the auth flows, the retry logic, the mobile push, and a prompt someone iterated on for months against real complaints. A self-hosted clone works great for two weeks and then you stop opening the tab, which is the actual failure mode of every personal AI build.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Entry written from limited public detail, so the verdict is soft on purpose. Revisit once the feature set is confirmed.",
+  "prompt": "Build a local personal AI assistant web app in an empty folder. No accounts, no cloud, no telemetry.\n\nStack, no substitutions:\n- TypeScript, Node 20, Fastify for the server\n- SQLite via better-sqlite3, file at ./data/assistant.db\n- Server-rendered HTML with htmx for interactivity, plain CSS, no React, no Tailwind\n- OpenAI-compatible chat completions and embeddings, base URL and key read from .env (OPENAI_API_KEY, OPENAI_BASE_URL, CHAT_MODEL, EMBED_MODEL)\n- node-cron for scheduled jobs, all in one process\n\nFeatures in scope:\n1. Context library: paste text, upload .md/.txt, or submit a URL. URLs are fetched server side and reduced to readable text with @mozilla/readability plus jsdom. Chunk to ~800 tokens, embed, store chunks and vectors in SQLite.\n2. Chat: a single conversation view. On each message, retrieve the top 8 chunks by cosine similarity, put them in the system prompt with source titles, stream the reply back. Persist all turns.\n3. Watchlist: each row is a name, a URL or a search query, and a cadence (daily or weekly). A cron job fetches each item, diffs the extracted text against the last stored snapshot, and asks the model to summarize what changed in under 80 words. Skip items with no meaningful diff.\n4. Digest: a /digest page listing the latest summaries newest first, plus a digest.md file written to ./out/ after each run so it is greppable.\n5. Every model call is logged to a calls table with model, token counts and latency, and /usage shows totals by day so you can see what you are spending.\n\nOut of scope, do not build: user accounts, OAuth to any third party, email or push notifications, mobile app, multi-user sharing, vector database services, Docker.\n\nDeliver: npm install, npm run dev on port 3000, a seeded example watchlist item, .env.example with every variable, and a README that states plainly what works and what breaks if the process dies.",
+  "promptCurated": false
+}

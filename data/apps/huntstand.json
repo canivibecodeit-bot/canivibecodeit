@@ -1,0 +1,52 @@
+{
+  "slug": "huntstand",
+  "name": "HuntStand",
+  "domain": "huntstand.com",
+  "category": "productivity-utilities",
+  "subcategory": "hunting land mapping and scouting",
+  "tagline": "Mobile mapping app for hunters: property boundaries, stand and camera markers, wind and weather overlays, and shared hunt logs for a hunting club.",
+  "priceMonthly": 2.92,
+  "pricing": {
+    "plan": "HuntStand Pro",
+    "basis": "annual subscription, monthly equivalent",
+    "unit": "flat",
+    "source": "https://www.huntstand.com/subscriptions/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Billed annually only: $34.99/year = $2.92/mo. Ultimate (formerly Pro Whitetail) is $99.99/year.",
+    "native": "34.99 USD"
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "Drawing pins on a map and logging what you saw at dawn is a trivial build, and an agent will hand you a working offline map in an afternoon. The part people actually pay for is the data underneath: nationwide parcel boundaries with owner names, recent high resolution aerial and topo imagery, and radar and wind layers stitched into one mobile app that works with no signal. That parcel layer is licensed, not scraped, and the imagery bill is real. Add the club side of it, where four people share the same map and see each other's stand check-ins live, and your local-only build stops covering the use case. Build the personal scouting notebook, keep paying if you need to know who owns the ridge behind you.",
+  "coreLoopDIY": "An offline-capable PWA map where you drop stands, cameras, food plots and trails, draw your own property polygon, log sits with wind and moon data, and export everything as GeoJSON.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A MapTiler or Mapbox key for satellite and topo tiles, or plain OpenStreetMap tiles if you accept no imagery",
+    "County or state GIS parcel exports downloaded by hand for the properties you care about",
+    "Open-Meteo for forecast and wind, no key needed",
+    "A phone that will actually install a PWA and cache tiles"
+  ],
+  "whatYouLose": [
+    "Nationwide parcel boundaries and landowner names, which are licensed data you cannot regenerate",
+    "Fresh leaf-off aerial imagery and multi-source topo layers across the whole country",
+    "Live sharing with a hunting party: shared markers, check-ins, and who is sitting where right now",
+    "Native app polish offline: reliable background GPS tracks, tile prefetch, battery behavior",
+    "Weather radar, rut and deer movement forecasts, and the constant map data refreshes"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "collaboration",
+    "execution-polish"
+  ],
+  "moatNotes": "Parcel and ownership data is bought per-state from aggregators. Any clone either pays the same bill or ships without the one layer that sells the app.",
+  "whyPeopleStillPay": "Hunters pay for two things a personal build cannot fake. First, knowing exactly where a boundary line is and whose name is on the deed, which is a legal question as much as a hunting one, and that answer lives in licensed parcel data refreshed constantly. Second, the group: a lease with five members needs one shared map where everyone's stands, cameras and sit logs are visible and current, and the sharing has to work from a truck with one bar of signal. The mapping toy is cheap. The data subscription and the sync are the product.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can absolutely build the stand-marker notebook in a weekend and it will be fine for one property you already know. The moat is licensed nationwide parcel and ownership data plus live map sharing across a hunting party.",
+  "prompt": "Build a personal, offline-first hunting scouting map as a PWA. No accounts, no server, no telemetry. All data stays on the device.\n\nStack, no substitutions:\n- Vite + React + TypeScript\n- MapLibre GL JS for the map\n- Dexie (IndexedDB) for all storage\n- vite-plugin-pwa for installability and tile caching\n- Tailwind for styling, keep it plain and thumb-friendly\n\nMap:\n- Base layers switchable: satellite and topo from MapTiler using VITE_MAPTILER_KEY from .env, plus an OpenStreetMap raster fallback that needs no key\n- \"Download this area\" button: prefetch tiles for the current viewport at zoom 12 to 16 into the service worker cache, show progress and cache size, allow clearing\n\nData model in Dexie: properties (name, GeoJSON polygon, acres computed), markers (type: stand, blind, camera, plot, trail cam, gate, sign, custom; lat, lng, notes, photo blob), tracks (recorded GPS line, timestamps), sits (marker id, start, end, wind dir and speed, temp, moon phase, sightings list with species, count, sex, time, free notes).\n\nFeatures:\n- Tap map to add a marker, choose type from an icon grid, attach a photo from the camera input\n- Draw or import property polygons: file import for GeoJSON, KML and GPX, since county GIS portals hand those out. Show acreage.\n- Record a walk: watchPosition into a track, works with screen on, stop and save\n- Wind overlay: fetch current and hourly wind direction and speed from Open-Meteo for the map center, draw an arrow and a compass rose, and shade a simple downwind cone from any selected stand so it is obvious which stands are burned today\n- Sunrise, sunset and moon phase computed locally with suncalc, no API\n- Sit log: start a sit from a stand marker, it snapshots wind, temp and moon, then log sightings as you go\n- Export and import everything as one JSON file, plus GeoJSON export of markers and tracks\n\nExplicitly out of scope: parcel boundaries or landowner names (no legal source to pull from, the user imports their own), multi-user sharing, sync, push notifications, deer movement predictions.\n\nSeed with two example markers and a sample property polygon so the UI is not empty. Write a README that states plainly what it does not do.",
+  "promptCurated": false
+}

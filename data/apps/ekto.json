@@ -1,0 +1,52 @@
+{
+  "slug": "ekto",
+  "name": "ekto",
+  "domain": "voicetranslate.app",
+  "category": "voice-ai",
+  "subcategory": "live speech translation",
+  "tagline": "Real-time voice translation: speak in one language, get the other side rendered back in near real time.",
+  "priceMonthly": 29.99,
+  "pricing": {
+    "plan": "Monthly Unlimited PRO",
+    "basis": "monthly subscription",
+    "unit": "flat",
+    "source": "https://www.voicetranslate.app/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Other tiers on the same page: $14.99/week, $59.99/quarter; App Store also lists Yearly Unlimited PRO $134.99 (~$11.25/mo).",
+    "native": "29.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The pipeline is no longer exotic: capture mic audio, segment it with a voice activity detector, transcribe with Whisper, translate, speak it back with a local TTS voice. An agent can wire that into a working local app in a weekend and it will genuinely translate a conversation. What it will not do out of the gate is stay graceful for an hour: chunk boundaries clip words, speaker turns bleed together, latency creeps as the buffer grows, and the sentence by sentence pacing that makes these apps usable in real conversation is a tuning problem, not a coding problem. You also get no phone app, which is where voice translation actually happens. Fine for a desk setup and travel prep, unconvincing when you are holding it out to a stranger in a market.",
+  "coreLoopDIY": "Streams mic audio over a WebSocket to a local Whisper plus translation plus TTS chain and plays the translated speech back with running transcript.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Python 3.11 and a machine with at least 8GB RAM, GPU strongly preferred",
+    "Local model downloads: faster-whisper and a Piper voice per target language",
+    "A browser with mic permission, or an API key if you swap in a hosted translation model",
+    "Headphones, otherwise the TTS output feeds back into the mic"
+  ],
+  "whatYouLose": [
+    "Long session reliability: memory growth, drifting segmentation and dropped turns after the first 20 minutes",
+    "Clean sentence by sentence pacing and turn detection, which is most of the perceived quality",
+    "A mobile app, so no translating anything while standing up",
+    "Offline or low-bandwidth behavior tuned for actual travel",
+    "Latency budgets someone else already fought for: streaming partial results instead of waiting for a full segment"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "scale-infra",
+    "proprietary-models"
+  ],
+  "moatNotes": "The models are commodity. The state machine that decides when a sentence ended, and the mobile audio stack that survives a bad hotel wifi, are not.",
+  "whyPeopleStillPay": "Because voice translation is judged entirely on the seconds between someone finishing a sentence and you hearing it, and on whether it still works on minute 40. A local build nails the demo and then frays: barge-in, background noise, two people talking over each other, the phone locking. Paying gets you a phone in your pocket that handles those cases without you adding VAD thresholds mid-conversation.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Very buildable as a desk toy, much harder as something you would trust in a taxi.",
+  "prompt": "Build a local real-time voice translation app. No accounts, no cloud services, no telemetry.\n\nStack, non-negotiable:\n- Python 3.11 + FastAPI, served with uvicorn on port 8000.\n- One HTML page with vanilla JS, no framework, no build step.\n- Audio in: browser getUserMedia, 16kHz mono, streamed to the server over a WebSocket in 250ms PCM chunks.\n- Speech to text: faster-whisper (small model default, configurable via .env).\n- Segmentation: silero-vad or webrtcvad to detect end of utterance. Do not translate on fixed timers, translate on detected utterance boundaries.\n- Translation: argostranslate with locally installed language pairs.\n- Text to speech: piper, one voice per target language, downloaded on first run into ./models.\n\nBehavior:\n- User picks source and target language in a dropdown before starting.\n- Press Start, speak, and on each detected utterance the server returns: original text, translated text, and a WAV of the translated speech. The page appends both lines to a running transcript and plays the audio.\n- Show live latency per utterance in ms in the corner. Be honest, measure end of speech to audio ready.\n- Handle overlap: if a new utterance arrives while audio is playing, queue it, never drop it.\n- Long session hygiene: cap the in-memory transcript at 500 lines, reset the whisper buffer after every utterance, log RSS every 60 seconds.\n\nOut of scope, do not build: mobile app, user accounts, cloud sync, speaker diarization, a two-phone conversation mode.\n\nDeliverables: main.py, static/index.html, static/app.js, requirements.txt, .env.example (WHISPER_MODEL, DEVICE, COMPUTE_TYPE), scripts/download_models.py, and a README with exact run steps plus one paragraph on where this degrades in sessions over 20 minutes.\n\nRun it, speak a test sentence in English with Spanish as target, and paste the measured latency into the README.",
+  "promptCurated": false
+}

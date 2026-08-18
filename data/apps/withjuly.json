@@ -1,0 +1,52 @@
+{
+  "slug": "withjuly",
+  "name": "WithJuly",
+  "domain": "withjuly.com",
+  "category": "creator-commerce",
+  "subcategory": "creator brand deals and sponsorship management",
+  "tagline": "A platform for creators to find, price, negotiate and manage brand sponsorship deals.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Essentials",
+    "basis": "per manager per month plus $6/mo per creator, billed quarterly",
+    "unit": "per-seat",
+    "source": "https://withjuly.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "Page states 'Our minimum plan is $50/month' and '+$6/mo per creator, Billed Quarterly', but the per-manager base prices for Essentials/Pro/Growth are client-rendered and absent from the fetched HTML.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The software layer here is thin: a media kit page, a deal pipeline, some invoices and reminders. The part that matters is on the other side of the table, meaning actual brand relationships, inbound demand, and rate data from deals that already closed. An agent can build you a very tidy place to track sponsorships you do not have yet. It cannot tell you what a 40k-subscriber tech channel really gets paid for a 60 second integration, and it cannot make a marketing manager email you. Build the tracker if you want, but do not confuse it with the thing being replaced.",
+  "coreLoopDIY": "A local dashboard with a public media kit page, a deal pipeline board, rate notes, deliverable checklists and payment reminders.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a local Postgres or SQLite file",
+    "A domain or subdomain if you want the media kit page to be public",
+    "Your own audience numbers, pulled or pasted in manually",
+    "Optional: a Stripe or invoicing tool for the actual money"
+  ],
+  "whatYouLose": [
+    "Inbound brand demand: no deals arrive because you built a pipeline",
+    "Benchmark rate data from real closed deals across comparable creators",
+    "A human or process pushing negotiation and follow up on your behalf",
+    "Brand-side trust, contracting and payment collection when a sponsor goes quiet",
+    "Deal terms review, exclusivity and usage-rights sanity checks"
+  ],
+  "moatTags": [
+    "marketplace-liquidity",
+    "proprietary-data",
+    "brand-trust"
+  ],
+  "moatNotes": "Two-sided by nature: creators show up because brands are there, brands show up because creators are. A solo build starts with zero of both.",
+  "whyPeopleStillPay": "Creators do not pay for the pipeline UI, they pay for deal flow and for not being the one who has to email a brand asking where the money is. The rate data is the quiet second reason: knowing that similar creators charged more is worth several times the subscription on a single negotiation. Both of those are byproducts of volume that already flowed through the platform, and no amount of good code manufactures volume on day one.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can build the paperwork side of this in a weekend and it will be fine. The moat is deal flow plus a private history of what brands actually paid, and neither ships with your repo.",
+  "prompt": "Build a local-first sponsorship deal tracker for a single creator. Consolation build: this replaces the paperwork, not the deal flow.\n\nStack, no substitutions:\n- Next.js 15 App Router, TypeScript, Tailwind\n- SQLite via Drizzle ORM, file at ./data/deals.db\n- No auth, no accounts, no telemetry, no external SaaS calls\n- Runs with: npm install, npm run db:push, npm run dev\n\nData model:\n- brand: name, contactName, contactEmail, notes\n- deal: brandId, status (inbound, negotiating, agreed, in-production, delivered, invoiced, paid, dead), platform, deliverables (text), grossFee (integer cents), currency, usageRights (text), exclusivity (text), agreedAt, dueAt, invoicedAt, paidAt, notes\n- rateNote: platform, audienceSize, deliverableType, feeCents, dateClosed, source (mine or reported), notes\n- asset: dealId, label, url\n\nPages:\n1. /pipeline: kanban board by deal status, drag to move, inline edit of fee and due date. Show totals per column in currency.\n2. /deals/[id]: full deal detail, deliverable checklist stored as JSON, timeline of status changes, asset links.\n3. /rates: table of rateNote rows plus a simple median and range calculator filtered by platform and deliverable type. Make it obvious that this is your own data only and that an empty table means you know nothing yet.\n4. /money: unpaid deals sorted by days overdue, computed from invoicedAt, with a copy-to-clipboard chase email drafted from a template.\n5. /kit: a printable one-page media kit. Audience numbers are typed in by hand and stored in a single settings row. Include a static export script that writes ./out/kit.html for hosting anywhere.\n\nExplicitly out of scope, do not build: brand discovery, any marketplace or matching, contract e-signing, payment processing, OAuth to YouTube, TikTok or Instagram, benchmark data you did not enter yourself.\n\nInclude seed data with three fake brands and six deals across statuses. Put any future API keys in .env.example, none are required to run. README: one paragraph on setup, one paragraph stating plainly that this tracks deals and does not source them.",
+  "promptCurated": false
+}

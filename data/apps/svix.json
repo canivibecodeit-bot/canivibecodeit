@@ -1,0 +1,52 @@
+{
+  "slug": "svix",
+  "name": "Svix",
+  "domain": "svix.com",
+  "category": "dev-tools",
+  "subcategory": "webhooks as a service",
+  "tagline": "Managed outbound webhook sending with retries, signing, logs and a customer-facing portal.",
+  "priceMonthly": 490,
+  "pricing": {
+    "plan": "Professional",
+    "basis": "monthly flat plus usage overage",
+    "unit": "flat",
+    "source": "https://www.svix.com/pricing/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Professional is 'starting from $490/month' (50k messages included, 800 msg/s, 90-day retention, 99.99% SLA). Overage on all plans is $0.0001 per attempted message; filtered and retry messages are free. Enterprise is contact-sales.",
+    "native": "490 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The core loop here is genuinely small: accept an event, look up subscribed endpoints, sign the payload, POST it, retry on failure with backoff, log the attempt. An agent will produce that in a session, and for a single product sending a few thousand events a day it will work fine. What does not fall out of a one-shot is the boring half: a queue that survives restarts, per-endpoint rate limiting and circuit breaking so one dead customer does not poison your worker pool, replay and manual retry tooling, a portal your customers can log into, and signature schemes that third-party libraries already understand. Svix is also open source, which means the honest DIY move is often self-hosting theirs rather than writing your own. Call it a weekend for something you would actually put in front of paying users, and understand that you are now on call for it.",
+  "coreLoopDIY": "Takes an event via API, fans it out to registered endpoints with HMAC-signed payloads, retries failures on exponential backoff, and records every attempt.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A Postgres database",
+    "Redis or Postgres-backed job queue",
+    "A server that stays up, not a serverless function",
+    "Somewhere to store attempt logs that will grow fast"
+  ],
+  "whatYouLose": [
+    "A customer-facing portal where your users manage their own endpoints and see failures",
+    "Battle-tested signature format that existing verification libraries accept out of the box",
+    "Per-endpoint circuit breaking and rate limiting so one slow consumer does not stall everyone",
+    "Operational maturity: dead-letter handling, replay windows, throughput under a spike",
+    "Someone else being paged when delivery breaks at 3am"
+  ],
+  "moatTags": [
+    "scale-infra",
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The interesting moat is not the code, it is that the code is already open source and the paid thing is not having to run it.",
+  "whyPeopleStillPay": "Webhook delivery is a system where the failure modes are all in the tail: the customer whose endpoint returns 200 but drops the body, the one that goes down for six hours, the traffic spike that queues fifty thousand deliveries behind one timeout. Writing the happy path takes an afternoon. Discovering and handling those tails takes months of production traffic you have not had yet. Teams pay so that outbound webhooks stop being a thing they think about, and so that when a customer complains about a missed event there is a searchable log and a replay button instead of a grep through application logs.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The happy path is an afternoon; the tail is the product. Worth checking their open source server before writing a line of your own.",
+  "prompt": "Build a self-hosted outbound webhook delivery service. Single Node.js project, TypeScript, Fastify for HTTP, Postgres via Drizzle ORM, BullMQ on Redis for the delivery queue. Docker Compose for Postgres and Redis. No cloud accounts, no telemetry, no auth provider: a single static API key in .env guards the admin and ingest routes.\n\nData model:\n- applications: id, name, created_at (one per tenant/customer of mine)\n- endpoints: id, application_id, url, description, secret, enabled, event_types (text array, empty means all), created_at\n- messages: id, application_id, event_type, payload jsonb, created_at\n- attempts: id, message_id, endpoint_id, attempt_number, status_code, response_body_excerpt, error, duration_ms, created_at\n\nHTTP API (all JSON, all behind the API key header):\n- POST /api/applications, GET /api/applications\n- POST /api/applications/:id/endpoints, GET, PATCH, DELETE\n- POST /api/applications/:id/messages: body has event_type and payload. Persist the message, resolve matching enabled endpoints, enqueue one delivery job per endpoint, return the message id with 202.\n- GET /api/messages/:id/attempts\n- POST /api/attempts/:id/replay: re-enqueue that single delivery immediately.\n\nDelivery worker:\n- POST the raw JSON payload with headers: webhook-id, webhook-timestamp (unix seconds), webhook-signature as \"v1,\" plus base64 HMAC-SHA256 over \"{id}.{timestamp}.{body}\" using the endpoint secret.\n- 5 second connect timeout, 10 second total timeout.\n- Success is any 2xx. Retry on everything else with backoff: 5s, 30s, 5m, 30m, 2h, 5h, then give up and mark the endpoint as failing.\n- Record an attempt row for every try, truncating response bodies to 2KB.\n- Rate limit per endpoint to 20 concurrent deliveries max using a BullMQ group or per-endpoint limiter.\n\nAlso build a minimal server-rendered admin UI at / using Fastify plus plain HTML templates and no frontend framework: list applications, list endpoints, list recent messages, drill into a message to see attempts and hit replay. Ugly is fine, tables and buttons only.\n\nOut of scope: a customer-facing self-serve portal, per-customer login, multi-region, event type schema validation, inbound webhook receiving, transformations.\n\nInclude a README with docker compose up, migration command, and one curl example that creates an application, an endpoint pointing at a local sink, and sends a message. Add a small script that runs a throwaway HTTP sink on port 4000 that verifies the signature and prints the payload, so delivery can be tested end to end. Write integration tests for signature generation and for the retry backoff schedule.",
+  "promptCurated": false
+}

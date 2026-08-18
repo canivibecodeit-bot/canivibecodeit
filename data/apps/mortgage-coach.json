@@ -1,0 +1,51 @@
+{
+  "slug": "mortgage-coach",
+  "name": "Mortgage Coach",
+  "domain": "trustengine.com",
+  "category": "finance-accounting",
+  "subcategory": "mortgage loan comparison presentations",
+  "tagline": "Loan officer tool that builds side-by-side loan comparison presentations (Total Cost Analysis) to show borrowers the long-term cost of each option.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Contact sales / demo",
+    "basis": "quoted per lender, commonly per loan officer seat",
+    "unit": "custom",
+    "source": "https://www.trustengine.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "No pricing page exists (/pricing returns 404); site funnels to 'Reach out to see MortgageCoach in action'.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The math here is not exotic: amortization schedules, PMI drop-off, points breakeven, net cost after N years, rent versus buy. An agent can build a clean side-by-side scenario comparator with charts and a printable one-pager in a single session, and for a person modeling their own refinance that is genuinely enough. What you cannot one-shot is the part that makes it a business tool: pulling live loan scenarios out of the LOS or pricing engine, compliance-reviewable output your employer will actually let you send to a borrower, and the delivery layer that tracks whether the client opened the presentation. If you are a licensed originator, your DIY version is a scratchpad, not something you put in front of a client. If you are the borrower trying to sanity check what your lender sent you, the DIY version is arguably better because you control the assumptions.",
+  "coreLoopDIY": "Enter two to four loan scenarios, get amortization schedules, breakeven points and total-cost-over-time charts side by side, then print a one-page summary.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+",
+    "a browser",
+    "nothing else: no accounts, no API keys, all math runs locally"
+  ],
+  "whatYouLose": [
+    "Integrations with loan origination systems, pricing engines and CRMs, so every scenario is typed in by hand",
+    "Compliance-vetted presentation output and audit trail, which is the entire reason a regulated lender licenses this instead of using a spreadsheet",
+    "Borrower engagement tracking: who opened the presentation, how long they looked, which option they clicked",
+    "Polished branded video and mobile presentation formats that agents and borrowers are used to receiving",
+    "Someone else maintaining the edge cases: ARMs, buydowns, MI structures, state-specific cost lines"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "The comparison math is commodity. The reason it sells is that a lender's compliance team has already blessed the output format and it plugs into the systems originators already live in.",
+  "whyPeopleStillPay": "Loan officers do not buy this to do arithmetic, they buy it because it turns a rate quote into a story a borrower can act on, and because the output is something their compliance department has already approved for client delivery. The tool also sits inside the workflow: scenarios flow in from the origination and pricing systems, presentations go out through the CRM, and engagement comes back as a lead signal. A self-built comparator gives you the numbers but none of that plumbing, and in a regulated sales process the plumbing is the product.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Great DIY tool for the person taking the loan, mediocre DIY tool for the person selling it.",
+  "prompt": "Build a local, single-page loan comparison tool called \"Loan Compare\". No backend, no accounts, no telemetry, no external API calls.\n\nStack, non-negotiable:\n- Vite + React + TypeScript\n- Tailwind CSS for styling\n- Recharts for charts\n- Zod for input validation\n- Vitest for the math tests\n- State persisted to localStorage, no server\n\nCore data model: a Scenario has name, loan amount, home price, down payment, interest rate, term in months, loan type (fixed or ARM), optional ARM fields (initial fixed period, adjustment cap, lifetime cap, assumed adjusted rate), points paid, lender fees, property tax annual, homeowners insurance annual, HOA monthly, mortgage insurance monthly plus the LTV at which it drops off, and extra monthly principal payment.\n\nBuild these features:\n1. Add, duplicate, rename and delete scenarios. Support 2 to 4 side by side.\n2. A pure TypeScript amortization engine in src/lib/amortize.ts that returns a month by month schedule: payment, interest, principal, balance, MI charged, cumulative interest, cumulative cost. Handle extra principal, MI drop-off at the configured LTV using the original home price, and ARM rate steps after the fixed period.\n3. A comparison table: monthly payment now, monthly payment after MI drops, total interest, total cost at 3, 5, 7, 10 years and full term, remaining balance at each of those horizons, and net cost after subtracting principal paid down.\n4. Charts: cumulative cost over time per scenario, balance over time, and a breakeven chart showing where a higher-points scenario overtakes a lower one.\n5. A \"what changed\" panel that plainly states which scenario wins at each horizon and by how much.\n6. A print stylesheet so Cmd+P produces a clean one page summary with the table and the cumulative cost chart. No PDF library.\n7. Share by encoding all scenarios into the URL hash, so a link reproduces the comparison with no server.\n8. Vitest tests for the engine: a known 30 year fixed schedule, MI drop-off timing, extra principal shortening the term, and an ARM step.\n\nExplicitly out of scope: live rate feeds, credit pulls, loan origination system or CRM integrations, e-signature, borrower open tracking, user accounts, any compliance or disclosure language. Put a visible footer: \"Estimates only. Not a loan disclosure or an offer of credit.\"\n\nIf you ever add anything needing a secret, read it from .env and commit .env.example only. Ship a README with run and test commands and a one paragraph explanation of the amortization assumptions.",
+  "promptCurated": false
+}

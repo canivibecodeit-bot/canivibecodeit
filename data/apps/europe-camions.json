@@ -1,0 +1,51 @@
+{
+  "slug": "europe-camions",
+  "name": "Europe-Camions",
+  "domain": "europe-camions.com",
+  "category": "commerce",
+  "subcategory": "heavy truck and trailer classifieds marketplace",
+  "tagline": "A European classifieds marketplace for used trucks, tractor units, trailers and commercial vehicles, mostly listed by dealers.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Professional listing package (forfait)",
+    "basis": "quote-based monthly subscription for dealers; pay-per-ad for private sellers",
+    "unit": "custom",
+    "source": "https://www.europe-camions.com/company/faq/seller?select=5",
+    "checkedOn": "2026-08-18",
+    "confidence": "medium",
+    "notes": "Seller FAQ states two formulas: private sellers / low-volume sellers pay per published ad (unit rates shown on the site homepage, not readable to fetchers), professionals get volume forfaits arranged by phone. The CGV say the subscription price is invoiced per the quote issued by Via Mobilis and signed by the client, renewed monthly by tacit renewal. Credit-pack rates are only visible inside the My.Via-Mobilis account area.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "low",
+  "verdictSummary": "The software here is a search form over a database of listings, and yes, an agent can build that in an afternoon. What it cannot build is the several thousand trucks that dealers actually bothered to upload, which is the entire product. A private clone launches with zero inventory and zero buyers, so it answers no queries and sells no trucks. The only honest personal build is a tracker that sits on top of listings you already found: watchlists, price history, diesel of a spreadsheet with better manners. Useful if you are shopping for one truck, worthless as a replacement.",
+  "coreLoopDIY": "A local watchlist app where you record trucks you are considering, track asking price changes over time, compare cost per kilometre and mileage, and get flagged when something you saved moves.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20 and a terminal",
+    "Listings you enter yourself, or feeds you have permission to fetch",
+    "No account or cloud service needed"
+  ],
+  "whatYouLose": [
+    "The inventory: thousands of vehicles from dealers across several countries",
+    "The buyer side, so nothing you list gets seen",
+    "Dealer vetting and the loose trust layer that comes with a known marketplace",
+    "Multilingual reach across French, German, Dutch and Spanish speaking buyers",
+    "Cross referencing by make, axle configuration, euro emission class and body type on real data"
+  ],
+  "moatTags": [
+    "marketplace-liquidity",
+    "network-effects",
+    "proprietary-data"
+  ],
+  "moatNotes": "Classifieds are a two sided cold start problem, and heavy trucks are a thin, regional, high value market where a handful of dealers per country hold most of the supply.",
+  "whyPeopleStillPay": "Dealers pay because that is where the buyers already look, and buyers show up because that is where the trucks are. Neither side is paying for the search UI, which is unremarkable, they are paying for the aggregation. Personal software cannot manufacture an audience of fleet buyers in Poland or Spain, so the value never transfers to a self-hosted copy.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The search page is a weekend build; the trucks are not. The moat is marketplace liquidity: years of dealer inventory on one side and cross border buyers on the other.",
+  "prompt": "Build a local truck shopping tracker called RigWatch. Single user, runs on my laptop, no accounts, no cloud, no telemetry.\n\nStack, no substitutions: Node 20, TypeScript, Express, better-sqlite3, EJS templates, plain CSS. No React, no ORM, no Docker.\n\nData model in SQLite:\n- vehicle: id, title, make, model, year, mileage_km, engine_power_hp, axle_config, euro_class, body_type, country, dealer_name, source_url, notes, status (watching | contacted | rejected | bought), created_at\n- price_point: id, vehicle_id, amount_cents, currency, seen_on (date)\n- alert_event: id, vehicle_id, kind (price_drop | price_rise | stale), message, created_at, seen (bool)\n\nFeatures, all server rendered:\n1. Add and edit a vehicle by hand, including pasting a source URL. Optional: if a URL is given, fetch the page server side and try to prefill title and price from Open Graph tags and JSON-LD only. If that fails, leave fields blank and say so. Respect robots.txt, honour a 5 second timeout, do not crawl beyond the single URL given.\n2. Record a new price point for a vehicle at any time. Show a sparkline or a simple bar list of price history plus total change since first seen.\n3. List view with filters: make, country, euro class, year range, mileage range, status. Sort by price, mileage, price per 1000 km.\n4. Compare view: pick two to four vehicles, render a side by side table of every field plus a computed value score (price divided by remaining useful mileage, with the assumed end of life km configurable in .env).\n5. A single command, npm run check, that re-fetches every vehicle with a source_url, records a new price_point when the parsed price differs, writes alert_events for changes and for anything untouched in 30 days, and prints a summary. No background scheduler, no email.\n6. CSV import and export of vehicles so a spreadsheet stays the source of truth if I want.\n\nOut of scope, do not build: messaging sellers, payments, user auth, public listing pages, scraping search result pages, translation, image hosting beyond storing one image URL string.\n\nConfig in .env: PORT, DB_PATH, DEFAULT_CURRENCY, END_OF_LIFE_KM. Commit a .env.example, never a .env.\n\nDeliver: npm install then npm run dev serving on localhost, a seed script with 8 fake trucks, and a README with the three commands and a one paragraph note that this tracks listings found elsewhere and is not a marketplace.",
+  "promptCurated": false
+}

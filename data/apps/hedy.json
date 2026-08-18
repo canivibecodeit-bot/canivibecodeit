@@ -1,0 +1,51 @@
+{
+  "slug": "hedy",
+  "name": "Hedy",
+  "domain": "hedy.ai",
+  "category": "meeting-notes",
+  "subcategory": "real-time meeting copilot",
+  "tagline": "Listens to your meetings, classes and calls live and feeds you suggested questions, context and notes while they are still happening.",
+  "priceMonthly": 12.99,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly per user",
+    "unit": "flat",
+    "source": "https://hedy.ai/pricing/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Annual billing is $99.99/yr (about $8.33/mo, advertised as 36% savings); a $299 one-time lifetime option is also offered.",
+    "native": "12.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The pieces are all commodity now: capture audio, stream it through a local Whisper variant, keep a rolling transcript, and every few seconds ask a model for the next good question. An agent will get you that in one sitting on a laptop, and the transcript-plus-summary half will genuinely be fine. What it will not get you is a phone in your pocket that survives being backgrounded during a two hour lecture, or sub-second suggestions that arrive before the moment passes. Live assistance is a latency and UX problem more than an AI problem, and that is exactly the part that takes weeks of fiddling. Build it if you mostly sit at a desk; keep paying if you mostly do not.",
+  "coreLoopDIY": "A local desktop app that records mic and system audio, streams a rolling transcript, and every few seconds asks a model for suggested questions and notes in a side panel.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A laptop with a decent CPU or GPU for local Whisper, or an API key for hosted transcription",
+    "An LLM API key in .env",
+    "A virtual audio device (BlackHole on macOS, WASAPI loopback on Windows) to capture the other side of the call",
+    "Consent from whoever you are recording, which is on you"
+  ],
+  "whatYouLose": [
+    "Mobile apps that keep recording reliably when the screen is off, which is where most of these sessions actually happen",
+    "Tuned latency: your DIY suggestions arrive a beat late, and a beat late is useless in conversation",
+    "Speaker diarization and meeting-type presets that shape the assistant for a sales call vs a lecture vs a doctor visit",
+    "Calendar and conferencing integrations that join and label sessions for you",
+    "Hosted, searchable history across every session with no laptop babysitting"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "Nothing here is proprietary tech. The product is whether the suggestion lands in time and whether the recording survives a locked phone.",
+  "whyPeopleStillPay": "Because real-time is unforgiving. A post-hoc summarizer can be sloppy and still useful, but a live copilot that lags four seconds or drops audio when you switch apps is worse than nothing, and people pay to not think about that. The mobile side compounds it: background audio on iOS is a permissions and lifecycle minefield that nobody wants to solve for themselves. Add the meeting-type presets and calendar hookups and the subscription is mostly buying tuning you would otherwise do by hand for a month.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The transcript half is a solved weekend; the live half is where the money is. Build the desk version and keep expectations calibrated.",
+  "prompt": "Build a local desktop meeting copilot. Stack: Python 3.11, FastAPI backend, a single HTML page with vanilla JS and a WebSocket, no build step. Run everything on localhost, no accounts, no telemetry, no cloud storage.\n\nAudio capture: use sounddevice to record from a selectable input device at 16kHz mono. Document in the README that capturing the other side of a call requires a loopback device (BlackHole on macOS, a WASAPI loopback device on Windows) and let the user pick it from a dropdown of available inputs. Optionally mix two devices (mic plus loopback) into one stream.\n\nTranscription: faster-whisper with the small.en model by default, configurable via .env. Process audio in 5 second chunks with a 1 second overlap, maintain a rolling transcript in memory, and push each new segment to the browser over the WebSocket with a timestamp.\n\nAssistance loop: every 15 seconds, or on a manual \"nudge\" button, send the last 2000 characters of transcript plus a short session brief the user typed at the start to an LLM via the OpenAI-compatible API. Key comes from OPENAI_API_KEY in .env. Ask for exactly three things in JSON: two suggested questions to ask next, one factual note or definition worth knowing, and one line of what seems to be at stake. Render these as cards in a right-hand panel, newest on top, with the old ones dimmed rather than deleted.\n\nSession end: on stop, write the full transcript and all generated cards to ./sessions/YYYY-MM-DD-HHMM.md, then make one final call for a summary with action items appended at the top of that file.\n\nUI: two columns. Left is the live transcript, auto-scrolling, with a pause button. Right is the assistance cards. A header with device picker, session brief field, start/stop, and a visible recording indicator. Dark, dense, no animations.\n\nIn scope: local recording, streaming transcript, periodic suggestions, markdown export, session list page that greps past files.\n\nOut of scope: mobile, speaker diarization, calendar or Zoom integration, multi-user, auth, hosted anything. Do not add them.\n\nShip a README with the loopback setup steps, the exact pip install line, a .env.example, and a blunt note that recording other people may require their consent where the user lives.",
+  "promptCurated": false
+}

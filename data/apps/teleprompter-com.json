@@ -1,0 +1,50 @@
+{
+  "slug": "teleprompter-com",
+  "name": "Teleprompter.com",
+  "domain": "teleprompter.com",
+  "category": "audio-video",
+  "subcategory": "teleprompter / on-camera scripts",
+  "tagline": "Scrolling script overlay for talking-head video, with speed control, mirroring and recording.",
+  "priceMonthly": 19.99,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly per account",
+    "unit": "flat",
+    "source": "https://www.teleprompter.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Annual billing drops Pro to $7.50/mo (billed yearly); Max $49.99/mo monthly or $24.99/mo annual.",
+    "native": "19.99 USD"
+  },
+  "verdict": "yes",
+  "verdictConfidence": "medium",
+  "verdictSummary": "A teleprompter is text that moves down the screen at an adjustable speed, and every browser can already do that. The genuinely useful extras, mirror flip for beam-splitter rigs, large-type layout, keyboard speed control, camera preview behind the words, are all standard web APIs and fit in one session. Even voice-tracked scrolling, the feature people assume is magic, is a Web Speech API loop that matches recognized words against your script. What you cannot casually rebuild is the polished phone app you actually hold at arm's length while filming, plus remote control between two devices. If you record at a desk with a webcam, the DIY version is not a compromise, it is the same thing.",
+  "coreLoopDIY": "A local web app that stores scripts, scrolls them at a controllable speed over an optional live camera preview, mirrors on demand, and can record the take to a file.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "A modern Chromium browser for camera access and speech recognition",
+    "Webcam and mic permissions granted to localhost",
+    "Optional: a second device on the same network if you want to prompt from a phone"
+  ],
+  "whatYouLose": [
+    "A real iOS/Android app that behaves well when the screen is your only prompter",
+    "Remote control from a second device without you building the socket plumbing",
+    "Cloud sync of scripts across phone, laptop and someone else's machine",
+    "Reliable voice tracking in noisy rooms; browser speech recognition drifts",
+    "Export niceties: burned-in captions, project organization, team script sharing"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "hardware"
+  ],
+  "moatNotes": "The moat is ergonomics on a handheld screen and playing nicely with prompter hardware, not the scrolling algorithm.",
+  "whyPeopleStillPay": "Because the people who buy teleprompter software are usually filming on a phone, not sitting at a laptop, and a native app that survives screen rotation, background audio, lock behavior and a physical prompter rig is worth more than the twelve lines of scroll logic inside it. Paying also means not thinking about it five minutes before a take, which is exactly when a hand-rolled tool decides the camera permission expired.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "One of the rare cases where the feature list is shorter than the pricing page.",
+  "prompt": "Build a local teleprompter web app. Stack: Vite + React + TypeScript, no backend, no accounts, no telemetry, no external API calls.\n\nData: scripts are stored in localStorage as {id, title, body, updatedAt}. Ship with one sample script. No cloud, no sync, no login.\n\nLayout: two views in a single page app.\n1) Library: list scripts, create, rename, delete, edit body in a plain textarea with autosave on blur.\n2) Prompt view: fullscreen scrolling display of the selected script.\n\nPrompt view requirements:\n- Very large default type, adjustable font size, line height and text width.\n- Continuous smooth scroll driven by requestAnimationFrame, speed in pixels per second, not a CSS animation.\n- Controls: space toggles play/pause, arrow up/down changes speed, arrow left/right jumps 3 seconds of scroll, R resets to top, M toggles horizontal mirror, F toggles fullscreen, Esc exits.\n- A fixed reading line marker with adjustable vertical position.\n- Mirror mode applies transform: scaleX(-1) to the text layer only, controls stay readable.\n- Optional camera layer: getUserMedia video preview rendered behind the text at adjustable opacity. If permission is denied, fall back to a solid background and say so once, quietly.\n- Optional recording: MediaRecorder on the camera+mic stream, save to a downloadable .webm. Do not attempt to composite the text into the recording.\n- Optional voice tracking behind a toggle labelled experimental: use the browser SpeechRecognition API, fuzzy match recognized words against upcoming script tokens, and nudge scroll position toward the matched word. If SpeechRecognition is unavailable, hide the toggle.\n\nPersist user settings (speed, font size, mirror, opacity, marker position) in localStorage.\n\nOut of scope: multi device remote control, accounts, script sharing, burned-in captions, mobile native app.\n\nStyling: plain CSS, dark background, high contrast, no UI framework. Controls auto-hide after 3 seconds of mouse idle during playback.\n\nDeliver a README with npm install, npm run dev, the full keyboard shortcut list, and a note that camera and mic access require localhost or HTTPS. No .env needed since there are no secrets.",
+  "promptCurated": false
+}

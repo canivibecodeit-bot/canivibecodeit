@@ -1,0 +1,52 @@
+{
+  "slug": "cal-ai",
+  "name": "Cal AI",
+  "domain": "calai.app",
+  "category": "wellness",
+  "subcategory": "photo calorie tracking",
+  "tagline": "Point your phone at a plate of food and get a calorie and macro estimate logged to a daily total.",
+  "priceMonthly": 9.99,
+  "pricing": {
+    "plan": "Cal AI Unlimited",
+    "basis": "monthly subscription",
+    "unit": "flat",
+    "source": "https://apps.apple.com/us/app/cal-ai-calorie-tracker/id6480417616",
+    "checkedOn": "2026-08-18",
+    "confidence": "medium",
+    "notes": "App Store in-app purchase list shows Unlimited at $9.99 (monthly), $29.99 (annual, ~$2.50/mo equivalent), $2.99 (weekly), plus $19.99 and $5.99 variants and a Cal AI Family Plan at $59.99. Durations are not labelled in Apple's listing, so the mapping of each price to a period is inferred from the price ladder.",
+    "native": "9.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The core trick, send a food photo to a multimodal model and ask for calories and macros as JSON, is a one-evening build and works surprisingly well. Where it stops being easy is everything around it: a native app that opens fast, a camera flow you actually use three times a day, barcode lookups against a real food database, HealthKit or Google Fit sync, and streaks that keep you logging past day four. Accuracy is also less about your prompt and more about calibration, portion-size guessing is where these apps live or die and you have no correction data. A local PWA is a genuinely useful personal replacement if you are the kind of person who will tolerate a browser bookmark instead of an app icon. You are also renting the vision model, so this is not fully self-contained.",
+  "coreLoopDIY": "Snap or upload a food photo, a vision model returns dish name, portion guess and macros as structured JSON, and it gets appended to a local daily log with running totals.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "An API key for a multimodal model that accepts images",
+    "Node 20 and a machine or cheap VPS to run it",
+    "A phone browser, added to home screen, for the camera flow",
+    "Acceptance that portion estimates will be wrong by 20 percent sometimes"
+  ],
+  "whatYouLose": [
+    "A native app with widgets, notifications and instant cold start",
+    "Barcode scanning against a maintained packaged-food database",
+    "HealthKit / Google Fit / Apple Watch sync",
+    "Streaks, coaching copy and the habit scaffolding that makes tracking stick",
+    "Whatever portion-size calibration they have learned from millions of corrected logs"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "brand-trust",
+    "proprietary-data"
+  ],
+  "moatNotes": "The model is rented from the same labs you would rent from. The defensible part is the daily-habit UX and the distribution that made it a household name among teenagers.",
+  "whyPeopleStillPay": "Because calorie tracking only works if the friction is near zero, and a subscription buys an app icon, a camera that opens in half a second, a food database, and a nag notification at 8pm. A self-hosted web version costs you nothing per month but adds three seconds and a mental hurdle to every meal, which is exactly the amount of friction that ends a tracking habit. People are not paying for the vision call, they are paying for the thing that makes them do it on day thirty.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": "The hard part of a food logger was never the food, it was getting you to open it at dinner.",
+  "prompt": "Build a self-hosted photo calorie logger as a mobile-first PWA. No accounts, no cloud, no telemetry, single user.\n\nStack, no substitutions:\n- Next.js 15 App Router, TypeScript, Tailwind. Server actions and route handlers only, no separate API service.\n- SQLite via better-sqlite3, file at ./data/food.db, schema created on boot if missing.\n- OpenAI-compatible chat completions with image input for the estimate. Read OPENAI_API_KEY and MODEL from .env. Commit a .env.example, never a real key.\n\nCore loop:\n1. Home screen shows today: total kcal, protein, carbs, fat, plus a list of logged entries with thumbnails and a delete button on each.\n2. A big camera button uses an input type=\"file\" with accept=\"image/*\" and capture=\"environment\". Resize client side to max 1024px on the long edge, JPEG quality 0.8, before upload.\n3. Server action stores the image under ./data/uploads, then sends it to the model with a strict instruction: identify each distinct food item, estimate portion in grams, return JSON only matching { items: [{ name, grams, kcal, protein_g, carbs_g, fat_g, confidence }], notes }. Use JSON response format and validate with zod. On parse failure, retry once, then surface an error, do not fake numbers.\n4. Show a confirmation screen listing detected items with editable grams. Editing grams rescales that item's macros linearly. Save writes one row per item plus a parent meal row.\n5. Manual entry form as a fallback: name, grams, kcal, macros. No barcode scanning, no external food database.\n\nAlso include:\n- A daily kcal and protein target stored in a settings table, shown as progress bars.\n- A /history page: last 30 days, one row per day with totals, and a tiny inline bar chart drawn with divs, no chart library.\n- Export button that dumps all entries as CSV.\n- PWA manifest and an icon so it can be added to a phone home screen. Offline is out of scope, say so in the README.\n\nExplicitly out of scope: auth, multi-user, HealthKit or Google Fit sync, push notifications, streaks, recipes, native apps.\n\nDeliver a README with setup, .env vars, how to run on a LAN so the phone can reach it, and one blunt paragraph noting that portion estimates from a photo are rough and the edit-grams step is not optional if you care about the numbers.",
+  "promptCurated": false
+}

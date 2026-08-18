@@ -1,0 +1,51 @@
+{
+  "slug": "greenhouse",
+  "name": "Greenhouse",
+  "domain": "greenhouse.com",
+  "category": "hr",
+  "subcategory": "applicant tracking / recruiting",
+  "tagline": "Applicant tracking and structured hiring software for companies that hire at volume.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Core / Plus / Pro",
+    "basis": "quote-only, scales with hiring volume",
+    "unit": "custom",
+    "source": "https://www.greenhouse.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Greenhouse states cost depends on plan tier, hiring volume, organizational complexity, and features required; you must request a demo or contact sales.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "An agent can absolutely build you a candidate tracker: stages, notes, a Kanban board, a scorecard form. That is maybe five percent of what Greenhouse is being paid for. The rest is job board syndication, a hosted careers page that survives traffic, interview scheduling against a dozen calendars, structured interview kits, permissioned access for hiring managers who are not you, audit trails, EEOC and OFCCP reporting, GDPR retention and deletion workflows, and a very long tail of HRIS and background check integrations. Hiring is also one of the most litigated processes in a company, which means the boring parts (who saw what, when, and what got deleted) are the product. Solo or two-person hiring is genuinely fine on a DIY tracker; anything with a legal surface is not.",
+  "coreLoopDIY": "A local applicant tracker: add roles, drag candidates through stages, attach resumes and notes, and fill structured scorecards, all in one SQLite file.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+ and a place to run it (localhost is fine)",
+    "Somewhere to put resume files (local disk)",
+    "Your own inbox for actually talking to candidates"
+  ],
+  "whatYouLose": [
+    "Job board syndication and a hosted careers page candidates can find",
+    "Interview scheduling that reads real interviewer calendars",
+    "Multi-user permissions, so hiring managers can review without seeing everything",
+    "Compliance scaffolding: EEOC/OFCCP reporting, consent capture, GDPR retention and deletion, audit logs",
+    "Integrations with HRIS, background checks, assessments, and every recruiter tool your team already uses"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "switching-costs"
+  ],
+  "moatNotes": "Recruiting data is the kind of data that gets subpoenaed. That changes what \"good enough\" means.",
+  "whyPeopleStillPay": "Because hiring is a multiplayer, legally observed process and a personal tracker is single player. The moment a hiring manager, a recruiter, a coordinator, and an external agency all need scoped access to the same pipeline, and the moment someone asks for adverse impact numbers or a candidate exercises a deletion request, the DIY build stops being a tracker and starts being an unfunded compliance project. Greenhouse also sits at the center of the recruiting tool graph: sourcing extensions, assessments, scheduling, background checks, and the HRIS all assume it exists. Ripping it out means rebuilding those seams by hand.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "A one-person hiring pipeline is a weekend build and honestly a nice one. The moat is everything that shows up when hiring becomes multiplayer and legally observed: permissions, audit trails, retention rules, and the integration graph every recruiter tool assumes.",
+  "prompt": "Build a local-only applicant tracker for a solo or two-person hiring pipeline. No cloud, no accounts, no telemetry.\n\nStack, non-negotiable:\n- Next.js 15, App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, single file at ./data/ats.db. Schema in migrations run at boot.\n- Resume/attachment files stored on local disk under ./data/files, referenced by path in the DB.\n- No auth. This runs on localhost for one person.\n\nData model:\n- roles: title, team, status (open/closed), created_at, notes markdown.\n- candidates: name, email, phone, source (referral/inbound/outbound/agency), role_id, stage, created_at, archived_at nullable.\n- stages are per-role and ordered: default Applied, Screen, Interview, Onsite, Offer, Hired, Rejected.\n- notes: candidate_id, body markdown, created_at.\n- scorecards: candidate_id, interview_name, per-attribute rating 1-4, overall recommendation (strong no/no/yes/strong yes), free text, created_at.\n- attachments: candidate_id, filename, path, uploaded_at.\n- events: append-only log of every stage change and field edit with timestamp. Never delete rows here.\n\nUI:\n- /roles list, /roles/[id] shows a Kanban board of that role's stages with drag and drop between columns.\n- /candidates/[id] is the main screen: header with name, role, stage, source; tabs for Notes, Scorecards, Attachments, History (from events).\n- Global search across candidate name, email, and note bodies. Use SQLite FTS5.\n- Quick add: paste a name and email, pick a role, done in one modal.\n- A per-role funnel count strip: how many in each stage, and median days in stage.\n\nAlso include:\n- Structured interview kits: per-role, define a named interview with 3-6 attributes to rate. Scorecards are created from a kit so ratings stay comparable.\n- CSV export of all candidates and scorecards, and a JSON dump of the whole DB.\n- A retention helper: a page listing candidates archived more than N days ago with a one-click purge that deletes their files and PII but keeps an anonymized events row. Default N in .env.\n\nExplicitly out of scope, do not build or stub:\n- Email sending, calendar scheduling, job board posting, a public careers page, multi-user permissions, any OAuth.\n\nDeliver a README with setup, `npm run dev`, and a seed script that creates two roles and eight fake candidates. Secrets and config in .env.example.\n",
+  "promptCurated": false
+}

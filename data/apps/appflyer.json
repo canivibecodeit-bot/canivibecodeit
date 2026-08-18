@@ -1,0 +1,53 @@
+{
+  "slug": "appflyer",
+  "name": "AppsFlyer",
+  "domain": "appsflyer.com",
+  "category": "analytics",
+  "subcategory": "mobile attribution",
+  "tagline": "Mobile measurement platform that attributes app installs and in-app events to the ad campaigns that caused them.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Growth",
+    "basis": "per conversion, pay as you go",
+    "unit": "usage",
+    "source": "https://www.appsflyer.com/pricing/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "No flat monthly price: Growth is $0.07 per conversion after the included welcome package; Enterprise is contact-sales.",
+    "native": "0.07 USD per conversion"
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "You can absolutely build a click tracker: log clicks, generate deep links, receive install pings from your own SDK, join them in SQLite. What you cannot build is the reason AppsFlyer exists, which is that Meta, Google, TikTok and Apple do not hand raw attribution data to random self-hosted endpoints. Those self-attributing networks report only to certified measurement partners, and SKAdNetwork/AdAttributionKit postbacks are aggregated and privacy-thresholded by design. Add install fraud detection, which is a data problem across billions of devices rather than a code problem, and the gap stops being about engineering effort. The honest consolation build is a first-party attribution tracker for channels you control: your own links, emails, influencer codes, organic web to app.",
+  "coreLoopDIY": "A self-hosted link tracker that issues tagged deep links, logs clicks, and matches them to install and event pings from your own app SDK to give you first-party attribution for channels you control.",
+  "diyTimeEstimate": "multi-day",
+  "requirements": [
+    "A server with a public HTTPS domain for click and postback endpoints",
+    "Ability to add a small SDK or HTTP call to your own iOS/Android app",
+    "Apple App Site Association and Android assetlinks.json files served for deep linking",
+    "Your own ad account exports if you want spend numbers next to installs"
+  ],
+  "whatYouLose": [
+    "Self-attributing network data from Meta, Google, TikTok and Apple Search Ads, which is restricted to certified measurement partners",
+    "SKAdNetwork and AdAttributionKit postback handling, decoding and conversion value modeling",
+    "Install and click fraud detection, which depends on cross-advertiser device data you will never have",
+    "Postbacks and audience syncs to thousands of ad partners and MMP-only integrations",
+    "A maintained SDK that survives every OS release, ATT prompt change and privacy policy update",
+    "Deterministic cross-device and cross-platform identity resolution"
+  ],
+  "moatTags": [
+    "integrations",
+    "proprietary-data",
+    "compliance-regulatory"
+  ],
+  "moatNotes": "Being a certified measurement partner is a permissioned position, not a feature. The ad platforms decide who gets to be one.",
+  "whyPeopleStillPay": "Because attribution is not a computation, it is an entitlement. The moment a meaningful slice of your spend goes to Meta or Google or TikTok, your homegrown tracker sees a blob of untagged traffic and shrugs, while the ad networks themselves only talk to partners they have certified. On top of that, media buyers want a neutral scorekeeper both sides accept, finance wants one number, and nobody wants to argue with a partner about whose SQL is right. The price is the referee, not the dashboard.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The click logger is a weekend, the attribution is not. The moat is certified access to networks that refuse to report to anyone else, plus fraud signals drawn from device data across the whole industry.",
+  "prompt": "Build a self-hosted first-party mobile attribution tracker. TypeScript, Fastify, SQLite via better-sqlite3, Vite plus React for the dashboard, Docker Compose for deployment. No accounts, no cloud services, no telemetry.\n\nWhat it does:\n1. Link service: POST /api/links creates a tracked link with campaign, source, medium, and an optional destination path in my app. Each link gets a short id served at GET /l/:id.\n2. On click, /l/:id records a click row: timestamp, short id, user agent, platform guess from UA, referrer, IP truncated to /24 for IPv4 and /48 for IPv6, and a random click token set as a cookie. Then 302 to a universal link if the platform is iOS or Android, otherwise to a configured web fallback.\n3. Serve /.well-known/apple-app-site-association and /.well-known/assetlinks.json from files in ./public so real deep links work.\n4. Ingest endpoint: POST /api/events accepts { deviceId, eventName, clickToken?, platform, appVersion, ts, value? } authenticated by a shared secret in APP_INGEST_KEY. Store raw events untouched in an events table.\n5. Attribution job: for each first_open event, attribute deterministically if clickToken matches a click. Otherwise do a probabilistic match against clicks in the last 24 hours on the same truncated IP and platform, and mark it as probabilistic with a confidence field. Never overwrite a deterministic match. Store results in an attributions table so the logic can be re-run idempotently.\n6. Dashboard at /: table of campaigns with clicks, installs, deterministic versus probabilistic split, and any named post-install events. Date range picker. CSV export.\n7. CLI script: npm run import-spend that loads a CSV of campaign,date,spend so the dashboard can show cost per install for channels I bought myself.\n\nExplicitly out of scope, and say so in the README: SKAdNetwork and AdAttributionKit postbacks, any integration with Meta, Google, TikTok or Apple Search Ads, fraud detection, audience syncing, and a native SDK. The client side is a documented HTTP contract only.\n\nSecrets in .env: APP_INGEST_KEY, PUBLIC_BASE_URL, WEB_FALLBACK_URL. Include a seed script with fake clicks and installs, and vitest tests covering deterministic match, probabilistic match, and the no-double-attribution rule.",
+  "promptCurated": false
+}

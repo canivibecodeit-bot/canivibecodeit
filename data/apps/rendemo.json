@@ -1,0 +1,51 @@
+{
+  "slug": "rendemo",
+  "name": "Rendemo",
+  "domain": "rendemo.com",
+  "category": "audio-video",
+  "subcategory": "product demo videos",
+  "tagline": "A tool for turning screen captures into polished, shareable product demos.",
+  "priceMonthly": 39,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly per workspace",
+    "unit": "flat",
+    "source": "https://www.rendemo.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Flat per-workspace pricing, unlimited creators; Scale $129/mo, Enterprise custom.",
+    "native": "39 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanics of a demo builder are not mysterious: capture or import clips, trim them, add zooms, captions and a background, then render an MP4. An agent can wire that up locally with ffmpeg and a canvas timeline in a weekend, and for a solo founder shipping one launch video that is probably enough. What it will not hand you is the taste baked into the presets: the easing on the auto-zoom, the mouse smoothing, the default padding that makes a raw screen recording look intentional. You also lose hosted playback, analytics on who watched, and the ability to re-render at 4K without your laptop fans screaming. Fine if you make demos occasionally, annoying if demos are your job.",
+  "coreLoopDIY": "Import screen recordings, arrange them on a timeline with auto-zoom, captions and a padded background, then render an MP4 locally with ffmpeg.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+",
+    "ffmpeg installed locally",
+    "a browser that supports getDisplayMedia if you want in-app capture",
+    "patience for render times on long clips"
+  ],
+  "whatYouLose": [
+    "Preset motion design that actually looks good without fiddling: easing, mouse smoothing, sensible padding",
+    "Hosted playback with a share link, embeds and view analytics",
+    "Fast cloud rendering instead of pinning your own CPU for ten minutes",
+    "Template library and brand kits, so every demo looks like part of a set",
+    "Someone else keeping up with codec and browser capture quirks"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "The gap between a working video pipeline and one that produces something you would put on a landing page is almost entirely motion design defaults.",
+  "whyPeopleStillPay": "Because the output is public-facing. A demo video is marketing material, and nobody wants to ship a launch clip that looks slightly off because the zoom eased wrong. Paying a small monthly fee to get presets that were tuned by someone who does this all day is a rational trade against an afternoon of tweaking cubic-bezier values, especially when the alternative also means babysitting your own renders.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Video pipelines are easy to build and hard to make look expensive.",
+  "prompt": "Build a local-only product demo video editor. No accounts, no cloud, no telemetry.\n\nStack, no substitutions:\n- Vite + React + TypeScript\n- Tailwind for UI\n- Zustand for editor state\n- fluent-ffmpeg driving a locally installed ffmpeg binary, via a small Express server on port 8787\n- Projects stored as JSON files in ./projects, media in ./media\n\nFeatures in scope:\n1. Import: drag and drop .mp4 / .mov / .webm files, plus an in-app recorder using navigator.mediaDevices.getDisplayMedia that saves a .webm to ./media.\n2. Timeline: single video track, drag to reorder clips, trim handles for in/out points, delete clip.\n3. Keyframed zoom: user clicks a point on the preview at a given time and sets a zoom level; interpolate between zoom keyframes with an ease-in-out cubic curve. Default zoom is 1.6x over 700ms.\n4. Framing: solid or linear-gradient background, configurable padding, corner radius and drop shadow on the video frame. Presets: 16:9, 1:1, 9:16.\n5. Captions: text overlays with start/end time, position, font size, one clean sans font.\n6. Preview: canvas-based scrubbing preview at reduced resolution, driven by requestAnimationFrame.\n7. Export: POST the project JSON to the server, which builds an ffmpeg filter_complex chain and writes ./exports/NAME.mp4 at 1080p, 30fps, h264, yuv420p. Stream progress back over SSE and show a progress bar.\n\nOut of scope, do not build:\n- multi-track audio, music library, transitions beyond hard cuts\n- hosted sharing, embeds, view analytics, collaboration\n- auto zoom detection from cursor movement\n- any login or hosted storage\n\nRequirements:\n- Fail loudly at startup if ffmpeg is not on PATH, with the install command in the error.\n- No secrets needed, but include .env.example with PORT and MEDIA_DIR anyway.\n- README with setup, a worked example project, and a short note on expected render times.\n- Type-check clean, no any.",
+  "promptCurated": false
+}

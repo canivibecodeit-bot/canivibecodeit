@@ -1,0 +1,51 @@
+{
+  "slug": "composio",
+  "name": "Composio",
+  "domain": "composio.dev",
+  "category": "dev-tools",
+  "subcategory": "agent tool integrations / MCP",
+  "tagline": "Managed tool and auth layer that gives AI agents working access to hundreds of third-party apps.",
+  "priceMonthly": 29,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly flat plus usage overage",
+    "unit": "flat",
+    "source": "https://composio.dev/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Pro is $29/mo including a non-rolling monthly usage credit, unlimited team members and configurable spend caps; overage beyond included allowances is $0.0003 per tool call and $0.003 per trigger event, with add-ons at $0.0001-$0.0005 per call (zero data retention, IP allowlist, DPA). Enterprise is custom.",
+    "native": "29 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "If you personally use four apps, not four hundred, most of Composio evaporates. An agent can write you a local MCP server that wraps Gmail, Slack, GitHub and Notion with your own personal access tokens in about a session, and the tool-calling loop works fine. What you are actually buying from Composio is the part nobody enjoys: OAuth app registration per provider, token refresh, per-user credential storage, rate limit handling, and schemas for tools you have not thought of yet. That gets ugly the moment you want more than a handful of integrations, or multiple users, or an OAuth flow instead of a static token you pasted in. Solo and token-based: build it. Multi-tenant or breadth-hungry: pay.",
+  "coreLoopDIY": "A local MCP server that exposes hand-written tools for the three or four SaaS APIs you actually touch, authenticated with your own personal tokens.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+",
+    "Personal access tokens for each service you want to wrap",
+    "An MCP-capable client such as Claude Desktop, Cursor or your own agent loop"
+  ],
+  "whatYouLose": [
+    "Hundreds of pre-built, pre-tested tool schemas you did not have to read API docs for",
+    "Managed OAuth: app registration, consent screens, refresh tokens, revocation",
+    "Per-end-user credential storage, which is the whole game if your agent serves anyone but you",
+    "Someone else fixing your integration when a provider ships a breaking API change",
+    "Usage observability, retries and rate limit smoothing across providers"
+  ],
+  "moatTags": [
+    "integrations",
+    "switching-costs",
+    "scale-infra"
+  ],
+  "moatNotes": "Integration breadth is a treadmill, not a fortress, but it is a treadmill you personally do not want to run on.",
+  "whyPeopleStillPay": "Because integrations are boring, endless maintenance work with a long tail nobody can pre-plan. Writing one tool wrapper is trivial; writing eighty and keeping them alive through provider changes is a team. The real unlock is managed OAuth for other people's accounts: the second your agent has users, you are storing and refreshing third-party credentials, and that is a security and support problem you can rent your way out of.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The honest test: count the integrations you would actually call this month, and if the answer is under five, write them yourself.",
+  "prompt": "Build a local MCP (Model Context Protocol) server in TypeScript that gives an AI agent working tools for my own SaaS accounts, using personal access tokens. No hosted service, no accounts, no telemetry.\n\nStack, non-negotiable:\n- Node 20+, TypeScript, pnpm\n- @modelcontextprotocol/sdk over stdio transport\n- zod for tool input schemas\n- undici fetch for HTTP, no per-provider SDKs\n\nStructure:\n- src/index.ts: server bootstrap, registers every tool module\n- src/providers/gmail.ts, slack.ts, github.ts, notion.ts\n- src/http.ts: one shared request helper with timeout, retry on 429 and 5xx with exponential backoff, and error normalization\n- .env.example listing every token var, .env gitignored, fail loudly at startup if a token for an enabled provider is missing\n\nTools to implement, keep them small and honest:\n- gmail_search_messages, gmail_get_message, gmail_send_message\n- slack_list_channels, slack_post_message, slack_search_messages\n- github_list_issues, github_create_issue, github_comment_issue\n- notion_search, notion_get_page, notion_append_block\nEach tool: zod-validated input, a one-line description an LLM can act on, and output trimmed to useful fields only, never raw API dumps.\n\nIn scope: static token auth, a PROVIDERS env var to enable a subset, structured logging to stderr only (stdout is the MCP channel), a vitest suite that mocks HTTP and covers happy path plus 401 and 429 handling.\nOut of scope: OAuth flows, multi-user credential storage, a web UI, a database. Say so in the README.\n\nDeliver a README with setup steps, token scope requirements per provider, and the exact JSON block to paste into a Claude Desktop or Cursor MCP config.",
+  "promptCurated": false
+}

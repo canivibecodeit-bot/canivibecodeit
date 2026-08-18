@@ -1,0 +1,54 @@
+{
+  "slug": "mymind",
+  "name": "Mymind",
+  "domain": "mymind.com",
+  "category": "bookmarks",
+  "subcategory": "private visual bookmarking and AI auto-tagging",
+  "tagline": "A private, single-user place to dump links, images, notes and screenshots that tags and organizes itself so you never file anything.",
+  "priceMonthly": 12.99,
+  "pricing": {
+    "plan": "Mastermind",
+    "basis": "monthly, single user",
+    "unit": "flat",
+    "source": "https://access.mymind.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Mastermind is $12.99/mo or $129/yr (about $10.75/mo). Cheaper tiers: Student of Life $7.99/mo or $79/yr, The Bookmarker $4.99/mo (no AI). A 'Newton' plan at $299/yr is listed as not yet available.",
+    "native": "12.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The mechanic is honestly simple: capture a thing, extract text and metadata, ask a model for tags, embed it, then search across everything. An agent can build that in a weekend with SQLite, a headless browser for page snapshots and one model API call per item. What you cannot one-shot is the capture surface, which is the entire product in practice: browser extensions for three browsers, an iOS and Android share sheet, and the reliability that makes you trust it with the thought you had in a queue. The taste also matters more than it should here, because the pitch is that you never organize anything, and a DIY version that mis-tags half your library quietly becomes a junk drawer. Fine build, real gaps.",
+  "coreLoopDIY": "Captures URLs, images, highlights and notes into a local SQLite library, auto-extracts text and metadata, asks a model for tags and a one-line summary, then serves a visual masonry grid with semantic plus keyword search.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and pnpm, runs locally",
+    "An LLM API key for tagging and embeddings, in .env",
+    "Playwright with Chromium for page snapshots and screenshots",
+    "Local disk for original images and thumbnails",
+    "Optional: Tesseract for OCR on screenshots",
+    "A browser extension loaded unpacked in dev mode"
+  ],
+  "whatYouLose": [
+    "Real browser extensions and a mobile share sheet, so capture friction goes way up",
+    "Image understanding that recognizes objects, art, color palettes and text in photos at Mymind's quality",
+    "Sync across devices, plus offline capable native apps",
+    "Serendipity features: the everything-search, the surfacing of old cards, spaced resurfacing",
+    "Someone else's ongoing judgment about what a good tag actually is"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "brand-trust"
+  ],
+  "moatNotes": "The defensible parts are the capture surfaces and the restraint of the interface, not the storage or the tagging.",
+  "whyPeopleStillPay": "Because the value of a second brain is proportional to how little effort each save costs, and Mymind spent years shaving that cost down to one click from any device. A self-hosted clone tags almost as well now that models are cheap, but it lives on your laptop behind a localhost URL, which means the thing you saw on your phone at 11pm never makes it in. People also pay for the privacy stance and the promise of no social features, no sharing, no feed, which is easy to replicate technically and hard to replicate as a trust relationship.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The AI tagging is the cheap part in 2026; the share sheet is the expensive part.",
+  "prompt": "Build a local-first personal \"everything bucket\" web app called Mind. Single user, no accounts, no telemetry, no cloud.\n\nStack, no substitutions:\n- Node 20, TypeScript, Next.js App Router, Tailwind.\n- SQLite via better-sqlite3, with sqlite-vec for vector search. One file at ./data/mind.db.\n- Playwright (Chromium) for page fetch, readable text extraction and a 1200px-wide screenshot.\n- One LLM provider read from .env: MODEL_API_KEY, MODEL_BASE_URL, MODEL_NAME, EMBED_MODEL. Never hardcode keys.\n\nData model: cards table with id, kind (link | image | note | highlight), url, title, author, siteName, textContent, aiSummary, colorHex, createdAt, favicon path, imagePath, thumbPath. Separate tags table and card_tags join. Separate embeddings virtual table keyed by card id.\n\nCapture:\n- POST /api/capture accepts { url } or { text } or a multipart image upload.\n- For a URL: fetch with Playwright, extract main text, title, site name, favicon, save screenshot and a thumbnail.\n- For an image: store the original, generate a thumbnail, run OCR with tesseract.js if available, and skip silently if it is not.\n- After extraction, one model call returns 3 to 6 lowercase tags plus a single sentence summary as strict JSON. Then one embedding call over title + summary + first 2000 chars of text.\n- Extract a dominant color from the image or screenshot and store it as colorHex for the card background.\n\nUI:\n- Home is a masonry grid of cards, newest first, image-forward, no folders and no manual filing anywhere in the app.\n- One search input at the top that does hybrid search: SQLite FTS5 over title/text/tags plus vector similarity, merged and deduped.\n- Clicking a card opens a detail sheet with the original link, full text, tags (editable) and a delete button.\n- Keyboard: \"/\" focuses search, \"n\" opens a quick note composer, Escape closes.\n\nAlso ship:\n- A bookmarklet and a minimal Chrome MV3 extension in ./extension that POSTs the current tab URL and any selected text to http://localhost:3000/api/capture.\n- A CLI: pnpm mind add URL_OR_TEXT.\n- A tiny import script that reads a Pocket or browser bookmarks HTML export and queues each URL.\n\nOut of scope, do not build: multi-user auth, sharing, mobile apps, hosted deployment, sync between machines, payments.\n\nWrite a README with setup, .env.example, a seed script that captures five sample URLs, and make pnpm dev work on a clean clone.",
+  "promptCurated": false
+}

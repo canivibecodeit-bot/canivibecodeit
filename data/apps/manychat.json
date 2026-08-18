@@ -1,0 +1,52 @@
+{
+  "slug": "manychat",
+  "name": "ManyChat",
+  "domain": "manychat.com",
+  "category": "social-media",
+  "subcategory": "chat marketing / DM automation",
+  "tagline": "Visual flow builder for automated Instagram, Messenger, WhatsApp and SMS conversations.",
+  "priceMonthly": 39,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly, includes 2,500 active contacts then per-contact overage",
+    "unit": "usage",
+    "source": "https://manychat.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Live page headline shows $29/mo billed annually ($348/yr, 25% off); month-to-month is $39. Overage $0.05 per extra active contact monthly, $0.038 annual.",
+    "native": "39 USD"
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The flow builder is the visible part and it is not the hard part: keyword triggers, branching, delays and tags are a weekend of CRUD and a state machine. The hard part is that every message goes through Meta, and Meta decides who gets to send it. To reply to arbitrary strangers who DM your Instagram account you need a reviewed app with advanced messaging permissions, a linked Facebook page, business verification, and compliance with the 24 hour window and human agent tag rules. ManyChat has already cleared all of that and maintains it as the APIs churn. A DIY bot works fine for accounts you personally control in dev mode, which is exactly the audience that does not need automation.",
+  "coreLoopDIY": "A self-hosted webhook server that receives Instagram or Messenger events and runs your keyword-triggered reply flows from a JSON config, storing contacts and state in SQLite.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Meta developer app with a professional Instagram account linked to a Facebook page",
+    "App review for advanced messaging permissions if you want to reply to non-testers",
+    "Publicly reachable HTTPS endpoint for the webhook (tunnel or small VPS)",
+    "Willingness to fix the integration whenever Meta changes the API"
+  ],
+  "whatYouLose": [
+    "Pre-approved Meta Business Partner status, so your bot only talks to testers until review passes",
+    "The visual flow editor that non-engineers can actually edit without touching JSON",
+    "Multi-channel parity: WhatsApp, SMS and email in one contact record",
+    "Comment-to-DM triggers, story reply triggers, ads-click entry points and other Meta surface coverage",
+    "Deliverability guardrails: 24 hour window handling, message tags, broadcast policy compliance baked in"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "execution-polish"
+  ],
+  "moatNotes": "The moat is a permission grant from a company that does not hand them out casually, plus the ongoing tax of tracking Meta's messaging policy changes.",
+  "whyPeopleStillPay": "Because the bottleneck is access, not code. Anyone selling through Instagram DMs needs messages that actually reach strangers who commented on a post, and that requires permissions Meta grants to reviewed apps and revokes when policy shifts. ManyChat absorbs that risk, keeps the connectors alive across API versions, and hands a marketing person a canvas they can edit at 11pm without a deploy. Fifteen dollars a month against a broken funnel is not a hard call.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The flow engine is a weekend; the permission to use it on real humans is not. The moat is Meta platform access plus the standing compliance work to keep it.",
+  "prompt": "Build a self-hosted Instagram/Messenger DM autoresponder called \"dmflow\". Node 20, TypeScript, Fastify, better-sqlite3, no ORM, no frontend framework.\n\nStack decisions are final, do not offer alternatives.\n\nWhat it does:\n1. POST /webhook receives Meta Messenger and Instagram messaging webhook events. GET /webhook handles the hub.challenge verification using VERIFY_TOKEN from .env.\n2. Verify the X-Hub-Signature-256 header against APP_SECRET and reject anything that fails.\n3. Store contacts (platform, psid, first_seen, last_inbound_at, tags) and a messages log in SQLite at ./data/dmflow.db. Create the schema on boot if missing.\n4. Load flows from ./flows/*.json. A flow has: id, triggers (array of keyword strings, matched case-insensitively on the inbound text, plus an optional \"default\" fallback flow), and steps. Step types: send_text, send_buttons (title plus up to 3 postback buttons), wait (seconds), add_tag, set_field, goto (another flow id).\n5. Run a small state machine per contact: current flow id, current step index, collected fields. Persist state so a restart resumes correctly.\n6. Outbound sends go to the Graph API /me/messages with PAGE_ACCESS_TOKEN. Respect the 24 hour window: if last_inbound_at is older than 24 hours, refuse to send and log the reason instead of retrying forever.\n7. Retry failed sends up to 3 times with exponential backoff, then dead-letter the message into a table.\n8. Serve a single read-only HTML page at / rendering contacts, their tags, and the last 50 messages. Plain server-rendered HTML, no JS build step.\n\nOut of scope: WhatsApp, SMS, email, a visual flow editor, multi-user auth, analytics dashboards, broadcast sending.\n\nSecrets in .env only: VERIFY_TOKEN, APP_SECRET, PAGE_ACCESS_TOKEN, PORT. Ship .env.example. No telemetry, no third party services beyond Meta's Graph API.\n\nInclude two example flows in ./flows: a keyword flow for \"price\" and a default greeting flow.\n\nWrite a README that states plainly that until the Meta app passes review for advanced messaging permissions, this will only reply to accounts added as app testers, and that this is a limitation of Meta, not of the code.",
+  "promptCurated": false
+}

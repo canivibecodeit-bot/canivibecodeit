@@ -1,0 +1,52 @@
+{
+  "slug": "monkstreet",
+  "name": "MonkStreet",
+  "domain": "monk.st",
+  "category": "personal-finance",
+  "subcategory": "quant signals and investing research",
+  "tagline": "Subscription investing service that sells algorithmic stock signals and quant-flavored market research.",
+  "priceMonthly": 200,
+  "pricing": {
+    "plan": "MonkStreet Annual",
+    "basis": "annual subscription, single plan",
+    "unit": "flat",
+    "source": "https://www.monk.st/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Billed annually only at $2,400/year; $200/month is the converted monthly equivalent, not an offered plan.",
+    "native": "2400 USD per year"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The software half of a signals service is genuinely small: pull daily bars, compute factors, rank a universe, backtest with walk-forward windows, email yourself the top names. An agent will get you that in a weekend, and it will look uncomfortably similar to what you are paying for. What you cannot one-shot is point-in-time fundamentals, survivorship-bias-free universes and clean corporate actions, which is exactly where homemade backtests turn into fiction that says 40 percent a year. The unverifiable part is whether the paid edge is real, because no subscriber gets to audit it either. So build the harness, use it to think, and do not confuse a green equity curve on free data with alpha.",
+  "coreLoopDIY": "Pulls daily price data for a chosen universe, ranks it with momentum and value style factors, backtests the ranking with walk-forward rebalancing, and emails you the current top and bottom names.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Python 3.11 and a machine that can run a nightly job",
+    "a market data source with an API key, free tier is fine for daily bars",
+    "an SMTP account or similar for the daily digest",
+    "enough statistics to distrust your own backtest"
+  ],
+  "whatYouLose": [
+    "Point-in-time fundamentals and delisted tickers, so your backtest quietly assumes the losers never existed",
+    "Clean handling of splits, dividends, mergers and index reconstitutions",
+    "Whatever research process, however good or bad, sits behind the paid signal",
+    "Someone else's conviction to blame when a position goes against you",
+    "Any institutional data feed: short interest, filings parsing, tick data, borrow costs"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "proprietary-models",
+    "brand-trust"
+  ],
+  "moatNotes": "The data moat is real and mostly boring: licensed point-in-time datasets are expensive and cannot be scraped into existence. The model moat is asserted rather than demonstrated, which is true of nearly every service in this category.",
+  "whyPeopleStillPay": "People pay for a decision, not for code. A signals subscription outsources the part that is actually hard, which is committing to a rule and sticking with it through a drawdown, and it does so with a narrative confident enough to hold onto. There is also the data gap: a paid service can license clean point-in-time fundamentals that a hobbyist cannot, and that difference shows up as backtests that are less flattering and more honest. The uncomfortable part is that from the outside you cannot tell a licensed, carefully validated process from a spreadsheet with good copywriting, and both charge monthly.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Building the harness is the cheapest way to find out how fragile most published edges are, including the one you are paying for.",
+  "prompt": "Build a local quant research harness for a single user. No accounts, no hosting, no telemetry.\n\nStack: Python 3.11, uv for deps, DuckDB for storage, pandas and numpy for math, Streamlit for the UI, plain SMTP for the daily digest. No cloud services, no Docker, no web framework.\n\nData: fetch daily adjusted OHLCV for a ticker list in universe.txt from one provider behind a single fetcher module, so it can be swapped. Cache every response into DuckDB and never refetch a date range you already have. Provider key and SMTP creds live in .env, loaded with python-dotenv, and .env is gitignored with a .env.example committed.\n\nBuild these pieces:\n1. ingest.py: incremental daily bar download into DuckDB, idempotent, logs how many rows were added per ticker.\n2. factors.py: compute 12-1 momentum, 60-day volatility, 200-day trend filter, and a simple value proxy from whatever fundamental fields the provider gives for free. Each factor is a pure function of a price frame, cross-sectionally z-scored, missing data handled explicitly rather than dropped silently.\n3. backtest.py: monthly rebalance, long the top decile of a weighted factor blend, equal weight, configurable transaction cost in basis points, walk-forward so factor weights are fit only on data before each test window. Output CAGR, max drawdown, Sharpe, turnover, hit rate, and a per-year table. Print a loud warning that the universe is survivorship biased and the fundamentals are not point-in-time.\n4. app.py: Streamlit page with the equity curve, the yearly table, the current ranked table, and a slider for factor weights that re-runs the backtest.\n5. digest.py: a script for cron that emails today's top 20 and bottom 20 with their factor scores.\n\nOut of scope: intraday data, options, order execution, broker integration, portfolio accounting, tax lots, auth, multi-user anything.\n\nInclude pytest tests for the factor functions and for one known-answer backtest on synthetic data. Write a README that states plainly what the data limitations invalidate.",
+  "promptCurated": false
+}

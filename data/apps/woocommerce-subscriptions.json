@@ -1,0 +1,52 @@
+{
+  "slug": "woocommerce-subscriptions",
+  "name": "WooCommerce Subscriptions",
+  "domain": "woocommerce.com",
+  "category": "commerce",
+  "subcategory": "recurring billing",
+  "tagline": "Official WooCommerce extension that turns a WordPress store into a recurring billing system with renewals, upgrades and failed payment handling.",
+  "priceMonthly": 23.25,
+  "pricing": {
+    "plan": "Single site licence, billed annually",
+    "basis": "annual per-site licence",
+    "unit": "flat",
+    "source": "https://woocommerce.com/products/woocommerce-subscriptions/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "$279/year billed annually = $23.25/month equivalent. The submitted $17/mo (~$204/yr) is stale. EU visitors are quoted EUR 245/yr, with a two-year option at EUR 490 discounted to EUR 392.",
+    "native": "279 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The actual hard part of recurring billing lives at the payment processor, not in this plugin: Stripe Billing already does tokenization, renewal attempts, SCA, proration and dunning. So an agent can absolutely wire a small self-hosted checkout plus webhook listener plus entitlement table in a weekend, and for one product with two or three plans that is genuinely enough. What you cannot one-shot is the part that makes this extension worth a license: living inside WooCommerce so that orders, coupons, taxes, shipping, emails, reports and forty other plugins all understand a subscription. If you already run a real Woo store, replacing this means rebuilding the glue, not the billing. If you just want money to arrive monthly for something you built, you never needed WordPress in the first place.",
+  "coreLoopDIY": "Sells a handful of hardcoded plans through Stripe Checkout, listens to billing webhooks, and keeps a local table of who currently has access.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Stripe account in live mode",
+    "A publicly reachable HTTPS host for webhook delivery",
+    "Node 20 and SQLite",
+    "Stripe API keys and webhook secret in .env"
+  ],
+  "whatYouLose": [
+    "Integration with the WooCommerce order, coupon, tax and shipping machinery, so subscriptions are no longer just orders your other plugins understand",
+    "Gateway breadth: you are married to one processor instead of the dozen Woo supports",
+    "Customer-facing plan switching, pausing, resubscribing and prorated upgrades in your own UI, unless you accept the hosted portal as-is",
+    "Admin reporting, renewal calendars and bulk actions over thousands of subscribers",
+    "Years of edge case handling for partial renewals, mixed carts, manual renewals and payment method migrations"
+  ],
+  "moatTags": [
+    "integrations",
+    "switching-costs",
+    "compliance-regulatory"
+  ],
+  "moatNotes": "The moat is the WordPress ecosystem around it, not the billing logic. Migrating live subscribers with stored payment tokens is also its own special kind of unpleasant.",
+  "whyPeopleStillPay": "Because their store is already WooCommerce, and in that world this extension is the thing every other plugin, theme and gateway expects to be present. Paying once a year to have renewals, dunning emails, subscriber lists and coupon rules behave like normal Woo orders is cheaper than maintaining a parallel billing system that has to be kept in sync with the store forever. People building something new from scratch have a much easier time: point Stripe or Paddle at it and skip all of this.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Buildable if you are selling access to your own thing, not if you are trying to graft it back onto a live Woo store.",
+  "prompt": "Build a minimal self-hosted recurring billing service for a single product. No WordPress, no WooCommerce.\n\nStack, non negotiable: Node 20, TypeScript, Express, SQLite via better-sqlite3, Stripe Node SDK, plain server-rendered EJS templates. No React, no ORM, no Docker.\n\nScope, in:\n- A plans.ts file defining three hardcoded plans (monthly, annual, lifetime) each with a Stripe Price ID pulled from env.\n- GET /pricing renders the plans and a Subscribe button per plan.\n- POST /checkout/:plan creates a Stripe Checkout Session in subscription mode (or payment mode for lifetime) and redirects to it.\n- POST /webhook with raw body parsing and signature verification. Handle checkout.session.completed, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed. Upsert into a subscriptions table: stripe_customer_id, email, plan, status, current_period_end, cancel_at_period_end.\n- GET /portal creates a Stripe Billing Portal session for the logged in customer so plan changes, cancellation and card updates are Stripe's problem, not yours.\n- Magic link auth only: POST /login emails a signed token, no passwords. Log the link to stdout in dev instead of sending mail.\n- GET /api/entitlement returns JSON with active true or false plus plan and period end, so another app can gate features on it.\n- GET /admin, protected by a single ADMIN_TOKEN from env, listing subscribers with status and next renewal, filterable by status.\n- Idempotent webhook handling: store processed event IDs and ignore repeats.\n\nScope, out: multi gateway support, tax calculation beyond Stripe Tax, proration math of your own, coupons, shipping, invoices you render yourself, any telemetry.\n\nSecrets in .env: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_LIFETIME, ADMIN_TOKEN, APP_URL. Commit a .env.example, never a filled .env.\n\nDeliver a README with exact steps: create products in the Stripe dashboard, run stripe listen to forward webhooks locally, seed a test subscription, and how to flip to live keys. Include a script that replays a saved webhook fixture so the handler is testable without Stripe.",
+  "promptCurated": false
+}

@@ -1,0 +1,51 @@
+{
+  "slug": "erpnext",
+  "name": "ERPNext",
+  "domain": "frappe.io",
+  "category": "finance-accounting",
+  "subcategory": "ERP suite",
+  "tagline": "Open source ERP covering accounting, inventory, manufacturing, HR, CRM and projects in one system.",
+  "priceMonthly": 5,
+  "pricing": {
+    "plan": "Frappe Cloud Sites (shared)",
+    "basis": "monthly per site, from",
+    "unit": "flat",
+    "source": "https://frappe.io/erpnext/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Self-hosting ERPNext is completely free (AGPL-3.0); the paid offering is Frappe Cloud managed hosting. Sites plan starts at $5/mo (Rs 410/mo) for a single site on shared servers; Servers (VM) plans start at $20/mo, premium dedicated from $125/mo. Implementation/partner costs are separate.",
+    "native": "5 USD"
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "ERPNext is not one app, it is roughly a dozen interlocking ones: a double entry ledger, stock with valuation methods, bills of material, purchase and sales cycles, payroll, and reports that accountants and auditors expect to look a certain way. An agent can absolutely one-shot the shape of any single module, and the result will feel great until you post a credit note, revalue stock, or try to close a fiscal year. The deeper joke is that the software is already free: the code is open source and self-hostable, so rebuilding it from scratch is the one move that makes no sense. If you pay, you are paying Frappe for hosting, upgrades and someone to call. The honest DIY option is either running ERPNext yourself or building a deliberately tiny ledger for one small business and accepting it will never be an ERP.",
+  "coreLoopDIY": "A self-hosted mini ledger: items, contacts, sales and purchase invoices, payments, stock on hand, and correct double entry behind it all with P&L and balance sheet.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Python 3.12 and a machine that stays on",
+    "Willingness to keep your own backups",
+    "An accountant who will look at the numbers before you trust them"
+  ],
+  "whatYouLose": [
+    "Manufacturing: bills of material, work orders, capacity planning, none of it",
+    "Payroll, leave, expense claims and the statutory reports that go with them",
+    "Tax templates, multi-currency, and country specific compliance packs that took years to accumulate",
+    "Upgrades, migrations and a support contract when the ledger disagrees with the bank",
+    "The ecosystem: apps, integrations, consultants who already know the data model"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "switching-costs",
+    "integrations"
+  ],
+  "moatNotes": "An ERP's moat is boring by design: it is the accumulated set of edge cases that only surface at month end, plus the fact that once your inventory and ledger live there, leaving means a data migration project.",
+  "whyPeopleStillPay": "Because the price of ERPNext is not the software, it is the certainty. Businesses running real stock and real payroll are buying hosting they do not maintain, upgrades that do not break the ledger, and a support channel for the day something reconciles wrong. Self-hosting ERPNext is genuinely viable and plenty of people do it, but the moment the system is load bearing for invoicing or wages, paying someone else to own uptime and version upgrades looks cheap. A hand-built replacement inverts that: you become the vendor, on call, forever.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The smart move is not rebuilding ERPNext, it is running it, since the code is already free. The moat is a decade and a half of accounting, tax and inventory edge cases, plus the switching costs of every business that already keeps its stock and ledger inside it.",
+  "prompt": "Build a small self-hosted bookkeeping and stock app for a one-person business. This is NOT an ERP replacement and should not pretend to be one.\n\nStack, no substitutions:\n- Python 3.12, Django 5, SQLite, Django admin as the primary UI\n- Plain Django templates for the few custom pages, no JS framework\n- Run with `python manage.py runserver`, no Docker, no cloud, no accounts, no telemetry\n- Secrets (SECRET_KEY only) read from .env via python-dotenv, ship .env.example\n\nData model:\n- Account (code, name, type: asset/liability/equity/income/expense)\n- JournalEntry (date, memo) with JournalLine (account, debit, credit); enforce that each entry balances to zero at save time and refuse to save if it does not\n- Party (customer or supplier, single model with a flag)\n- Item (sku, name, unit, sale price, purchase price, current qty)\n- SalesInvoice and PurchaseInvoice, each with lines (item, qty, unit price); posting an invoice generates the matching JournalEntry and adjusts Item qty\n- Payment (party, date, amount, direction) that also posts a JournalEntry\n\nBehaviour:\n- Seed a minimal chart of accounts on first migrate: Cash, Bank, Accounts Receivable, Accounts Payable, Sales, Purchases, Inventory, Owner Equity\n- Invoices are draft or posted; posted invoices are immutable, corrections happen via a credit note that posts a reversing entry\n- Inventory valuation is simple average cost, and say so plainly in the UI\n\nReports as read-only pages:\n- Trial balance for a date range\n- Profit and loss for a date range\n- Balance sheet as of a date\n- Stock on hand with average cost value\n- Each report has a CSV download\n\nExplicitly out of scope, do not build: manufacturing, payroll, multi-currency, tax engines, multi-user permissions, approval workflows, email sending.\n\nDeliver README.md with setup in under five commands, a seed script that loads a few months of fake invoices and payments, and pytest tests covering: unbalanced entries are rejected, posting an invoice moves stock and hits the ledger, and the balance sheet actually balances.\n",
+  "promptCurated": false
+}

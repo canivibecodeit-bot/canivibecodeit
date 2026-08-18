@@ -1,0 +1,51 @@
+{
+  "slug": "servicenow",
+  "name": "ServiceNow",
+  "domain": "servicenow.com",
+  "category": "automation",
+  "subcategory": "ITSM and enterprise workflow platform",
+  "tagline": "Enterprise platform for IT service management, employee and customer workflows, and the endless approval chains around them.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "ITSM (Foundation / Advanced / Prime)",
+    "basis": "quote-only, per fulfiller per month",
+    "unit": "custom",
+    "source": "https://www.servicenow.com/products/itsm/pricing.html",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "No public price list; ServiceNow sells via direct sales with custom quotes. Third-party estimates put ITSM around $70-$200 per fulfiller/month, but nothing is published by the vendor.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "You can build a ticket tracker in an afternoon. You cannot build ServiceNow, because ServiceNow is not a ticket tracker: it is a CMDB, an approval engine, a change management workflow that auditors accept, and a discovery agent crawling every asset on a corporate network. Nobody buys it because the forms are nice, they buy it because Sarbanes-Oxley auditors and ISO reviewers already know what a ServiceNow change record looks like. The personal version of this makes no sense either, since a single human does not need a change advisory board. If you genuinely want the shape of it for yourself, build a small request queue with states and an audit log and stop there.",
+  "coreLoopDIY": "A local ticket queue with typed request forms, state transitions, an append-only audit log, and a tiny asset table you can link tickets to.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+",
+    "A browser",
+    "Nothing else, it runs on local SQLite"
+  ],
+  "whatYouLose": [
+    "Automated discovery and a real CMDB that maps thousands of assets and their dependencies",
+    "Change management and approval workflows that auditors and compliance frameworks already recognize",
+    "Hundreds of prebuilt integrations into AD, Okta, Jira, SAP, monitoring tools and everything else in a corporate stack",
+    "Role based access, SSO, data residency, and the enterprise security paperwork that comes with it",
+    "An ecosystem of certified admins, partners and store apps, which is often the real reason the contract renews"
+  ],
+  "moatTags": [
+    "switching-costs",
+    "compliance-regulatory",
+    "integrations"
+  ],
+  "moatNotes": "Once your incident, change, and asset records live here and your auditors read them here, leaving means re-certifying every process. That is not a software problem.",
+  "whyPeopleStillPay": "Because ServiceNow is where a large company's processes physically live. Onboarding, access requests, incident response, change approvals, hardware inventory: all encoded as workflows that hundreds of people already know how to click through, wired into identity providers and monitoring and HR systems, with an audit trail that survives external review. The alternative is not a cheaper tool, it is a year long process re-implementation project plus retraining plus convincing your auditors. The price is high and everyone complains about it, and they renew anyway.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "A ticket form is a weekend; a CMDB your auditor trusts is not. The moat is switching costs plus compliance: every process in the company is already encoded here and every reviewer already knows how to read it.",
+  "prompt": "Build a local, single-user request queue called \"Deskless\". This is a personal consolation build for ServiceNow, not an ITSM platform. Be honest about scope.\n\nStack, no substitutions:\n- Next.js 15 App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, file at ./data/deskless.db, schema created on boot if missing.\n- Server Actions for all mutations. No API routes unless needed.\n- No auth, no accounts, no telemetry, no cloud. It runs at localhost:3000 for one person.\n\nData model:\n- assets: id, name, kind (laptop, service, subscription, account), owner_note, created_at.\n- tickets: id, key (auto like REQ-0001), title, body, type (incident, request, change), priority (low, med, high), state (new, in_progress, waiting, done, cancelled), asset_id nullable, due_date nullable, created_at, updated_at.\n- events: id, ticket_id, at, kind (created, state_change, comment, field_change), from_value, to_value, note. Append only, never edited or deleted.\n\nFeatures in scope:\n- Ticket list with filters by state, type, priority, and a text search over title and body.\n- New ticket form where the fields shown change by type: change tickets additionally ask for rollback_plan and planned_window, stored as JSON in an extra_fields column.\n- Ticket detail page: state transition buttons, comment box, linked asset, and the full audit log rendered as a timeline.\n- Assets page: create, list, and see all tickets touching an asset.\n- A \"Weekly\" view: tickets closed in the last 7 days and anything still open past its due date.\n- Export everything to a single JSON file via a button, and a CSV export of tickets.\n\nExplicitly out of scope, do not build: SLAs, approval chains, discovery agents, email ingestion, multi-user roles, SSO, a workflow designer.\n\nDeliver: a README with setup in three commands, a seed script that inserts 12 sample tickets and 5 assets, and one Vitest file covering that state changes always write an events row.",
+  "promptCurated": false
+}

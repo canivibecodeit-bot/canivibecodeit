@@ -1,0 +1,52 @@
+{
+  "slug": "hive-cpq",
+  "name": "Hive CPQ",
+  "domain": "hivecpq.com",
+  "category": "sales-outreach",
+  "subcategory": "CPQ and product configurator",
+  "tagline": "Configure-price-quote software for manufacturers: rule-driven product configurators, dealer portals and quotes that feed into ERP.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Custom quote",
+    "basis": "quoted, B2B manufacturing contract",
+    "unit": "custom",
+    "source": "https://www.hivecpq.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "No pricing page exists: /pricing returns 404 and the sitemap index lists no pricing URL. Site offers 'Request a trial' and 'Talk to an expert' only.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanical core of CPQ is not mysterious: a product tree, option groups, compatibility rules, a pricing formula, a PDF at the end. An agent can produce a working configurator for one product family in a weekend, and if you sell a few hundred SKUs with predictable option logic, that build may genuinely be enough. What you are not one-shotting is the part that makes CPQ a purchase: ERP and CRM sync, dealer accounts with their own price lists and discounts, 3D or 2D visual previews, multi-language catalogs, and someone maintaining the rule set when engineering changes a hinge. Also worth being honest that CPQ failure is expensive: a bad rule ships a quote that cannot be manufactured at the price you promised. So: buildable, and a bad idea to trust for anything you actually invoice on until the rules have been beaten on for months.",
+  "coreLoopDIY": "A local web app where you define option groups, compatibility rules and pricing formulas in a config file, then walk through a guided configurator that validates choices, prices the result and exports a branded quote PDF.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Your own product rules written down: option groups, incompatibilities, required combinations",
+    "A pricing model you can express as formulas, base price plus option deltas plus margin",
+    "Node 20 and a place to run it, local or a small VPS",
+    "Manual re-entry of accepted quotes into whatever ERP or accounting system you actually use"
+  ],
+  "whatYouLose": [
+    "ERP and CRM integrations, so accepted quotes become copy-paste work",
+    "A dealer or reseller portal with per-account price lists, discount tiers and order history",
+    "Visual product previews, 3D or otherwise, which is often the thing that closes the sale",
+    "Anyone but you maintaining the rule engine when the catalog changes",
+    "Version control on quotes and catalogs, audit trails, and the boring guarantees a buyer expects when a quote is contractual"
+  ],
+  "moatTags": [
+    "integrations",
+    "switching-costs",
+    "execution-polish"
+  ],
+  "moatNotes": "The lock-in is not the configurator UI, it is the year of work spent encoding a real catalog into rules and wiring the output into ERP. Nobody redoes that for fun.",
+  "whyPeopleStillPay": "Because the software is the cheap part. Manufacturers pay for a vendor who will sit with their engineers, turn a messy catalog and a folder of Excel price lists into a rule set that does not produce impossible configurations, then keep it working as products change and push results into ERP. A solo build covers your own product line if you are the engineer, the salesperson and the person who maintains the rules. A company with fifty dealers and a configurable machine cannot staff that with one person and a JSON file.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "A configurator is a weekend; a maintained rule set for a real catalog is a job. Fine build if you are the whole company, wrong build if quotes leave your hands.",
+  "prompt": "Build a local configure-price-quote tool for a single manufacturer with a configurable product line.\n\nStack, no substitutions: Next.js App Router with TypeScript, Tailwind, SQLite via better-sqlite3, PDF generation with @react-pdf/renderer. Runs with npm run dev. No auth provider, no cloud services, no telemetry.\n\nCatalog definition lives in /catalog/*.yaml, loaded at startup and validated with zod. A catalog file defines: product families, option groups (each with a type of single-select, multi-select or numeric), options with id, label, price delta and optional lead time, and rules. Support three rule kinds: requires, excludes, and a constraint expression evaluated against the current selection. Fail loudly on invalid catalog files, do not silently skip.\n\nPricing: each option contributes a delta; support a per-family formula string, evaluated with a small safe expression evaluator over selected values and quantities, plus configurable margin and discount percentages. Show a live price breakdown line by line, never just a total.\n\nConfigurator UI: pick a family, then step through option groups. Invalid options are disabled with the rule that blocked them shown in plain text. Selections persist in the URL so a configuration is shareable as a link.\n\nQuotes: save a configuration as a quote with customer name, quote number, valid-until date, notes and line items. Quotes are immutable once marked sent; edits create a new revision that references the previous one. List view with filter by status.\n\nPDF: one branded quote template reading company name, address and logo path from .env. Include the option breakdown, totals, lead time and validity date.\n\nSeed with a fake product family of about twenty options and at least four interacting rules, so the rule engine is exercised on first run.\n\nInclude a rules test suite with vitest: for each catalog file, assert that seeded valid configurations price correctly and that known-invalid combinations are rejected.\n\nOut of scope, do not build: ERP or CRM integration, 3D or image visualization, dealer accounts and per-customer price lists, multi-currency, tax calculation, email sending, payments, multi-tenancy.\n\nWrite a README covering catalog file format, rule syntax, and a blunt warning that pricing rules must be tested before any quote leaves the building.",
+  "promptCurated": false
+}

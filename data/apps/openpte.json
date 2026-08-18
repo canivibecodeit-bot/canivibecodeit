@@ -1,0 +1,52 @@
+{
+  "slug": "openpte",
+  "name": "OpenPTE",
+  "domain": "openpte.com",
+  "category": "education",
+  "subcategory": "PTE Academic exam prep",
+  "tagline": "Online PTE Academic practice platform: exam-style speaking, writing, reading and listening tasks with automated scoring and feedback.",
+  "priceMonthly": 17.99,
+  "pricing": {
+    "plan": "Premium 30-day pass",
+    "basis": "one-time time-limited access pass",
+    "unit": "one-time",
+    "source": "https://openpte.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Sold as passes, not a subscription: 3 days $3.99, 7 days $4.99, 15 days $9.99, 30 days $17.99, 60 days $34.99; the 30-day pass is the closest monthly equivalent",
+    "native": "17.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanics of a PTE trainer are not hard: record audio, transcribe it, time the task, score against a rubric, keep a history. An agent can build that in a weekend using Whisper for transcription and an LLM for rubric feedback, and you will genuinely practice more because the loop is yours. What you cannot build is the part people actually pay for: a question bank that tracks what is currently showing up in the real exam, and a scoring model calibrated against Pearson's automated marker so the number you see means something. Your DIY grader will be directionally useful and numerically fictional. Good enough for drilling fluency and essay structure, not good enough to decide whether you are ready to book the test.",
+  "coreLoopDIY": "A local web app that runs timed PTE-style tasks, records your speaking or captures your typing, transcribes it, and returns rubric feedback plus a trend chart across attempts.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a modern browser with mic permission",
+    "An OpenAI-compatible API key in .env for transcription and rubric scoring, or a local whisper.cpp build",
+    "Your own question set: prompts, images, and audio you supply as JSON",
+    "Time to write the rubric prompts per task type, which is most of the actual work"
+  ],
+  "whatYouLose": [
+    "Scores calibrated to the real automated marker, so your numbers are vibes, not predictions",
+    "A question bank that is maintained and rotated as the exam changes",
+    "Full mock tests with official section timing, weighting and score report layout",
+    "Model answers, templates and community discussion around each item",
+    "Mobile apps, cross-device sync, and anyone to blame when the grader is wrong"
+  ],
+  "moatTags": [
+    "proprietary-data",
+    "proprietary-models",
+    "content-rights"
+  ],
+  "moatNotes": "Test prep moats are boring and durable: item banks that reflect the live exam, plus scoring calibrated against someone else's black box.",
+  "whyPeopleStillPay": "Because a test taker is not buying software, they are buying a number they can trust before they pay the exam fee. A prep platform's value is the item bank that mirrors what is currently in circulation and a grader tuned so a 79 on the practice test means roughly a 79 on the day. Both of those are accumulated data work, not code. A self-built trainer is great for volume practice and terrible for readiness signals, which is exactly the wrong half to have if you only get one shot at the visa cutoff.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Build it to drill, not to predict; treat your own scores as encouragement rather than evidence.",
+  "prompt": "Build a local PTE Academic practice trainer. Empty folder, no accounts, no telemetry, no cloud database.\n\nStack, non negotiable: Next.js 15 with the App Router, TypeScript, Tailwind, and SQLite via better-sqlite3. Everything runs with `npm run dev` on localhost. Secrets in .env.local only, read `OPENAI_API_KEY` and `OPENAI_BASE_URL`.\n\nData: a `questions/` folder of JSON files, one per task type, each item having id, type, prompt text, optional imagePath, optional audioPath, timeLimitSeconds, and preparationSeconds. Ship 3 dummy items per type so the app runs before the user adds real content. Do not scrape or invent exam content.\n\nTask types to support: Read Aloud, Repeat Sentence, Describe Image, Retell Lecture (speaking, recorded), plus Summarize Written Text, Write Essay (typed), and Reading Fill in the Blanks (drag or select).\n\nPractice flow: pick a task type, get a random unattempted item, show preparation countdown, then the recording or typing window with a hard timer that auto-submits. Use MediaRecorder for audio, store the webm blob under `data/recordings/`.\n\nScoring: for speaking, send audio to the Whisper transcription endpoint, then compute words per minute, filled pause count, and for Read Aloud a word level diff against the reference text. For writing, compute word count and run a rubric prompt. In both cases call the chat model with a task specific rubric that returns strict JSON: content, form, fluency, pronunciation or grammar, each 0 to 5, plus two sentences of feedback and three concrete fixes. Store the raw JSON.\n\nLabel every score in the UI as \"unofficial, uncalibrated\" and never render a 10 to 90 style score. This is deliberate.\n\nHistory: an attempts table plus a dashboard with a per task type trend line, a list of past attempts with playback of the stored audio, and a CSV export.\n\nOut of scope: full mock tests, official score mapping, user accounts, payments, mobile apps, sync, and any bundled question bank.\n\nDeliver a README covering setup, how to add your own items to `questions/`, and a blunt paragraph on why these scores are not predictions.",
+  "promptCurated": false
+}

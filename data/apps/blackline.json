@@ -1,0 +1,52 @@
+{
+  "slug": "blackline",
+  "name": "BlackLine",
+  "domain": "blackline.com",
+  "category": "finance-accounting",
+  "subcategory": "financial close and reconciliation",
+  "tagline": "Enterprise accounting automation for the financial close: account reconciliations, journal entries, matching, and audit trails on top of your ERP.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Custom quote",
+    "basis": "annual enterprise contract, quoted",
+    "unit": "custom",
+    "source": "https://www.blackline.com/request-a-demo/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "No pricing page exists: www.blackline.com/pricing/ returns 500/Not Found. Only a 'Schedule a demo' path.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "You can absolutely build a transaction matcher: read two CSVs, fuzzy match on amount and date, flag the leftovers. That is maybe five percent of what BlackLine is being paid for. The rest is certified reconciliations with named preparers and reviewers, immutable audit trails an external auditor will accept, SOX control evidence, multi-entity intercompany elimination, and live connectors into SAP, Oracle and NetSuite that survive a chart-of-accounts change. A personal replacement is a category error here: nobody buys this for themselves, a controller buys it so the audit does not become a quarter-long forensic exercise. If you are a solo operator reconciling one bank account against one ledger, you never needed it anyway.",
+  "coreLoopDIY": "Ingest a bank CSV and a ledger CSV, auto-match on amount plus date tolerance plus reference fuzz, and produce a reconciliation report listing matched pairs, unmatched items on each side, and a running difference.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Python 3.11 and a local terminal",
+    "CSV exports from your bank and your accounting system",
+    "Willingness to hand-tune matching rules for your own transaction descriptions",
+    "No auditor who needs to sign off on the result"
+  ],
+  "whatYouLose": [
+    "Audit-defensible evidence: preparer/reviewer sign-off, timestamps, locked periods, nothing editable after certification",
+    "SOX and internal-control reporting that auditors already know how to read",
+    "Live ERP integrations (SAP, Oracle, NetSuite, Dynamics) instead of manual CSV exports",
+    "Multi-entity and intercompany handling, FX, and consolidation-scale volumes",
+    "Someone accountable when the numbers are wrong at year end"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "switching-costs"
+  ],
+  "moatNotes": "The output is not a report, it is evidence. Software that produces audit evidence gets bought on trust and precedent, not features.",
+  "whyPeopleStillPay": "Because the buyer is not optimizing for cost, they are optimizing for not being the reason the audit slips. BlackLine sits between the ERP and the auditor and gives a controller a defensible story: every reconciliation was prepared by someone, reviewed by someone else, on a date, with the supporting file attached and the period locked afterward. Rebuilding the matching logic is easy; rebuilding fifteen years of auditors accepting the artifact is not. Add ERP connectors that have already survived thousands of messy chart-of-accounts migrations, and the switching cost is the entire close calendar.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The matcher is a weekend, the audit trail is not. The moat is compliance: BlackLine sells an artifact external auditors already trust, and no local script inherits that.",
+  "prompt": "Build a local, single-user bank reconciliation tool. No accounts, no cloud, no telemetry, no hosted anything.\n\nStack, non-negotiable:\n- Python 3.11\n- Typer for the CLI\n- pandas for CSV handling\n- SQLite via sqlite3 for persistence (file: recon.db)\n- Jinja2 to render a static HTML report\n- pytest for tests\nNo web server, no auth, no Docker, no external API calls.\n\nWhat it does:\n1. `recon import --side bank --file path.csv` and `--side ledger` ingest CSVs into SQLite. Support column mapping via a mapping.yml so the user can point date/amount/description/reference at their own headers. Store a stable row hash so re-importing the same file does not duplicate rows.\n2. `recon match --period 2026-07` runs matching in passes, most confident first: (a) exact amount + exact reference, (b) exact amount within a configurable date window (default 3 days), (c) exact amount + fuzzy description via difflib ratio above a threshold, (d) many-to-one sums where several ledger lines total one bank line, capped at 4 lines to keep it tractable. Every match records the pass that made it and a confidence score.\n3. `recon review --period 2026-07` interactive CLI: step through low-confidence and unmatched items, accept, reject, or tag as a known timing difference or fee. Decisions persist so re-running match does not undo human calls.\n4. `recon report --period 2026-07 --out report.html` renders: opening balance, matched total, unmatched bank items, unmatched ledger items, tagged differences, and the closing difference that must reconcile to zero. Include a plain-text summary printed to stdout.\n5. `recon rules` reads rules.yml for auto-tagging patterns (regex on description to category), applied during match.\n\nExplicitly out of scope: multi-entity consolidation, FX revaluation, journal entry posting, approval workflows, ERP connectors, anything claiming to be audit evidence.\n\nDeliverables: README with a worked example using two generated sample CSVs, mapping.yml and rules.yml examples, tests covering each matching pass plus the many-to-one case, and a Makefile with install/test/demo targets. Config paths and thresholds in .env or config.yml, never hardcoded. Print a one-line disclaimer in the report footer: this is a personal tool, not audit evidence.",
+  "promptCurated": false
+}

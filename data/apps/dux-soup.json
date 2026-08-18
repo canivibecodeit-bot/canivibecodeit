@@ -1,0 +1,52 @@
+{
+  "slug": "dux-soup",
+  "name": "Dux-Soup",
+  "domain": "dux-soup.com",
+  "category": "sales-outreach",
+  "subcategory": "LinkedIn automation",
+  "tagline": "Browser-based LinkedIn automation: visits profiles, sends connection requests and drip message sequences on your behalf.",
+  "priceMonthly": 14.99,
+  "pricing": {
+    "plan": "Pro Dux",
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://dux-soup.com/pricing/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Annual billing drops Pro Dux to $11.25/mo; next tiers are Turbo Dux $55/mo and Cloud Dux $99/mo, Cloud Agency flat $371/mo.",
+    "native": "14.99 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "Mechanically this is a Playwright script that drives your own logged-in Chrome profile, clicks buttons, and waits a random number of seconds. An agent can get a working profile-visitor and connection-request sender running in a session, and a small campaign queue with daily caps by the end of a weekend. What you are actually buying from Dux-Soup is the accumulated caution: throttle curves that do not get your account restricted, selectors that keep working after LinkedIn reshuffles the DOM every few weeks, and a cloud mode so your laptop does not have to stay awake. Note that neither the paid tool nor your script is blessed by LinkedIn, so the ban risk is yours in both cases; you are just choosing who tunes the pacing. Build it if you want ten touches a day and enjoy fixing selectors, buy it if outreach volume is how you eat.",
+  "coreLoopDIY": "Reads a CSV of LinkedIn profile URLs, drives your existing logged-in browser session to visit each one, optionally sends a connection request with a templated note, and logs outcomes to a local SQLite file with hard daily caps.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+ and a local Chrome or Chromium install",
+    "A LinkedIn account you are willing to risk, logged in via a persistent browser profile",
+    "A CSV of target profile URLs, sourced by you",
+    "A machine that stays awake during campaign windows",
+    "Tolerance for re-fixing selectors whenever LinkedIn ships a UI change"
+  ],
+  "whatYouLose": [
+    "Pacing heuristics and safety limits tuned across a lot of accounts, not guessed at by you",
+    "Selector maintenance: when LinkedIn changes markup, someone else patches their extension and nobody patches yours",
+    "Cloud execution, so campaigns keep running with your laptop shut",
+    "Webhook and CRM plumbing into HubSpot, Pipedrive and friends, plus Zapier glue",
+    "Campaign reporting, reply detection and sequence branching that actually stops when someone answers"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "The moat is maintenance velocity against a hostile target, not technology. Any single week of the product is copyable; the treadmill is not.",
+  "whyPeopleStillPay": "Because the failure modes are expensive and asymmetric. A sloppy script gets your LinkedIn account rate-limited or restricted, and for people doing outbound sales that account is the pipeline. Paying a few tens of dollars a month for someone whose full-time job is keeping the clicks looking human, plus a cloud runner and CRM handoff, is cheaper than a week of debugging selectors and one restricted profile. The DIY build is real and fun for low volume; it is a bad trade at volume.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Grey-hat by construction: whichever route you take, LinkedIn's terms do not care that your script is artisanal.",
+  "prompt": "Build a local LinkedIn outreach assistant that drives my own browser. Stack: TypeScript, Node 20, Playwright with a persistent Chromium user data dir, better-sqlite3 for state, no server, no cloud, no telemetry, no account system. CLI only.\n\nStructure:\n- src/browser.ts: launches Playwright chromium with userDataDir from .env (PROFILE_DIR), headed by default so I can watch and take over.\n- src/login.ts: opens linkedin.com and waits for me to log in manually, then exits. Never handle or store my password. No credentials in code or .env.\n- src/db.ts: SQLite schema for targets (url, name, status, added_at) and actions (target_url, action_type, result, ran_at).\n- src/import.ts: reads targets.csv (column: profile_url, optional first_name) and inserts new rows as status 'queued'.\n- src/run.ts: the campaign loop.\n\nCampaign loop rules:\n- Read config from config.json: daily_visit_cap, daily_connect_cap, active_hours (start and end, local time), min_delay_seconds, max_delay_seconds.\n- Default caps low and boring: 20 visits, 10 connects.\n- Sleep a random interval between min and max delay between every action, plus a longer random pause every 5 actions.\n- Stop immediately and log if the page shows a captcha, a checkpoint, an 'unusual activity' interstitial, or a login redirect. Do not retry.\n- Actions: visit profile, and optionally click Connect and add a note rendered from templates/connect.txt with {{first_name}} substitution. Truncate notes to the field limit.\n- Everything runs in dry-run mode unless --live is passed. Dry run logs the exact action it would take.\n- Idempotent: never act twice on the same target for the same action type.\n\nAlso include: src/report.ts printing counts by status and action outcome, a README that states plainly that this automates a logged-in session and may violate LinkedIn's user agreement and can get an account restricted, and a .env.example with PROFILE_DIR only.\n\nOut of scope: scraping or guessing email addresses, bulk profile data export, running headless to evade detection, proxy rotation, multiple accounts, reply detection, CRM sync, any hosted component.",
+  "promptCurated": false
+}

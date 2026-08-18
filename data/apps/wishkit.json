@@ -1,0 +1,51 @@
+{
+  "slug": "wishkit",
+  "name": "WishKit",
+  "domain": "wishkit.io",
+  "category": "user-research",
+  "subcategory": "feature request boards",
+  "tagline": "Drop-in feature request and upvote board for apps, with a native SwiftUI SDK and a hosted backend.",
+  "priceMonthly": 15,
+  "pricing": {
+    "plan": "Premium",
+    "basis": "monthly per account (2 projects)",
+    "unit": "flat",
+    "source": "https://www.wishkit.io/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Annual billing $12.50/mo; Enterprise (unlimited projects) $39/mo or $32.50/mo annual",
+    "native": "15 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The data model here is four tables and a sort function: wishes, votes, comments, statuses. An agent can produce the whole web board plus a REST API in a single sitting, and it will work fine for a side project. The part that is actually work is everything after that: a native in-app widget for each platform you ship on, anonymous device identity so the same user cannot vote fifty times, spam and profanity handling, and an endpoint that stays up for people who already installed your binary. Nothing there is hard, it is just a real backend you now own forever. Build it if you like owning it, pay if your roadmap board is not the thing you want to be on call for.",
+  "coreLoopDIY": "Runs a self-hosted feature request board with upvotes, comments, status labels and an admin view, exposed over a small REST API that your app can call from an embedded widget.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A place to host a small Node service with persistent disk",
+    "A domain or subdomain your shipped app can call",
+    "Xcode if you want the SwiftUI widget compiled and tested",
+    "Basic rate limiting or a proxy in front of the write endpoints"
+  ],
+  "whatYouLose": [
+    "A maintained SDK per platform, so every new client is your code to write and version",
+    "Anti-abuse that someone else already tuned: duplicate votes, spam floods, garbage submissions",
+    "Uptime you did not have to think about for users running an old build of your app",
+    "Email or push notifications when a request they voted for ships",
+    "Duplicate merging, tagging and the other board hygiene features that only matter once you have hundreds of wishes"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations"
+  ],
+  "moatNotes": "The moat is being the boring dependency inside a shipped binary, not the board itself. Once your 1.2 release is calling their API, switching means shipping a new version and waiting for people to update.",
+  "whyPeopleStillPay": "Because a feature request board is not the product, it is a chore attached to the product. Paying converts an endpoint you have to keep alive, patch, and defend from spam into a line item, and it gets you a native widget that matches the platform without you writing UI you do not care about. Indie developers in particular are buying the SDK and the uptime, not the CRUD.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The board is a weekend, the on-call rotation for it is forever.",
+  "prompt": "Build a self-hosted feature request board with a small public API, meant to be embedded in my own apps.\n\nStack, no substitutions: Next.js 15 with the App Router and TypeScript, SQLite via better-sqlite3 with Drizzle ORM, Tailwind for styling. No auth provider, no analytics, no telemetry, no external services.\n\nData model: projects (id, name, api_key), wishes (id, project_id, title, description, status, created_at, author_device_id), votes (wish_id, device_id, unique together), comments (id, wish_id, device_id, body, created_at). Statuses: pending, approved, in_progress, completed, rejected.\n\nPublic REST API, all scoped by an X-Api-Key header mapped to a project:\n- GET /api/wishes?sort=votes|new returns approved, in_progress and completed wishes with vote counts and whether the calling device already voted\n- POST /api/wishes creates a wish with status pending\n- POST /api/wishes/:id/vote and DELETE /api/wishes/:id/vote, idempotent per device_id\n- GET and POST /api/wishes/:id/comments\nDevice identity is a client-generated UUID sent as X-Device-Id. No accounts. Reject bodies over 2000 characters and rate limit writes to 10 per device per hour using an in-memory token bucket.\n\nAdmin UI at /admin behind a single ADMIN_PASSWORD from .env, checked with a signed httpOnly cookie: list all wishes including pending, change status, delete, merge a duplicate into another wish (moves votes, dedupes by device_id).\n\nPublic web board at /b/[projectId]: sortable list, vote button, detail page with comments, submit form. Mobile-first, plain and fast, no animations.\n\nAlso generate a minimal SwiftUI package in ./ios-sdk: one WishBoardView that lists, votes and submits against the API, device UUID persisted in UserDefaults, base URL and api key passed in at init. Keep it under 300 lines and do not add dependencies.\n\nOut of scope: email or push notifications, multi-tenant signup, billing, roadmap columns, OAuth, i18n.\n\nSecrets in .env: ADMIN_PASSWORD, COOKIE_SECRET. Ship a seed script that creates one project and ten sample wishes, plus a README with curl examples for every endpoint.",
+  "promptCurated": false
+}

@@ -1,0 +1,53 @@
+{
+  "slug": "reel-farm",
+  "name": "Reel Farm",
+  "domain": "reel.farm",
+  "category": "ai-video",
+  "subcategory": "faceless short-form video generation",
+  "tagline": "Generates faceless TikTok slideshow posts in bulk from a topic, captioned and auto-posted.",
+  "priceMonthly": 95,
+  "pricing": {
+    "plan": "Scale",
+    "basis": "monthly flat",
+    "unit": "flat",
+    "source": "https://reel.farm/#pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Tiers are quota-based: Growth $49/mo (100 slideshows, 150 AI credits, 10 automations), Scale $95/mo (250/300/20, marked Most Popular), Enterprise $195/mo (750/750/200).",
+    "native": "95 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The pipeline here is not a secret: an LLM writes a short script, a TTS API reads it, stock or generated clips get stitched behind it, and word-level timings drive burned-in captions. ffmpeg does the heavy lifting and an agent can wire the whole chain in a weekend, including a queue that renders fifty variations overnight. Where it stops being fun is everything after the render: scheduled posting to TikTok, Instagram and YouTube means real API access, app review, tokens that expire, and platform rules that change without warning. You will also spend more time than you expect on the boring parts, safe-area layout for captions, loudness normalization, and clips that do not visually repeat every third video. Build it if you want control over the script and the look, pay if the value you actually want is the post button.",
+  "coreLoopDIY": "A local CLI that takes a topic, writes a short script, synthesizes a voiceover, stitches stock clips with word-timed burned-in captions, and renders a vertical MP4 batch.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "ffmpeg and ffprobe installed locally",
+    "An LLM API key for scripting",
+    "A TTS API key, or a local TTS model",
+    "A stock footage API key, or your own clip library",
+    "whisper.cpp or a transcription API for word-level caption timings",
+    "Disk space and patience for render queues"
+  ],
+  "whatYouLose": [
+    "Scheduled auto-posting to TikTok, Instagram Reels and YouTube Shorts, which is the part that needs approved platform apps",
+    "Hosted rendering, so long batches tie up your own machine",
+    "Curated templates and caption styles that already look native to each platform",
+    "Any built-in sense of what is performing, analytics loops and hook variants",
+    "Someone else absorbing model and stock-footage cost changes"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish"
+  ],
+  "moatNotes": "The render is commodity. The posting credentials and the taste in the caption layer are not.",
+  "whyPeopleStillPay": "Because a faceless content operation is not one video, it is two hundred, and the friction that kills it is scheduling and upload, not generation. Getting write access to the major short-form platforms is a bureaucratic slog that nobody wants to do twice, and a hosted tool that already holds those tokens is worth a subscription to people running this as a volume game. There is also the honest fact that the default output of a DIY pipeline looks like a DIY pipeline for the first week, until you fix the caption placement, the loudness, and the clip repetition. If you are making a handful of videos with a specific look you care about, build it. If you are farming, pay.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Rendering vertical video with captions is a solved ffmpeg problem; getting a robot to post it is not.",
+  "prompt": "Build a local command-line tool that mass-produces vertical faceless short-form videos. No web UI, no accounts, no telemetry, no cloud storage.\n\nStack: TypeScript on Node 20, run with tsx. Use commander for the CLI, zod for config validation, and fluent-ffmpeg shelling out to a locally installed ffmpeg. SQLite via better-sqlite3 for the job queue and render history. No frontend framework, no Docker.\n\nSecrets in .env, loaded with dotenv: OPENAI_API_KEY, ELEVENLABS_API_KEY, PEXELS_API_KEY. Fail loudly on startup if a key needed by the chosen command is missing.\n\nCommands:\n1. reelfarm script --topic \"...\" --count 5 : call an LLM to produce N short scripts as JSON, each with a hook line, 3 to 5 body beats, and a closing line, target 25 to 40 seconds when spoken. Store each as a pending job row.\n2. reelfarm voice --job-id X : send the script to ElevenLabs TTS, save MP3 to media/voice, and normalize loudness to -14 LUFS with the ffmpeg loudnorm filter in two passes.\n3. reelfarm captions --job-id X : transcribe the rendered voiceover with whisper.cpp if a local binary is configured, otherwise the OpenAI transcription API with word timestamps, and write an ASS subtitle file with 2 to 4 words per screen, centered in the middle third, thick outline, no more than 90 percent of frame width.\n4. reelfarm clips --job-id X : pull vertical stock clips from Pexels matched to keywords extracted from each beat, cache downloads in media/clips, and never reuse the same clip twice within one batch.\n5. reelfarm render --job-id X : with ffmpeg, scale and center-crop clips to 1080x1920, cut between them on beat boundaries, overlay the ASS captions, mix voiceover over an optional background track at -22 dB, and write out/{job-id}.mp4 with faststart, H.264, yuv420p, 30 fps.\n6. reelfarm batch --topic \"...\" --count 10 : run the whole chain end to end, serially, resumable, skipping steps whose output already exists on disk.\n\nExplicitly out of scope: posting or scheduling to any social platform, analytics, AI video generation models, multi-user anything. Print the output path and let the human upload.\n\nWrite a config.example.json with caption style, voice id, target duration, and clip source. Include a README with the ffmpeg install line, the .env template, and one working batch example. Add a smoke test that renders a 5 second clip from a bundled sample audio file and a solid-color background so the pipeline can be verified without spending API credits.",
+  "promptCurated": false
+}

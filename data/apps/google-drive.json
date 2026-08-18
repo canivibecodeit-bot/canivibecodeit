@@ -1,0 +1,52 @@
+{
+  "slug": "google-drive",
+  "name": "Google Drive",
+  "domain": "drive.google.com",
+  "category": "cloud-storage",
+  "subcategory": "file sync and sharing",
+  "tagline": "Cloud file storage with sync clients, sharing links, and the Google Docs suite bolted on.",
+  "priceMonthly": 1.99,
+  "pricing": {
+    "plan": "Google One Basic 100 GB",
+    "basis": "monthly, individual (storage shared across Drive/Gmail/Photos)",
+    "unit": "flat",
+    "source": "https://one.google.com/about/plans",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Also sold annually at $19.99/yr (~$1.67/mo); storage can be shared with up to 5 family members",
+    "native": "1.99 USD"
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "You can absolutely build a file upload page with folders, search, and share links in an afternoon. What you cannot build is durable multi-region storage that has not lost a byte in fifteen years, a sync daemon that survives sleep, flaky wifi, and two machines editing the same folder, and native apps on every platform your family owns. The cost side is brutal too: two terabytes of redundant storage plus egress will run you more than the consumer plan, before you have written a line of code. Add that half the value is not storage at all, it is that everyone you share with already has an account and Docs opens in one click. This is infrastructure wearing a UI, and infrastructure is the part you are paying for.",
+  "coreLoopDIY": "A self-hosted file locker: upload, browse folders, full text search on filenames, and generate expiring public share links from a single box you control.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A VPS or always-on home machine with disk you actually trust",
+    "S3-compatible object storage or a RAID array plus a real offsite backup",
+    "A domain and TLS cert for share links",
+    "Willingness to test your own restore path before you need it"
+  ],
+  "whatYouLose": [
+    "Real sync clients on macOS, Windows, iOS, and Android, including offline files and conflict resolution",
+    "Google Docs, Sheets, and Slides opening inline with live multiplayer editing",
+    "Durability and availability engineering you will never match, plus versioning and trash that actually works",
+    "Sharing with people who already have accounts, plus granular permissions and audit trails",
+    "OCR and content search inside PDFs and images, and the mobile scanner"
+  ],
+  "moatTags": [
+    "scale-infra",
+    "integrations",
+    "switching-costs"
+  ],
+  "moatNotes": "The sync engine is the hard part and it is invisible, which is why everyone underestimates it.",
+  "whyPeopleStillPay": "Because storage is a promise, not a feature. Paying a few dollars a month means you are not the person on call when a disk dies, a sync loop eats a folder, or your share links stop resolving during a family emergency. On top of that, most people's Drive is load bearing for other people: shared folders, Docs links pasted into email threads years ago, phone backups. Replacing the upload form is easy, replacing the promise and the graph of links pointing at it is not.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "A file locker is a weekend; a sync engine that never loses a byte is not. The moat is redundant global storage plus a client on every device your relatives own.",
+  "prompt": "Build a self-hosted personal file locker called \"Vault\". Single Node.js service, no framework soup.\n\nStack, non negotiable:\n- Node 20 with Fastify and TypeScript\n- SQLite via better-sqlite3 for metadata\n- Files stored on local disk under DATA_DIR, sharded by the first two chars of a content hash\n- Server rendered HTML with Nunjucks plus a little vanilla JS, no React\n- Single admin user, password hash in .env, cookie session\n\nIn scope:\n- Upload via drag and drop, chunked, resumable, files up to 5 GB, using tus protocol or a simple range based chunk endpoint you write\n- Content addressed storage: hash on upload, dedupe identical bytes, keep every version of a path\n- Folder tree browsing, rename, move, soft delete with a 30 day trash table and a purge command\n- Search on filename, extension, size range, and date, all from SQLite\n- Share links: random 22 char token, optional expiry, optional download limit, optional password, served from a read only route that streams with correct Content-Type and range support\n- Thumbnails for images and PDF first pages using sharp and pdftoppm if present, skipped gracefully if not\n- A \"vault backup\" CLI command that rsyncs DATA_DIR and dumps the SQLite file, plus a \"vault verify\" that rehashes everything and reports drift\n\nOut of scope, do not attempt:\n- Desktop or mobile sync clients\n- Multi user accounts, sharing between accounts, permissions matrices\n- Document editing or previews beyond thumbnails\n- Any cloud service, telemetry, or analytics\n\nRequirements:\n- All config in .env: PORT, DATA_DIR, ADMIN_PASSWORD_HASH, SESSION_SECRET, PUBLIC_BASE_URL\n- docker-compose.yml with one service and one named volume\n- Integration tests covering chunked upload, resume after interrupt, dedupe, share link expiry, and trash purge\n- README that states plainly: this is one disk, it is not a backup, here is the restore drill, run it once a quarter\n",
+  "promptCurated": false
+}

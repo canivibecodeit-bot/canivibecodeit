@@ -1,0 +1,51 @@
+{
+  "slug": "letterboxd",
+  "name": "Letterboxd",
+  "domain": "letterboxd.com",
+  "category": "social-media",
+  "subcategory": "film logging and reviews",
+  "tagline": "A social diary for films: log what you watch, rate it, review it, and read everyone else's takes.",
+  "priceMonthly": 1.58,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "annual subscription per member",
+    "unit": "flat",
+    "source": "https://letterboxd.com/about/pro/",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "Billed annually only ($18.99/yr = about $1.58/mo). Patron tier is $48.99/yr (about $4.08/mo). Web checkout runs through Paddle at the same annual cadence.",
+    "native": "18.99 USD"
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The logging half of Letterboxd is trivial: a table of films, a date, a rating, a note. The half people actually open the app for is everyone else, friends' four-star shrugs, review pages with thousands of jokes, lists that function as film school syllabi, and the year-end stats that only mean something because they are comparable. A one-shot build gives you a private diary with no one in it, and you will still need TMDB to get posters and metadata that do not look broken. If you genuinely only want a watch log, build it and enjoy the speed. If you want the film internet, you are not building the film internet this weekend.",
+  "coreLoopDIY": "A local film diary that searches TMDB for a title, logs a watch date, rating and review, and shows your history plus a stats page.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "TMDB API key for film metadata and posters",
+    "Node 20+",
+    "SQLite (no server to run)"
+  ],
+  "whatYouLose": [
+    "Every other human: friends' ratings, popular reviews, comment threads",
+    "Curated and community lists, which are most of the discovery value",
+    "Aggregate ratings and the histogram that tells you if a film is divisive or just bad",
+    "Mobile apps, offline logging, share cards, streaming availability data",
+    "Importing your existing history back out of anything without a CSV wrangle"
+  ],
+  "moatTags": [
+    "network-effects",
+    "proprietary-data",
+    "brand-trust"
+  ],
+  "moatNotes": "The ratings graph and the review corpus are both user-generated and both compound. Nobody wants to be the first person on a film site.",
+  "whyPeopleStillPay": "The paid tier is mostly a tip jar with benefits: no ads, better stats, watchlist filtering by streaming service, and a few power-user views. People pay because the free product already earned a place in their routine and the annual price is roughly a cinema ticket. The value being purchased is not features, it is continued access to a place where their taste is legible to other people who care about films. A private diary cannot sell that at any price.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The diary is an afternoon; the audience is not. The moat is a decade of reviews, lists and rating distributions that only exist because everyone else showed up first.",
+  "prompt": "Build a local-first personal film diary web app. Single user, no accounts, no cloud, no telemetry.\n\nStack, non-negotiable:\n- Next.js 15 with the App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, one file at ./data/diary.db, schema created on first run.\n- No auth, no external services except TMDB for metadata.\n\nSecrets:\n- .env.local with TMDB_API_KEY. Commit .env.example only. Fail loudly with a readable message if the key is missing.\n\nData model:\n- films: tmdb_id (primary key), title, year, director, runtime, poster_path, overview, cached_at.\n- entries: id, tmdb_id, watched_on (date), rating (0.5 to 5 in half steps, nullable), review (text, nullable), rewatch (boolean), liked (boolean), created_at.\n- watchlist: tmdb_id, added_at, note.\n\nFeatures in scope:\n- Search box that hits TMDB search, shows posters and years, one click to log. Cache the film row locally so the app works offline for anything already logged.\n- Log form: watched date defaults to today, half-star rating widget, review textarea, rewatch and liked toggles.\n- Diary view grouped by month, newest first, poster grid plus compact list toggle.\n- Film detail page: local metadata, every entry you have for it, rating history.\n- Watchlist page with add from search and a one-click promote to a diary entry.\n- Stats page: films per year and per month, rating distribution histogram, top directors by count, total runtime in hours and days, longest streak of consecutive days with a log.\n- CSV import that accepts the Letterboxd export format (Name, Year, Watched Date, Rating, Review, Rewatch) and matches to TMDB with a manual disambiguation queue for anything ambiguous.\n- CSV export of everything.\n\nExplicitly out of scope: any social features, follower graphs, comments, aggregate ratings, streaming availability, mobile apps, push notifications, deployment config.\n\nDeliver: working app, README with setup in under five commands, seed script that inserts three sample entries so the stats page is not empty on first load.",
+  "promptCurated": false
+}

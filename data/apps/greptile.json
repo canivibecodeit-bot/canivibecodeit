@@ -1,0 +1,53 @@
+{
+  "slug": "greptile",
+  "name": "Greptile",
+  "domain": "greptile.com",
+  "category": "dev-tools",
+  "subcategory": "AI code review",
+  "tagline": "An AI bot that indexes your whole codebase and leaves context-aware review comments on every pull request.",
+  "priceMonthly": 30,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly per seat",
+    "unit": "per-seat",
+    "source": "https://www.greptile.com/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "high",
+    "notes": "50 credits included per seat; extra credits $1 each (standard review 1 credit, TREX review 3). Enterprise is custom-priced.",
+    "native": "30 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The mechanical core is genuinely a weekend project: a GitHub App that catches pull request webhooks, pulls the diff, retrieves related code from an embedding index of the repo, and posts inline comments from an LLM. You can get to first useful comment in an afternoon. What you will not get in one sitting is signal quality, which is the entire product: knowing when to shut up, not re-flagging the same nit on every push, understanding a monorepo without blowing the context window, and keeping the index fresh without a full reindex on every merge. Expect a bot that is impressive on day one and muted by the team on day nine. Worth building if you own the repo and enjoy tuning prompts; not worth building to save a per-seat fee across a real engineering org.",
+  "coreLoopDIY": "A GitHub App that on each pull request retrieves semantically related code from a local embedding index of the repo and posts LLM-written inline review comments on the diff.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "GitHub App registration with webhook secret and private key",
+    "An LLM API key (embeddings plus a strong reasoning model)",
+    "A small always-on host or tunnel to receive webhooks",
+    "Local disk for the vector index, roughly proportional to repo size",
+    "Willingness to iterate on the review prompt for weeks"
+  ],
+  "whatYouLose": [
+    "Tuned false-positive suppression: their bot has been beaten into silence by thousands of teams, yours has not",
+    "Incremental reindexing and monorepo handling that does not choke on a 500k file tree",
+    "Memory of past reviews so the same nit is not raised on every force push",
+    "Team-level config, custom rule sets, and per-repo style learning from accepted or dismissed comments",
+    "Bitbucket, GitLab, and self-hosted host support, plus SOC 2 paperwork your security team will ask for"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "proprietary-data",
+    "integrations"
+  ],
+  "moatNotes": "The retrieval plumbing is commodity. The judgment about which comments are worth a human's attention is not, and it comes from watching a lot of engineers dismiss a lot of comments.",
+  "whyPeopleStillPay": "Because a noisy code reviewer is worse than none, and getting from noisy to useful is a long grind of prompt tuning, retrieval tweaks, and feedback loops you cannot shortcut with one prompt. Teams also want the review bot to be someone else's uptime problem, to work across every repo without a platform engineer babysitting an index, and to arrive with a compliance page attached. A per-developer fee is trivially cheaper than an engineer maintaining an in-house bot that everyone quietly mutes.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Building the reviewer is easy, making it not annoying is the whole job.",
+  "prompt": "Build a self-hosted AI pull request reviewer for a single GitHub repository. No web UI, no accounts, no telemetry.\n\nStack, no substitutions: Python 3.12, FastAPI, uvicorn, SQLite for state, sqlite-vec for vector search, httpx for GitHub REST calls, OpenAI API for embeddings and review generation. Package with uv. Everything runs in one process plus one CLI.\n\nSecrets in .env, loaded with python-dotenv: GITHUB_APP_ID, GITHUB_PRIVATE_KEY_PATH, GITHUB_WEBHOOK_SECRET, OPENAI_API_KEY, REPO_FULL_NAME.\n\nPart 1, indexer CLI (index.py):\n- Walk the local clone of the repo, respect .gitignore, skip binaries, lockfiles, and anything over 400 KB.\n- Chunk source files by function or class using tree-sitter for Python, TypeScript, JavaScript, and Go; fall back to 60-line sliding windows with 10-line overlap for everything else.\n- Embed each chunk, store text, path, start line, end line, git blob sha, and vector in SQLite.\n- Support incremental reindex: given two git revisions, only re-embed chunks whose file blob sha changed. Print counts of added, updated, deleted chunks.\n\nPart 2, webhook service (server.py):\n- POST /webhook, verify the X-Hub-Signature-256 HMAC against GITHUB_WEBHOOK_SECRET, reject on mismatch.\n- Handle pull_request opened and synchronize events only. Enqueue work in a SQLite-backed job table and return 202 immediately.\n- A background worker fetches the PR diff, splits it per file hunk, and for each hunk retrieves the top 8 related chunks by vector similarity plus the full current version of the changed file if it is under 800 lines.\n- Send one LLM call per changed file with the hunk, retrieved context, and a review prompt that demands: only comment on correctness, security, or clear API misuse; no style nits; no praise; no summaries; return an empty array when the change is fine.\n- Model output must be strict JSON: a list of objects with path, line, severity, body. Validate with Pydantic and drop anything whose line is not inside the diff.\n\nPart 3, dedupe and posting:\n- Store a hash of path plus normalized comment body per PR. Never post the same finding twice across force pushes.\n- Post surviving comments as a single GitHub review with inline comments, authenticated as the GitHub App via a short-lived installation token.\n- Add a CLI command 'review-local PR_NUMBER' that prints what it would post without calling GitHub, for prompt tuning.\n\nOut of scope: GitLab and Bitbucket, multi-repo support, a dashboard, learning from dismissed comments, autofix suggestions, chat replies to review threads.\n\nDeliver a README with GitHub App setup steps, the exact permissions needed (contents read, pull requests write, metadata read), and how to expose the webhook locally with a tunnel. Include pytest coverage for signature verification, diff line mapping, and dedupe.",
+  "promptCurated": false
+}

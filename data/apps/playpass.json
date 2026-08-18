@@ -1,0 +1,52 @@
+{
+  "slug": "playpass",
+  "name": "Playpass",
+  "domain": "playpass.com",
+  "category": "scheduling",
+  "subcategory": "sports league registration and management",
+  "tagline": "Registration, payments, rosters and schedules for recreational sports leagues, camps and tournaments.",
+  "priceMonthly": 12.85,
+  "pricing": {
+    "plan": "Pro",
+    "basis": "monthly per organisation",
+    "unit": "flat",
+    "source": "https://playpass.com/sports-software/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "medium",
+    "notes": "Tiered flat plans (Free EUR 0, Plus EUR 5.30, Pro EUR 11.10, Max EUR 58) plus a payment processing fee that drops with the tier (3% free, 2.5% Plus, 2% Pro, 1% Max); annual billing saves 8%+. USD figure converted at EUR/USD 1.157 on 2026-08-18.",
+    "native": "11.10 EUR"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The mechanics here are not exotic: a signup form, a payment link, a roster table, a round robin schedule generator and a standings page. An agent will get you all of that in a weekend, and if you run one league for one hundred people it will be genuinely fine. The part that hurts is that you are now the payment processor, the refund desk and the support line for parents who cannot find the confirmation email, during the two weeks a year when everyone signs up at once. Waivers, discount codes, waitlists, team invites, partial payments and mid-season roster moves are each small features and collectively a product. Build it if you run the league yourself and like owning your data; do not build it if you are running leagues for other people's money.",
+  "coreLoopDIY": "Publishes a league page with a paid registration form, collects Stripe payments, builds teams from the signup list, and generates a round robin schedule with a standings table.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Stripe account in test mode, then live keys if you take real money",
+    "transactional email via Resend or SMTP credentials",
+    "a small host or VPS that stays up during registration week",
+    "someone technical reachable on signup day"
+  ],
+  "whatYouLose": [
+    "Refunds, chargebacks, failed cards and the payout paperwork all become your problem",
+    "No polished mobile experience for players checking game times and RSVPs",
+    "Waivers, medical info handling and minors' data get no compliance thinking unless you do it yourself",
+    "No shared discovery: players cannot find your league the way they find one on a platform",
+    "Nobody else answers support email when a parent's registration silently fails"
+  ],
+  "moatTags": [
+    "switching-costs",
+    "compliance-regulatory",
+    "brand-trust"
+  ],
+  "moatNotes": "Mid-season is the worst possible time to migrate, which is most of the year, and organizers remember that.",
+  "whyPeopleStillPay": "League organizers are usually volunteers with a day job, and the thing they are actually buying is not scheduling logic, it is not being personally liable when money and children's contact details are involved. Handing registration to a platform means the payment rails, the refund policy, the receipts and the parent complaining that the site did not work are somebody's job description rather than your Sunday. The per registration cost usually comes out of the player's fee anyway, so the organizer never feels it. That is a hard price to beat with a self-hosted app you also have to babysit.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Fine for the league you personally run, bad idea for leagues where you hold other people's money.",
+  "prompt": "Build a self-hosted league registration and scheduling app for a single organizer running recreational sports leagues.\n\nStack, no substitutions:\n- Next.js 15 with App Router and TypeScript\n- SQLite via Prisma, file at ./data/app.db\n- Tailwind CSS, plain and boring, no component library\n- Stripe Checkout in test mode for payments\n- Resend for transactional email, fall back to logging emails to console if RESEND_API_KEY is missing\n- Single admin password from ADMIN_PASSWORD in .env, session cookie, no user accounts for admins\n\nData model: League (name, sport, season dates, fee in cents, capacity, public slug, status), Registration (name, email, phone, notes, waiverAcceptedAt, paymentStatus, stripeSessionId), Team, TeamMember, Game (round, date, homeTeam, awayTeam, homeScore, awayScore).\n\nPublic side:\n- /l/[slug] shows league info, remaining spots, and a registration form\n- Submitting creates a pending Registration and redirects to Stripe Checkout\n- Webhook at /api/stripe/webhook marks the registration paid and emails a confirmation\n- If the league is at capacity, put the registration on a waitlist instead of charging\n- /l/[slug]/schedule shows the generated schedule and a standings table computed from entered scores\n\nAdmin side at /admin:\n- Create and edit leagues, view registrations with payment status, export CSV\n- Manually mark a registration paid or refunded, no Stripe refund API call, just a status field and a note\n- Auto-assign paid registrations into N teams, allow drag-free manual reassignment via a dropdown per player\n- Generate a round robin schedule across a list of date slots, regenerate wipes and rebuilds\n- Enter scores per game, standings recompute from wins, losses, ties and point differential\n\nExplicitly out of scope: refunds through Stripe, discount codes, installment payments, a mobile app, push notifications, multi-organizer permissions, analytics, telemetry.\n\nAll secrets in .env, provide .env.example with DATABASE_URL, ADMIN_PASSWORD, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY. Include a seed script that creates one league with twenty paid registrations so the schedule and standings pages have something to show. README covers local run, Stripe CLI webhook forwarding, and one loud warning that taking real money means real refund and tax obligations.",
+  "promptCurated": false
+}

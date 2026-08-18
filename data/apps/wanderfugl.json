@@ -1,0 +1,51 @@
+{
+  "slug": "wanderfugl",
+  "name": "Wanderfugl",
+  "domain": "wanderfugl.com",
+  "category": "travel",
+  "subcategory": "trip planning",
+  "tagline": "A web app for planning trips: itineraries, bookings and travel details in one place.",
+  "priceMonthly": 9,
+  "pricing": {
+    "plan": "Plus",
+    "basis": "monthly flat",
+    "unit": "flat",
+    "source": "https://wanderfugl.com/pricing.html",
+    "checkedOn": "2026-08-18",
+    "confidence": "medium",
+    "notes": "Only two tiers: Free $0 and Plus $9/mo, with a 7-day refund guarantee.",
+    "native": "9 USD"
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Trip planning is one of the most one-shottable categories there is: it is days, places, times, notes and a map, which is a CRUD app with a calendar view. An agent can give you a local itinerary builder with day-by-day cards, confirmation numbers, an ICS export and a pinned map in a single sitting, and it will feel better than a spreadsheet. The gap is everything that touches live travel data: flight and hotel prices, schedule changes, timezone-correct arrival math, place search with real coordinates, and inbox parsing of booking emails. If the paid product's value is mostly structure and a nice UI, self-hosting wins; if it is live data feeds or a polished phone app you use offline in an airport, it does not. Rate it kinda until you know which of those you are actually paying for.",
+  "coreLoopDIY": "A local trip planner where you create a trip, add day-by-day items with times, places, links and confirmation numbers, see them on a map, and export the whole thing to calendar or a printable page.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node and a browser",
+    "A maps tile key if you want a real map instead of a static list",
+    "Optional: a place search API key for coordinates"
+  ],
+  "whatYouLose": [
+    "Live flight, train and hotel pricing or availability",
+    "Automatic booking email parsing into your itinerary",
+    "A real mobile app with offline access while travelling",
+    "Timezone and schedule-change handling done correctly by someone else",
+    "Sharing a polished read-only itinerary with travel companions"
+  ],
+  "moatTags": [
+    "integrations",
+    "execution-polish",
+    "proprietary-data"
+  ],
+  "moatNotes": "The defensible part of any travel tool is plumbing: booking feeds, place data, email parsing, and a mobile client that works with no signal.",
+  "whyPeopleStillPay": "Because the hard part of trip planning is not storing the plan, it is getting the plan in and out without typing. Forwarding a confirmation email and having flights, seats and hotel nights appear correctly, with the right timezones and the right dates, is worth money to people who travel often. Add a phone app that works in an airport with no data and a share link your travel partner can actually read, and a self-hosted version starts to feel like homework right when you least want homework.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The structure is a weekend project, the plumbing is not: decide whether you are paying for the itinerary UI or the data feeding it.",
+  "prompt": "Build a local-first trip planner web app called Fugl. No accounts, no cloud, no telemetry.\n\nStack, non negotiable:\n- Next.js with the App Router and TypeScript\n- SQLite via better-sqlite3, file at ./data/fugl.db, created and migrated on first run\n- Tailwind for styling, no component library\n- Leaflet with OpenStreetMap tiles for the map\n- Runs with: npm install, npm run dev\n\nData model:\n- Trip: id, name, destination label, start date, end date, notes, home timezone\n- Item: id, trip id, kind (flight, train, lodging, activity, food, note), title, start datetime, end datetime nullable, timezone, location name, lat nullable, lng nullable, confirmation code, url, cost, currency, notes\n- Packing item: id, trip id, label, packed boolean\n\nFeatures in scope:\n- Trip list page, create and edit trips\n- Trip detail page grouped by day, each day showing items sorted by start time, with kind icons and a running per-day cost total\n- Add and edit items in a side drawer, with lat and lng entered manually or pasted from a maps URL\n- Map panel showing all items with coordinates for the trip, pins numbered by day\n- Packing list with checkboxes, persisted\n- Export trip to .ics with one VEVENT per item, timezone aware\n- Printable itinerary view at /trips/[id]/print, clean single column, no nav chrome\n- JSON export and import of a whole trip\n- Full text search across item titles, notes and confirmation codes\n\nExplicitly out of scope:\n- Flight, hotel or price lookups of any kind\n- Email parsing, OAuth, sharing links, multi user\n- Push notifications and native apps\n\nUse .env for the optional map tile URL and nothing else. Seed one demo trip with three days of items so the UI is not empty. Write a README with run steps and a one line note that all data stays in ./data.",
+  "promptCurated": false
+}

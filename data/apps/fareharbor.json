@@ -1,0 +1,52 @@
+{
+  "slug": "fareharbor",
+  "name": "FareHarbor",
+  "domain": "fareharbor.com",
+  "category": "travel",
+  "subcategory": "tour and activity booking",
+  "tagline": "Booking, availability and payment software for tour, activity and rental operators, with distribution out to the big OTAs.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": "Consumer-funded booking fee",
+    "basis": "percentage fee per booking",
+    "unit": "usage",
+    "source": "https://fareharbor.com/pricing/",
+    "checkedOn": "2026-08-18",
+    "confidence": "medium",
+    "notes": "No monthly software fee for operators; the fee (commonly cited around 6% in North America, negotiable 5-8%) is added to the traveler's checkout total. OTA-sourced bookings are billed to the operator separately.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The part everyone thinks they are paying for, a calendar with capacity, a checkout, and a manifest the guides can read, is genuinely a weekend build with Stripe doing the hard money parts. The part that is actually load-bearing is everything after that: pushing live availability to Viator, GetYourGuide, Expedia and Booking.com, reconciling reseller commissions, handling refunds and chargebacks on other people's money, and a phone line that answers at 6am when the 7am kayak trip is double-booked. A self-hosted build replaces direct-website bookings cleanly and replaces channel distribution not at all. If most of your volume is direct and you can eat the ops burden, the maths gets interesting fast. If OTAs feed you, you are rebuilding a channel manager, which is not a weekend.",
+  "coreLoopDIY": "Self-hosted booking site: define tours with dated departures and capacity, take deposits or full payment through Stripe Checkout, and give staff a day-view manifest with check-in and cancellation.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Stripe account (test mode is fine to build against)",
+    "a domain and any Node host, plus a Postgres or SQLite volume",
+    "transactional email provider for confirmations",
+    "clear rules for your own cancellation, deposit and capacity logic before you start"
+  ],
+  "whatYouLose": [
+    "OTA and reseller distribution: live availability pushed to Viator, GetYourGuide, Expedia and dozens of local agents, plus the commission accounting behind it",
+    "Someone else owning payment risk: chargebacks, disputes, refund flows, payout timing, PCI scope and multi-currency",
+    "24/7 human support during a season where a broken booking page costs real departures that day",
+    "The messy operational features you only miss in August: resource and guide assignment, gear allocation, multi-day and multi-activity itineraries, gift cards, promo codes, waivers, group and private bookings",
+    "Mobile check-in that works on a beach with one bar of signal, and the reporting your accountant already knows how to read"
+  ],
+  "moatTags": [
+    "integrations",
+    "compliance-regulatory",
+    "network-effects"
+  ],
+  "moatNotes": "The channel manager is the product. The booking calendar is the demo.",
+  "whyPeopleStillPay": "Because the fee is usually charged to the traveler, not the operator, so it never shows up as a line item on the operator's P&L the way a subscription would, and because the alternative to a channel manager is manually keeping availability in sync across five OTAs while running trips. Operators also pay for the absence of liability: when a card is disputed or a payout is late, that is not their engineering problem. A DIY build is a real option for a direct-sales operator with a stable product catalogue and someone technical on the team, and it is a bad option for anyone whose seats are filled by resellers.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The booking calendar is a weekend, the channel sync and the money liability are not.",
+  "prompt": "Build a self-hosted booking system for a single tour operator. Stack: Next.js 15 with the App Router, TypeScript, Tailwind, Postgres via Prisma, Stripe Checkout. No auth provider, no analytics, no telemetry.\n\nData model: Product (name, slug, description, duration minutes, base price cents, currency, min and max party size, active flag), Departure (product, start datetime, capacity, status: scheduled | cancelled), Booking (departure, lead name, email, phone, party size, amount cents, stripe payment intent id, status: pending | confirmed | cancelled | refunded, notes, waiver accepted at), Passenger (booking, name, age band).\n\nPublic side:\n- /tours lists active products, /tours/[slug] shows the next 60 days of departures with seats remaining computed as capacity minus confirmed and pending party sizes.\n- Booking flow: pick a departure, enter party size and lead contact, tick a waiver checkbox, then redirect to Stripe Checkout. Create the Booking as pending before redirect. Confirm it only in the Stripe webhook handler, never on the return URL.\n- Overselling is the thing you must get right: take the seat hold inside a serialisable transaction that re-checks remaining capacity, and expire pending bookings older than 20 minutes with a cron route.\n\nOperator side at /admin, protected by a single shared password from .env stored in an httpOnly cookie:\n- Day view manifest: every departure today with lead names, party sizes, phone numbers, waiver status and a check-in toggle.\n- Create and bulk-generate departures from a weekday recurrence rule with a date range.\n- Cancel a departure: refunds all confirmed bookings through the Stripe API and emails everyone.\n- Manual booking entry for phone and walk-up guests, marked as unpaid or cash.\n- CSV export of bookings for a date range.\n\nEmail confirmations and cancellations via Resend, plain text, with an .ics attachment. Money in integer cents, one currency, store all times in UTC and render in a single operator timezone from .env.\n\nExplicitly out of scope: OTA or reseller channel sync, promo codes, gift cards, multi-day itineraries, guide and equipment assignment, multi-currency, per-user accounts and roles.\n\nSecrets in .env: DATABASE_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, ADMIN_PASSWORD, OPERATOR_TIMEZONE. Ship a seed script with two products and 30 days of departures, a README with the Stripe CLI webhook command, and a test that proves a departure cannot be oversold under concurrent requests.",
+  "promptCurated": false
+}
