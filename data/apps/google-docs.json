@@ -1,0 +1,50 @@
+{
+  "slug": "google-docs",
+  "name": "Google Docs",
+  "domain": "docs.google.com",
+  "category": "documents",
+  "subcategory": "collaborative word processor",
+  "tagline": "Browser word processor with real-time multiplayer editing, comments, and revision history, tied to Google Drive.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "per-seat",
+    "source": "https://docs.google.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Docs is free for consumer accounts and bundled into paid Google Workspace seats."
+  },
+  "verdict": "no",
+  "verdictConfidence": "high",
+  "verdictSummary": "You can absolutely one-shot a document editor. Tiptap or ProseMirror plus Yjs gets you rich text, cursors, and multiplayer in an afternoon, and it will feel good. What you cannot one-shot is the fact that every client, coworker, teacher, and landlord you will ever email already has a Google account and expects a link that just opens. Docs is not a text editor, it is the default shared surface for documents on the internet, plus twenty years of .docx import fidelity, comment threads, suggestion mode, offline sync, and revision history that nobody actually wants to reimplement. For solo private writing, ditch it and use a local editor. For anything you send to another human, you will end up back here.",
+  "coreLoopDIY": "A self-hosted rich text editor where multiple browsers on a shared link edit the same document live, with autosave and version snapshots to SQLite.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+ and a small always-on server or VPS if you want the share links to work from outside your LAN",
+    "A domain or tunnel (Cloudflare Tunnel, Tailscale) for anyone else to reach it",
+    "Comfort with the fact that your recipients must trust an unfamiliar URL"
+  ],
+  "whatYouLose": [
+    "Universal reach: everyone already has an account and nobody has to install or trust anything",
+    "Real .docx and .pdf import/export fidelity, which is a genuine multi-year engineering problem",
+    "Suggestion mode, resolvable comment threads, and granular revision history that actually restores cleanly",
+    "Offline editing with conflict-free sync across web, iOS, and Android",
+    "Drive: search, sharing permissions, org-wide access controls, and the fact that the file is already where your other files are"
+  ],
+  "moatTags": [
+    "collaboration",
+    "network-effects",
+    "integrations"
+  ],
+  "moatNotes": "The multiplayer tech is commodity now. The distribution is not: sending a Docs link costs the recipient zero clicks of setup.",
+  "whyPeopleStillPay": "Almost nobody pays for Docs directly, which is the point. It rides along with a Workspace seat people buy for email and storage, and then becomes the path of least resistance for every document that has to leave your machine. The pain of a self-hosted editor is not the editing, it is the moment you send the link and someone replies asking whether they need an account, or opens your export in Word and the tables have exploded. Paying keeps that conversation from happening.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": "The editor is a weekend build; the audience is not. The moat is that every person you send a document to is already logged in.",
+  "prompt": "Build a self-hosted collaborative rich text editor called \"Paperweight\" in an empty folder.\n\nStack, no substitutions:\n- Node 20, TypeScript, Express for the HTTP server\n- Vite + React for the client\n- Tiptap (ProseMirror) with the Collaboration and CollaborationCursor extensions\n- Yjs for CRDT state, y-websocket server hosted in the same Node process\n- SQLite via better-sqlite3 for persistence, single file at ./data/paperweight.db\n- Plain CSS, no UI framework, no Tailwind\n\nIn scope:\n- Document list page: create, rename, delete, open. Titles derived from the first heading, editable inline.\n- Editor: headings, bold/italic/strike/code, bullet and ordered lists, blockquote, code block, links, horizontal rule, undo/redo. Markdown-style input rules (typing \"## \" makes an h2).\n- Multiplayer: every doc gets a room. Two browser tabs on the same URL show live edits and remote cursors with a random name and color per session.\n- Persistence: debounce the Yjs update stream and write the encoded doc state plus a plaintext excerpt to SQLite. Reload restores exactly.\n- Versions: snapshot the doc state every 5 minutes if it changed, keep the last 20 per doc, with a sidebar to preview a snapshot read-only and a \"restore\" button that replaces current content.\n- Export: download as Markdown and as a single-file HTML. Import Markdown from a file picker.\n- Access: one shared password in .env (PAPERWEIGHT_PASSWORD), checked once and stored in a signed cookie. No user accounts, no signup, no email.\n- npm run dev for local work, npm run build && npm start for production. README with a Cloudflare Tunnel one-liner for exposing it.\n\nOut of scope, do not build:\n- .docx or .pdf import/export, comments, suggestion mode, images or file uploads, offline sync, mobile apps, per-user permissions, telemetry, analytics, any third-party API.\n\nSecrets in .env, .env.example committed, .env gitignored. Ship it working on first run: npm install, npm run dev, open localhost, create a doc, open it in a second tab, see both cursors.",
+  "promptCurated": false
+}
