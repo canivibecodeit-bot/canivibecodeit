@@ -10,6 +10,7 @@
 import { buildById, updateBuild } from './db.js';
 import { alertRob, esc } from './mail.js';
 import { GOES, parsePublicUrl } from './builds.js';
+import { generateBuildOg } from './build-og.js';
 
 const MODEL = 'anthropic/claude-haiku-4.5';
 
@@ -152,6 +153,7 @@ export async function reviewBuild(id) {
       const fresh = await buildById(id);
       if (fresh?.status !== 'pending') return;
       await updateBuild(id, { status: 'live' });
+      generateBuildOg(id).catch((err) => console.error(`build og ${id}: ${err.message}`));
       await alertRob(
         `[cvci] AI approved, live: ${build.name}`,
         `<p><b>${esc(build.name)}</b> · ${esc(build.one_liner)} — live now.</p>

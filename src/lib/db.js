@@ -469,7 +469,7 @@ function lookupCol(column) {
 // Build columns the admin surface may rewrite after insert. Same rule as
 // PURCHASE_FIELDS: names reach SQL as identifiers, never from a request body.
 const BUILD_FIELDS = [
-  'status', 'featured', 'featured_note', 'model_norm', 'media', 'updated_at',
+  'status', 'featured', 'featured_note', 'model_norm', 'media', 'og_image', 'updated_at',
 ];
 
 function buildParts(fields) {
@@ -547,6 +547,8 @@ async function pgDriver() {
   await pool.query(
     'CREATE UNIQUE INDEX IF NOT EXISTS user_handle_unique ON "user" (lower("handle"))'
   );
+  // Share card for an approved build, generated at approval and stored on R2.
+  await pool.query('ALTER TABLE builds ADD COLUMN IF NOT EXISTS og_image TEXT');
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -941,6 +943,12 @@ async function sqliteDriver() {
     if (!/duplicate column/i.test(err.message)) throw err;
   }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS user_handle_unique ON "user" (lower("handle"))');
+  // Share card for an approved build, generated at approval and stored on R2.
+  try {
+    db.exec('ALTER TABLE builds ADD COLUMN og_image TEXT');
+  } catch (err) {
+    if (!/duplicate column/i.test(err.message)) throw err;
+  }
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);

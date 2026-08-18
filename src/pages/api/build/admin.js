@@ -8,6 +8,7 @@ import { buildById, updateBuild } from '../../../lib/db.js';
 import { json, readBody } from '../../../lib/request.js';
 import { isAdmin } from '../../../lib/sponsors.js';
 import { BUILD_ID_RE } from '../../../lib/builds.js';
+import { generateBuildOg } from '../../../lib/build-og.js';
 
 export async function POST({ request }) {
   const wantsJson = (request.headers.get('content-type') || '').includes('application/json');
@@ -44,6 +45,7 @@ export async function POST({ request }) {
   if (action === 'approve') {
     if (build.status !== 'pending') return fail('not in the queue', 409);
     await updateBuild(id, { status: 'live' });
+    generateBuildOg(id).catch((err) => console.error(`build og ${id}: ${err.message}`));
     return done(`live: ${build.name}`);
   }
 

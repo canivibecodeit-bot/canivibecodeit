@@ -20,6 +20,7 @@ import {
   promptRequired,
   shortDate,
 } from '../../../lib/builds.js';
+import { generateBuildOg } from '../../../lib/build-og.js';
 
 if (!buildsLive()) return new Response(null, { status: 404 });
 
@@ -54,11 +55,18 @@ try {
 // the prompt (one/few), the story (weeks), or where it broke (never).
 const promptIsHero = promptRequired(build.goes) && build.prompt;
 const chatLine = chatFactLine(build);
+
+// Self-heal: live builds approved before share cards existed grow one on
+// first view (fire-and-forget; this render still uses the default card).
+if (build.status === 'live' && !build.og_image) {
+  generateBuildOg(build.id).catch((err) => console.error(`build og ${build.id}: ${err.message}`));
+}
 ---
 
 <Base
   {title}
   description={`${build.one_liner} · ${goesLabel(build)} · built with ${build.tool}.`}
+  ogImage={build.og_image ?? '/og/home.png'}
   noindex={ownerPreview}
 >
   <main class="wrap bd-page" data-build={build.id}>
