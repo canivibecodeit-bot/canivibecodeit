@@ -1,0 +1,51 @@
+{
+  "slug": "sort-feed",
+  "name": "Sort Feed",
+  "domain": "sortfeed.com",
+  "category": "rss-research",
+  "subcategory": "AI feed ranking",
+  "tagline": "A reader that pulls your feeds and reorders them by what you actually care about instead of by timestamp.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://sortfeed.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Fetching RSS and Atom feeds, deduping items and asking a model to score each one against a written description of your interests is a genuinely small program. An agent can produce a working local version in a sitting: a poller, a SQLite table, a scoring pass, a page that lists items highest-interest first. The gaps are the boring ones: no phone app, no read state that follows you between devices, no clean handling of sites that only publish partial feeds or nothing at all, and a scoring pass that costs money and drifts unless you keep tuning the prompt. If the product's real trick is pulling from sources that do not offer feeds, scraping or platform APIs, your clone stops at whatever XML you can find. Build it if you read on a laptop and like tinkering with your own ranking rules.",
+  "coreLoopDIY": "Polls a list of feed URLs on a schedule, scores each new item against your stated interests with an LLM, and serves a single ranked reading page with read/hide state stored locally.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "A list of feed URLs you actually want",
+    "An LLM API key, or a local model if you want zero per-item cost",
+    "Somewhere to run a background poller: a laptop that stays on, a small VPS, or a cron job"
+  ],
+  "whatYouLose": [
+    "Mobile: no app, no offline cache, no sync of read state across devices",
+    "Sources without RSS, which is most of the modern web, unless you write scrapers per site",
+    "Ranking that improves from your clicks rather than from you editing a prompt",
+    "Someone else eating the model bill and the rate limits",
+    "Any polish around long feed lists: OPML edge cases, dead feeds, redirect chains, feeds that lie about dates"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "proprietary-data"
+  ],
+  "moatNotes": "The defensible part is not the ranking, it is the ingestion plumbing and whatever behavioral signal accumulates from real reading sessions.",
+  "whyPeopleStillPay": "Because feed reading is a habit that lives on a phone, and a self-hosted ranker that only works when your laptop is awake quietly dies within two weeks. Paying also buys you out of maintaining the least fun part: feeds that break, sites that switch to partial excerpts, and a ranking prompt you will otherwise fiddle with forever instead of reading. The clone is satisfying for a weekend and then competes with your own attention span.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The ranking is a prompt, the plumbing is the product.",
+  "prompt": "Build a self-hosted, single-user AI feed ranker. No accounts, no signup, no telemetry, no cloud services beyond one LLM API.\n\nStack, non-negotiable:\n- Python 3.12, FastAPI, Uvicorn\n- SQLite via sqlite3 stdlib, single file data/feed.db\n- feedparser for RSS/Atom parsing, httpx for fetching\n- Jinja2 server-rendered HTML, plain CSS, zero JS build step, a little vanilla JS for mark-as-read\n- OpenAI-compatible chat completions for scoring, base URL and key from .env (OPENAI_API_KEY, OPENAI_BASE_URL, MODEL)\n\nData model:\n- feeds(id, url, title, etag, last_modified, last_fetched_at, error_count)\n- items(id, feed_id, guid UNIQUE, url, title, author, published_at, summary_text, score, score_reason, scored_at, read_at, hidden_at)\n- config table with one row: interests_prompt (free text describing what the user cares about and what they do not)\n\nBehavior:\n1. CLI: python -m app.cli add-feed URL, import-opml FILE, poll-once, score-once.\n2. Poller: an asyncio background task on startup, every POLL_MINUTES (default 30), fetches every feed with conditional GET using stored etag/last-modified, inserts new items keyed on guid, never duplicates, increments error_count and backs off feeds that fail.\n3. Scorer: for each unscored item, send title plus first 1200 characters of the summary and the interests_prompt, ask for strict JSON {score: 0-100, reason: one short sentence}. Batch up to 10 items per request. Retry once on bad JSON, then store score 50 with reason \"unscored\". Log estimated token spend per run to stdout.\n4. Web UI at /: unread, unhidden items sorted by score desc, then published_at desc. Each row: score badge, title linking out, source, relative time, the one-line reason, and buttons for mark read and hide. /all shows everything with a score filter. /settings edits the interests prompt and the feed list, and shows per-feed last fetch status and error count.\n\nExplicitly out of scope: mobile app, multi-user, scraping sites without feeds, full-text extraction, push notifications, click-based learning.\n\nDeliver: pyproject.toml, .env.example, README with three commands to run it, and a seed script that adds five well-known tech feeds so the first run shows something. Include pytest tests for dedupe on guid and for parsing a malformed scorer response.",
+  "promptCurated": false
+}
