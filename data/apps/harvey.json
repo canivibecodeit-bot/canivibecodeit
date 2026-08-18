@@ -1,0 +1,51 @@
+{
+  "slug": "harvey",
+  "name": "Harvey",
+  "domain": "harvey.ai",
+  "category": "legal",
+  "subcategory": "AI for law firms and in-house legal teams",
+  "tagline": "An enterprise AI assistant for legal work: research, drafting, review and diligence across a firm's document estate.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://harvey.ai/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Harvey sells enterprise contracts with no public price list.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "You can absolutely build a local RAG assistant over your own PDFs in an afternoon, and for reading your lease or a vendor contract that is genuinely enough. Harvey is not sold on that loop. It is sold on trained-and-evaluated legal workflows, curated case law and regulatory sources under license, deployment that survives a law firm's security review, and the ability to put a name behind an output that a partner will bill against. The thing you cannot one-shot is the confidence to rely on the answer, which in legal work is the entire product. A personal replacement is fine for personal stakes and dangerous the moment money or a filing depends on it.",
+  "coreLoopDIY": "Indexes a folder of your own contracts and PDFs locally, then answers questions about them with quotes and page citations so you can check every claim yourself.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "An LLM API key, or a local model via Ollama if you would rather nothing leaves the machine",
+    "Your own documents: no licensed case law, no statute databases, no primary sources",
+    "Python 3.11 and a willingness to read the cited passage rather than trust the summary"
+  ],
+  "whatYouLose": [
+    "Licensed primary law: case law, statutes, filings and regulatory corpora you cannot legally scrape together",
+    "Workflow products that have been evaluated by actual lawyers: diligence checklists, redline review, deposition prep",
+    "Firm-grade deployment: SSO, data residency, retention controls, audit logs, security questionnaires answered",
+    "Anyone to blame. Your hallucination is your malpractice exposure",
+    "Integration into the systems legal work actually lives in: DMS, iManage, Word, the review platform"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "content-rights",
+    "brand-trust"
+  ],
+  "moatNotes": "The licensed corpora and the enterprise security posture are both hard walls. The soft wall is reputational: firms buy the vendor they can name in a risk memo.",
+  "whyPeopleStillPay": "A law firm is not paying for text generation, it is paying for defensibility. The output has to be traceable to a licensed source, the deployment has to pass a security review that takes months, the workflows have to have been tested against how associates actually do diligence, and there has to be a vendor contract with indemnities when something goes wrong. Individual lawyers also cannot use a homemade tool on client matters without answering awkward questions about where the privileged data went. A local RAG box over your own files solves none of that and does not need to; it solves reading your own documents faster, which is a different and much smaller job.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The retrieval half is a weekend, the reliance half is not. The moat is licensed primary law plus an enterprise security posture that took years to clear, and a name a partner can put in a risk memo.",
+  "prompt": "Build a local document Q&A tool for my own contracts and PDFs. Python 3.11, single project, no web framework, no accounts, no telemetry.\n\nStack, no alternatives:\n- CLI with Typer\n- pypdf for text extraction, page numbers preserved\n- SQLite with the sqlite-vec extension for vector storage\n- OpenAI API for embeddings and answers, key from .env via python-dotenv, plus an --ollama flag that swaps to a local model at http://localhost:11434\n\nCommands:\n- ingest PATH: walk a folder, extract text per page, chunk to roughly 800 tokens with 100 overlap, store chunk text plus doc name plus page number, embed and index. Skip files already ingested unless --force.\n- ask \"QUESTION\": retrieve top 12 chunks, then answer with an LLM that is instructed to answer only from the provided chunks and to say \"not in these documents\" when the answer is absent. Every claim must carry an inline citation like [contract.pdf p.4].\n- sources \"QUESTION\": print the retrieved chunks verbatim with file and page, no LLM, so I can read the raw text.\n- docs: list ingested files, page counts, chunk counts.\n\nIn scope: local-only storage in ./index.db, deterministic chunking, a --model flag, plain text output.\nOut of scope: web UI, multi-user, cloud sync, any bundled case law or statute data, any attempt to cite external legal sources.\n\nPrint a one-line disclaimer after every answer: this is a reading aid over my own files, not legal advice, verify each citation.\nInclude a README with setup, .env.example, and a short section explaining that answers are only as good as the documents I ingested.",
+  "promptCurated": false
+}
