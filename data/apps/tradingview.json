@@ -1,0 +1,53 @@
+{
+  "slug": "tradingview",
+  "name": "TradingView",
+  "domain": "tradingview.com",
+  "category": "finance-accounting",
+  "subcategory": "market charting and analysis",
+  "tagline": "Browser based charting, screening and alerting across stocks, futures, forex and crypto, with a scripting language and a large community of published indicators.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "per-seat",
+    "source": "https://tradingview.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Tiered consumer plans plus optional real-time exchange data add-ons, which is where the bill actually grows.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The chart widget itself is not the product, and TradingView proved that by open sourcing a perfectly good one: lightweight-charts is MIT licensed and you can have candles on screen in an afternoon. What you cannot build is the data pipe behind it. Real-time consolidated equity, futures and options feeds are licensed per exchange, per user, with entitlement checks and redistribution rules, and the free endpoints you will end up scraping are delayed, rate limited and quietly break. On top of that sits Pine Script and roughly a decade of community published indicators and strategies, plus screeners over every listed symbol, alerts that fire while your laptop is shut, and broker order routing. A local build gives you crypto in real time and equities on a delay, which is either fine or completely useless depending on your time horizon.",
+  "coreLoopDIY": "A local charting app that pulls daily and intraday candles from free public endpoints, caches them in SQLite, renders them with lightweight-charts, and polls a handful of price alerts you define yourself.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 plus",
+    "A machine left running if you want alerts to fire",
+    "Tolerance for delayed or rate limited free equity data",
+    "Binance or similar public API for anything that needs to be genuinely real time"
+  ],
+  "whatYouLose": [
+    "Licensed real-time exchange data for equities, futures and options; free sources are delayed and fragile",
+    "Pine Script and the enormous library of published indicators and strategies other people already wrote",
+    "Server side alerts that fire when your device is off, plus push and email delivery",
+    "Screeners and scanners over every listed symbol, and multi-market symbol coverage in general",
+    "Polished mobile and desktop apps with drawings and watchlists synced across all of them",
+    "Broker connections and one click order entry from the chart"
+  ],
+  "moatTags": [
+    "content-rights",
+    "network-effects",
+    "scale-infra"
+  ],
+  "moatNotes": "Exchange data is rented, not owned, and the redistribution licenses are the actual wall. The Pine Script ecosystem is the second wall: every published indicator makes the next trader less likely to leave.",
+  "whyPeopleStillPay": "Because the subscription is mostly a data and uptime bill wearing a charting UI. Traders pay so that real-time quotes are entitled and correct, so alerts fire at 2am without a laptop being awake, so the same watchlist and drawings appear on phone and desktop, and so the indicator they read about on a forum is one click away instead of a weekend of reimplementation. For anyone whose decisions happen on a daily or weekly candle, though, the paid tiers are largely convenience, and a local build genuinely covers it.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 2,
+  "verifiedOneShot": false,
+  "notes": "They open sourced the chart and still have a moat, which tells you where the value was all along. The moat is licensed exchange data plus a decade of community written Pine Script that only runs on their servers.",
+  "prompt": "Build a local-first market charting app called \"deskchart\". Single user, runs on my machine, no accounts, no telemetry, no cloud.\n\nStack, not negotiable:\n- Vite + React + TypeScript for the UI\n- lightweight-charts (MIT, from TradingView) for rendering candles and overlays\n- A small Express + TypeScript server in the same repo as a data proxy and cache\n- SQLite via better-sqlite3 for candle cache, watchlists and alerts\n- pnpm workspaces, one command to run both: pnpm dev\n\nData:\n- Crypto: Binance public REST klines endpoint, no key needed, treat this as the real-time path\n- Equities and ETFs: Stooq daily CSV as the default source, with an optional adapter interface so another provider can be dropped in via .env\n- Cache every fetched candle range in SQLite and only request the missing tail on reload\n- Put any API keys in .env, read via a single config module, ship .env.example. Never hardcode secrets\n- Print a visible \"DELAYED\" badge on any symbol whose source is not real time. Do not pretend otherwise\n\nFeatures in scope:\n- Symbol search over a locally seeded symbol list, watchlists stored in SQLite\n- Candlestick chart with timeframe switcher: 1m, 5m, 1h, 1d, 1w\n- Indicator overlays computed client side: SMA, EMA, VWAP, RSI and MACD in a lower pane\n- Persisted horizontal price lines and trendlines per symbol, saved to SQLite\n- Simple alerts: price crosses above or below a level. Server polls every 60s and fires a desktop notification via node-notifier plus a row in an alerts log\n- Dark theme, keyboard shortcuts for timeframe and symbol switching\n\nExplicitly out of scope, do not attempt:\n- Any scripting language or Pine Script compatibility\n- Broker connections or order entry\n- Social feed, published ideas, comments\n- Multi-user auth, hosted deployment, mobile apps\n- Scraping any paid or authenticated data feed\n\nDeliverables: working repo, README with setup and a blunt \"data limitations\" section, seed script for symbols, and vitest coverage on the indicator math and the cache-gap logic.",
+  "promptCurated": false
+}
