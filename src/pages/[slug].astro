@@ -4,6 +4,7 @@ import VerdictBadge from '../components/VerdictBadge.astro';
 import DigestCard from '../components/DigestCard.astro';
 import DigestReveal from '../components/DigestReveal.astro';
 import AltCard from '../components/AltCard.astro';
+import BuildsSection from '../components/BuildsSection.astro';
 import { getApp, relatedApps, yearlySaving, sortedAlternatives, ALTERNATIVES_PAGE_MIN, CATEGORIES, VERDICTS, MOAT_TAGS, MOAT_TAG_EMOJI, VIBE_CODING_TOOL_SLUGS } from '../lib/apps.js';
 import { stackSlugs, voteCount, voteCounts } from '../lib/db.js';
 
@@ -358,6 +359,8 @@ const tweet = encodeURIComponent(
         </section>
       )
     }
+
+    <BuildsSection {app} />
 
     {
       related.length > 0 && (

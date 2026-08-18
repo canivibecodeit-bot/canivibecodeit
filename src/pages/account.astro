@@ -4,10 +4,21 @@
 import Base from '../layouts/Base.astro';
 import VerdictBadge from '../components/VerdictBadge.astro';
 import { allApps, getApp } from '../lib/apps.js';
-import { stackSlugs, voteCounts } from '../lib/db.js';
+import { buildUserNames, liveBuilds, pendingBuilds, stackSlugs, voteCounts } from '../lib/db.js';
+import { buildsLive } from '../lib/flags.js';
+import { ago, buildHref, goesLabel } from '../lib/builds.js';
 
 const user = Astro.locals.user;
 if (!user) return Astro.redirect('/signin');
+
+// Your builds, queue included: the pending page is owner-only, and this list
+// is its stable address. Renders nothing while the flag is off.
+const myBuilds = buildsLive()
+  ? [...(await pendingBuilds()), ...(await liveBuilds())]
+      .filter((b) => b.user_id === user.id)
+      .sort((a, b) => b.created_at - a.created_at)
+  : [];
+const myNames = myBuilds.length ? await buildUserNames([user.id]) : new Map();
 
 const slugs = await stackSlugs(user.id);
 const apps = slugs.map((s) => getApp(s)).filter(Boolean);
@@ -85,6 +96,35 @@ const totalApps = allApps().length;
         )
       }
     </section>
+
+    {
+      buildsLive() && (
+        <section class="account-section">
+          <div class="section-head">
+            <span class="microlabel">my builds · {myBuilds.length}</span>
+            <a class="microlabel build-post-link" href="/post-a-build">post a build →</a>
+          </div>
+          {myBuilds.length === 0 ? (
+            <p class="empty">
+              nothing posted yet. <a href="/post-a-build">post what you vibe coded →</a>
+            </p>
+          ) : (
+            <div class="stack-rows">
+              {myBuilds.map((b) => (
+                <div class="stack-row">
+                  <a class="stack-name" href={buildHref(myNames, b)}>{b.name}</a>
+                  <span class="build-goes">{goesLabel(b)}</span>
+                  <span class:list={['build-state', { live: b.status === 'live' }]}>
+                    {b.status === 'live' ? 'live' : 'waiting for a look'}
+                  </span>
+                  <span class="build-ago">{ago(b.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )
+    }
 
     <section class="account-section">
       <span class="microlabel">weekly digest</span>
@@ -181,6 +221,26 @@ const totalApps = allApps().length;
     flex-wrap: wrap;
   }
   .saved-line {
+    color: var(--primary);
+  }
+  .build-post-link {
+    color: var(--primary);
+  }
+  .build-goes,
+  .build-ago {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .build-state {
+    flex-shrink: 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .build-state.live {
+    color: var(--primary);
+  }
+  .empty a {
     color: var(--primary);
   }
   .empty {

@@ -31,7 +31,9 @@ const themeHash = createHash('sha256').update(THEME_SCRIPT, 'utf8').digest('base
    - style-src 'unsafe-inline': style= attributes are all over the markup;
      locking styles down buys little (CSS can't run script) and costs a lot.
    - img-src https:: sponsor logos and their favicon fallback are arbitrary
-     external images by design (SponsorTape, details preview).
+     external images by design (SponsorTape, details preview). Build
+     screenshots served from the R2 media host (R2_PUBLIC_BASE) ride the
+     same allowance.
    - font-src data:: Vite inlines sub-4KB font subsets into the CSS.
    - media-src: the header radio streams from nightride.fm.
    - form-action: the sponsor checkout form ends in a redirect to Stripe,

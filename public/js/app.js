@@ -660,16 +660,22 @@
     const modal = $('#signup-modal');
     let pendingSlug = null;
     let modalCloseTimer;
-    const openSignup = (slug) => {
+    const openSignup = (slug, copy) => {
       pendingSlug = slug || null;
       if (!modal) {
         window.location.href = '/signin';
         return;
       }
       /* The title is conditional: "Sign in" from the nav, the save pitch only
-         when a save actually triggered it. */
+         when a save actually triggered it, and triggers may carry their own
+         pitch (data-signin-title / data-signin-sub, e.g. "post a build"). */
       const title = $('#signup-title');
-      if (title) title.textContent = pendingSlug ? 'Save it to your stack' : 'Sign in';
+      if (title) title.textContent = copy?.title || (pendingSlug ? 'Save it to your stack' : 'Sign in');
+      const sub = $('#signup-sub');
+      if (sub) {
+        sub.dataset.default ??= sub.textContent;
+        sub.textContent = copy?.sub || sub.dataset.default;
+      }
       /* Hiding the scrollbar shrinks the viewport and shifts the page; pad the
          body by exactly the scrollbar width so nothing moves. */
       const scrollbar = window.innerWidth - document.documentElement.clientWidth;
@@ -704,7 +710,7 @@
     $$('[data-signin]').forEach((a) =>
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        openSignup();
+        openSignup(null, { title: a.dataset.signinTitle, sub: a.dataset.signinSub });
       })
     );
 

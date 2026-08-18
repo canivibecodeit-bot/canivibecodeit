@@ -58,6 +58,11 @@ async function buildAuth() {
         enabled: true,
         trustedProviders: [],
         disableImplicitLinking: true,
+        // Explicit /link-social only (implicit stays off above): a signed-in
+        // user connecting a GitHub account whose email differs from their
+        // Google one is the normal case, not a takeover vector — the link is
+        // their own deliberate click on their own account.
+        allowDifferentEmails: true,
       },
     },
     session: {

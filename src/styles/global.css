@@ -1450,6 +1450,9 @@ a.row:hover .badge {
 .prompt-body pre {
   font: 13.5px/1.65 var(--font-mono);
   white-space: pre-wrap;
+  /* Pasted prompts carry unbroken URLs and code fragments; without this a
+     single long token forces the whole box to scroll sideways. */
+  overflow-wrap: anywhere;
 }
 
 .prompt-hint {
@@ -3171,6 +3174,13 @@ a.tile {
   .site-nav .nav-submit {
     display: none;
   }
+
+  /* With the builds section live the row gains a sixth link; "stats" steps
+     out with "submit an app" in the squeezed band (footer nav carries both).
+     :has() keeps this inert while the builds link doesn't render. */
+  .site-nav:has(.nav-builds) a[href='/stats'] {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -4376,6 +4386,329 @@ button.sp-banner {
 @media (max-width: 560px) {
   .brand .word {
     display: none;
+  }
+}
+
+/* ---------- builds vertical ---------- */
+
+/* The "how many goes?" chip: self-declared, so it always dresses grey — no
+   state on it is an award. */
+.bd-goes {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  background: var(--surface-2);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.bd-goes.big {
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: 6px;
+}
+
+/* Section microlabel: the builds surfaces use the wider 0.14em tracking. */
+.bd-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bd-label.green {
+  color: var(--primary);
+}
+
+/* App icon tile: always ahead of the app name in build contexts. */
+.bd-tile {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+}
+
+.bd-tile.lg {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+}
+
+/* ---------- build rows (index + verdict-page section) ---------- */
+
+.bd-rows {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  /* Rows carry side padding so the hover wash clears the text; pulling the
+     list back out by the same amount keeps the text on the page grid. */
+  margin-inline: -14px;
+}
+
+.bd-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+a.bd-row {
+  transition: background-color 0.15s ease;
+}
+
+a.bd-row:hover {
+  background: var(--surface);
+}
+
+.bd-thumb {
+  width: 120px;
+  height: 74px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.bd-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bd-thumb.lg {
+  width: 148px;
+  height: 92px;
+}
+
+.bd-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bd-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.bd-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.bd-by {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.bd-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.bd-links {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.bd-links a {
+  color: var(--primary);
+}
+
+.bd-links a:hover {
+  text-decoration: underline;
+}
+
+.bd-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial best-prompt strip on the verdict-page section. */
+.bd-best {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border-left: 2px solid var(--primary);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.bd-best .view {
+  margin-left: auto;
+  color: var(--primary);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.bd-best .view:hover {
+  text-decoration: underline;
+}
+
+/* ---------- cards (facts, votes, builder, replaces) ---------- */
+
+.bd-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bd-facts-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bd-fact {
+  display: flex;
+  gap: 10px;
+}
+
+.bd-fact .k {
+  color: var(--muted);
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.bd-fact .v {
+  color: var(--fg);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bd-fact .v.green,
+.bd-fact .v a {
+  color: var(--primary);
+}
+
+.bd-fact .v.bad {
+  color: var(--no-bg);
+}
+
+.bd-fine {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---------- builds index stat band ---------- */
+
+.bd-stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 0;
+}
+
+.bd-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 32px;
+  border-left: 1px solid var(--border);
+}
+
+.bd-stat:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.bd-stat b {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Filter chips: outlined-active per the boards (color still means verdict). */
+.bd-chip.active {
+  border-color: var(--primary);
+  background: var(--surface-2);
+  color: var(--fg);
+  font-weight: 500;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 760px) {
+  .bd-row {
+    flex-wrap: wrap;
+    gap: 12px 14px;
+  }
+
+  .bd-thumb,
+  .bd-thumb.lg {
+    width: 96px;
+    height: 60px;
+  }
+
+  .bd-main {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
+  .bd-side {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .bd-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 14px;
+  }
+
+  .bd-stat {
+    padding: 0;
+    border-left: none;
+  }
+
+  .bd-stat b {
+    font-size: 24px;
   }
 }
 

@@ -154,6 +154,48 @@ const SCHEMA_SQLITE = `
     updated_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS submissions_slug ON submissions (slug, status);
+
+  /* Community builds: runtime state only, app/verdict content stays JSON in
+     the repo. Builds land as status 'pending' and go live on admin approval.
+     goes = the self-declared "how many goes?" answer (one|few|weeks|never);
+     prompt is required for one/few, story for weeks, where_broke always.
+     by_owner = repo owner matched the poster's GitHub login at submit time. */
+  CREATE TABLE IF NOT EXISTS builds (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    app_slug TEXT,
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    one_liner TEXT NOT NULL,
+    goes TEXT NOT NULL,
+    prompt TEXT,
+    story TEXT,
+    where_broke TEXT NOT NULL,
+    tool TEXT NOT NULL,
+    model TEXT,
+    model_norm TEXT,
+    demo_url TEXT,
+    repo_url TEXT,
+    chat_url TEXT,
+    media TEXT NOT NULL DEFAULT '[]',
+    affiliation TEXT,
+    by_owner INTEGER NOT NULL DEFAULT 0,
+    featured INTEGER NOT NULL DEFAULT 0,
+    featured_note TEXT,
+    status TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS builds_app ON builds (app_slug, status);
+  CREATE INDEX IF NOT EXISTS builds_user ON builds (user_id);
+  CREATE UNIQUE INDEX IF NOT EXISTS builds_user_slug ON builds (user_id, slug);
+  CREATE TABLE IF NOT EXISTS build_media (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    build_id TEXT,
+    created_at INTEGER NOT NULL
+  );
 `;
 
 const SCHEMA_PG = `
@@ -305,6 +347,44 @@ const SCHEMA_PG = `
     updated_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS submissions_slug ON submissions (slug, status);
+
+  /* Community builds (same notes as the SQLite schema). */
+  CREATE TABLE IF NOT EXISTS builds (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    app_slug TEXT,
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    one_liner TEXT NOT NULL,
+    goes TEXT NOT NULL,
+    prompt TEXT,
+    story TEXT,
+    where_broke TEXT NOT NULL,
+    tool TEXT NOT NULL,
+    model TEXT,
+    model_norm TEXT,
+    demo_url TEXT,
+    repo_url TEXT,
+    chat_url TEXT,
+    media TEXT NOT NULL DEFAULT '[]',
+    affiliation TEXT,
+    by_owner INTEGER NOT NULL DEFAULT 0,
+    featured INTEGER NOT NULL DEFAULT 0,
+    featured_note TEXT,
+    status TEXT NOT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS builds_app ON builds (app_slug, status);
+  CREATE INDEX IF NOT EXISTS builds_user ON builds (user_id);
+  CREATE UNIQUE INDEX IF NOT EXISTS builds_user_slug ON builds (user_id, slug);
+  CREATE TABLE IF NOT EXISTS build_media (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    build_id TEXT,
+    created_at BIGINT NOT NULL
+  );
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -386,6 +466,32 @@ function lookupCol(column) {
   return column;
 }
 
+// Build columns the admin surface may rewrite after insert. Same rule as
+// PURCHASE_FIELDS: names reach SQL as identifiers, never from a request body.
+const BUILD_FIELDS = [
+  'status', 'featured', 'featured_note', 'model_norm', 'media', 'updated_at',
+];
+
+function buildParts(fields) {
+  const keys = Object.keys(fields).filter((k) => BUILD_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateBuild: no writable fields');
+  return keys;
+}
+
+// Postgres hands BIGINT back as strings; the pages do date maths on these.
+const BUILD_NUMERIC = ['created_at', 'updated_at'];
+
+function numericRow(cols) {
+  return (row) => {
+    if (!row) return null;
+    const out = { ...row };
+    for (const c of cols) out[c] = out[c] == null ? null : Number(out[c]);
+    return out;
+  };
+}
+
+const buildRow = numericRow(BUILD_NUMERIC);
+
 let driver;
 
 /* Raw connection handles, shared between the query driver below and Better
@@ -435,6 +541,12 @@ async function pgDriver() {
   await pool.query('ALTER TABLE sponsor_slots ADD COLUMN IF NOT EXISTS renewal_price_cents INTEGER');
   // When the automated next-run offer email went out for a purchase.
   await pool.query('ALTER TABLE sponsor_purchases ADD COLUMN IF NOT EXISTS reminder_offer_at BIGINT');
+  // Maker handle: claimed once at first build post, unique case-insensitive,
+  // shown (and used in /builds URLs) instead of the OAuth display name.
+  await pool.query('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "handle" TEXT');
+  await pool.query(
+    'CREATE UNIQUE INDEX IF NOT EXISTS user_handle_unique ON "user" (lower("handle"))'
+  );
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -675,6 +787,116 @@ async function pgDriver() {
       );
       return r.rows[0] ?? null;
     },
+    async insertBuild(b) {
+      await pool.query(
+        `INSERT INTO builds
+           (id, user_id, app_slug, name, slug, one_liner, goes, prompt, story,
+            where_broke, tool, model, model_norm, demo_url, repo_url, chat_url,
+            media, affiliation, by_owner, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+                 $17, $18, $19, $20, $21, $21)`,
+        [b.id, b.user_id, b.app_slug, b.name, b.slug, b.one_liner, b.goes, b.prompt,
+         b.story, b.where_broke, b.tool, b.model, b.model_norm, b.demo_url, b.repo_url,
+         b.chat_url, b.media, b.affiliation, b.by_owner, b.status, b.created_at]
+      );
+    },
+    async updateBuild(id, fields) {
+      const keys = buildParts(fields);
+      const params = [id, ...keys.map((k) => fields[k])];
+      const r = await pool.query(
+        `UPDATE builds SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        params
+      );
+      return r.rowCount;
+    },
+    async buildById(id) {
+      const r = await pool.query('SELECT * FROM builds WHERE id = $1', [id]);
+      return buildRow(r.rows[0]);
+    },
+    async liveBuilds() {
+      const r = await pool.query(
+        "SELECT * FROM builds WHERE status = 'live' ORDER BY created_at DESC"
+      );
+      return r.rows.map(buildRow);
+    },
+    async pendingBuilds() {
+      const r = await pool.query(
+        "SELECT * FROM builds WHERE status = 'pending' ORDER BY created_at ASC"
+      );
+      return r.rows.map(buildRow);
+    },
+    async buildUserNames(ids) {
+      if (!ids.length) return [];
+      const r = await pool.query(
+        'SELECT "id", "name", "handle" FROM "user" WHERE "id" = ANY($1)',
+        [ids]
+      );
+      return r.rows;
+    },
+    async userHandle(userId) {
+      const r = await pool.query('SELECT "handle" FROM "user" WHERE "id" = $1', [userId]);
+      return r.rows[0]?.handle ?? null;
+    },
+    // Set-once: only fills a NULL handle; the unique index turns a race for
+    // the same handle into a caught error -> false.
+    async setUserHandle(userId, handle) {
+      try {
+        const r = await pool.query(
+          'UPDATE "user" SET "handle" = $2 WHERE "id" = $1 AND "handle" IS NULL',
+          [userId, handle]
+        );
+        return r.rowCount > 0;
+      } catch (err) {
+        if (/unique|duplicate/i.test(err.message)) return false;
+        throw err;
+      }
+    },
+    async userByHandle(handle) {
+      const r = await pool.query(
+        'SELECT "id", "name", "handle" FROM "user" WHERE lower("handle") = lower($1)',
+        [handle]
+      );
+      return r.rows[0] ?? null;
+    },
+    async buildByUserSlug(userId, slug) {
+      const r = await pool.query(
+        'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
+        [userId, slug]
+      );
+      return buildRow(r.rows[0]);
+    },
+    async userBuildSlugs(userId) {
+      const r = await pool.query('SELECT slug FROM builds WHERE user_id = $1', [userId]);
+      return r.rows.map((x) => x.slug);
+    },
+    async githubAccountOf(userId) {
+      const r = await pool.query(
+        `SELECT "accountId" FROM "account" WHERE "userId" = $1 AND "providerId" = 'github' LIMIT 1`,
+        [userId]
+      );
+      return r.rows[0]?.accountId ?? null;
+    },
+    async insertBuildMedia(m) {
+      await pool.query(
+        'INSERT INTO build_media (id, user_id, key, created_at) VALUES ($1, $2, $3, $4)',
+        [m.id, m.user_id, m.key, m.created_at]
+      );
+    },
+    async mediaOwnedBy(ids, userId) {
+      if (!ids.length) return [];
+      const r = await pool.query(
+        'SELECT id, key FROM build_media WHERE id = ANY($1) AND user_id = $2 AND build_id IS NULL',
+        [ids, userId]
+      );
+      return r.rows;
+    },
+    async claimBuildMedia(ids, buildId, userId) {
+      if (!ids.length) return;
+      await pool.query(
+        'UPDATE build_media SET build_id = $2 WHERE id = ANY($1) AND user_id = $3 AND build_id IS NULL',
+        [ids, buildId, userId]
+      );
+    },
   };
 }
 
@@ -711,6 +933,14 @@ async function sqliteDriver() {
   } catch (err) {
     if (!/duplicate column/i.test(err.message)) throw err;
   }
+  // Maker handle: claimed once at first build post, unique case-insensitive,
+  // shown (and used in /builds URLs) instead of the OAuth display name.
+  try {
+    db.exec('ALTER TABLE "user" ADD COLUMN "handle" TEXT');
+  } catch (err) {
+    if (!/duplicate column/i.test(err.message)) throw err;
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS user_handle_unique ON "user" (lower("handle"))');
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);
@@ -918,6 +1148,104 @@ async function sqliteDriver() {
           .get(slug, ...SUBMISSION_OPEN_STATUSES, Date.now() - SUBMISSION_STALL_MS) ?? null
       );
     },
+    async insertBuild(b) {
+      db.prepare(
+        `INSERT INTO builds
+           (id, user_id, app_slug, name, slug, one_liner, goes, prompt, story,
+            where_broke, tool, model, model_norm, demo_url, repo_url, chat_url,
+            media, affiliation, by_owner, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(
+        b.id, b.user_id, b.app_slug, b.name, b.slug, b.one_liner, b.goes, b.prompt,
+        b.story, b.where_broke, b.tool, b.model, b.model_norm, b.demo_url, b.repo_url,
+        b.chat_url, b.media, b.affiliation, b.by_owner, b.status, b.created_at,
+        b.created_at
+      );
+    },
+    async updateBuild(id, fields) {
+      const keys = buildParts(fields);
+      return db
+        .prepare(`UPDATE builds SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async buildById(id) {
+      return buildRow(db.prepare('SELECT * FROM builds WHERE id = ?').get(id));
+    },
+    async liveBuilds() {
+      return db
+        .prepare("SELECT * FROM builds WHERE status = 'live' ORDER BY created_at DESC")
+        .all()
+        .map(buildRow);
+    },
+    async pendingBuilds() {
+      return db
+        .prepare("SELECT * FROM builds WHERE status = 'pending' ORDER BY created_at ASC")
+        .all()
+        .map(buildRow);
+    },
+    async buildUserNames(ids) {
+      if (!ids.length) return [];
+      const marks = ids.map(() => '?').join(', ');
+      return db
+        .prepare(`SELECT "id", "name", "handle" FROM "user" WHERE "id" IN (${marks})`)
+        .all(...ids);
+    },
+    async userHandle(userId) {
+      return db.prepare('SELECT "handle" FROM "user" WHERE "id" = ?').get(userId)?.handle ?? null;
+    },
+    async setUserHandle(userId, handle) {
+      try {
+        return (
+          db.prepare('UPDATE "user" SET "handle" = ? WHERE "id" = ? AND "handle" IS NULL')
+            .run(handle, userId).changes > 0
+        );
+      } catch (err) {
+        if (/unique|constraint/i.test(err.message)) return false;
+        throw err;
+      }
+    },
+    async userByHandle(handle) {
+      return (
+        db.prepare('SELECT "id", "name", "handle" FROM "user" WHERE lower("handle") = lower(?)')
+          .get(handle) ?? null
+      );
+    },
+    async buildByUserSlug(userId, slug) {
+      return buildRow(
+        db.prepare('SELECT * FROM builds WHERE user_id = ? AND slug = ?').get(userId, slug)
+      );
+    },
+    async userBuildSlugs(userId) {
+      return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
+    },
+    async githubAccountOf(userId) {
+      return (
+        db.prepare(
+          `SELECT "accountId" FROM "account" WHERE "userId" = ? AND "providerId" = 'github' LIMIT 1`
+        ).get(userId)?.accountId ?? null
+      );
+    },
+    async insertBuildMedia(m) {
+      db.prepare(
+        'INSERT INTO build_media (id, user_id, key, created_at) VALUES (?, ?, ?, ?)'
+      ).run(m.id, m.user_id, m.key, m.created_at);
+    },
+    async mediaOwnedBy(ids, userId) {
+      if (!ids.length) return [];
+      const marks = ids.map(() => '?').join(', ');
+      return db
+        .prepare(
+          `SELECT id, key FROM build_media WHERE id IN (${marks}) AND user_id = ? AND build_id IS NULL`
+        )
+        .all(...ids, userId);
+    },
+    async claimBuildMedia(ids, buildId, userId) {
+      if (!ids.length) return;
+      const marks = ids.map(() => '?').join(', ');
+      db.prepare(
+        `UPDATE build_media SET build_id = ? WHERE id IN (${marks}) AND user_id = ? AND build_id IS NULL`
+      ).run(buildId, ...ids, userId);
+    },
   };
 }
 
@@ -1091,6 +1419,78 @@ export async function submissionById(id) {
 
 export async function openSubmissionBySlug(slug) {
   return (await getDriver()).openSubmissionBySlug(slug);
+}
+
+/* ---------- builds ---------- */
+
+export async function insertBuild(b) {
+  return (await getDriver()).insertBuild(b);
+}
+
+export async function updateBuild(id, fields) {
+  return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });
+}
+
+export async function buildById(id) {
+  return (await getDriver()).buildById(id);
+}
+
+// All live builds, newest first. The pages filter/sort in JS — the whole
+// table is small and one query keeps both drivers trivial.
+export async function liveBuilds() {
+  return (await getDriver()).liveBuilds();
+}
+
+// The admin approval queue, oldest first.
+export async function pendingBuilds() {
+  return (await getDriver()).pendingBuilds();
+}
+
+// Maker identities for build pages, one round trip per page: the claimed
+// handle (display + URLs) with the OAuth name as fallback.
+export async function buildUserNames(ids) {
+  const rows = await (await getDriver()).buildUserNames([...new Set(ids)]);
+  return new Map(rows.map((r) => [r.id, { name: r.name, handle: r.handle ?? null }]));
+}
+
+export async function userHandle(userId) {
+  return (await getDriver()).userHandle(userId);
+}
+
+// Set-once, unique case-insensitive; false = already set or already taken.
+export async function setUserHandle(userId, handle) {
+  return (await getDriver()).setUserHandle(userId, handle);
+}
+
+export async function userByHandle(handle) {
+  return (await getDriver()).userByHandle(handle);
+}
+
+export async function buildByUserSlug(userId, slug) {
+  return (await getDriver()).buildByUserSlug(userId, slug);
+}
+
+// Existing slugs for one maker, so a repeat name gets -2, -3, … at insert.
+export async function userBuildSlugs(userId) {
+  return (await getDriver()).userBuildSlugs(userId);
+}
+
+// The linked GitHub account's numeric user id (Better Auth stores no login),
+// or null when the user never connected GitHub.
+export async function githubAccountOf(userId) {
+  return (await getDriver()).githubAccountOf(userId);
+}
+
+export async function insertBuildMedia(m) {
+  return (await getDriver()).insertBuildMedia(m);
+}
+
+export async function mediaOwnedBy(ids, userId) {
+  return (await getDriver()).mediaOwnedBy(ids, userId);
+}
+
+export async function claimBuildMedia(ids, buildId, userId) {
+  return (await getDriver()).claimBuildMedia(ids, buildId, userId);
 }
 
 // The headline number: total monthly cost of every subscription on the death list.

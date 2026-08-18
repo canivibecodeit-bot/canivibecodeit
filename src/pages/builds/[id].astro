@@ -1,0 +1,21 @@
+---
+// /builds/b_<id>: internal-id fallback. The canonical address is
+// /builds/<handle>/<slug>; anything that still holds an id (old links, the
+// admin forms' target) gets a permanent redirect there. Only ids match this
+// route — a handle in this slot 404s here and never shadows the pretty one.
+import { buildById, buildUserNames } from '../../lib/db.js';
+import { buildsLive } from '../../lib/flags.js';
+import { BUILD_ID_RE, buildHref } from '../../lib/builds.js';
+
+if (!buildsLive()) return new Response(null, { status: 404 });
+
+const { id } = Astro.params;
+if (!BUILD_ID_RE.test(id ?? '')) return new Response(null, { status: 404 });
+const build = await buildById(id);
+if (!build) return new Response(null, { status: 404 });
+
+const names = await buildUserNames([build.user_id]);
+const target = buildHref(names, build);
+if (target === `/builds/${build.id}`) return new Response(null, { status: 404 });
+return Astro.redirect(target, 301);
+---

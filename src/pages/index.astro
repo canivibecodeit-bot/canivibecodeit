@@ -6,6 +6,7 @@ import VisitorGlobe from '../components/VisitorGlobe.astro';
 import DigestCard from '../components/DigestCard.astro';
 import { allApps, appsWithAlternativesPage, topCategories, categoriesInUse } from '../lib/apps.js';
 import { voteCounts } from '../lib/db.js';
+import { buildsLive } from '../lib/flags.js';
 
 const votes = await voteCounts();
 const apps = allApps().sort(
@@ -103,13 +104,24 @@ const jsonld = [
       <a class="chip" href="/moats">🏰 moats</a>
       <a class="chip" href="/categories">all categories →</a>
     </nav>
-    <a class="hatch-strip" href="/alternatives">
-      <span class="hs-copy">
-        every verdict now has an escape hatch: {totalAlts.toLocaleString('en-US')} free
-        alternatives across {altApps.length} apps
-      </span>
-      <span class="hs-cta">browse them →</span>
-    </a>
+    {
+      buildsLive() ? (
+        <a class="hatch-strip" href="/builds">
+          <span class="hs-copy">
+            new: builds · what people actually vibe coded, with the exact prompts that made it
+          </span>
+          <span class="hs-cta">see the builds →</span>
+        </a>
+      ) : (
+        <a class="hatch-strip" href="/alternatives">
+          <span class="hs-copy">
+            every verdict now has an escape hatch: {totalAlts.toLocaleString('en-US')} free
+            alternatives across {altApps.length} apps
+          </span>
+          <span class="hs-cta">browse them →</span>
+        </a>
+      )
+    }
   </section>
 
   <Ticker />

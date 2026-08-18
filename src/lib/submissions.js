@@ -368,12 +368,14 @@ export async function processSubmission(id, input) {
     const prUrl = await openPr({ entry, icon, submitter, take });
     await updateSubmission(id, { status: 'done', pr_url: prUrl });
 
-    alertRob(
-      `[cvci] submission PR: ${entry.name} (${entry.verdict})`,
-      `<p>New app submission turned into a PR:</p>
-       <p><a href="${esc(prUrl)}">${esc(prUrl)}</a></p>
-       <p>${esc(entry.name)} · ${esc(entry.category)} · verdict ${esc(entry.verdict)} (${esc(entry.verdictConfidence)})${submitter ? ` · submitted by ${esc(submitter)}` : ''}</p>`
-    ).catch((err) => console.error(`submit: alert mail failed: ${err.message}`));
+    // Per-PR email to Rob disabled on his ask (2026-08-18): too noisy — the
+    // GitHub PR notification already covers it. Re-enable by uncommenting.
+    // alertRob(
+    //   `[cvci] submission PR: ${entry.name} (${entry.verdict})`,
+    //   `<p>New app submission turned into a PR:</p>
+    //    <p><a href="${esc(prUrl)}">${esc(prUrl)}</a></p>
+    //    <p>${esc(entry.name)} · ${esc(entry.category)} · verdict ${esc(entry.verdict)} (${esc(entry.verdictConfidence)})${submitter ? ` · submitted by ${esc(submitter)}` : ''}</p>`
+    // ).catch((err) => console.error(`submit: alert mail failed: ${err.message}`));
   } catch (err) {
     console.error(`submit ${id} (${slug}): ${err.message}`);
     await updateSubmission(id, {

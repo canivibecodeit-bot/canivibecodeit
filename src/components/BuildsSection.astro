@@ -1,0 +1,145 @@
+---
+// Verdict-page section: community builds attached to this app. Renders
+// nothing unless the flag is on AND at least two live builds exist, so the
+// page is byte-identical to today until both are true (one lonely build
+// reads as an ad; two reads as a scene).
+import { buildsLive } from '../lib/flags.js';
+import { liveBuilds, buildUserNames } from '../lib/db.js';
+import { ago, buildHref, builderName, goesLabel } from '../lib/builds.js';
+
+const { app } = Astro.props;
+
+let builds = [];
+let names = new Map();
+let featured = null;
+if (buildsLive()) {
+  builds = (await liveBuilds()).filter((b) => b.app_slug === app.slug);
+  if (builds.length >= 2) {
+    names = await buildUserNames(builds.map((b) => b.user_id));
+    featured = builds.find((b) => b.featured) ?? null;
+  }
+}
+const shown = builds.slice(0, 3);
+const baseName = app.name.split(' / ')[0];
+const media = (b) => {
+  try {
+    return JSON.parse(b.media || '[]');
+  } catch {
+    return [];
+  }
+};
+---
+
+{
+  builds.length >= 2 && (
+    <section class="bd-section">
+      <div class="bd-sec-head">
+        <span class="bd-label">community builds · {builds.length}</span>
+        <span class="bd-sec-note">newest first · failures welcome</span>
+      </div>
+      <p class="bd-sec-line">people who took on {baseName}, prompts included.</p>
+
+      {featured && (
+        <div class="bd-best">
+          <span class="bd-label green">current best prompt</span>
+          <span>
+            by {builderName(names, featured)}
+            {featured.featured_note && <> · "{featured.featured_note}"</>}
+          </span>
+          <a class="view" href={buildHref(names, featured)}>view prompt →</a>
+        </div>
+      )}
+
+      <div class="bd-rows" style="margin-top: 18px;">
+        {shown.map((b) => (
+          <div class="bd-row">
+            <span class="bd-thumb lg">
+              {media(b)[0] ? <img src={media(b)[0]} alt="" loading="lazy" /> : ''}
+            </span>
+            <div class="bd-main">
+              <div class="bd-title-row">
+                <span class="bd-name">{b.name}</span>
+                <span class="bd-by">by {builderName(names, b)}</span>
+                <span class="bd-goes">{goesLabel(b)}</span>
+              </div>
+              <span class="bd-meta">
+                {b.one_liner} · {b.tool} · {ago(b.created_at)}
+              </span>
+              <div class="bd-links">
+                {b.demo_url && (
+                  <a href={b.demo_url} target="_blank" rel="ugc nofollow noopener">
+                    live demo ↗
+                  </a>
+                )}
+                {b.repo_url && (
+                  <a href={b.repo_url} target="_blank" rel="ugc nofollow noopener">
+                    repo ↗
+                  </a>
+                )}
+                <a href={buildHref(names, b)}>the build →</a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="bd-sec-foot">
+        <a class="btn primary" href={`/post-a-build?app=${app.slug}`}>post your build</a>
+        <span>your build sits on this page, permanently</span>
+        {builds.length > shown.length ? (
+          <a class="all" href={`/builds?app=${app.slug}`}>all {builds.length} builds →</a>
+        ) : (
+          <a class="all" href="/builds">all builds →</a>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .bd-section {
+    padding-top: 52px;
+  }
+
+  .bd-sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bd-sec-note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .bd-sec-line {
+    padding-top: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .bd-sec-foot {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .bd-sec-foot .btn {
+    font-size: 14px;
+  }
+
+  .bd-sec-foot .all {
+    margin-left: auto;
+    color: var(--muted);
+  }
+
+  .bd-sec-foot .all:hover {
+    color: var(--fg);
+  }
+</style>
