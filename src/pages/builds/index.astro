@@ -347,7 +347,9 @@ const href = (over = {}) => {
   }
 
   .bd-empty {
-    padding: 28px 0;
+    /* Side padding matches the rows', so the text sits on the page grid
+       despite the list's -14px pull. */
+    padding: 28px 14px;
     font-size: 14px;
     color: var(--muted);
   }

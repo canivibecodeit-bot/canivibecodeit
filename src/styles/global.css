@@ -2477,25 +2477,29 @@ a.tile {
 
 .site-footer {
   margin-top: 72px;
-  border-top: 1px solid var(--border);
-  padding: 26px 24px;
+  padding: 0 20px 26px;
   font-size: 12.5px;
   color: var(--muted);
 }
 
+/* 1080px = the content column (.wrap's 1120px minus its side padding), so
+   the footer text and both footer rules line up with the page content
+   instead of bleeding wider than everything above them. */
 .site-footer .inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  max-width: 1280px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
 .site-footer .footer-nav {
   justify-content: center;
   gap: 10px 26px;
+  border-top: 1px solid var(--border);
+  padding-top: 26px;
   padding-bottom: 18px;
   margin-bottom: 18px;
   border-bottom: 1px solid var(--border);
@@ -3545,7 +3549,7 @@ button.sp-banner {
   }
 
   .site-footer .inner {
-    max-width: min(1280px, calc(100vw - var(--sp-side) * 2 - 40px));
+    max-width: min(1080px, calc(100vw - var(--sp-side) * 2 - 40px));
   }
 
   .hero {
@@ -4448,12 +4452,24 @@ button.sp-banner {
 /* ---------- build rows (index + verdict-page section) ---------- */
 
 .bd-rows {
-  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   /* Rows carry side padding so the hover wash clears the text; pulling the
-     list back out by the same amount keeps the text on the page grid. */
+     list back out by the same amount keeps the text on the page grid. The
+     frame lines are drawn inset by the same amount so they sit on the grid
+     too, matching every other rule on the page. */
   margin-inline: -14px;
+  position: relative;
+}
+
+.bd-rows::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: var(--border);
 }
 
 .bd-row {
@@ -4461,7 +4477,17 @@ button.sp-banner {
   align-items: center;
   gap: 20px;
   padding: 16px 14px;
-  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.bd-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: var(--border);
 }
 
 a.bd-row {
