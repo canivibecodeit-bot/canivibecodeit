@@ -114,7 +114,59 @@
     const state = {
       goes: null, // 'one' | 'few' | 'weeks' | 'never'
       app: null, // optional attach target
-      media: [],
+      media: [], // uploaded screenshots: [{id, url}]
+      pendingFiles: [], // Files picked while signed out, waiting for a session
+    };
+
+    /* Draft persistence: the sign-in click is a full OAuth round trip, so a
+       half-filled form would die with the navigation. Text state rides
+       sessionStorage (tab-scoped, gone when the tab closes); files picked
+       while signed out ride IndexedDB as blobs and upload themselves the
+       moment the maker is back with a session. Cleared on successful post. */
+    const DRAFT_KEY = 'bp-draft';
+    const DRAFT_FIELDS = [
+      'name', 'one_liner', 'prompt', 'story', 'where_broke', 'tool', 'model',
+      'chat_url', 'demo_url', 'repo_url', 'affiliation',
+    ];
+    const saveDraft = () => {
+      try {
+        const form = $('#bp-form');
+        const d = {
+          goes: state.goes,
+          app: state.app?.slug ?? null,
+          media: state.media,
+          handle: $('#bp-handle')?.value ?? '',
+        };
+        for (const f of DRAFT_FIELDS) d[f] = form?.elements[f]?.value ?? '';
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+      } catch {}
+    };
+    const idbOpen = () =>
+      new Promise((resolve, reject) => {
+        const r = indexedDB.open('bp-stash', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('files', { autoIncrement: true });
+        r.onsuccess = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+      });
+    const idbTx = async (mode, run) => {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const req = run(db.transaction('files', mode).objectStore('files'));
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    };
+    const stashFiles = () =>
+      idbTx('readwrite', (s) => s.clear())
+        .then(() => Promise.all(state.pendingFiles.map((f) => idbTx('readwrite', (s) => s.add(f)))))
+        .catch(() => {});
+    const stashedFiles = () => idbTx('readonly', (s) => s.getAll()).catch(() => []);
+    const clearStash = () => idbTx('readwrite', (s) => s.clear()).catch(() => {});
+    const clearDraft = () => {
+      try {
+        sessionStorage.removeItem(DRAFT_KEY);
+      } catch {}
+      return clearStash();
     };
 
     /* Typeahead picker: rows are built as DOM nodes, never HTML strings. */
@@ -239,6 +291,7 @@
 
     const search = wireSearch($('#bp-search'), (a) => {
       state.app = a;
+      saveDraft();
     });
 
     /* "How many goes?" chips decide what the form asks for next. */
@@ -282,6 +335,7 @@
       btn.addEventListener('click', () => {
         state.goes = btn.dataset.goes;
         syncGoes();
+        saveDraft();
       })
     );
 
@@ -301,52 +355,72 @@
       }
     });
 
-    /* Screenshots: upload on choose OR drop, keep the ids for the post. */
+    /* Screenshots: upload on choose OR drop. Signed in, they upload right
+       away; signed out they stash locally (thumb included) and upload
+       after the OAuth round trip. */
     const fileInput = $('#bp-files');
     const dropZone = $('.bp-drop');
+    const shotCount = () => state.media.length + state.pendingFiles.length;
     const syncDropline = () => {
       const line = $('[data-bd-dropline]');
       if (!line) return;
-      line.textContent = state.media.length
-        ? `${state.media.length} of 3 attached · tap or drop to add more`
+      line.textContent = shotCount()
+        ? `${shotCount()} of 3 attached · tap or drop to add more`
         : 'add 1-3 screenshots of what you built';
     };
+    const addThumb = (url, onRemove) => {
+      const wrap = document.createElement('span');
+      wrap.className = 'bp-thumb-wrap';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'bp-thumb-x';
+      x.setAttribute('aria-label', 'remove this screenshot');
+      x.textContent = '×';
+      x.addEventListener('click', () => {
+        onRemove();
+        wrap.remove();
+        syncDropline();
+        saveDraft();
+      });
+      wrap.append(img, x);
+      $('[data-bd-thumbs]').appendChild(wrap);
+    };
     const uploadFiles = async (fileList) => {
-      const thumbs = $('[data-bd-thumbs]');
       const files = [...fileList]
         .filter((f) => (f.type || '').startsWith('image/'))
-        .slice(0, 3 - state.media.length);
+        .slice(0, 3 - shotCount());
       for (const file of files) {
+        if (!signedIn) {
+          // No session yet: keep the file locally, preview it, upload later.
+          state.pendingFiles.push(file);
+          addThumb(URL.createObjectURL(file), () => {
+            state.pendingFiles = state.pendingFiles.filter((f) => f !== file);
+            stashFiles();
+          });
+          continue;
+        }
         const fd = new FormData();
         fd.append('file', file);
         try {
           const res = await fetch('/api/build/media', { method: 'POST', body: fd });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(data.error || 'upload failed');
-          state.media.push(data.id);
-          const wrap = document.createElement('span');
-          wrap.className = 'bp-thumb-wrap';
-          const img = document.createElement('img');
-          img.src = data.url;
-          img.alt = '';
-          const x = document.createElement('button');
-          x.type = 'button';
-          x.className = 'bp-thumb-x';
-          x.setAttribute('aria-label', 'remove this screenshot');
-          x.textContent = '×';
-          x.addEventListener('click', () => {
+          const entry = { id: data.id, url: data.url };
+          state.media.push(entry);
+          addThumb(data.url, () => {
             // Detach only: the orphaned upload never gets claimed by a build.
-            state.media = state.media.filter((m) => m !== data.id);
-            wrap.remove();
-            syncDropline();
+            state.media = state.media.filter((m) => m.id !== entry.id);
           });
-          wrap.append(img, x);
-          thumbs.appendChild(wrap);
         } catch (err) {
           toast(err.message || 'upload failed');
         }
       }
+      if (!signedIn) await stashFiles();
       syncDropline();
+      saveDraft();
     };
     fileInput?.addEventListener('change', async () => {
       await uploadFiles(fileInput.files);
@@ -393,7 +467,7 @@
         repo_url: form.elements.repo_url.value,
         affiliation: form.elements.affiliation.value,
         slug: state.app?.slug,
-        media: state.media,
+        media: state.media.map((m) => m.id),
         website: form.elements.website.value,
       };
       if (payload.name.trim().length < 2) return fail('give the build a name.');
@@ -426,11 +500,15 @@
         const data = await res.json().catch(() => ({}));
         if (!res.ok) return fail(data.error || 'something went sideways · try again in a minute.');
         track('build_post', { goes: state.goes, app: payload.slug });
+        await clearDraft();
         window.location.href = data.url;
       } catch {
         fail('could not reach the server · try again in a minute.');
       }
     });
+
+    /* Every keystroke keeps the draft current (cheap: one JSON stringify). */
+    form?.addEventListener('input', saveDraft);
 
     /* Prefill from the query string (?app=…). */
     const preApp = wrap.dataset.preselectApp;
@@ -438,6 +516,52 @@
       const a = catalog.find((x) => x.slug === preApp);
       if (a) search.set(a);
     }
+
+    /* Restore a draft left by the sign-in round trip (or a stray reload).
+       Runs after the ?app= prefill so the draft, being newer intent, wins. */
+    try {
+      const d = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null');
+      if (d) {
+        for (const f of DRAFT_FIELDS) {
+          if (form?.elements[f] && typeof d[f] === 'string') form.elements[f].value = d[f];
+        }
+        const h = $('#bp-handle');
+        if (h && typeof d.handle === 'string') h.value = d.handle;
+        if (d.goes && $(`[data-bd-goes] .bp-chip[data-goes="${d.goes}"]`)) {
+          state.goes = d.goes;
+          syncGoes();
+        }
+        if (d.app) {
+          const a = catalog.find((x) => x.slug === d.app);
+          if (a) search.set(a);
+        }
+        if (signedIn && Array.isArray(d.media)) {
+          for (const m of d.media) {
+            if (typeof m?.id === 'string' && typeof m?.url === 'string') {
+              const entry = { id: m.id, url: m.url };
+              state.media.push(entry);
+              addThumb(entry.url, () => {
+                state.media = state.media.filter((x) => x.id !== entry.id);
+              });
+            }
+          }
+          syncDropline();
+        }
+      }
+    } catch {}
+
+    /* Files stashed while signed out: upload them now if a session exists,
+       otherwise re-preview them so nothing looks lost. */
+    stashedFiles().then(async (files) => {
+      if (!files?.length) return;
+      if (signedIn) {
+        await clearStash();
+        await uploadFiles(files);
+        if (state.media.length) toast('your screenshots came along · all attached');
+      } else {
+        await uploadFiles(files); // signed out: re-previews and re-stashes
+      }
+    });
   };
 
   const init = () => {
