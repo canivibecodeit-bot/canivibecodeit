@@ -109,8 +109,9 @@ const media = (b) => {
 </Base>
 
 <style>
+  /* No wrapper padding-top: the global .crumbs already carries the 40px
+     page-top rhythm, and every /builds surface must start at the same Y. */
   .mk-page {
-    padding-top: 48px;
     padding-bottom: 90px;
   }
 
@@ -118,7 +119,7 @@ const media = (b) => {
     display: flex;
     align-items: center;
     gap: 18px;
-    padding-top: 22px;
+    padding-top: 20px;
   }
 
   .mk-head :global(.maker-icon) {
