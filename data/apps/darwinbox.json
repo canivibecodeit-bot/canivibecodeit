@@ -1,0 +1,50 @@
+{
+  "slug": "darwinbox",
+  "name": "Darwinbox",
+  "domain": "darwinbox.com",
+  "category": "hr",
+  "subcategory": "HRMS / HCM suite",
+  "tagline": "Enterprise HR platform covering hiring, onboarding, attendance, leave, payroll and performance for the whole org.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "quoted per employee, annual contract",
+    "unit": "custom",
+    "source": "https://darwinbox.com/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "This is not a tool you use alone, it is the system of record for every employee your company has. The parts that look buildable, a leave tracker and an org chart, are the cheap 10 percent. The expensive 90 percent is statutory payroll across multiple countries, tax filings, audit trails, role-based access that HR and legal will actually sign off on, and the fact that finance, IT and the auditors all already read from it. A personal replacement makes no sense because there is no personal version of a company's payroll compliance. If you are a founder with eight people, a spreadsheet plus your accountant beats both this and a DIY build.",
+  "coreLoopDIY": "A self-hosted employee directory with leave balances, approval requests and a CSV export you hand to whoever actually runs payroll.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a machine to run it on",
+    "Someone external doing actual payroll and tax filing"
+  ],
+  "whatYouLose": [
+    "Statutory payroll, tax and provident fund compliance across jurisdictions, which is the entire product",
+    "Audit trails and access controls that survive an actual audit or an employment dispute",
+    "Integrations with finance systems, background check vendors, job boards and identity providers",
+    "Mobile apps that non-technical employees will use for attendance and expense claims",
+    "Someone to blame, and to call, when a pay run goes wrong on the 30th"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "switching-costs",
+    "integrations"
+  ],
+  "moatNotes": "Payroll is a regulatory product wearing a software costume. Every country you operate in adds another rulebook that changes yearly.",
+  "whyPeopleStillPay": "Because HR software is bought to reduce risk, not to save time. A wrong pay run or a missed statutory filing costs more than the annual contract, and nobody in the company wants to personally own that. Add the switching cost: once headcount data, leave history, appraisal cycles and payroll inputs all live in one system that finance and IT are wired into, migration is a project with a budget and a steering committee, not a weekend.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can build the directory and the leave tracker in a weekend, and neither is what anyone pays for. The moat is payroll compliance in every jurisdiction you operate in, plus the fact that finance, IT and the auditors already read from this one database.",
+  "prompt": "Build a self-hosted internal HR record app for a small team. Not payroll, not compliance, just records and leave.\n\nStack, no substitutions:\n- Next.js 15, App Router, TypeScript, Tailwind.\n- SQLite via better-sqlite3, file at ./data/hr.db, schema created on first run.\n- No auth provider, no cloud, no telemetry. Single shared password from HR_PASSWORD in .env, checked in middleware, plus an ADMIN_EMAILS list in .env that unlocks admin views.\n\nIn scope:\n1. Employees table: name, work email, job title, department, manager (self-referencing), start date, employment type, location, status (active, on leave, exited), notes. Full CRUD for admins, read-only directory for everyone.\n2. Org chart rendered from the manager field as nested lists, no graph library.\n3. Leave: policies table (name, days per year, carry-over cap), balances computed per employee per calendar year, requests with start date, end date, half-day flag, reason, status (pending, approved, rejected).\n4. Approval flow: a request goes to the employee's manager, manager sees a queue, approve or reject with a comment. Every state change writes an append-only audit row with actor, timestamp and old/new values.\n5. Working-day math that skips weekends and a holidays table admins can edit. Store all dates as ISO strings, no timezone conversion.\n6. Reports: leave taken per employee per year, headcount by department, and a CSV export of employees plus approved leave for whoever actually runs payroll.\n7. Seed script with 12 fake employees, 2 policies and a few requests so the app is not empty on first load.\n\nOut of scope, do not build: salary fields, payslips, tax logic, expenses, recruitment, performance reviews, mobile apps, email sending, any integration.\n\nDeliverables: working app on npm run dev, npm run seed, a .env.example, and a README that states plainly that this is a record keeper and that payroll and statutory filing are handled by a human accountant outside this system.",
+  "promptCurated": false
+}
