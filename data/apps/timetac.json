@@ -1,0 +1,51 @@
+{
+  "slug": "timetac",
+  "name": "TimeTac",
+  "domain": "timetac.com",
+  "category": "time-tracking",
+  "subcategory": "employee time tracking and workforce management",
+  "tagline": "Cloud time tracking, attendance and leave management for teams, with clock-in via web, mobile and terminals.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "monthly per user",
+    "unit": "per-seat",
+    "source": "https://new.timetac.com/es/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "If you are one person logging hours against projects, this is a solved evening: a table, a timer, a CSV export, done. TimeTac is not sold for that, it is sold to companies that must prove who worked when, which in Spain means a daily time record that survives an inspection. An agent can absolutely build the clock-in screen, the leave calendar and the monthly timesheet PDF, and it will feel surprisingly complete. What it will not hand you is the tamper-resistant audit trail, the payroll and HR exports your accountant already accepts, and the phone app your field staff will actually open. So: yes for yourself, shaky the moment other people's paychecks depend on your SQLite file.",
+  "coreLoopDIY": "A local web app where people clock in and out, log time against projects, request time off, and export approved monthly timesheets as CSV or PDF.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+",
+    "somewhere to run it that your team can reach, plus HTTPS if it leaves your laptop",
+    "backups you actually test, because these records are the evidence"
+  ],
+  "whatYouLose": [
+    "Legally defensible records: no tamper-evident log, no retention guarantees, nothing an inspector or works council will nod at",
+    "Native iOS and Android apps with GPS, offline clock-in and geofencing for people who are not at a desk",
+    "Hardware terminals and badge or fingerprint clock-in for shop floors",
+    "Payroll, ERP and HR integrations plus the export formats your bookkeeper already imports without complaining",
+    "Someone else owning uptime, overtime rule edge cases and the shift and break math for each country"
+  ],
+  "moatTags": [
+    "compliance-regulatory",
+    "integrations",
+    "switching-costs"
+  ],
+  "moatNotes": "Spanish and Austrian and German working time rules are the actual product. The timer is packaging.",
+  "whyPeopleStillPay": "Companies do not buy time tracking because timers are hard, they buy it because a missing time record is a fine and a disputed overtime claim is a lawsuit. The paid version comes with rule sets for breaks, overtime and absence accrual per country, exports that payroll accepts, apps that work on a phone in a van, and a vendor to point at when something is wrong. A self-hosted app you wrote yourself is fine for your own invoicing and a bad idea the moment an employee disagrees with it.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Great personal timesheet, mediocre compliance artifact, and TimeTac is sold as the second thing.",
+  "prompt": "Build a self-hosted team time tracking app called Hours. Empty folder, no cloud services.\n\nStack, no substitutions: Next.js 15 with the App Router and TypeScript, Tailwind for styling, SQLite through Prisma, all data in ./data/hours.db. Session auth with an httpOnly signed cookie, secret in .env as SESSION_SECRET. No third-party auth, no telemetry, no analytics.\n\nData model: User (name, email, passwordHash, role of admin or member, weeklyHours, vacationDaysPerYear), Project (name, client, archived), TimeEntry (userId, projectId nullable, start, end nullable, note, breakMinutes, approvedAt nullable), Absence (userId, type of vacation or sick or unpaid, startDate, endDate, status of pending or approved or rejected), AuditLog (userId, action, targetType, targetId, before JSON, after JSON, createdAt).\n\nMember views: a big clock in and clock out button showing today's running total, a project picker, an editable list of this week's entries with hour totals per day and week, an absence request form, and a personal balance showing hours worked versus contracted and vacation days used versus remaining.\n\nAdmin views: everyone's entries for a chosen month in a grid, one-click approve per user per month which locks those entries from editing, approve or reject absence requests, CRUD for users and projects, and exports: CSV of entries filtered by month and user, plus a printable HTML monthly timesheet per user with signature lines.\n\nEvery create, update and delete on TimeEntry and Absence writes an AuditLog row. Never hard delete a TimeEntry, use a deletedAt flag and keep it out of totals.\n\nRules: overlapping open entries are rejected, entries longer than 12 hours warn on save, a configurable auto break deduction of 30 minutes past 6 hours is applied at display time not at write time.\n\nOut of scope, do not build: mobile apps, GPS or geofencing, payroll integrations, invoicing, multi-tenant orgs, email sending.\n\nShip a seed script with two users, three projects and a week of sample entries, a README with setup and backup instructions, and Vitest tests for the totals and break deduction math.",
+  "promptCurated": false
+}
