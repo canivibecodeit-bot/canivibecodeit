@@ -1,0 +1,51 @@
+{
+  "slug": "workelo",
+  "name": "Workelo",
+  "domain": "workelo.eu",
+  "category": "hr",
+  "subcategory": "employee onboarding and offboarding",
+  "tagline": "Templated onboarding, crossboarding and offboarding journeys for HR teams, with task assignment, reminders and an employee-facing portal.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://www.workelo.eu/?utm_term=workelo&utm_campaign=S+%5BFR%5D+Marque&utm_source=adwords&utm_medium=ppc&hsa_acc=2848695474&hsa_cam=13157737355&hsa_grp=122833654775&hsa_ad=811753633587&hsa_src=g&hsa_tgt=kwd-770000034411&hsa_kw=workelo&hsa_mt=e&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=1",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified. Workelo sells through sales contact rather than a public price list, so treat any number you see elsewhere as a guess.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "medium",
+  "verdictSummary": "Strip away the branding and Workelo is a workflow engine: journey templates, tasks with owners and due dates relative to a start date, reminders, and a page the new hire actually sees. That part is genuinely a weekend build, and for a five person company a self-hosted version is fine. What breaks is everything at the edges: HRIS sync, Google Workspace and Slack account provisioning, equipment requests routed to IT, document signing, and the audit trail HR wants when someone leaves. Also worth naming the obvious: this is a tool for coordinating other people, so a personal build only pays off if you are the one running onboarding. If you are, you get most of the value; if you need it to talk to your HRIS, you will spend the weekend on OAuth instead of features.",
+  "coreLoopDIY": "A self-hosted app where you define onboarding and offboarding journey templates as tasks offset from a start date, launch one per employee, assign owners, and email everyone their overdue items daily.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20 and a place to run it (a small VPS or a container)",
+    "SMTP credentials for reminder emails, or nothing if you accept an in-app inbox only",
+    "Someone willing to keep the templates current, which is the actual work"
+  ],
+  "whatYouLose": [
+    "HRIS and ATS connectors, so employee records get typed in by hand",
+    "Automatic account and access provisioning in Google Workspace, Slack, and IT tools, plus the deprovisioning checklist on exit",
+    "E-signature and document collection flows that a legal team will accept",
+    "The polished employee-facing portal and email design that makes day one feel intentional rather than homemade",
+    "Reporting, audit logs, and the GDPR paperwork story your HR lead will ask about"
+  ],
+  "moatTags": [
+    "integrations",
+    "compliance-regulatory",
+    "execution-polish"
+  ],
+  "moatNotes": "The connector list is the product. Everything on top of it is CRUD with dates.",
+  "whyPeopleStillPay": "HR teams are not buying a task list, they are buying the fact that a start date in the HRIS makes eleven things happen across six systems without anyone remembering to do them. That plumbing is unglamorous, breaks silently, and needs an owner when it does. Add the compliance and audit angle for offboarding, plus the fact that the buyer is usually a two person People team with zero engineering budget, and a self-hosted alternative loses on total cost even when it wins on features.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The engine is trivial; keeping the templates honest is the job nobody wants.",
+  "prompt": "Build a self-hosted employee onboarding and offboarding tracker. Empty folder, no scaffolding questions, just build it.\n\nStack, non negotiable: Next.js 15 with the App Router and TypeScript, SQLite through Prisma, Tailwind for styling, server actions for all mutations. No external auth provider. No telemetry. No analytics.\n\nData model:\n- Journey template: name, type (onboarding, crossboarding, offboarding), list of TaskTemplates.\n- TaskTemplate: title, description (markdown), owner role (manager, hr, it, employee), dayOffset (integer, negative means before the start or exit date), optional link.\n- Employee: name, personal email, work email, role, manager name, manager email, startDate, exitDate (nullable), status.\n- Journey: created by applying a template to an employee, snapshots the tasks so later template edits do not rewrite history.\n- Task: title, description, ownerEmail resolved at launch, dueDate computed from dayOffset plus the anchor date, done flag, completedAt.\n\nFeatures in scope:\n- CRUD for templates with a drag free ordering (just an integer sort field and up/down buttons).\n- Launch a journey: pick employee plus template, preview computed due dates, confirm.\n- Dashboard: all active journeys, percent complete, overdue count, sorted by nearest due date.\n- Per journey view grouped by week relative to the anchor date, checkboxes that complete tasks via server actions.\n- A tokenized public task page at /me/[token] so a new hire or manager can see and tick their own tasks without an account. Token is a random 32 char string on the journey, unguessable, no login.\n- A daily digest script (npm run digest) that finds tasks due or overdue and emails each owner one summary. Use nodemailer with SMTP_HOST, SMTP_USER, SMTP_PASS, MAIL_FROM from .env. If those are unset, print the emails to stdout instead of failing.\n- Seed script with one realistic onboarding template (about 15 tasks spanning day -7 to day +30) and one offboarding template (about 10 tasks).\n\nExplicitly out of scope: HRIS or ATS integrations, Slack or Google Workspace provisioning, e-signature, file uploads, multi tenancy, role based admin permissions. One admin, protected by a single ADMIN_PASSWORD in .env checked in middleware with a cookie. That is enough.\n\nDeliver a README with setup, .env.example, prisma migrate command, and a cron line for the digest. Make the /me pages look decent on a phone; that is the only surface an employee ever sees.",
+  "promptCurated": false
+}
