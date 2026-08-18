@@ -1,0 +1,52 @@
+{
+  "slug": "feedlog",
+  "name": "FeedLog",
+  "domain": "feedlog.ai",
+  "category": "user-research",
+  "subcategory": "feedback boards and public roadmaps",
+  "tagline": "A hosted feedback board where users post feature requests, vote on them, and follow a public roadmap.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://feedlog.ai/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "The visible surface of a feedback board is a CRUD app with an upvote button, and an agent will hand you a working one in an afternoon. The parts that actually matter show up later: stopping vote stuffing without forcing every user through a login, keeping roadmap columns and status changes coherent as the list grows past a few hundred items, and emailing 200 subscribers when something ships without landing in spam. Semantic duplicate detection is the difference between a useful board and a wall of eleven slightly different phrasings of the same request, and that needs embeddings plus a threshold you tune by hand. None of it is hard research, all of it is unglamorous work you will do on a Sunday instead of shipping your actual product. Build it if your board is small and internal, pay if it is public and customer facing.",
+  "coreLoopDIY": "A public board where anyone can post a request, upvote it once, and watch it move through planned, in progress, and shipped columns, with an admin view for triage and merging duplicates.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "A host for a small Next.js app plus a persistent disk or Postgres, since SQLite on ephemeral filesystems will eat your votes",
+    "An SMTP provider or transactional email API if you want ship notifications",
+    "An embeddings API key if you want duplicate detection that understands wording, otherwise you get keyword matching",
+    "Some form of identity, even a magic link, the moment the board is public"
+  ],
+  "whatYouLose": [
+    "Vote integrity: cookie based dedupe is trivially defeated, and real anti abuse means accounts, rate limits, and someone watching the logs",
+    "Deliverable notifications: status change emails that actually arrive require domain auth, unsubscribe handling, and digest batching",
+    "Semantic duplicate detection and merging that preserves votes and subscribers from both items",
+    "Polished public surface: embeddable widgets, changelog pages, SSO handoff from your own app, moderation tools",
+    "Someone else owning the uptime of a page your customers are pointed at"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "switching-costs"
+  ],
+  "moatNotes": "No network effect here: your board's value comes from your own users, not from other companies' boards. That is why the DIY version is viable at all.",
+  "whyPeopleStillPay": "Because a feedback board is customer facing infrastructure that nobody wants to babysit. It is the page you link from your app when someone is already annoyed, so the bar for load times, spam resistance, and email that actually arrives is higher than for an internal tool. Teams also pay for the boring transitional stuff: importing an old spreadsheet of requests, tying board identities to their existing users, and having a changelog that pushes out without a deploy. The build is cheap, the ongoing ownership is not.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "The prototype takes an afternoon; the anti abuse and email work is what turns it into a weekend and then a chore.",
+  "prompt": "Build a self hosted customer feedback board and public roadmap. Stack: Next.js (App Router, TypeScript), Postgres via Prisma, Tailwind CSS. No third party auth SaaS, no analytics, no telemetry.\n\nData model: Board, Post (title, body, status, authorEmail, createdAt), Vote (postId, voterId, unique together), Comment, Subscription (postId, email), AdminSession. Statuses: open, planned, in_progress, shipped, declined.\n\nPublic pages:\n- / lists open posts, sortable by votes or recency, with a search box.\n- /roadmap shows planned, in_progress and shipped as three columns.\n- /p/[id] shows one post, its comments, and a subscribe button.\n- Submitting a post or voting requires a verified email via magic link (signed token, 15 minute expiry, stored in Postgres). Do not use cookie only identity, it is not worth building.\n\nAdmin at /admin behind a single password from ADMIN_PASSWORD in .env, session in an httpOnly cookie:\n- change status, edit or delete posts, pin posts\n- merge post B into post A: move votes, comments and subscriptions, dedupe voters, leave a redirect from B to A\n\nDuplicate detection: on submit, embed the title plus body with the OpenAI embeddings API if OPENAI_API_KEY is set, store the vector as a float array in Postgres with pgvector, and show the three nearest existing posts above the submit button with an \"upvote this instead\" action. If no key is set, fall back to Postgres full text search on title. Make the similarity threshold an env var.\n\nNotifications: when a post changes status, queue an email to its subscribers. Send through SMTP using nodemailer with credentials from .env. Batch sends, include a one click unsubscribe link with a signed token, and log failures instead of retrying forever. If SMTP vars are absent, write the emails to stdout.\n\nAbuse controls: per IP rate limit on submit, vote and magic link endpoints using a Postgres backed counter. One vote per verified email per post, enforced by a unique index, not by application logic alone.\n\nDeliverables: docker-compose.yml with app plus postgres (pgvector image), prisma migrations, a seed script with 20 sample posts, .env.example listing every variable, and a README covering setup, the merge behavior and the duplicate threshold. Out of scope: multi tenancy, embeddable widget, SSO, i18n, mobile apps.",
+  "promptCurated": false
+}
