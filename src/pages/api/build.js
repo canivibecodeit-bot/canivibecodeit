@@ -30,6 +30,7 @@ import {
   storyRequired,
 } from '../../lib/builds.js';
 import { r2PublicUrl } from '../../lib/r2.js';
+import { aiReviewOn, reviewBuild } from '../../lib/build-review.js';
 
 const clean = (v, max) =>
   typeof v === 'string'
@@ -190,17 +191,23 @@ export async function POST({ request, locals, clientAddress }) {
 
   await claimBuildMedia(mediaIds, id, locals.user.id);
 
-  // Approve-first means the queue email IS the doorbell: without it a build
-  // sits pending until Rob happens to look. One mail per post, low volume.
-  // Subject is a mail header, not HTML: name is already control-char
-  // stripped by clean(), so no esc() (it would show literal entities).
-  alertRob(
-    `[cvci] build in the queue: ${name}`,
-    `<p>New build waiting for approval:</p>
-     <p><b>${esc(name)}</b> · ${esc(oneLiner)}</p>
-     <p>${esc(GOES[goes])} · ${esc(tool)}${model ? ` · ${esc(model)}` : ''}${appSlug ? ` · on ${esc(appSlug)}` : ''}${affiliation ? ` · affiliation: ${esc(affiliation)}` : ''}</p>
-     <p><a href="https://canivibecodeit.com/admin/builds?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
-  ).catch((err) => console.error(`build queue alert failed: ${err.message}`));
+  if (aiReviewOn()) {
+    // Overnight mode: the AI reviewer owns the outcome email (approved-and-
+    // live or held-for-you), so Rob still gets exactly one mail per post.
+    reviewBuild(id).catch((err) => console.error(`build review ${id}: ${err.message}`));
+  } else {
+    // Approve-first means the queue email IS the doorbell: without it a
+    // build sits pending until Rob happens to look. One mail per post.
+    // Subject is a mail header, not HTML: name is already control-char
+    // stripped by clean(), so no esc() (it would show literal entities).
+    alertRob(
+      `[cvci] build in the queue: ${name}`,
+      `<p>New build waiting for approval:</p>
+       <p><b>${esc(name)}</b> · ${esc(oneLiner)}</p>
+       <p>${esc(GOES[goes])} · ${esc(tool)}${model ? ` · ${esc(model)}` : ''}${appSlug ? ` · on ${esc(appSlug)}` : ''}${affiliation ? ` · affiliation: ${esc(affiliation)}` : ''}</p>
+       <p><a href="https://canivibecodeit.com/admin/builds?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
+    ).catch((err) => console.error(`build queue alert failed: ${err.message}`));
+  }
 
   return json({ ok: true, id, url: `/builds/${handle}/${slug}` }, 201);
 }
