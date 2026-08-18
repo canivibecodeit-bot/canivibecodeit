@@ -1,0 +1,53 @@
+{
+  "slug": "meshi-ai",
+  "name": "Meshy",
+  "domain": "meshy.ai",
+  "category": "generative-media",
+  "subcategory": "text-to-3D and image-to-3D asset generation",
+  "tagline": "Generates textured 3D models from text prompts or single images, exportable for game engines and 3D printing.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": "monthly subscription with credit allowances",
+    "unit": "usage",
+    "source": "https://meshy.ai/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "no",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The product here is not the web app, it is the model weights and the GPUs they run on. You can absolutely wire up a local pipeline with open-weight image-to-3D models and get meshes out, and for hobby work that may be enough. What you will not get is the retopology, UV unwrapping, PBR texture synthesis and quad-mesh cleanliness that make an asset usable without an hour of manual repair. That gap is research and training data, not code. A coding agent can build you the interface in an afternoon and then hand you a bag of blobby triangles.",
+  "coreLoopDIY": "A local web UI that takes a text prompt or reference image, runs it through open-weight image-to-3D inference on your own GPU, and hands back a GLB you can drop into Blender.",
+  "diyTimeEstimate": "multi-day",
+  "requirements": [
+    "An NVIDIA GPU with at least 12GB VRAM, or a rented cloud GPU",
+    "Python 3.11, CUDA toolkit, and patience with model dependency hell",
+    "Tens of gigabytes of disk for model weights",
+    "A text-to-image model locally or an image API key if you want text-to-3D rather than image-to-3D",
+    "Blender for the cleanup you will inevitably be doing"
+  ],
+  "whatYouLose": [
+    "Clean quad topology and sane UVs; open pipelines mostly give you dense triangle soup",
+    "PBR material output, not just a baked diffuse texture",
+    "Auto-rigging and animation features",
+    "Fast generation without owning or renting a GPU",
+    "Consistent quality across weird prompts, which is where their tuning actually shows"
+  ],
+  "moatTags": [
+    "proprietary-models",
+    "scale-infra",
+    "execution-polish"
+  ],
+  "moatNotes": "Open-weight 3D generators have closed a lot of the gap in the last two years, so this moat is narrowing faster than most. It is still a moat today.",
+  "whyPeopleStillPay": "Because a working 3D asset pipeline is a chain of unglamorous steps, generation, remeshing, unwrapping, texturing, export, and paying a subscription collapses all of it into a text box. Anyone shipping game assets on a deadline is buying throughput, not the novelty of local inference. The credit model also means you pay for the twelve failed generations, which is honest pricing for a stochastic product. And if you do not already own a decent GPU, the local build costs more per month in cloud rental than the subscription does.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "You can build the button, you cannot build the mesh quality behind it. The moat is trained 3D generation models plus the boring post-processing pipeline that turns raw output into an asset a game engine will accept.",
+  "prompt": "Build a local, single-user web tool for image-to-3D generation. Stack: Python 3.11, FastAPI backend, a single server-rendered HTML page with vanilla JS and a three.js viewer via CDN. No accounts, no database beyond SQLite, no telemetry, no cloud services.\n\nRequirements:\n- Assume an NVIDIA GPU with CUDA available. Fail loudly with a clear message if torch.cuda.is_available() is False.\n- Use an open-weight single-image-to-3D model from Hugging Face (default to a TripoSR-class or Hunyuan3D-class checkpoint). Put the model id in .env as MODEL_ID so it can be swapped. Download weights lazily on first run and cache them under ./models.\n- POST /generate accepts an uploaded image plus optional background-removal flag. Run inference in a background worker, one job at a time, and return a job id.\n- GET /jobs/{id} returns status: queued, running, done, or failed, with the error string on failure.\n- On success, export both .glb and .obj into ./outputs/{job_id}/ and expose them for download.\n- Background removal: use rembg locally if installed, otherwise skip and say so in the job log.\n- After generation, run a mesh cleanup pass with trimesh: merge duplicate vertices, remove degenerate faces, and optionally decimate to a target face count passed in the request. Log before/after face counts.\n- Front page: drag-and-drop image upload, a face-count slider, a job list with live status polling, an inline three.js preview of the finished GLB, and download links.\n- Store job metadata in SQLite: id, created_at, source image path, params, status, output paths, duration.\n\nExplicitly out of scope: text-to-3D (accept images only), auto-rigging, animation, PBR material synthesis, quad retopology, multi-user auth, any hosted deployment.\n\nDeliverables: main.py, worker.py, templates/index.html, requirements.txt, .env.example, and a README that states the VRAM floor, the first-run download size, and the fact that output topology will need manual cleanup in Blender.",
+  "promptCurated": false
+}
