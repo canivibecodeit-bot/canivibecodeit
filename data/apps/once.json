@@ -1,0 +1,52 @@
+{
+  "slug": "once",
+  "name": "Once",
+  "domain": "once.film",
+  "category": "audio-video",
+  "subcategory": "film and video delivery",
+  "tagline": "A paid web product for filmmakers built around single-use, controlled viewing of a film; exact feature set unverified.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://once.film/pricing",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "This entry is provisional: Once is a paid product in the film and video space, and its exact feature set has not been verified here, so read the build below as the closest defensible shape rather than a feature-for-feature clone. The general pattern, controlled one-time viewing of a video file with expiring links and watermarking, is very buildable: signed URLs, a viewing token that burns after use, and ffmpeg do most of the work. The gaps are the boring, expensive parts: reliable playback across bad connections, adaptive streaming, mobile browsers that ignore your rules, and anything resembling real DRM. If Once turns out to be a hosted service that guarantees a producer's screener does not leak, that guarantee is the product, not the code. Treat a self-hosted version as fine for your own cuts, not for someone else's unreleased feature.",
+  "coreLoopDIY": "Upload a video, generate a one-time expiring viewing link with a burned-in viewer watermark, and log who opened it and when.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "Node 20+ and a machine you can leave running",
+    "ffmpeg installed for transcoding and watermark burn-in",
+    "Disk space, video files are large",
+    "A domain plus reverse proxy with HTTPS if links go to anyone outside your LAN"
+  ],
+  "whatYouLose": [
+    "Real DRM and screen-capture deterrence; burned-in watermarks are a social deterrent, not encryption",
+    "Adaptive bitrate streaming and a CDN, so a reviewer on hotel wifi will suffer",
+    "Player polish: chapters, frame-accurate scrubbing, timecoded comments, mobile quirks",
+    "Someone else's uptime and support when a distributor cannot open the link at 11pm",
+    "Whatever workflow niceties the paid product actually ships, which you can only match by reading its docs"
+  ],
+  "moatTags": [
+    "scale-infra",
+    "execution-polish",
+    "brand-trust"
+  ],
+  "moatNotes": "Video delivery is a bandwidth and reliability business wearing an app costume. The trust that a screener will not leak is sold, not coded.",
+  "whyPeopleStillPay": "Because the people who need controlled film delivery are usually delivering someone else's work under someone else's contract, and they want a vendor name in the email trail. A self-hosted box is fine for your own rough cuts and terrible as an answer to \"who else had access to this file\". Add transcoding costs, egress, and the fact that playback failures happen in front of the exact person you were trying to impress, and a subscription looks cheap.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Provisional entry: the feature set at once.film has not been verified, so the prompt targets the closest defensible shape. If it turns out to be a hosted delivery service, the moat is bandwidth and the trust that nothing leaks.",
+  "prompt": "Build a self-hosted one-time video screener called \"onceish\" in an empty folder.\n\nStack, no substitutions: Node 20, Express, better-sqlite3, plain server-rendered EJS templates, no React, no build step. Store video files on local disk under ./storage. Store secrets in .env (SESSION_SECRET, ADMIN_PASSWORD, PUBLIC_BASE_URL). No cloud services, no telemetry, no accounts beyond a single admin password.\n\nIn scope:\n1. Admin login with a single password from .env, cookie session.\n2. Admin can upload an MP4 or MOV via multipart form, streamed to disk, no size cap.\n3. On upload, shell out to ffmpeg to produce one 1080p H.264 MP4 proxy and one poster JPEG at 5 seconds. Run it in a queue of one job at a time, store status pending/ready/failed in SQLite.\n4. Admin creates a viewing invite per video: recipient name, recipient email as a label only, expiry timestamp, and max views (default 1).\n5. Each invite gets an unguessable token URL. Opening it renders a minimal page with an HTML5 video element pointing at a streaming route that supports HTTP Range requests.\n6. The streaming route validates the token, expiry, and remaining views, and refuses anything else with a plain 404. Increment the view count on first successful playback start, not on every range request.\n7. Burn the recipient name plus a short token prefix into the proxy as a low-opacity ffmpeg drawtext watermark that moves position every 30 seconds. One watermarked render per invite, cached on disk.\n8. Access log table: token, timestamp, IP, user agent. Admin page lists invites with view counts and a revoke button that hard-kills the token.\n9. README with setup, ffmpeg install note, and an honest paragraph saying this is a deterrent, not DRM.\n\nOut of scope: HLS or adaptive bitrate, DRM, real user accounts, email sending, comments, timecoded notes, payments, multi-tenant anything.\n\nMake it run with npm install && npm start on port 3000. Seed nothing. Keep total code under roughly 700 lines and do not add a frontend framework.",
+  "promptCurated": false
+}
