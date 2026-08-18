@@ -1,0 +1,51 @@
+{
+  "slug": "merra-ai",
+  "name": "Merra AI",
+  "domain": "merra.ai",
+  "category": "ai-assistant",
+  "subcategory": "AI agent / chat assistant",
+  "tagline": "Hosted AI assistant that answers questions and runs tasks against your own material.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "custom",
+    "source": "https://merra.ai/",
+    "checkedOn": "2026-08-18",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "kinda",
+  "verdictConfidence": "low",
+  "verdictSummary": "Anything shaped like \"chat with an LLM over my own documents, with a few tools attached\" is now a solved weekend project: the model does the hard part and you are writing plumbing. A coding agent will get you streaming chat, file ingestion, embeddings search, tool calls and a chat history in a single sitting, and it will run on your laptop with one API key. The gaps are the boring ones that never go away: connectors to the places your data actually lives, permissions, mobile access, and the quiet prompt and retrieval tuning that makes answers feel reliable instead of plausible. If Merra's value turns out to sit mostly in specific integrations or a domain-tuned pipeline rather than the chat surface, the DIY build lands closer to \"useful toy\" than \"replacement\". Build it, use it for two weeks, and you will know which side of that line you are on.",
+  "coreLoopDIY": "A local web app where you drop in files, ask questions, and get streamed answers grounded in those files with citations, plus a couple of tools the model can call.",
+  "diyTimeEstimate": "a weekend",
+  "requirements": [
+    "An LLM API key (OpenAI or Anthropic) and a small budget for tokens",
+    "Python 3.11+ and a machine you are willing to leave running",
+    "Willingness to tune chunking and retrieval when answers get vague"
+  ],
+  "whatYouLose": [
+    "Prebuilt connectors to Drive, Slack, email and whatever else the hosted version syncs from",
+    "A mobile-friendly, always-on surface you can hit from a phone without port forwarding",
+    "Someone else's retrieval and prompt tuning, which is most of the perceived quality",
+    "Team sharing, permissions and audit trails",
+    "Automatic upkeep as models, SDKs and pricing shift underneath you"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "integrations",
+    "proprietary-data"
+  ],
+  "moatNotes": "For assistant products the moat is rarely the model. It is the connectors and the thousand small retrieval decisions that make it stop hallucinating.",
+  "whyPeopleStillPay": "Because the last twenty percent is the whole product. A self-built assistant works beautifully on the five documents you tested it with and then starts confidently making things up on the fiftieth, at which point you are debugging chunk sizes on a Sunday instead of doing the work you built it for. Paying gets you connectors that already exist, a URL that works on your phone, and someone whose job is keeping the answers grounded when the underlying models change shape.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Chat-over-your-docs is the new to-do list app: everyone can build one, few keep using theirs.",
+  "prompt": "Build a local, single-user AI assistant I can run on my own machine. No accounts, no cloud services beyond the LLM API, no telemetry.\n\nStack, non-negotiable:\n- Python 3.11 with FastAPI, served by uvicorn\n- SQLite for all storage (chats, messages, documents, chunks, embeddings stored as blobs)\n- Server-rendered HTML with Jinja2 plus htmx for interactivity. No React, no build step.\n- OpenAI API for chat and embeddings, key read from .env via python-dotenv. Provide .env.example.\n\nFeatures in scope:\n1. Chat UI at /: message list, input box, streamed token-by-token responses via server-sent events.\n2. Multiple conversations in a left sidebar, renameable, deletable, persisted in SQLite.\n3. Document upload (pdf, txt, md, docx). Extract text, chunk to roughly 800 tokens with 100 token overlap, embed each chunk, store in SQLite.\n4. Retrieval: on each user message, embed the query, cosine-similarity search over chunks in Python (no vector DB), inject the top 6 chunks into the system prompt with source filenames, and render clickable citations under the answer.\n5. Two tools the model can call via function calling: fetch_url (download a page, strip HTML, return text) and now (current date and time).\n6. A /documents page listing uploaded files with chunk counts and a delete button.\n7. Token usage and rough cost per conversation, displayed in the sidebar.\n\nExplicitly out of scope: authentication, multi-user support, Docker, tests beyond a smoke test, streaming audio, image input, any third-party connectors.\n\nDeliverables: app.py, db.py, rag.py, tools.py, templates/, static/, requirements.txt, .env.example, and a README with exact run commands. Create the SQLite schema automatically on first run. Handle a missing API key with a clear error, not a stack trace.",
+  "promptCurated": false
+}
