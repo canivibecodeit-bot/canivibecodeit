@@ -1,8 +1,17 @@
+import { createHash } from 'node:crypto';
+import { captureServer } from '../../lib/analytics.js';
 import { addToWaitlist, rateLimit } from '../../lib/db.js';
 import { mirrorToResend } from '../../lib/mail.js';
 import { clientIp, json, readBody, validEmail } from '../../lib/request.js';
 
-const SOURCES = ['home', 'app', 'app_copy', 'category', 'moat', '404', 'bar', 'sponsor', 'account'];
+// Every placement that renders a signup form. A source missing here is
+// recorded as 'unknown' and its conversion becomes invisible — add the source
+// HERE in the same change that adds the form.
+const SOURCES = [
+  'home', 'app', 'app_copy', 'category', 'moat', '404', 'bar', 'sponsor', 'account',
+  'alternatives_hub', 'alternatives', 'alternative_product', 'bvct',
+  'newsletter', 'search_miss', 'post_vote', 'post_submit',
+];
 
 // RFC 2606 reserved names can never receive mail, and Resend refuses to send a
 // broadcast while any @example.com contact sits in the audience.
@@ -37,7 +46,15 @@ export async function POST({ request, clientAddress }) {
 
   // Only new rows are mirrored: re-posting an address must never resubscribe
   // someone who unsubscribed on Resend's side.
-  if (await addToWaitlist(email, source)) mirrorToResend(email);
+  if (await addToWaitlist(email, source)) {
+    mirrorToResend(email);
+    // Hashed address as distinct_id: stable dedupe key, no address in PostHog.
+    captureServer(
+      'waitlist_signup',
+      { placement: source, source },
+      createHash('sha256').update(email).digest('hex').slice(0, 32)
+    );
+  }
   // Dedupe silently — "you're on the list" either way, no email enumeration.
   return json({ ok: true });
 }

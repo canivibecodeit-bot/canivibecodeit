@@ -1089,8 +1089,9 @@
           btn.textContent = "you're in ✓";
           btn.disabled = true;
           form.querySelector('input[type=email]').disabled = true;
-          toast('in. verdicts arrive weekly.');
-          track('waitlist_signup', { placement: form.querySelector('[name=source]')?.value });
+          toast('in. see you thursday.');
+          // waitlist_signup is captured server-side in /api/waitlist — no
+          // client event, or blocked-analytics visitors vanish from the count.
           remember('digest_subscribed');
           if (reveal && !reveal.contains(form)) reveal.hidden = true;
           // A signup from the bar itself keeps its "you're in ✓" on screen.

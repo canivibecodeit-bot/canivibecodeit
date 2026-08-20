@@ -23,6 +23,35 @@ const QUERY = `
     AND timestamp > now() - INTERVAL 7 DAY
 `;
 
+/* Server-side event capture through the public ingest key. Fire-and-forget:
+   analytics may never fail a user-facing request. ~58% of this audience blocks
+   client analytics, so conversion events (signups) are counted here, where they
+   actually happen — the client-side capture for those events was removed, this
+   is the only writer. $process_person_profile:false keeps every event at the
+   anonymous billing rate (nothing may ever call identify — see quota notes). */
+const INGEST = process.env.POSTHOG_INGEST_HOST || 'https://eu.i.posthog.com';
+const PUBLIC_KEY = process.env.POSTHOG_KEY;
+
+export function captureServer(event, properties = {}, distinctId = 'server') {
+  if (!PUBLIC_KEY) return;
+  fetch(`${INGEST}/i/v0/e/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      api_key: PUBLIC_KEY,
+      event,
+      distinct_id: distinctId,
+      properties: {
+        ...properties,
+        $process_person_profile: false,
+        $host: 'canivibecodeit.com',
+        $lib: 'server',
+      },
+    }),
+    signal: AbortSignal.timeout(5000),
+  }).catch(() => {});
+}
+
 /* PostHog's query API allows 2400 requests/hour but only 3 concurrent queries
    per project; queued queries can be cancelled. Callers must keep any
    Promise.all at 3 queries or fewer. A 429 means the hourly quota is gone:
