@@ -84,11 +84,28 @@ const jsonld = [
       </div>
       <div class="search-results" id="search-results" role="listbox"></div>
     </div>
-    <p class="search-miss" id="no-results" role="status">
+    <div class="search-miss" id="no-results" role="status">
       <span class="badge kinda" style="font-size: 10px;">NOT LISTED YET</span>
       <a href="/submit">submit it → the bot drafts the verdict</a>
       <span class="miss-note">verdicts are added daily · thousands more on the way</span>
-    </p>
+      {/* 32% of searches end here — the honest ask is the cadence, never a
+          promise to email this specific verdict when it lands */}
+      <span class="miss-note miss-hook">five vibe-coding tips + new verdicts, every thursday:</span>
+      <form method="post" action="/api/waitlist" data-digest class="miss-form">
+        <label class="hp" aria-hidden="true">
+          Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
+        </label>
+        <input type="hidden" name="source" value="search_miss" />
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="you@wherever.com"
+          aria-label="Email address"
+        />
+        <button class="btn primary" type="submit">get thursday's</button>
+      </form>
+    </div>
     <nav class="chips" aria-label="Categories">
       {/* Plain navigation: each chip goes to its category page. In-place list
           filtering happens in the dropdown next to the list header instead —

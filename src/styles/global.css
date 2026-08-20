@@ -783,9 +783,47 @@ h3 {
 }
 
 .search-miss.show {
-  max-height: 60px;
+  /* room for the signup rows on any wrap; the transition still reads as one
+     slide because overflow stays hidden */
+  max-height: 220px;
   opacity: 1;
   transform: none;
+}
+
+.search-miss .miss-hook {
+  flex-basis: 100%;
+  text-align: center;
+  margin-top: 6px;
+}
+
+.search-miss .miss-form {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.search-miss .miss-form input[type='email'] {
+  width: min(260px, 60vw);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 13px;
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.search-miss .miss-form input[type='email']:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.search-miss .miss-form .btn.primary {
+  font-size: 13px;
+  padding: 9px 14px;
+  white-space: nowrap;
 }
 
 .search-miss a {
@@ -3297,7 +3335,8 @@ body[data-user] .digest-reveal .dr-oneclick {
   .search input,
   .digest-card input[type='email'],
   .digest-reveal input[type='email'],
-  .digest-bar input[type='email'] {
+  .digest-bar input[type='email'],
+  .search-miss .miss-form input[type='email'] {
     font-size: 16px;
   }
 
