@@ -169,6 +169,24 @@ function homeCard(mrr) {
   ]);
 }
 
+function newsletterCard() {
+  return page([
+    logoRow,
+    el('div', { display: 'flex', flexDirection: 'column', gap: 30, marginTop: 56 }, [
+      el('div', {
+        fontFamily: 'Space Grotesk', fontSize: 76, fontWeight: 700,
+        color: COLORS.fg, letterSpacing: '-0.02em', lineHeight: 1.1,
+      }, 'Five vibe-coding tips a week.'),
+      el('div', mono(30, COLORS.muted), 'With receipts. The prompts behind them, and which verdicts flipped.'),
+      el('div', { ...mono(26, COLORS.green, 700), letterSpacing: '0.08em', marginTop: 18 }, 'THURSDAYS · FREE'),
+    ]),
+    el('div', { display: 'flex', marginTop: 'auto', justifyContent: 'space-between' }, [
+      el('div', mono(22, COLORS.muted), 'canivibecodeit.com/newsletter'),
+      el('div', mono(22, COLORS.muted), 'unsubscribe in one click →'),
+    ]),
+  ]);
+}
+
 async function render(node, file) {
   const svg = await satori(node, { width: 1200, height: 630, fonts });
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -238,6 +256,7 @@ if (range) {
   const cache = loadCache();
   await renderCached(homeCard(mrr), 'home.png', `home:${mrr}`, cache);
   await renderCached(siteCard(), 'vibecode-this-site.png', 'site', cache);
+  await renderCached(newsletterCard(), 'newsletter.png', 'newsletter:1', cache);
   saveCache(cache);
   const { spawnSync } = await import('node:child_process');
   const self = new URL(import.meta.url).pathname;

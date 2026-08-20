@@ -15,6 +15,7 @@ export async function GET() {
     `${base}/moats`,
     `${base}/stats`,
     `${base}/submit`,
+    `${base}/newsletter`,
     `${base}/best-vibe-coding-tools`,
     `${base}/vibecode-this-site`,
   ];
