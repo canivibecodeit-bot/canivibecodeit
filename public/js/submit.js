@@ -29,6 +29,23 @@
     const resultLink = document.getElementById('submit-result-link');
     const resultApp = document.getElementById('submit-result-app');
 
+    /* The digest ask after a successful submission. app.js wires the card's
+       form, one-click and dismiss; this only decides whether the moment has
+       earned the ask (same keys app.js maintains — subscribed is permanent,
+       dismissal is one shared 90-day clock). */
+    const showDigestAsk = () => {
+      try {
+        if (localStorage.getItem('digest_subscribed')) return;
+        if (localStorage.getItem('digest_dismissed') || localStorage.getItem('digest_bar_dismissed')) return;
+        const at = Number(localStorage.getItem('digest_ask_dismissed'));
+        if (at && Date.now() - at < 90 * 24 * 60 * 60 * 1000) return;
+      } catch {}
+      const r = document.getElementById('digest-reveal');
+      if (!r || !r.hidden) return;
+      r.hidden = false;
+      requestAnimationFrame(() => r.classList.add('in'));
+    };
+
     const showStatus = (line) => {
       result.hidden = true;
       status.hidden = false;
@@ -73,6 +90,7 @@
         }
         if (s === 'done') {
           window.posthog?.capture('app_submitted');
+          showDigestAsk();
           return finish({
             line: 'done. the entry is up as a pull request, a human reviews it before it goes live.',
             prUrl: data.prUrl,

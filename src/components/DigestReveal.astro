@@ -1,11 +1,15 @@
 ---
-const { source } = Astro.props;
+const {
+  source,
+  head = 'prompt copied. verdicts flip when models improve.',
+  sub = 'five vibe-coding tips + the verdicts that changed. thursdays, free, one-click out.',
+} = Astro.props;
 ---
 
 <section class="digest-reveal" id="digest-reveal" hidden>
   <div class="dr-text">
-    <p class="dr-head">prompt copied. want to know what dies next week?</p>
-    <p class="dr-sub">new verdicts + top votes, weekly. free. one-click out.</p>
+    <p class="dr-head" data-dr-head>{head}</p>
+    <p class="dr-sub">{sub}</p>
   </div>
   <form method="post" action="/api/waitlist" data-digest>
     <label class="hp" aria-hidden="true">
@@ -19,7 +23,12 @@ const { source } = Astro.props;
       placeholder="you@wherever.com"
       aria-label="Email address"
     />
-    <button class="btn primary" type="submit">yes, weekly</button>
+    <button class="btn primary" type="submit">get thursday's</button>
     <button class="dr-close" type="button" data-digest-dismiss aria-label="dismiss">✕</button>
   </form>
+  {/* signed-in state (CSS-gated on body[data-user]): the email is on file */}
+  <div class="dr-oneclick">
+    <button class="btn primary" type="button" data-digest-oneclick>add it to my email</button>
+    <button class="dr-close" type="button" data-digest-dismiss aria-label="dismiss">✕</button>
+  </div>
 </section>

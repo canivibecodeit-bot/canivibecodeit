@@ -2351,6 +2351,29 @@ a.tile {
   white-space: nowrap;
 }
 
+/* signed-in: the account email is on file, so the ask is one click, no typing.
+   CSS-gated on body[data-user] rather than a server branch — the component
+   stays static and cacheable. */
+.digest-reveal .dr-oneclick {
+  display: none;
+  gap: 10px;
+  align-items: stretch;
+}
+
+body[data-user] .digest-reveal form[data-digest] {
+  display: none;
+}
+
+body[data-user] .digest-reveal .dr-oneclick {
+  display: flex;
+}
+
+.dr-oneclick .btn.primary {
+  font-size: 13px;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
 .dr-close {
   flex-shrink: 0;
   width: 34px;

@@ -4,6 +4,7 @@
 // bot's fork. GitHub stays the moderation layer; this page just removes the
 // git knowledge requirement.
 import Base from '../layouts/Base.astro';
+import DigestReveal from '../components/DigestReveal.astro';
 
 const user = Astro.locals.user ?? null;
 ---
@@ -70,6 +71,12 @@ const user = Astro.locals.user ?? null;
         <a class="btn ghost" id="submit-result-link" target="_blank" rel="noopener" hidden>view the pull request ↗</a>
         <a class="result-app" id="submit-result-app" hidden></a>
       </div>
+
+      <DigestReveal
+        source="post_submit"
+        head="submitted. a human reviews it next."
+        sub="five vibe-coding tips + the week's new verdicts. thursdays, free, one-click out."
+      />
 
       <noscript>
         <p class="submit-fine">the form needs JavaScript to talk to the drafting bot. without it, <a href="https://github.com/canivibecodeit/canivibecodeit/blob/main/CONTRIBUTING.md">the PR route</a> works fine.</p>

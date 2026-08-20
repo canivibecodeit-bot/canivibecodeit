@@ -585,9 +585,20 @@
         return false;
       }
     };
-    const showReveal = () => {
+    /* The same card serves several moments (post-copy, post-vote): the trigger
+       passes its own source + headline. First trigger wins — a visible card is
+       never re-labelled under the reader. */
+    const showReveal = (opts) => {
       if (!reveal || !reveal.hidden) return;
       if (asksDismissed() || remembered('digest_subscribed')) return;
+      if (opts?.source) {
+        const src = $('input[name=source]', reveal);
+        if (src) src.value = opts.source;
+      }
+      if (opts?.head) {
+        const head = $('[data-dr-head]', reveal);
+        if (head) head.textContent = opts.head;
+      }
       reveal.hidden = false;
       requestAnimationFrame(() => reveal.classList.add('in'));
       // One ask at a time: the reveal on screen sends the bar away.
@@ -664,6 +675,7 @@
             voteLabel(btn, true);
             toast('☠ counted. RIP that subscription.');
             track('vote', { app: slug });
+            showReveal({ source: 'post_vote', head: 'counted. verdicts flip when models improve.' });
           }
         } catch {
           toast('something broke · try again');
@@ -1130,6 +1142,27 @@
           toast(res?.status === 429 ? 'slow down a little' : 'that email looks off');
         }
       });
+    });
+
+    /* Signed-in one-click subscribe (the reveal's dr-oneclick state): the
+       account email is on file, /api/account/digest flips it on server-side. */
+    $('[data-digest-oneclick]')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const placement = reveal?.querySelector('input[name=source]')?.value || 'app_copy';
+      const res = await jsonPost('/api/account/digest', 'POST', { on: true, placement }).catch(() => null);
+      if (res?.ok) {
+        btn.textContent = "you're in ✓";
+        toast('digest on · see you thursday');
+        remember('digest_subscribed');
+        setTimeout(() => {
+          if (reveal) reveal.hidden = true;
+        }, 1500);
+        killBar();
+      } else {
+        btn.disabled = false;
+        toast('that did not stick · try again');
+      }
     });
 
     $$('[data-digest-dismiss]').forEach((el) =>
