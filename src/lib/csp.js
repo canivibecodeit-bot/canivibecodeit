@@ -11,17 +11,23 @@ import { createHash } from 'node:crypto';
 
 /* Theme before first paint: the one script that must stay inline (an
    external fetch would flash the wrong theme). ClientRouter swaps <html>
-   attributes on soft navigations, so the theme is re-applied on
-   astro:after-swap (fires before paint). */
+   attributes on soft navigations, so the incoming document gets the theme
+   stamped at astro:before-swap — BEFORE it enters the DOM. (after-swap ran a
+   frame too late: the attribute-less <html> painted with the default dark
+   tokens first, a black flicker on every light-mode navigation.)
+   theme-color values must match --bg in global.css for each theme; app.js's
+   toggle keeps the meta in step too. */
 export const THEME_SCRIPT = `(() => {
-  const apply = () => {
-    const stored = localStorage.getItem('theme');
+  const paint = (doc) => {
     const theme =
-      stored || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    document.documentElement.dataset.theme = theme;
+      localStorage.getItem('theme') ||
+      (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    doc.documentElement.dataset.theme = theme;
+    const meta = doc.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = theme === 'light' ? '#f2f3f5' : '#0b0d0b';
   };
-  apply();
-  document.addEventListener('astro:after-swap', apply);
+  paint(document);
+  document.addEventListener('astro:before-swap', (e) => paint(e.newDocument));
 })();`;
 
 const themeHash = createHash('sha256').update(THEME_SCRIPT, 'utf8').digest('base64');

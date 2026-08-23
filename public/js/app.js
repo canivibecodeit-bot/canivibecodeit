@@ -67,6 +67,9 @@
       const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
       document.documentElement.dataset.theme = next;
       localStorage.setItem('theme', next);
+      // keep browser chrome in step; values mirror --bg (and THEME_SCRIPT)
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = next === 'light' ? '#f2f3f5' : '#0b0d0b';
       track('theme_toggle', { theme: next });
     });
 

@@ -44,32 +44,33 @@
 }
 
 [data-theme='light'] {
-  /* light — paper terminal, inverted for contrast (Rob 2026-08-06): warm paper
-     GROUND, pure-white cards that pop off it, darker borders and secondary
-     text. The old all-white version read washed out. */
-  --bg: #f4f1e8;
+  /* light — cool grey GROUND, pure-white cards that pop off it (Rob
+     2026-08-23). Replaced the warm paper theme, which read beige and clashed
+     with the white section bands. Everything neutral is COOL grey; the only
+     warm notes left are the verdict amber and the catch label. */
+  --bg: #f2f3f5;
   --surface: #ffffff;
-  --surface-2: #ece8db;
-  --border: #c9c2ac;
-  --fg: #14170f;
-  --muted: #575d51;
+  --surface-2: #e9ebee;
+  --border: #d8dbe1;
+  --fg: #15181d;
+  --muted: #5b6370;
   --primary: #0b7c39;
   --on-primary: #ffffff;
-  --primary-dim: #9fdcb6;
+  --primary-dim: #a3d9b9;
   --kinda-bg: #f5b300;
   --kinda-fg: #241800;
   --no-bg: #e03131;
   --no-fg: #ffffff;
-  --catch: #8f6400;
+  --catch: #8a6200;
   --ticker: #0e9c47;
-  --ticker-dim: #628a70;
+  --ticker-dim: #64827a;
   --ticker-label: #2f8a52;
-  --ticker-bg: #e7f3ea;
-  --ticker-cell: #f4fbf6;
-  --ticker-cell-border: #bcdcc7;
-  --lose-bg: #fbe3e3;
-  --lose-border: #e5a5a5;
-  --shadow: 0 8px 32px rgba(40, 36, 24, 0.14);
+  --ticker-bg: #e8f3ec;
+  --ticker-cell: #f6fbf8;
+  --ticker-cell-border: #bfdccb;
+  --lose-bg: #fbe4e4;
+  --lose-border: #eab0b0;
+  --shadow: 0 8px 32px rgba(16, 20, 28, 0.1);
   --card: #ffffff;
 
   color-scheme: light;
@@ -85,6 +86,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* the canvas itself carries the theme ground: overscroll and mid-swap
+     frames paint --bg, never the browser default */
+  background: var(--bg);
 }
 
 body {
@@ -2452,7 +2456,7 @@ body[data-user] .digest-reveal .dr-oneclick {
 }
 
 [data-theme='light'] .digest-bar {
-  box-shadow: 0 -10px 30px rgba(40, 36, 24, 0.12);
+  box-shadow: 0 -10px 30px rgba(16, 20, 28, 0.12);
 }
 
 .digest-bar.show {
@@ -4265,12 +4269,7 @@ button.sp-banner {
   }
 }
 
-/* ---------- light mode: white canvas ---------- */
-
-/* With bg and surface both white, hovers need the well tone instead. */
-[data-theme='light'] a.row:hover {
-  background: var(--surface-2);
-}
+/* ---------- light mode: grey canvas, white cards ---------- */
 
 /* Controls get a solid white face and a hairline shadow so they read as
    raised buttons rather than outlines drawn on the page. */
