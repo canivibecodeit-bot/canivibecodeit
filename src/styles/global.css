@@ -4271,6 +4271,37 @@ button.sp-banner {
 
 /* ---------- light mode: grey canvas, white cards ---------- */
 
+/* Death-list rows are white strips on the grey ground (Rob 2026-08-23);
+   hover falls back to the well tone since white IS the resting state. */
+[data-theme='light'] .row {
+  background: var(--surface);
+}
+
+[data-theme='light'] a.row:hover {
+  background: var(--surface-2);
+}
+
+/* The stats + globe bands melt into the grey ground instead of reading as
+   white slabs; the globe keeps a white disc behind it, and the embedded
+   card variant (/stats, /sponsor) stays a white card like every other. */
+[data-theme='light'] .stats-strip,
+[data-theme='light'] .globe-strip {
+  background: var(--bg);
+}
+
+[data-theme='light'] .globe-strip.embedded {
+  background: var(--surface);
+}
+
+[data-theme='light'] #globe-canvas {
+  background: var(--surface);
+  border-radius: 50%;
+}
+
+[data-theme='light'] .g-chip {
+  background: var(--surface);
+}
+
 /* Controls get a solid white face and a hairline shadow so they read as
    raised buttons rather than outlines drawn on the page. */
 [data-theme='light'] .site-nav .gh,
