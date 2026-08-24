@@ -6,6 +6,20 @@ const HOST = process.env.POSTHOG_UI_HOST || 'https://eu.posthog.com';
 const PROJECT = process.env.POSTHOG_PROJECT_ID;
 const KEY = process.env.POSTHOG_PERSONAL_KEY;
 
+/* The scripted-browser pair filtered at the /ph proxy also left ~31k
+   historical events that can't be deleted (personless mode has no person
+   rows to delete through), so every read excludes them here. The coalesce
+   matters: NULL NOT IN (...) is NULL, which would silently drop
+   server-captured events that carry no user agent. */
+const BOT_UAS = [
+  'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
+  'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0',
+]
+  .map((ua) => `'${ua}'`)
+  .join(', ');
+const SITE = `properties.$host = 'canivibecodeit.com'
+  AND coalesce(properties.$raw_user_agent, '') NOT IN (${BOT_UAS})`;
+
 const QUERY = `
   SELECT
     countIf(event = '$pageview' AND timestamp >= toStartOfDay(now())) AS views_today,
@@ -15,11 +29,11 @@ const QUERY = `
     (SELECT max(pv) FROM (
       SELECT toDate(timestamp) AS d, countIf(event = '$pageview') AS pv
       FROM events
-      WHERE properties.$host = 'canivibecodeit.com'
+      WHERE ${SITE}
       GROUP BY d
     )) AS best_day
   FROM events
-  WHERE properties.$host = 'canivibecodeit.com'
+  WHERE ${SITE}
     AND timestamp > now() - INTERVAL 7 DAY
 `;
 
@@ -77,8 +91,6 @@ async function hogql(query, { fresh = false } = {}) {
   if (!res.ok) throw new Error(`posthog ${res.status}`);
   return (await res.json()).results;
 }
-
-const SITE = `properties.$host = 'canivibecodeit.com'`;
 
 // $pathname arrives from PostHog events, and anyone can POST a fake event with
 // the public ingest key, so it is attacker-controlled. A genuine path starts
