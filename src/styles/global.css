@@ -48,9 +48,9 @@
      2026-08-23). Replaced the warm paper theme, which read beige and clashed
      with the white section bands. Everything neutral is COOL grey; the only
      warm notes left are the verdict amber and the catch label. */
-  --bg: #f2f3f5;
+  --bg: #fdfdfd;
   --surface: #ffffff;
-  --surface-2: #e9ebee;
+  --surface-2: #eef0f2;
   --border: #d8dbe1;
   --fg: #15181d;
   --muted: #5b6370;
@@ -4303,14 +4303,25 @@ button.sp-banner {
 }
 
 /* Controls get a solid white face and a hairline shadow so they read as
-   raised buttons rather than outlines drawn on the page. */
+   raised buttons rather than outlines drawn on the page. The .site-nav
+   prefixes on the chips are for specificity: their base rules sit later in
+   the file. The radio's on-air green tint still wins (three classes). */
 [data-theme='light'] .site-nav .gh,
 [data-theme='light'] .theme-toggle,
+[data-theme='light'] .radio-btn,
+[data-theme='light'] .site-nav .signin-chip,
+[data-theme='light'] .site-nav .avatar-chip,
 [data-theme='light'] .chip:not(.active),
 [data-theme='light'] .vchip:not(.active),
 [data-theme='light'] .btn.ghost {
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(23, 26, 23, 0.06);
+}
+
+/* The brand mark's question-box is stroke-only; on the light ground it gets
+   a white fill so the logo matches the solid-faced controls beside it. */
+[data-theme='light'] .brand .mark rect[fill='none'] {
+  fill: #ffffff;
 }
 
 /* Elevated overlays sit on a white page — never darker than the canvas. */
