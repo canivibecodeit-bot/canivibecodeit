@@ -8,7 +8,8 @@ const PG_URL = process.env.DATABASE_URL;
 const SCHEMA_SQLITE = `
   CREATE TABLE IF NOT EXISTS votes (
     slug TEXT PRIMARY KEY,
-    count INTEGER NOT NULL DEFAULT 0
+    count INTEGER NOT NULL DEFAULT 0,
+    pinned INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS waitlist (
     email TEXT PRIMARY KEY,
@@ -201,7 +202,8 @@ const SCHEMA_SQLITE = `
 const SCHEMA_PG = `
   CREATE TABLE IF NOT EXISTS votes (
     slug TEXT PRIMARY KEY,
-    count INTEGER NOT NULL DEFAULT 0
+    count INTEGER NOT NULL DEFAULT 0,
+    pinned INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS waitlist (
     email TEXT PRIMARY KEY,
@@ -549,6 +551,9 @@ async function pgDriver() {
   );
   // Share card for an approved build, generated at approval and stored on R2.
   await pool.query('ALTER TABLE builds ADD COLUMN IF NOT EXISTS og_image TEXT');
+  // Moderation: a pinned row's count is frozen. Votes still get a normal 200
+  // so vote-stuffers see nothing, but nothing is written.
+  await pool.query('ALTER TABLE votes ADD COLUMN IF NOT EXISTS pinned INTEGER NOT NULL DEFAULT 0');
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -568,7 +573,8 @@ async function pgDriver() {
     async addVote(slug) {
       const r = await pool.query(
         `INSERT INTO votes (slug, count) VALUES ($1, 1)
-         ON CONFLICT (slug) DO UPDATE SET count = votes.count + 1
+         ON CONFLICT (slug) DO UPDATE
+           SET count = CASE WHEN votes.pinned = 1 THEN votes.count ELSE votes.count + 1 END
          RETURNING count`,
         [slug]
       );
@@ -576,7 +582,7 @@ async function pgDriver() {
     },
     async removeVote(slug) {
       const r = await pool.query(
-        `UPDATE votes SET count = GREATEST(count - 1, 0) WHERE slug = $1 RETURNING count`,
+        `UPDATE votes SET count = GREATEST(count - 1, 0) WHERE slug = $1 AND pinned = 0 RETURNING count`,
         [slug]
       );
       return r.rows[0]?.count ?? 0;
@@ -949,6 +955,13 @@ async function sqliteDriver() {
   } catch (err) {
     if (!/duplicate column/i.test(err.message)) throw err;
   }
+  // Moderation: a pinned row's count is frozen. Votes still get a normal 200
+  // so vote-stuffers see nothing, but nothing is written.
+  try {
+    db.exec('ALTER TABLE votes ADD COLUMN pinned INTEGER NOT NULL DEFAULT 0');
+  } catch (err) {
+    if (!/duplicate column/i.test(err.message)) throw err;
+  }
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);
@@ -957,7 +970,7 @@ async function sqliteDriver() {
     allVotes: db.prepare('SELECT slug, count FROM votes'),
     addVote: db.prepare(`
       INSERT INTO votes (slug, count) VALUES (?, 1)
-      ON CONFLICT(slug) DO UPDATE SET count = count + 1
+      ON CONFLICT(slug) DO UPDATE SET count = CASE WHEN pinned = 1 THEN count ELSE count + 1 END
     `),
     addEmail: db.prepare('INSERT OR IGNORE INTO waitlist (email, source) VALUES (?, ?)'),
     addSponsor: db.prepare('INSERT INTO sponsors (email, message) VALUES (?, ?)'),
@@ -980,7 +993,7 @@ async function sqliteDriver() {
       return stmts.getVote.get(slug).count;
     },
     async removeVote(slug) {
-      db.prepare('UPDATE votes SET count = max(count - 1, 0) WHERE slug = ?').run(slug);
+      db.prepare('UPDATE votes SET count = max(count - 1, 0) WHERE slug = ? AND pinned = 0').run(slug);
       return stmts.getVote.get(slug)?.count ?? 0;
     },
     // Atomically spend a live rate-limit key: true only for the one caller
