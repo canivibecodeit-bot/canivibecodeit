@@ -5,8 +5,33 @@
 const INGEST = 'https://eu.i.posthog.com';
 const ASSETS = 'https://eu-assets.i.posthog.com';
 
+/* Scripted-browser filter (first seen 2026-08-22): a GB machine running two
+   Firefox profiles in a loop against the homepage, also clicking every
+   sponsor slot. Its ingest gets swallowed here so analytics and the event
+   quota stay clean; the site itself still serves it. Scoped to country GB so
+   a real user elsewhere with the same user agent keeps analytics. */
+const DROP_UAS = new Set([
+  'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
+  'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:153.0) Gecko/20100101 Firefox/153.0',
+]);
+let dropCount = 0;
+
 async function proxy({ params, request, clientAddress }) {
   const path = params.path ? `/${params.path}` : '/';
+  if (
+    !path.startsWith('/static/') &&
+    DROP_UAS.has(request.headers.get('user-agent') || '') &&
+    (request.headers.get('cf-ipcountry') || '') === 'GB'
+  ) {
+    // Sampled log line so the source IP is on record without flooding.
+    if (dropCount++ % 200 === 0) {
+      console.warn(`ph-drop: ${request.headers.get('cf-connecting-ip') || '?'} (${dropCount} dropped since boot)`);
+    }
+    return new Response('{"status": 1}', {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   const search = new URL(request.url).search;
   const upstreamBase = path.startsWith('/static/') ? ASSETS : INGEST;
   const upstream = upstreamBase + path + search;
