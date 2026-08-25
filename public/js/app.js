@@ -69,7 +69,7 @@
       localStorage.setItem('theme', next);
       // keep browser chrome in step; values mirror --bg (and THEME_SCRIPT)
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.content = next === 'light' ? '#fdfdfd' : '#0b0d0b';
+      if (meta) meta.content = next === 'light' ? '#f7f8f9' : '#0b0d0b';
       track('theme_toggle', { theme: next });
     });
 

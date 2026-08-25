@@ -24,7 +24,7 @@ export const THEME_SCRIPT = `(() => {
       (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     doc.documentElement.dataset.theme = theme;
     const meta = doc.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'light' ? '#fdfdfd' : '#0b0d0b';
+    if (meta) meta.content = theme === 'light' ? '#f7f8f9' : '#0b0d0b';
   };
   paint(document);
   document.addEventListener('astro:before-swap', (e) => paint(e.newDocument));
