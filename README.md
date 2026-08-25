@@ -33,7 +33,7 @@ npm start          # node server on 127.0.0.1:8095
 ```
 
 No environment variables are required for local development. `.env.example` documents
-the optional ones (analytics key, data directory).
+the optional ones (analytics, sign-in, payments, email, media storage).
 
 ## Stack
 
