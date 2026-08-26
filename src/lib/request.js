@@ -1,16 +1,53 @@
-// Client IP: only Cloudflare can reach this box in production, so CF-Connecting-IP
-// is trustworthy there. The x-forwarded-for fallback is client-spoofable, so it
-// only applies while the origin lock is off (local dev / pre-rollout): with
-// ORIGIN_VERIFY_SECRET set, a request with no cf-connecting-ip reached the
-// origin directly and gets the shared 'unknown' rate-limit bucket instead of a
-// self-chosen fresh one.
+import { timingSafeEqual } from 'node:crypto';
+
+/* Cloudflare origin lock. A Transform Rule on the zone stamps a secret
+   x-origin-verify header onto every request CF forwards, so a request without
+   it reached the origin directly and its client-sent headers can't be
+   trusted. Three env-driven states (rollback is an env change, never a
+   deploy):
+   - ORIGIN_VERIFY_SECRET unset            → off (local dev / mirror)
+   - secret set, ORIGIN_VERIFY_ENFORCE!=1  → log-only: count the miss, serve
+   - secret set, ORIGIN_VERIFY_ENFORCE=1   → 403 the request
+   Lives here (a leaf util) so both middleware and clientIp share one answer. */
+export function originVerdict(request) {
+  const secret = process.env.ORIGIN_VERIFY_SECRET;
+  if (!secret) return 'ok';
+  const got = request.headers.get('x-origin-verify') ?? '';
+  // Node hands header values over as latin1; re-encoding them as UTF-8 would
+  // make any secret with a byte over 0x7F unmatchable and 403 the whole site.
+  const a = Buffer.from(got, 'latin1');
+  const b = Buffer.from(secret, 'utf8');
+  if (a.length === b.length && timingSafeEqual(a, b)) return 'ok';
+  return ['1', 'true'].includes(process.env.ORIGIN_VERIFY_ENFORCE) ? 'block' : 'log';
+}
+
+// True ONLY when the origin lock is active AND this request carried the valid
+// edge stamp — i.e. it genuinely came through Cloudflare. An unset secret
+// (mirror / local dev) is not edge-proof, so it is never "verified edge".
+function fromVerifiedEdge(request) {
+  return !!process.env.ORIGIN_VERIFY_SECRET && originVerdict(request) === 'ok';
+}
+
+/* Client IP for rate-limit bucketing. cf-connecting-ip is Cloudflare's stamp
+   and is only meaningful on a request that actually came through Cloudflare —
+   so we trust it ONLY when the origin lock proves that. A direct-to-origin
+   request (lock on but unstamped) gets the shared 'unknown' bucket rather
+   than a self-chosen one. With the lock off (mirror), nginx overwrites
+   x-forwarded-for with the real peer address, so the first hop is
+   trustworthy and cf-connecting-ip — which a client could forge — is ignored
+   entirely. This closes the CF-Connecting-IP spoof (audit H1). */
 export function clientIp(request, astroClientAddress) {
-  const cf = request.headers.get('cf-connecting-ip');
-  if (cf) return cf;
-  // The literal bucket, not astroClientAddress: Astro's clientAddress starts
-  // trusting x-forwarded-for if security.allowedDomains is ever configured,
-  // which would silently reopen the spoof this line exists to close.
-  if (process.env.ORIGIN_VERIFY_SECRET) return 'unknown';
+  if (process.env.ORIGIN_VERIFY_SECRET) {
+    if (fromVerifiedEdge(request)) {
+      const cf = request.headers.get('cf-connecting-ip');
+      if (cf) return cf;
+    }
+    // Locked but not edge-verified: trust no client-supplied IP header.
+    return 'unknown';
+  }
+  // The literal 'unknown' fallback, not astroClientAddress: Astro's
+  // clientAddress starts trusting x-forwarded-for if security.allowedDomains
+  // is ever set, which would silently reopen the spoof this closes.
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
     astroClientAddress ||

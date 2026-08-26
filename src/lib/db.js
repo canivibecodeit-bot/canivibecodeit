@@ -223,6 +223,24 @@ const SCHEMA_SQLITE = `
   CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
   CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
   CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
+
+  /* One row per (entry, reporter) so a single IP can't run the report count
+     up on its own — the auto-hold weighs DISTINCT reporters, not raw hits. */
+  CREATE TABLE IF NOT EXISTS challenge_reports (
+    entry_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (entry_id, reporter_hash)
+  );
+
+  /* Registrable hosts an admin has removed (or Safe Browsing flagged): a new
+     entry on the same host is rejected before it ever lists, so re-posting
+     the same site under a fresh query string can't dodge a moderation call. */
+  CREATE TABLE IF NOT EXISTS challenge_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at INTEGER NOT NULL
+  );
 `;
 
 const SCHEMA_PG = `
@@ -437,6 +455,18 @@ const SCHEMA_PG = `
   CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
   CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
   CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
+
+  CREATE TABLE IF NOT EXISTS challenge_reports (
+    entry_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at BIGINT NOT NULL,
+    PRIMARY KEY (entry_id, reporter_hash)
+  );
+  CREATE TABLE IF NOT EXISTS challenge_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at BIGINT NOT NULL
+  );
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -975,12 +1005,12 @@ async function pgDriver() {
       );
       return r.rows.map(chRow);
     },
-    async bumpEntryReport(id) {
+    async liveEntryCount(challengeId) {
       const r = await pool.query(
-        'UPDATE challenge_entries SET report_count = report_count + 1 WHERE id = $1 RETURNING report_count',
-        [id]
+        "SELECT COUNT(*) AS n FROM challenge_entries WHERE challenge_id = $1 AND status = 'live' AND kind != 'demo'",
+        [challengeId]
       );
-      return r.rows[0] ? Number(r.rows[0].report_count) : null;
+      return Number(r.rows[0].n);
     },
     async bumpEntryBadge(id) {
       const r = await pool.query(
@@ -988,6 +1018,33 @@ async function pgDriver() {
         [id]
       );
       return r.rowCount;
+    },
+    // Records the report if this reporter hasn't already flagged this entry;
+    // returns the resulting DISTINCT reporter count, or null if it was a
+    // duplicate (so a repeat report from one IP moves nothing).
+    async addEntryReport(entryId, reporterHash, ts) {
+      const ins = await pool.query(
+        'INSERT INTO challenge_reports (entry_id, reporter_hash, created_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        [entryId, reporterHash, ts]
+      );
+      if (ins.rowCount === 0) return null;
+      const c = await pool.query('SELECT COUNT(*) AS n FROM challenge_reports WHERE entry_id = $1', [entryId]);
+      const n = Number(c.rows[0].n);
+      await pool.query('UPDATE challenge_entries SET report_count = $2 WHERE id = $1', [entryId, n]);
+      return n;
+    },
+    async blockHost(host, reason, ts) {
+      await pool.query(
+        'INSERT INTO challenge_blocked_hosts (host, reason, created_at) VALUES ($1, $2, $3) ON CONFLICT (host) DO NOTHING',
+        [host, reason, ts]
+      );
+    },
+    async isHostBlocked(host) {
+      const r = await pool.query('SELECT 1 FROM challenge_blocked_hosts WHERE host = $1', [host]);
+      return r.rowCount > 0;
+    },
+    async unblockHost(host) {
+      await pool.query('DELETE FROM challenge_blocked_hosts WHERE host = $1', [host]);
     },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
@@ -1400,17 +1457,35 @@ async function sqliteDriver() {
         .all()
         .map(chRow);
     },
-    async bumpEntryReport(id) {
-      const changed = db
-        .prepare('UPDATE challenge_entries SET report_count = report_count + 1 WHERE id = ?')
-        .run(id).changes;
-      if (!changed) return null;
-      return db.prepare('SELECT report_count FROM challenge_entries WHERE id = ?').get(id).report_count;
+    async liveEntryCount(challengeId) {
+      return db
+        .prepare("SELECT COUNT(*) AS n FROM challenge_entries WHERE challenge_id = ? AND status = 'live' AND kind != 'demo'")
+        .get(challengeId).n;
     },
     async bumpEntryBadge(id) {
       return db
         .prepare("UPDATE challenge_entries SET badge_hits = badge_hits + 1 WHERE id = ? AND status = 'live'")
         .run(id).changes;
+    },
+    async addEntryReport(entryId, reporterHash, ts) {
+      const ins = db
+        .prepare('INSERT OR IGNORE INTO challenge_reports (entry_id, reporter_hash, created_at) VALUES (?, ?, ?)')
+        .run(entryId, reporterHash, ts);
+      if (ins.changes === 0) return null;
+      const n = db.prepare('SELECT COUNT(*) AS n FROM challenge_reports WHERE entry_id = ?').get(entryId).n;
+      db.prepare('UPDATE challenge_entries SET report_count = ? WHERE id = ?').run(n, entryId);
+      return n;
+    },
+    async blockHost(host, reason, ts) {
+      db.prepare(
+        'INSERT OR IGNORE INTO challenge_blocked_hosts (host, reason, created_at) VALUES (?, ?, ?)'
+      ).run(host, reason, ts);
+    },
+    async isHostBlocked(host) {
+      return !!db.prepare('SELECT 1 FROM challenge_blocked_hosts WHERE host = ?').get(host);
+    },
+    async unblockHost(host) {
+      db.prepare('DELETE FROM challenge_blocked_hosts WHERE host = ?').run(host);
     },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
@@ -1648,12 +1723,28 @@ export async function challengeEntriesForCheck() {
   return (await getDriver()).challengeEntriesForCheck();
 }
 
-export async function bumpEntryReport(id) {
-  return (await getDriver()).bumpEntryReport(id);
+export async function liveEntryCount(challengeId) {
+  return (await getDriver()).liveEntryCount(challengeId);
 }
 
 export async function bumpEntryBadge(id) {
   return (await getDriver()).bumpEntryBadge(id);
+}
+
+export async function addEntryReport(entryId, reporterHash, ts = Date.now()) {
+  return (await getDriver()).addEntryReport(entryId, reporterHash, ts);
+}
+
+export async function blockHost(host, reason, ts = Date.now()) {
+  return (await getDriver()).blockHost(host, reason, ts);
+}
+
+export async function isHostBlocked(host) {
+  return (await getDriver()).isHostBlocked(host);
+}
+
+export async function unblockHost(host) {
+  return (await getDriver()).unblockHost(host);
 }
 
 export async function updateBuild(id, fields) {

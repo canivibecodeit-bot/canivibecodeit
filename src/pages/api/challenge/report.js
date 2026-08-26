@@ -1,13 +1,19 @@
-// Report a challenge entry. Reports are a counter, not a takedown button:
-// crossing the threshold auto-holds the entry (out of the gallery, not
-// deleted) and pings Rob once. Rate-limited so one grudge can't be a brigade.
-import { bumpEntryReport, challengeEntryById, rateLimit, updateChallengeEntry } from '../../../lib/db.js';
+// Report a challenge entry. A report is a signal, not a takedown button: it
+// takes HOLD_AT DISTINCT reporters (deduped per IP+entry per day) to auto-hold
+// an entry, so one person with a script can't censor a rival — the audit's
+// report-bombing hole (H2). Crossing the threshold pings Rob once.
+import { createHash } from 'node:crypto';
+import { addEntryReport, challengeEntryById, rateLimit, updateChallengeEntry } from '../../../lib/db.js';
 import { challengeLive } from '../../../lib/flags.js';
 import { alertRob, esc } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
 import { ENTRY_ID_RE } from '../../../lib/challenge.js';
 
-const HOLD_AT = 5;
+const HOLD_AT = 5; // distinct reporters
+
+// Daily-rotating salt so reporter hashes can't be precomputed or correlated
+// across days, and the per-(entry,reporter) dedupe still holds within a day.
+const dailySalt = () => Math.floor(Date.now() / 86_400_000);
 
 export async function POST({ request, clientAddress }) {
   if (!challengeLive()) return new Response(null, { status: 404 });
@@ -28,19 +34,23 @@ export async function POST({ request, clientAddress }) {
   const id = String(body.id ?? '');
   if (!ENTRY_ID_RE.test(id)) return json({ error: 'bad id' }, 400);
 
-  const count = await bumpEntryReport(id);
-  if (count == null) return json({ error: 'unknown entry' }, 404);
+  const reporterHash = createHash('sha256').update(`${ip}:${id}:${dailySalt()}`).digest('hex').slice(0, 32);
+  const distinct = await addEntryReport(id, reporterHash);
 
-  // Threshold crossing exactly once: the == keeps repeat reports from
+  // Duplicate report from this reporter, or unknown entry: nothing moves, but
+  // the response is identical so a reporter can't probe entry existence.
+  if (distinct == null) return json({ ok: true });
+
+  // Threshold crossing exactly once: '===' keeps later distinct reports from
   // re-holding an entry an admin already looked at and relisted.
-  if (count === HOLD_AT) {
+  if (distinct === HOLD_AT) {
     const entry = await challengeEntryById(id);
     if (entry && entry.status === 'live') {
-      await updateChallengeEntry(id, { status: 'held', held_reason: `reports: ${count}` });
+      await updateChallengeEntry(id, { status: 'held', held_reason: `reports: ${distinct} distinct` });
       alertRob(
         '[cvci] challenge entry auto-held on reports',
-        `<p><b>${esc(entry.page_title ?? entry.url)}</b> by @${esc(entry.x_handle)} hit ${count} reports and is out of the gallery pending a look.</p>
-         <p><a href="https://canivibecodeit.com/admin/challenge?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
+        `<p><b>${esc(entry.page_title ?? entry.url)}</b> by @${esc(entry.x_handle)} hit ${distinct} distinct reports and is out of the gallery pending a look.</p>
+         <p><a href="https://canivibecodeit.com/admin/challenge">open the queue and paste your token</a></p>`
       ).catch((err) => console.error(`challenge report alert failed: ${err.message}`));
     }
   }

@@ -3,10 +3,10 @@
 // kind switches for seed/demo labeling. Token-gated like the other admin
 // endpoints; form posts bounce back to /admin/challenge, JSON callers get
 // JSON. Works with the flag off — the queue must stay reachable.
-import { challengeEntryById, updateChallengeEntry } from '../../../lib/db.js';
+import { blockHost, challengeEntryById, unblockHost, updateChallengeEntry } from '../../../lib/db.js';
 import { json, readBody } from '../../../lib/request.js';
 import { isAdmin } from '../../../lib/sponsors.js';
-import { ENTRY_ID_RE } from '../../../lib/challenge.js';
+import { blockableHost, ENTRY_ID_RE } from '../../../lib/challenge.js';
 
 const ACTIONS = {
   release: { status: 'live', held_reason: null },
@@ -52,5 +52,19 @@ export async function POST({ request }) {
   if (!entry) return fail('unknown entry', 404);
 
   await updateChallengeEntry(id, ACTIONS[action]);
+
+  // Unlisting blocks the entry's host so it can't be re-submitted under a
+  // fresh query string (H4); relisting is the admin's explicit re-approval,
+  // so it lifts the block. Host derived from the stored URL.
+  if (action === 'unlist' || action === 'relist') {
+    try {
+      const host = blockableHost(new URL(entry.url).hostname);
+      if (action === 'unlist') await blockHost(host, 'admin unlist', Date.now());
+      else await unblockHost(host);
+    } catch {
+      /* a stored URL that won't parse just skips the host rule */
+    }
+  }
+
   return doneWith(`${action} · done`);
 }

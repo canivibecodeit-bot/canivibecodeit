@@ -9,6 +9,7 @@ import {
   addToWaitlist,
   challengeEntryByUrl,
   insertChallengeEntry,
+  isHostBlocked,
   rateLimit,
 } from '../../../lib/db.js';
 import { challengeLive } from '../../../lib/flags.js';
@@ -16,16 +17,22 @@ import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
 import { parsePublicUrl } from '../../../lib/builds.js';
 import {
+  blockableHost,
+  canonicalUrl,
   challengeState,
   currentChallenge,
   fetchPageMeta,
   newEntryId,
   normalizeHandle,
 } from '../../../lib/challenge.js';
-import { checkUrl, safeBrowsingOn } from '../../../lib/safe-browsing.js';
+import { assertSafeBrowsingReady, checkUrl, safeBrowsingOn } from '../../../lib/safe-browsing.js';
+import { selfHostOgImage } from '../../../lib/challenge-image.js';
 
 export async function POST({ request, clientAddress }) {
   if (!challengeLive()) return new Response(null, { status: 404 });
+  // The gate must be armed whenever the vertical is live: refuse to accept
+  // entries we can't screen rather than list them unchecked.
+  assertSafeBrowsingReady();
   if (crossOrigin(request)) return json({ error: 'bad origin' }, 403);
 
   const challenge = currentChallenge();
@@ -72,11 +79,24 @@ export async function POST({ request, clientAddress }) {
   const handle = normalizeHandle(body.x_handle);
   if (!handle) return json({ error: 'an X handle: 1-15 letters, numbers, underscores' }, 400);
 
-  // Same URL twice = the same entry, silently. Public content, nothing to
-  // enumerate; re-posting your own entry just hands the permalink back.
-  const dupe = await challengeEntryByUrl(challenge.id, url.href);
+  // Host blocklist first: a site an admin unlisted (or Safe Browsing flagged)
+  // can't come back under a fresh query string. Neutral message — don't
+  // confirm to the attacker that their host is specifically blocked.
+  if (await isHostBlocked(blockableHost(url.hostname))) {
+    return json({ error: "that site can't be entered" }, 403);
+  }
+
+  // Dedupe on the CANONICAL url (lowercased host, no fragment, sorted query),
+  // so evil.com/?2 and evil.com/#x collapse into the stored row instead of
+  // minting infinite distinct entries. Only a LIVE dupe hands back its
+  // permalink; held/unlisted matches return neutrally (no moderation oracle).
+  const canonical = canonicalUrl(url);
+  const dupe = await challengeEntryByUrl(challenge.id, canonical);
   if (dupe) {
-    return json({ ok: true, id: dupe.id, url: `/challenge/e/${dupe.id}`, existing: true }, 200);
+    if (dupe.status === 'live') {
+      return json({ ok: true, id: dupe.id, url: `/challenge/e/${dupe.id}`, existing: true }, 200);
+    }
+    return json({ ok: true, existing: true, message: 'that entry is already in' }, 200);
   }
 
   // Optional opt-in: results + next challenge, via the one digest list.
@@ -89,29 +109,47 @@ export async function POST({ request, clientAddress }) {
     emailOpted = 1;
   }
 
-  // Derived, never typed: page title + the page's own og:image.
+  // Derive title + og:image from the page. fetchPageMeta walks redirects
+  // through the SSRF-safe fetcher and reports the URL it actually LANDED on —
+  // that final URL is what the gate screens and what we store.
   const meta = await fetchPageMeta(url);
+  const finalUrl = parsePublicUrl(meta.finalUrl) ?? url;
 
-  // Safe Browsing gate: a match holds, an API error does not (fail open,
-  // the daily recheck re-covers). Key unset = check off (mirror).
+  // Re-check the blocklist against the final host too: a clean host that
+  // redirects to a blocked one doesn't get a free pass.
+  if (finalUrl.href !== url.href && (await isHostBlocked(blockableHost(finalUrl.hostname)))) {
+    return json({ error: "that site can't be entered" }, 403);
+  }
+
+  // Safe Browsing on the FINAL url: a match holds, and — unlike before — an
+  // API error/timeout ('unknown') ALSO holds, for human review, rather than
+  // listing live. On the mirror (unchecked explicitly allowed, no key) the
+  // gate is skipped and entries list; production always has the key.
   let status = 'live';
   let heldReason = null;
   if (safeBrowsingOn()) {
-    const threats = await checkUrl(url.href);
-    if (threats) {
+    const verdict = await checkUrl(finalUrl.href);
+    if (verdict === 'unknown') {
       status = 'held';
-      heldReason = `safe-browsing: ${threats.join(', ')}`;
+      heldReason = 'safe-browsing: check unavailable, pending review';
+    } else if (verdict) {
+      status = 'held';
+      heldReason = `safe-browsing: ${verdict.join(', ')}`;
     }
   }
 
+  // Self-host the og:image so it can't be swapped after approval. Mirror has
+  // R2 off, so this is null there and the fallback tile shows.
   const id = newEntryId();
+  const ogImage = meta.ogImage && status === 'live' ? await selfHostOgImage(meta.ogImage, id) : null;
+
   await insertChallengeEntry({
     id,
     challenge_id: challenge.id,
     x_handle: handle,
-    url: url.href,
+    url: canonical,
     page_title: meta.title,
-    og_image: meta.ogImage,
+    og_image: ogImage,
     email_opted: emailOpted,
     kind: 'entry',
     status,
@@ -123,10 +161,10 @@ export async function POST({ request, clientAddress }) {
   if (status === 'held') {
     alertRob(
       '[cvci] challenge entry held',
-      `<p>Safe Browsing flagged a challenge entry:</p>
+      `<p>A challenge entry needs review:</p>
        <p><b>${esc(meta.title)}</b> by @${esc(handle)}</p>
        <p>${esc(heldReason)}</p>
-       <p><a href="https://canivibecodeit.com/admin/challenge?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
+       <p><a href="https://canivibecodeit.com/admin/challenge">open the queue and paste your token</a></p>`
     ).catch((err) => console.error(`challenge held alert failed: ${err.message}`));
   }
 

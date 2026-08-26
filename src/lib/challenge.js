@@ -9,9 +9,8 @@
    a copy PR shortly before opening; it renders only once the clock passes
    twistRevealAt, so merging early leaks nothing. */
 import { randomBytes } from 'node:crypto';
-import { lookup } from 'node:dns/promises';
-import { isIP } from 'node:net';
 import { parsePublicUrl } from './builds.js';
+import { safeFetch } from './safe-fetch.js';
 
 /* ---------- the challenges (append-only; last = current) ---------- */
 
@@ -116,129 +115,96 @@ export function normalizeHandle(raw) {
   return XHANDLE_RE.test(h) ? h : null;
 }
 
+/* Canonical form for dedupe: lowercase host, no fragment, sorted query, no
+   trailing "?" — so evil.com/?2, evil.com/#x and evil.com// collapse into one
+   row instead of minting infinite distinct entries (audit H4). */
+export function canonicalUrl(u) {
+  const c = new URL(u.href);
+  c.hash = '';
+  c.hostname = c.hostname.toLowerCase();
+  c.pathname = c.pathname.replace(/\/+/g, '/').replace(/\/+$/, '') || '/';
+  // Keep only value-bearing params, sorted — so cosmetic junk (?2, ?, ?x=)
+  // collapses onto the base URL while real params (?id=5) still distinguish.
+  const params = [...c.searchParams.entries()]
+    .filter(([, v]) => v !== '')
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  c.search = params.length ? '?' + params.map(([k, v]) => `${k}=${v}`).join('&') : '';
+  return c.href;
+}
+
+/* The registrable host we block on. Not a full public-suffix parse (that
+   needs a list we don't ship); the last two labels catch the common case and
+   a moderator can always block a longer host explicitly. */
+export function blockableHost(hostname) {
+  return hostname.toLowerCase().replace(/^www\./, '');
+}
+
 /* ---------- page metadata fetch (title + the page's own og:image) ----------
    The 60-second form asks for a URL and nothing else; title and image are
-   derived. This is a server-side fetch of an ATTACKER-CHOSEN URL, so it is
-   the vertical's sharpest edge and every hop is treated as hostile:
-   - parsePublicUrl already refused IP literals, credentials, non-https and
-     internal-looking names — but that is string-level only, so
-   - every hostname is DNS-resolved first and rejected if ANY address is
-     loopback, private, link-local, CGNAT, metadata (169.254.x), or v6
-     equivalents — a public name pointing at 127.0.0.1 gets nowhere;
-   - redirects are followed MANUALLY (max 3), each hop re-parsed against the
-     same public-https bar and re-resolved — a friendly page that 302s to
-     169.254.169.254 dies at the hop, not after;
-   - the read is capped at 256KB of DECODED bytes (the reader sees
-     post-decompression output, so a gzip bomb stops at the cap too);
-   - 8s overall budget, silent failure — a page that won't say its title
-     becomes its hostname, never an error the entrant sees. */
+   derived. This fetches an ATTACKER-CHOSEN URL server-side, so it runs
+   entirely through safe-fetch.js: connection pinned to a vetted public
+   address (no DNS-rebind window), redirects walked by hand with every hop
+   re-screened by parsePublicUrl, 256KB decoded-byte cap, 8s budget. The URL
+   we actually LANDED on comes back too, so the Safe Browsing gate and the
+   stored record describe the real destination, not the first hop. */
 
 const META_BYTES = 262144; // 256KB is plenty to find <head> content
 const META_TIMEOUT = 8000;
 const MAX_HOPS = 3;
 
-// Address ranges a server-side fetch must never reach. v4 checked directly
-// and again when mapped inside v6 (::ffff:a.b.c.d).
-function privateV4(ip) {
-  const o = ip.split('.').map(Number);
-  return (
-    o[0] === 0 || o[0] === 10 || o[0] === 127 ||
-    (o[0] === 100 && o[1] >= 64 && o[1] <= 127) || // CGNAT
-    (o[0] === 169 && o[1] === 254) ||              // link-local + cloud metadata
-    (o[0] === 172 && o[1] >= 16 && o[1] <= 31) ||
-    (o[0] === 192 && o[1] === 168) ||
-    o[0] >= 224                                    // multicast + reserved
-  );
-}
+// The entry URL's own policy, reused for every redirect hop.
+const screenHop = (raw) => parsePublicUrl(raw, { maxLen: 500 });
 
-function privateAddress(ip) {
-  if (isIP(ip) === 4) return privateV4(ip);
-  const v6 = ip.toLowerCase();
-  const mapped = v6.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return privateV4(mapped[1]);
-  return (
-    v6 === '::' || v6 === '::1' ||
-    v6.startsWith('fc') || v6.startsWith('fd') || // ULA
-    v6.startsWith('fe8') || v6.startsWith('fe9') ||
-    v6.startsWith('fea') || v6.startsWith('feb')  // link-local
-  );
-}
+/* Strip characters that let a scraped title lie about itself: HTML markup
+   chars (defence in depth for any future unescaped sink — we do NOT decode
+   entities back into live markup), bidi overrides and zero-width glyphs that
+   visually reorder or hide text. */
+const UNSAFE_GLYPHS = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g;
 
-// True only when the hostname resolves and EVERY address is public.
-async function resolvesPublic(hostname) {
-  try {
-    const addrs = await lookup(hostname, { all: true, verbatim: true });
-    return addrs.length > 0 && addrs.every((a) => !privateAddress(a.address));
-  } catch {
-    return false; // unresolvable = nothing to fetch anyway
-  }
+export function sanitizeTitle(raw) {
+  return raw
+    .replace(/[<>]/g, '')
+    .replace(UNSAFE_GLYPHS, '') // zero-width, bidi overrides/isolates, BOM
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
 }
 
 export async function fetchPageMeta(url) {
-  const meta = { title: url.hostname, ogImage: null };
-  try {
-    // Walk redirects by hand: every hop must clear the public-https bar AND
-    // resolve to public addresses before it is fetched.
-    let current = url;
-    let res = null;
-    const deadline = AbortSignal.timeout(META_TIMEOUT);
-    for (let hop = 0; hop <= MAX_HOPS; hop += 1) {
-      if (!(await resolvesPublic(current.hostname))) return meta;
-      res = await fetch(current.href, {
-        redirect: 'manual',
-        signal: deadline,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; canivibecodeit-challenge; +https://canivibecodeit.com/challenge)',
-          Accept: 'text/html',
-        },
-      });
-      if (res.status < 300 || res.status >= 400) break;
-      const location = res.headers.get('location');
-      res.body?.cancel().catch(() => {});
-      if (!location || hop === MAX_HOPS) return meta;
-      const next = parsePublicUrl(new URL(location, current.href).href, { maxLen: 500 });
-      if (!next) return meta;
-      current = next;
-      res = null;
-    }
-    if (!res || !res.ok || !(res.headers.get('content-type') || '').includes('html')) return meta;
-    url = current; // og:image resolves against the page we actually read
+  // finalUrl defaults to the submitted URL so a failed fetch still gives the
+  // gate a concrete address to screen.
+  const meta = { title: url.hostname, ogImage: null, finalUrl: url.href };
+  const res = await safeFetch(url, {
+    screen: screenHop,
+    maxBytes: META_BYTES,
+    timeoutMs: META_TIMEOUT,
+    maxHops: MAX_HOPS,
+    headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'text/html' },
+  });
+  if (!res || !res.body || !res.contentType.includes('html')) return meta;
+  meta.finalUrl = res.finalUrl.href;
 
-    const reader = res.body.getReader();
-    const chunks = [];
-    let size = 0;
-    while (size < META_BYTES) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      size += value.length;
-    }
-    reader.cancel().catch(() => {});
-    const html = Buffer.concat(chunks).toString('utf8');
+  const html = res.body.toString('utf8');
 
-    const title = html.match(/<title[^>]*>([^<]{1,300})/i)?.[1];
-    if (title) {
-      const clean = title
-        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-        .replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 120);
-      if (clean) meta.title = clean;
-    }
+  const rawTitle = html.match(/<title[^>]*>([^<]{1,300})/i)?.[1];
+  if (rawTitle) {
+    const clean = sanitizeTitle(rawTitle);
+    if (clean) meta.title = clean;
+  }
 
-    // property= or name=, either attribute order, single or double quotes.
-    const og =
-      html.match(/<meta[^>]+(?:property|name)\s*=\s*["']og:image["'][^>]+content\s*=\s*["']([^"']{1,500})["']/i)?.[1] ??
-      html.match(/<meta[^>]+content\s*=\s*["']([^"']{1,500})["'][^>]+(?:property|name)\s*=\s*["']og:image["']/i)?.[1];
-    if (og) {
-      // Relative og:image URLs resolve against the page; whatever comes out
-      // must clear the same public-https bar as the entry URL itself.
-      const resolved = parsePublicUrl(new URL(og, url.href).href, { maxLen: 500 });
+  // property= or name=, either attribute order, single or double quotes.
+  const og =
+    html.match(/<meta[^>]+(?:property|name)\s*=\s*["']og:image["'][^>]+content\s*=\s*["']([^"']{1,500})["']/i)?.[1] ??
+    html.match(/<meta[^>]+content\s*=\s*["']([^"']{1,500})["'][^>]+(?:property|name)\s*=\s*["']og:image["']/i)?.[1];
+  if (og) {
+    // og:image resolves against the page we actually landed on, and must
+    // clear the same public-https bar as the entry URL.
+    try {
+      const resolved = parsePublicUrl(new URL(og, res.finalUrl.href).href, { maxLen: 500 });
       if (resolved) meta.ogImage = resolved.href;
+    } catch {
+      /* malformed og:image URL — just skip it */
     }
-  } catch {
-    /* a slow or broken page is not the entrant's problem */
   }
   return meta;
 }

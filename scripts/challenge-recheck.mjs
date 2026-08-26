@@ -61,12 +61,17 @@ if (entries.length === 0) {
 
 console.log(`challenge-recheck: ${entries.length} entries (${DRY ? 'DRY RUN' : 'live'})`);
 
-// One batched lookup (the API takes 500 per request; a challenge gallery
-// bigger than that gets chunked).
+// One batched lookup (the API takes 500 per request; a bigger gallery gets
+// chunked). If ANY chunk comes back not-ok (API error/timeout), this run is
+// inconclusive — it only ever TIGHTENS (holds fresh matches) and never
+// stamps 'clean', so an outage can't launder a payload to clean the way the
+// old fail-open recheck could (audit H3).
 const urls = entries.map((e) => e.url);
 const matches = new Map();
+let apiHealthy = true;
 for (let i = 0; i < urls.length; i += 500) {
-  const chunk = await checkUrls(urls.slice(i, i + 500));
+  const { ok, matches: chunk } = await checkUrls(urls.slice(i, i + 500));
+  if (!ok) { apiHealthy = false; continue; }
   for (const [u, threats] of chunk) matches.set(u, threats);
 }
 
@@ -75,25 +80,29 @@ const newlyHeld = [];
 
 for (const e of entries) {
   const threats = matches.get(e.url) ?? null;
-  const result = threats ? `match: ${threats.join(', ')}` : 'clean';
 
   if (threats && e.status === 'live') {
     newlyHeld.push({ entry: e, threats });
-    console.log(`  HOLD  ${e.id} @${e.x_handle} ${e.url} → ${result}`);
+    console.log(`  HOLD  ${e.id} @${e.x_handle} ${e.url} → match: ${threats.join(', ')}`);
     if (!DRY) {
       await updateChallengeEntry(e.id, {
         status: 'held',
         held_reason: `safe-browsing (recheck): ${threats.join(', ')}`,
         last_checked_at: now,
-        check_result: result,
+        check_result: `match: ${threats.join(', ')}`,
       });
     }
-  } else {
-    if (threats) console.log(`  still-held ${e.id} → ${result}`);
-    if (!DRY) {
-      await updateChallengeEntry(e.id, { last_checked_at: now, check_result: result });
-    }
+  } else if (threats) {
+    console.log(`  still-held ${e.id} → match: ${threats.join(', ')}`);
+    if (!DRY) await updateChallengeEntry(e.id, { last_checked_at: now, check_result: `match: ${threats.join(', ')}` });
+  } else if (apiHealthy && !DRY) {
+    // Only stamp 'clean' when the API actually answered for this batch.
+    await updateChallengeEntry(e.id, { last_checked_at: now, check_result: 'clean' });
   }
+}
+
+if (!apiHealthy) {
+  console.log('challenge-recheck: WARNING — Safe Browsing API was unhealthy this run; clean stamps skipped, only matches held.');
 }
 
 if (newlyHeld.length > 0 && !DRY) {
@@ -103,7 +112,7 @@ if (newlyHeld.length > 0 && !DRY) {
   await alertRob(
     `[cvci] challenge recheck held ${newlyHeld.length} ${newlyHeld.length === 1 ? 'entry' : 'entries'}`,
     `<p>The daily Safe Browsing recheck pulled these out of the gallery:</p><ul>${rows}</ul>
-     <p><a href="https://canivibecodeit.com/admin/challenge?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
+     <p><a href="https://canivibecodeit.com/admin/challenge">open the queue and paste your token</a></p>`
   ).catch((err) => console.error(`recheck alert failed: ${err.message}`));
 }
 
