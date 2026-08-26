@@ -9,6 +9,8 @@
    a copy PR shortly before opening; it renders only once the clock passes
    twistRevealAt, so merging early leaks nothing. */
 import { randomBytes } from 'node:crypto';
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 import { parsePublicUrl } from './builds.js';
 
 /* ---------- the challenges (append-only; last = current) ---------- */
@@ -116,26 +118,91 @@ export function normalizeHandle(raw) {
 
 /* ---------- page metadata fetch (title + the page's own og:image) ----------
    The 60-second form asks for a URL and nothing else; title and image are
-   derived. parsePublicUrl upstream already refused IP literals, .local,
-   .internal, credentials and non-https, so this fetch only ever aims at
-   public https hostnames. Capped read, hard timeout, silent failure — a page
-   that won't say its title becomes its hostname. */
+   derived. This is a server-side fetch of an ATTACKER-CHOSEN URL, so it is
+   the vertical's sharpest edge and every hop is treated as hostile:
+   - parsePublicUrl already refused IP literals, credentials, non-https and
+     internal-looking names — but that is string-level only, so
+   - every hostname is DNS-resolved first and rejected if ANY address is
+     loopback, private, link-local, CGNAT, metadata (169.254.x), or v6
+     equivalents — a public name pointing at 127.0.0.1 gets nowhere;
+   - redirects are followed MANUALLY (max 3), each hop re-parsed against the
+     same public-https bar and re-resolved — a friendly page that 302s to
+     169.254.169.254 dies at the hop, not after;
+   - the read is capped at 256KB of DECODED bytes (the reader sees
+     post-decompression output, so a gzip bomb stops at the cap too);
+   - 8s overall budget, silent failure — a page that won't say its title
+     becomes its hostname, never an error the entrant sees. */
 
 const META_BYTES = 262144; // 256KB is plenty to find <head> content
 const META_TIMEOUT = 8000;
+const MAX_HOPS = 3;
+
+// Address ranges a server-side fetch must never reach. v4 checked directly
+// and again when mapped inside v6 (::ffff:a.b.c.d).
+function privateV4(ip) {
+  const o = ip.split('.').map(Number);
+  return (
+    o[0] === 0 || o[0] === 10 || o[0] === 127 ||
+    (o[0] === 100 && o[1] >= 64 && o[1] <= 127) || // CGNAT
+    (o[0] === 169 && o[1] === 254) ||              // link-local + cloud metadata
+    (o[0] === 172 && o[1] >= 16 && o[1] <= 31) ||
+    (o[0] === 192 && o[1] === 168) ||
+    o[0] >= 224                                    // multicast + reserved
+  );
+}
+
+function privateAddress(ip) {
+  if (isIP(ip) === 4) return privateV4(ip);
+  const v6 = ip.toLowerCase();
+  const mapped = v6.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return privateV4(mapped[1]);
+  return (
+    v6 === '::' || v6 === '::1' ||
+    v6.startsWith('fc') || v6.startsWith('fd') || // ULA
+    v6.startsWith('fe8') || v6.startsWith('fe9') ||
+    v6.startsWith('fea') || v6.startsWith('feb')  // link-local
+  );
+}
+
+// True only when the hostname resolves and EVERY address is public.
+async function resolvesPublic(hostname) {
+  try {
+    const addrs = await lookup(hostname, { all: true, verbatim: true });
+    return addrs.length > 0 && addrs.every((a) => !privateAddress(a.address));
+  } catch {
+    return false; // unresolvable = nothing to fetch anyway
+  }
+}
 
 export async function fetchPageMeta(url) {
   const meta = { title: url.hostname, ogImage: null };
   try {
-    const res = await fetch(url.href, {
-      redirect: 'follow',
-      signal: AbortSignal.timeout(META_TIMEOUT),
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; canivibecodeit-challenge; +https://canivibecodeit.com/challenge)',
-        Accept: 'text/html',
-      },
-    });
-    if (!res.ok || !(res.headers.get('content-type') || '').includes('html')) return meta;
+    // Walk redirects by hand: every hop must clear the public-https bar AND
+    // resolve to public addresses before it is fetched.
+    let current = url;
+    let res = null;
+    const deadline = AbortSignal.timeout(META_TIMEOUT);
+    for (let hop = 0; hop <= MAX_HOPS; hop += 1) {
+      if (!(await resolvesPublic(current.hostname))) return meta;
+      res = await fetch(current.href, {
+        redirect: 'manual',
+        signal: deadline,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; canivibecodeit-challenge; +https://canivibecodeit.com/challenge)',
+          Accept: 'text/html',
+        },
+      });
+      if (res.status < 300 || res.status >= 400) break;
+      const location = res.headers.get('location');
+      res.body?.cancel().catch(() => {});
+      if (!location || hop === MAX_HOPS) return meta;
+      const next = parsePublicUrl(new URL(location, current.href).href, { maxLen: 500 });
+      if (!next) return meta;
+      current = next;
+      res = null;
+    }
+    if (!res || !res.ok || !(res.headers.get('content-type') || '').includes('html')) return meta;
+    url = current; // og:image resolves against the page we actually read
 
     const reader = res.body.getReader();
     const chunks = [];
