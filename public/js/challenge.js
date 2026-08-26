@@ -24,6 +24,16 @@
   };
 
   const init = () => {
+    /* ---------- badge-click landing: bring the highlighted card into view ---------- */
+    const hotId = new URLSearchParams(location.search).get('e');
+    if (hotId && /^ce_[a-z2-9]{10}$/.test(hotId)) {
+      const card = document.getElementById(hotId);
+      if (card && !card.dataset.chScrolled) {
+        card.dataset.chScrolled = '1';
+        card.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }
+    }
+
     /* ---------- countdown ---------- */
     const cd = claim($('[data-countdown]'));
     if (cd && cd.dataset.state !== 'closed') {
@@ -130,7 +140,9 @@
             return;
           }
           toast(out.existing ? 'already in · here it is' : 'you are in.');
-          location.href = out.url || '/challenge';
+          // Let the toast land before the permalink takes over.
+          const dest = out.url || '/challenge';
+          setTimeout(() => { location.href = dest; }, 700);
         } catch {
           err.textContent = 'network hiccup — try again';
           err.hidden = false;
