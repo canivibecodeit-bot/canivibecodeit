@@ -38,7 +38,7 @@ export const CHALLENGES = [
       'Enter by posting a live URL along with your X handle. That is how we credit you if you win.',
       'Build during the challenge window. Work that started before the opening date does not count.',
       'Your build has to include the twist. Entries without it will not be judged.',
-      'Already sell a product that does this? Submit it to the directory instead — the challenge is for new builds.',
+      'Already sell a product that does this? Submit it to the directory instead. The challenge is for new builds.',
       'Say plainly that an AI built it. That is the point of the exercise, not a disclaimer.',
     ],
     // ⛔ The twist content NEVER lives in this file. The repo is public and
