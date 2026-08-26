@@ -57,6 +57,24 @@ const orgLd = {
 };
 
 const blocks = [orgLd, ...jsonld];
+
+/* One list, two renderings — the header shows only `top` items (the pages
+   that make money or grow the directory, per the operator's nav thinning),
+   the footer shows every section so nothing is stranded when the header
+   hides its links on narrow viewports. Edit THIS list, never the markup:
+   the two navs must not drift apart again. */
+const SECTIONS = [
+  { href: '/#death-list', label: 'the death list', top: true },
+  { href: '/alternatives', label: 'alternatives', top: true },
+  { href: '/builds', label: 'builds', top: false, show: buildsLive() },
+  { href: '/challenge', label: 'challenge', top: true, show: challengeLive(), cls: 'nav-challenge' },
+  { href: '/stats', label: 'stats', top: false },
+  { href: '/newsletter', label: 'newsletter', top: false, footerLabel: 'the newsletter' },
+  { href: '/submit', label: 'submit an app', top: true, cls: 'nav-submit' },
+  { href: '/sponsor', label: 'sponsor', top: true },
+];
+const navSections = SECTIONS.filter((s) => s.show !== false);
+const headerLinks = navSections.filter((s) => s.top);
 ---
 
 <!doctype html>
@@ -107,14 +125,7 @@ const blocks = [orgLd, ...jsonld];
           <span class="word">can<b>i</b>vibecode<b>it</b></span>
         </a>
         <nav class="site-nav">
-          <a href="/#death-list">the death list</a>
-          <a href="/alternatives">alternatives</a>
-          {buildsLive() && <a class="nav-builds" href="/builds">builds</a>}
-          {challengeLive() && <a class="nav-challenge" href="/challenge">challenge</a>}
-          <a href="/stats">stats</a>
-          <a href="/newsletter">newsletter</a>
-          <a class="nav-submit" href="/submit">submit an app</a>
-          <a href="/sponsor">sponsor</a>
+          {headerLinks.map((s) => <a class={s.cls} href={s.href}>{s.label}</a>)}
           {
             user ? (
               <a class="avatar-chip" href="/account" aria-label="your account" title="your account">{userInitial}</a>
@@ -136,7 +147,6 @@ const blocks = [orgLd, ...jsonld];
             <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"></path></svg>
           </button>
           <Radio />
-          <a class="gh" href="https://github.com/canivibecodeit/canivibecodeit">github ↗</a>
         </nav>
       </div>
     </header>
@@ -150,13 +160,7 @@ const blocks = [orgLd, ...jsonld];
           viewports (and "submit an app" in the rail-squeezed band), so this
           row is the guaranteed path to every section from every page. */}
       <nav class="inner footer-nav" aria-label="Site sections">
-        <a href="/#death-list">the death list</a>
-        <a href="/alternatives">alternatives</a>
-        {buildsLive() && <a href="/builds">builds</a>}
-        {challengeLive() && <a href="/challenge">challenge</a>}
-        <a href="/stats">stats</a>
-        <a href="/newsletter">the newsletter</a>
-        <a href="/submit">submit an app</a>
+        {navSections.map((s) => <a href={s.href}>{s.footerLabel ?? s.label}</a>)}
       </nav>
       <div class="inner">
       <span>

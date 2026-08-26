@@ -217,22 +217,6 @@ h3 {
   color: var(--fg);
 }
 
-.site-nav .gh {
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 12px;
-  transition: border-color 0.15s ease, transform 0.1s ease;
-}
-
-.site-nav .gh:hover {
-  border-color: var(--muted);
-}
-
-.site-nav .gh:active {
-  transform: scale(0.96);
-}
-
 .theme-toggle {
   width: 34px;
   height: 34px;
@@ -3229,25 +3213,19 @@ body[data-user] .digest-reveal .dr-oneclick {
 @media (max-width: 980px) {
   /* Account affordances are exempt: sign-in/avatar must survive every width
      (the chip swap below 760px is handled in the accounts section). */
-  .site-nav a:not(.gh):not([href='/sponsor']):not(.signin):not(.signin-chip):not(.avatar-chip) {
+  .site-nav a:not([href='/sponsor']):not(.signin):not(.signin-chip):not(.avatar-chip) {
     display: none;
   }
 }
 
-/* The full nav row needs ~1020px of header on one line, and between 980px and
-   ~1500px (tapes band + the rail-squeezed band, where the header sits at its
-   984px floor) it doesn't get it. "submit an app" steps out first: it's the
-   longest label with the smallest audience, the github button beside it points
-   at the same repo, and the footer nav row carries the full link everywhere. */
-@media (min-width: 980px) and (max-width: 1499px) {
-  .site-nav .nav-submit {
-    display: none;
-  }
+/* Nav thinning (2026-08-26): the header carries five text links and no
+   github button, so the row fits the 984px rail-squeezed floor with room to
+   spare — the old 980-1499px step-out rules for "submit an app" and "stats"
+   are gone with the links that made them necessary. */
 
-  /* With the builds section live the row gains a sixth link; "stats" steps
-     out with "submit an app" in the squeezed band (footer nav carries both).
-     :has() keeps this inert while the builds link doesn't render. */
-  .site-nav:has(.nav-builds) a[href='/stats'] {
+/* Rob's amendment to the thinning: the radio survives, desktop only. */
+@media (max-width: 760px) {
+  .site-nav .radio {
     display: none;
   }
 }
