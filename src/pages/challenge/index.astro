@@ -78,18 +78,15 @@ const hostOf = (u) => {
             <span class="ch-clock-closed">closed</span>
           ) : (
             <span class="ch-clock-row">
-              <span class="ch-cd-num" data-cd-days>{cd.days}</span><span class="ch-cd-unit">d</span>
-              <span class="ch-cd-num" data-cd-hours>{cd.hours}</span><span class="ch-cd-unit">h</span>
-              <span class="ch-cd-num" data-cd-mins>{cd.minutes}</span><span class="ch-cd-unit">m</span>
-              <span class="ch-cd-num" data-cd-secs>{cd.seconds}</span><span class="ch-cd-unit">s</span>
+              <span class="ch-cd-cell"><b class="ch-cd-num" data-cd-days>{cd.days}</b><span class="ch-cd-unit">d</span></span>
+              <span class="ch-cd-cell"><b class="ch-cd-num" data-cd-hours>{cd.hours}</b><span class="ch-cd-unit">h</span></span>
+              <span class="ch-cd-cell"><b class="ch-cd-num" data-cd-mins>{cd.minutes}</b><span class="ch-cd-unit">m</span></span>
+              <span class="ch-cd-cell"><b class="ch-cd-num" data-cd-secs>{cd.seconds}</b><span class="ch-cd-unit">s</span></span>
             </span>
           )
         }
-        <span class="ch-cd-label">{cdLabel} · {fmtUtc(challenge.opensAt)} → {fmtUtc(challenge.closesAt)}</span>
-        <span class="ch-counter">
-          <b data-entry-count>{entryCount}</b>
-          {entryCount === 1 ? 'entry' : 'entries'} so far
-        </span>
+        <span class="ch-clock-meta">{cdLabel} · {fmtUtc(state === 'upcoming' ? challenge.opensAt : challenge.closesAt)}</span>
+        <span class="ch-counter"><b data-entry-count>{entryCount}</b> {entryCount === 1 ? 'entry' : 'entries'}</span>
       </div>
     </header>
 
@@ -307,10 +304,11 @@ const hostOf = (u) => {
 
   .ch-sub {
     padding-top: 12px;
-    font-size: 17px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.55;
     color: var(--muted);
     max-width: 52ch;
+    text-wrap: pretty;
   }
 
   .ch-clock {
@@ -328,56 +326,70 @@ const hostOf = (u) => {
     }
   }
 
+  /* The clock is the biggest thing on the page — it carries the hierarchy. */
   .ch-clock-row {
     display: flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 10px;
     font-family: var(--font-mono);
     white-space: nowrap;
   }
 
+  .ch-cd-cell {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+  }
+
   .ch-cd-num {
-    font-size: clamp(34px, 4vw, 46px);
+    font-size: clamp(40px, 5vw, 58px);
     font-weight: 700;
     color: var(--primary);
+    /* tabular figures + a fixed two-digit cell: 10 → 9 never shifts the row. */
     font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    min-width: 2ch;
+    text-align: right;
     line-height: 1;
   }
 
+  /* Units demoted to tiny uppercase so the numerals carry it. */
   .ch-cd-unit {
-    font-size: 15px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     color: var(--muted);
-    margin-right: 10px;
-  }
-
-  .ch-clock-row .ch-cd-unit:last-child {
-    margin-right: 0;
   }
 
   .ch-clock-closed {
-    font: 700 clamp(34px, 4vw, 46px) var(--font-mono);
+    font: 700 clamp(40px, 5vw, 58px) var(--font-mono);
     color: var(--muted);
     line-height: 1;
   }
 
-  .ch-cd-label {
-    font: 12px var(--font-mono);
-    color: var(--muted);
+  /* Meta is the smallest, quietest layer — dates + label read only on a
+     second look. --faint falls back to --muted where the token isn't set. */
+  .ch-clock-meta {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--faint, var(--muted));
+    opacity: 0.85;
   }
 
   .ch-counter {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    font-size: 13px;
-    color: var(--muted);
+    font-size: 12px;
+    color: var(--faint, var(--muted));
+    opacity: 0.85;
   }
 
   .ch-counter b {
     display: inline-block;
-    font-size: 20px;
-    color: var(--primary);
+    font-size: 14px;
+    color: var(--fg);
     font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
   /* Movement only, per the interactivity rules: the pulse is a transform on
