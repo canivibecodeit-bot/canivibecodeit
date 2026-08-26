@@ -4284,7 +4284,6 @@ button.sp-banner {
    raised buttons rather than outlines drawn on the page. The .site-nav
    prefixes on the chips are for specificity: their base rules sit later in
    the file. The radio's on-air green tint still wins (three classes). */
-[data-theme='light'] .site-nav .gh,
 [data-theme='light'] .theme-toggle,
 [data-theme='light'] .radio-btn,
 [data-theme='light'] .site-nav .signin-chip,
