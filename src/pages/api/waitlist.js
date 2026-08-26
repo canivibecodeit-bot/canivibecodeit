@@ -10,7 +10,7 @@ import { clientIp, json, readBody, validEmail } from '../../lib/request.js';
 const SOURCES = [
   'home', 'app', 'app_copy', 'category', 'moat', '404', 'bar', 'sponsor', 'account',
   'alternatives_hub', 'alternatives', 'alternative_product', 'bvct',
-  'newsletter', 'search_miss', 'post_vote', 'post_submit',
+  'newsletter', 'search_miss', 'post_vote', 'post_submit', 'challenge',
 ];
 
 // RFC 2606 reserved names can never receive mail, and Resend refuses to send a

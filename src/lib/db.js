@@ -197,6 +197,32 @@ const SCHEMA_SQLITE = `
     build_id TEXT,
     created_at INTEGER NOT NULL
   );
+
+  /* Build challenges: challenge content lives in src/lib/challenge.js (the
+     repo is the admin panel, same as apps); this is runtime state only.
+     Entries are keyed by a self-declared X handle — future portfolio pages
+     hang off it. status: live | held | unlisted. kind: entry | seed | demo. */
+  CREATE TABLE IF NOT EXISTS challenge_entries (
+    id TEXT PRIMARY KEY,
+    challenge_id INTEGER NOT NULL,
+    x_handle TEXT NOT NULL,
+    url TEXT NOT NULL,
+    page_title TEXT,
+    og_image TEXT,
+    email_opted INTEGER NOT NULL DEFAULT 0,
+    kind TEXT NOT NULL DEFAULT 'entry',
+    status TEXT NOT NULL DEFAULT 'live',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    badge_hits INTEGER NOT NULL DEFAULT 0,
+    country TEXT,
+    created_at INTEGER NOT NULL,
+    last_checked_at INTEGER,
+    check_result TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
+  CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
+  CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
 `;
 
 const SCHEMA_PG = `
@@ -387,6 +413,30 @@ const SCHEMA_PG = `
     build_id TEXT,
     created_at BIGINT NOT NULL
   );
+
+  /* Build challenges: content in src/lib/challenge.js, runtime state here.
+     See the SQLite schema for the field notes. */
+  CREATE TABLE IF NOT EXISTS challenge_entries (
+    id TEXT PRIMARY KEY,
+    challenge_id INTEGER NOT NULL,
+    x_handle TEXT NOT NULL,
+    url TEXT NOT NULL,
+    page_title TEXT,
+    og_image TEXT,
+    email_opted INTEGER NOT NULL DEFAULT 0,
+    kind TEXT NOT NULL DEFAULT 'entry',
+    status TEXT NOT NULL DEFAULT 'live',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    badge_hits INTEGER NOT NULL DEFAULT 0,
+    country TEXT,
+    created_at BIGINT NOT NULL,
+    last_checked_at BIGINT,
+    check_result TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
+  CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
+  CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -493,6 +543,22 @@ function numericRow(cols) {
 }
 
 const buildRow = numericRow(BUILD_NUMERIC);
+
+/* Challenge entries: writable fields for updates, BIGINT columns for the
+   PG string → number fix. Counters (report_count, badge_hits) are bumped by
+   dedicated atomic methods, never through update. */
+const CH_ENTRY_FIELDS = [
+  'status', 'held_reason', 'kind', 'page_title', 'og_image',
+  'last_checked_at', 'check_result',
+];
+
+function chParts(fields) {
+  const keys = Object.keys(fields).filter((k) => CH_ENTRY_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateChallengeEntry: no writable fields');
+  return keys;
+}
+
+const chRow = numericRow(['created_at', 'last_checked_at']);
 
 let driver;
 
@@ -866,6 +932,63 @@ async function pgDriver() {
       );
       return r.rows[0] ?? null;
     },
+    async insertChallengeEntry(e) {
+      await pool.query(
+        `INSERT INTO challenge_entries
+           (id, challenge_id, x_handle, url, page_title, og_image, email_opted,
+            kind, status, held_reason, country, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [e.id, e.challenge_id, e.x_handle, e.url, e.page_title, e.og_image,
+         e.email_opted, e.kind, e.status, e.held_reason, e.country, e.created_at]
+      );
+    },
+    async updateChallengeEntry(id, fields) {
+      const keys = chParts(fields);
+      const params = [id, ...keys.map((k) => fields[k])];
+      const r = await pool.query(
+        `UPDATE challenge_entries SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        params
+      );
+      return r.rowCount;
+    },
+    async challengeEntryById(id) {
+      const r = await pool.query('SELECT * FROM challenge_entries WHERE id = $1', [id]);
+      return chRow(r.rows[0]);
+    },
+    async challengeEntryByUrl(challengeId, url) {
+      const r = await pool.query(
+        'SELECT * FROM challenge_entries WHERE challenge_id = $1 AND url = $2',
+        [challengeId, url]
+      );
+      return chRow(r.rows[0]);
+    },
+    async challengeEntries(challengeId, statuses) {
+      const r = await pool.query(
+        'SELECT * FROM challenge_entries WHERE challenge_id = $1 AND status = ANY($2) ORDER BY created_at DESC',
+        [challengeId, statuses]
+      );
+      return r.rows.map(chRow);
+    },
+    async challengeEntriesForCheck() {
+      const r = await pool.query(
+        "SELECT * FROM challenge_entries WHERE status IN ('live', 'held') ORDER BY created_at ASC"
+      );
+      return r.rows.map(chRow);
+    },
+    async bumpEntryReport(id) {
+      const r = await pool.query(
+        'UPDATE challenge_entries SET report_count = report_count + 1 WHERE id = $1 RETURNING report_count',
+        [id]
+      );
+      return r.rows[0] ? Number(r.rows[0].report_count) : null;
+    },
+    async bumpEntryBadge(id) {
+      const r = await pool.query(
+        "UPDATE challenge_entries SET badge_hits = badge_hits + 1 WHERE id = $1 AND status = 'live'",
+        [id]
+      );
+      return r.rowCount;
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -1236,6 +1359,59 @@ async function sqliteDriver() {
         db.prepare('SELECT * FROM builds WHERE user_id = ? AND slug = ?').get(userId, slug)
       );
     },
+    async insertChallengeEntry(e) {
+      db.prepare(
+        `INSERT INTO challenge_entries
+           (id, challenge_id, x_handle, url, page_title, og_image, email_opted,
+            kind, status, held_reason, country, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(
+        e.id, e.challenge_id, e.x_handle, e.url, e.page_title, e.og_image,
+        e.email_opted, e.kind, e.status, e.held_reason, e.country, e.created_at
+      );
+    },
+    async updateChallengeEntry(id, fields) {
+      const keys = chParts(fields);
+      return db
+        .prepare(`UPDATE challenge_entries SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async challengeEntryById(id) {
+      return chRow(db.prepare('SELECT * FROM challenge_entries WHERE id = ?').get(id));
+    },
+    async challengeEntryByUrl(challengeId, url) {
+      return chRow(
+        db.prepare('SELECT * FROM challenge_entries WHERE challenge_id = ? AND url = ?')
+          .get(challengeId, url)
+      );
+    },
+    async challengeEntries(challengeId, statuses) {
+      const marks = statuses.map(() => '?').join(', ');
+      return db
+        .prepare(
+          `SELECT * FROM challenge_entries WHERE challenge_id = ? AND status IN (${marks}) ORDER BY created_at DESC`
+        )
+        .all(challengeId, ...statuses)
+        .map(chRow);
+    },
+    async challengeEntriesForCheck() {
+      return db
+        .prepare("SELECT * FROM challenge_entries WHERE status IN ('live', 'held') ORDER BY created_at ASC")
+        .all()
+        .map(chRow);
+    },
+    async bumpEntryReport(id) {
+      const changed = db
+        .prepare('UPDATE challenge_entries SET report_count = report_count + 1 WHERE id = ?')
+        .run(id).changes;
+      if (!changed) return null;
+      return db.prepare('SELECT report_count FROM challenge_entries WHERE id = ?').get(id).report_count;
+    },
+    async bumpEntryBadge(id) {
+      return db
+        .prepare("UPDATE challenge_entries SET badge_hits = badge_hits + 1 WHERE id = ? AND status = 'live'")
+        .run(id).changes;
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -1446,6 +1622,38 @@ export async function openSubmissionBySlug(slug) {
 
 export async function insertBuild(b) {
   return (await getDriver()).insertBuild(b);
+}
+
+export async function insertChallengeEntry(e) {
+  return (await getDriver()).insertChallengeEntry(e);
+}
+
+export async function updateChallengeEntry(id, fields) {
+  return (await getDriver()).updateChallengeEntry(id, fields);
+}
+
+export async function challengeEntryById(id) {
+  return (await getDriver()).challengeEntryById(id);
+}
+
+export async function challengeEntryByUrl(challengeId, url) {
+  return (await getDriver()).challengeEntryByUrl(challengeId, url);
+}
+
+export async function challengeEntries(challengeId, statuses = ['live']) {
+  return (await getDriver()).challengeEntries(challengeId, statuses);
+}
+
+export async function challengeEntriesForCheck() {
+  return (await getDriver()).challengeEntriesForCheck();
+}
+
+export async function bumpEntryReport(id) {
+  return (await getDriver()).bumpEntryReport(id);
+}
+
+export async function bumpEntryBadge(id) {
+  return (await getDriver()).bumpEntryBadge(id);
 }
 
 export async function updateBuild(id, fields) {

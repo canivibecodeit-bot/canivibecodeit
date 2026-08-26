@@ -1,0 +1,194 @@
+---
+// /admin/challenge: the held queue + the live gallery, phone-first like the
+// build admin. Release = back in the gallery; unlist = out for good (until
+// relisted). The kind switches label seeds and the host's demo entry.
+// Reachable with the flag off, so the queue never goes dark.
+import Base from '../../layouts/Base.astro';
+import { challengeEntries } from '../../lib/db.js';
+import { ago } from '../../lib/builds.js';
+import { currentChallenge } from '../../lib/challenge.js';
+import { isAdmin } from '../../lib/sponsors.js';
+
+const token = Astro.url.searchParams.get('token') || '';
+// Wrong or missing token looks exactly like a page that doesn't exist.
+if (!isAdmin(token)) return new Response(null, { status: 404 });
+
+const challenge = currentChallenge();
+const [held, live, unlisted] = await Promise.all([
+  challengeEntries(challenge.id, ['held']),
+  challengeEntries(challenge.id, ['live']),
+  challengeEntries(challenge.id, ['unlisted']),
+]);
+
+const msg = Astro.url.searchParams.get('msg') || '';
+const returnTo = `/admin/challenge?token=${encodeURIComponent(token)}`;
+
+const actionForm = (id, action, label, cls = 'btn ghost') => ({ id, action, label, cls });
+---
+
+<Base title="challenge admin" description="" ogImage="/og/home.png">
+  <main class="wrap admin">
+    <div class="list-head">
+      <h2>{challenge.title} · held</h2>
+      <span class="note">{held.length} waiting · release = instantly listed</span>
+    </div>
+
+    {msg && <p class="admin-msg">{msg}</p>}
+
+    {held.length === 0 && <p class="note" style="padding-top: 14px;">nothing held. nice.</p>}
+
+    <div class="admin-rows ca-rows">
+      {
+        held.map((e) => (
+          <div class="admin-card ca-card">
+            <div class="ca-top">
+              <span class="admin-strong">{e.page_title ?? e.url}</span>
+              <span class="microlabel">@{e.x_handle}</span>
+              <span class="microlabel">{ago(e.created_at)}</span>
+            </div>
+            <p class="admin-sub ca-held-why">held: {e.held_reason ?? 'unknown'}{e.report_count > 0 && ` · ${e.report_count} reports`}</p>
+            <div class="ca-links">
+              <a href={e.url} target="_blank" rel="ugc nofollow noopener">open the build ↗ · judge for yourself</a>
+            </div>
+            <div class="admin-actions">
+              <form method="post" action="/api/challenge/admin" data-astro-reload>
+                <input type="hidden" name="token" value={token} />
+                <input type="hidden" name="return_to" value={returnTo} />
+                <input type="hidden" name="action" value="release" />
+                <input type="hidden" name="id" value={e.id} />
+                <button class="btn primary" type="submit">release · list it</button>
+              </form>
+              <form method="post" action="/api/challenge/admin" data-astro-reload>
+                <input type="hidden" name="token" value={token} />
+                <input type="hidden" name="return_to" value={returnTo} />
+                <input type="hidden" name="action" value="unlist" />
+                <input type="hidden" name="id" value={e.id} />
+                <button class="btn ghost" type="submit">unlist</button>
+              </form>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="list-head" style="padding-top: 36px;">
+      <h2>Live</h2>
+      <span class="note">{live.length} listed · newest first</span>
+    </div>
+    <div class="admin-rows ca-rows">
+      {
+        live.slice(0, 50).map((e) => (
+          <div class="admin-card ca-card ca-live">
+            <div class="ca-top">
+              <a class="admin-strong" href={`/challenge/e/${e.id}`} target="_blank">{e.page_title ?? e.url} ↗</a>
+              <span class="microlabel">@{e.x_handle}</span>
+              {e.kind !== 'entry' && <span class="microlabel ca-kind">{e.kind}</span>}
+              {e.report_count > 0 && <span class="microlabel ca-reports">{e.report_count} reports</span>}
+              {e.badge_hits > 0 && <span class="microlabel">{e.badge_hits} badge hits</span>}
+              <span class="microlabel">{ago(e.created_at)}</span>
+            </div>
+            <div class="admin-actions">
+              {[
+                actionForm(e.id, 'unlist', 'unlist'),
+                e.kind !== 'seed' && actionForm(e.id, 'mark-seed', 'mark seed'),
+                e.kind !== 'demo' && actionForm(e.id, 'mark-demo', 'mark demo'),
+                e.kind !== 'entry' && actionForm(e.id, 'mark-entry', 'mark entry'),
+              ]
+                .filter(Boolean)
+                .map((a) => (
+                  <form method="post" action="/api/challenge/admin" data-astro-reload>
+                    <input type="hidden" name="token" value={token} />
+                    <input type="hidden" name="return_to" value={returnTo} />
+                    <input type="hidden" name="action" value={a.action} />
+                    <input type="hidden" name="id" value={a.id} />
+                    <button class={a.cls} type="submit">{a.label}</button>
+                  </form>
+                ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    {
+      unlisted.length > 0 && (
+        <>
+          <div class="list-head" style="padding-top: 36px;">
+            <h2>Unlisted</h2>
+            <span class="note">{unlisted.length} out of the gallery</span>
+          </div>
+          <div class="admin-rows ca-rows">
+            {unlisted.slice(0, 30).map((e) => (
+              <div class="admin-card ca-card ca-live">
+                <div class="ca-top">
+                  <span class="admin-strong">{e.page_title ?? e.url}</span>
+                  <span class="microlabel">@{e.x_handle}</span>
+                  <span class="microlabel">{ago(e.created_at)}</span>
+                </div>
+                <div class="admin-actions">
+                  <form method="post" action="/api/challenge/admin" data-astro-reload>
+                    <input type="hidden" name="token" value={token} />
+                    <input type="hidden" name="return_to" value={returnTo} />
+                    <input type="hidden" name="action" value="relist" />
+                    <input type="hidden" name="id" value={e.id} />
+                    <button class="btn ghost" type="submit">relist</button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .ca-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 16px;
+  }
+
+  .ca-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ca-top {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .ca-top .microlabel:last-child {
+    margin-left: auto;
+  }
+
+  .ca-held-why {
+    color: var(--no-bg);
+  }
+
+  .ca-links {
+    font-size: 13px;
+  }
+
+  .ca-links a {
+    color: var(--primary);
+  }
+
+  .ca-kind {
+    color: var(--kinda, #d7b944);
+  }
+
+  .ca-reports {
+    color: var(--no-bg);
+  }
+
+  .ca-live {
+    gap: 6px;
+  }
+</style>

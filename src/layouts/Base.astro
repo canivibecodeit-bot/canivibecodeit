@@ -8,7 +8,7 @@ import Radio from '../components/Radio.astro';
 import SignupModal from '../components/SignupModal.astro';
 import SponsorRails from '../components/SponsorRails.astro';
 import SponsorTape from '../components/SponsorTape.astro';
-import { buildsLive } from '../lib/flags.js';
+import { buildsLive, challengeLive } from '../lib/flags.js';
 import { getBoard, nextRunMonthName } from '../lib/sponsors.js';
 import { scriptJson } from '../lib/request.js';
 import { THEME_SCRIPT } from '../lib/csp.js';
@@ -110,6 +110,7 @@ const blocks = [orgLd, ...jsonld];
           <a href="/#death-list">the death list</a>
           <a href="/alternatives">alternatives</a>
           {buildsLive() && <a class="nav-builds" href="/builds">builds</a>}
+          {challengeLive() && <a class="nav-challenge" href="/challenge">challenge</a>}
           <a href="/stats">stats</a>
           <a href="/newsletter">newsletter</a>
           <a class="nav-submit" href="/submit">submit an app</a>
@@ -152,6 +153,7 @@ const blocks = [orgLd, ...jsonld];
         <a href="/#death-list">the death list</a>
         <a href="/alternatives">alternatives</a>
         {buildsLive() && <a href="/builds">builds</a>}
+        {challengeLive() && <a href="/challenge">challenge</a>}
         <a href="/stats">stats</a>
         <a href="/newsletter">the newsletter</a>
         <a href="/submit">submit an app</a>
