@@ -91,14 +91,16 @@ export async function POST({ request, clientAddress }) {
   // so evil.com/?2 and evil.com/#x collapse into the stored row instead of
   // minting infinite distinct entries. Only a LIVE dupe hands back its
   // permalink; held/unlisted matches return neutrally (no moderation oracle).
-  const canonical = canonicalUrl(url);
-  const dupe = await challengeEntryByUrl(challenge.id, canonical);
-  if (dupe) {
-    if (dupe.status === 'live') {
-      return json({ ok: true, id: dupe.id, url: `/challenge/e/${dupe.id}`, existing: true }, 200);
-    }
-    return json({ ok: true, existing: true, message: 'that entry is already in' }, 200);
-  }
+  const existingDupe = (dupe) =>
+    dupe.status === 'live'
+      ? json({ ok: true, id: dupe.id, url: `/challenge/e/${dupe.id}`, existing: true }, 200)
+      : json({ ok: true, existing: true, message: 'that entry is already in' }, 200);
+
+  // Fast-path dedupe on the submitted URL: an identical re-post is rejected
+  // before we spend a fetch on it.
+  const submittedCanonical = canonicalUrl(url);
+  const dupe0 = await challengeEntryByUrl(challenge.id, submittedCanonical);
+  if (dupe0) return existingDupe(dupe0);
 
   // Optional opt-in: results + next challenge, via the one digest list.
   // Only new waitlist rows mirror to Resend (unsubscribes stay unsubscribed).
@@ -110,16 +112,39 @@ export async function POST({ request, clientAddress }) {
     emailOpted = 1;
   }
 
-  // Derive title + og:image from the page. fetchPageMeta walks redirects
-  // through the SSRF-safe fetcher and reports the URL it actually LANDED on
-  // (meta.finalUrl) plus whether it reached a definitive destination at all.
+  // Derive title + og:image, and resolve the URL we actually LAND on. From
+  // here everything — the blocklist, the Safe Browsing screen, dedupe, what we
+  // store, and what the daily recheck will re-screen — uses the FINAL URL, not
+  // the submitted one, so a padded redirect target can't be screened-then-
+  // discarded (audit P1) and the recheck always screens where the link lands.
   const meta = await fetchPageMeta(url);
-  const finalUrl = parsePublicUrl(meta.finalUrl) ?? url;
+  let effective = url;
+  let effectiveCanonical = submittedCanonical;
+  let reachedOk = meta.reached;
+  if (meta.reached) {
+    // The hop screen already produced this URL at maxLen 500, so it re-parses;
+    // matching that bound is the fix for the 301–500 char revert. A parse
+    // failure here can't normally happen — if it does, fail closed.
+    const f = parsePublicUrl(meta.finalUrl, { maxLen: 500 });
+    if (f) {
+      effective = f;
+      effectiveCanonical = canonicalUrl(f);
+    } else {
+      reachedOk = false;
+    }
+  }
 
-  // Re-check the blocklist against the final host too: a clean host that
-  // redirects to a blocked one doesn't get a free pass.
-  if (finalUrl.href !== url.href && (await isHostBlocked(registrableHost(finalUrl.hostname)))) {
+  // Blocklist on the FINAL host — a redirect into a blocked host is caught.
+  if (await isHostBlocked(registrableHost(effective.hostname))) {
     return json({ error: "that site can't be entered" }, 403);
+  }
+
+  // Second dedupe when the redirect moved us to a different canonical URL:
+  // two submissions that land on the same place are one entry (and this keeps
+  // the unique index from throwing on insert).
+  if (effectiveCanonical !== submittedCanonical) {
+    const dupe1 = await challengeEntryByUrl(challenge.id, effectiveCanonical);
+    if (dupe1) return existingDupe(dupe1);
   }
 
   // Safe Browsing gate — fail CLOSED. Three ways an entry holds for review:
@@ -131,11 +156,11 @@ export async function POST({ request, clientAddress }) {
   let status = 'live';
   let heldReason = null;
   if (safeBrowsingOn()) {
-    if (!meta.reached) {
+    if (!reachedOk) {
       status = 'held';
       heldReason = 'safe-browsing: destination unreachable, pending review';
     } else {
-      const verdict = await checkUrl(finalUrl.href);
+      const verdict = await checkUrl(effective.href);
       if (verdict === 'unknown') {
         status = 'held';
         heldReason = 'safe-browsing: check unavailable, pending review';
@@ -155,7 +180,7 @@ export async function POST({ request, clientAddress }) {
     id,
     challenge_id: challenge.id,
     x_handle: handle,
-    url: canonical,
+    url: effectiveCanonical,
     page_title: meta.title,
     og_image: ogImage,
     email_opted: emailOpted,
