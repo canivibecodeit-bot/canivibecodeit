@@ -86,7 +86,9 @@ function parseVerdict(text) {
 // queue email is skipped while the reviewer is on, so Rob gets exactly one
 // mail per post either way).
 export async function reviewBuild(id) {
-  const adminUrl = `https://canivibecodeit.com/admin/builds?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}`;
+  // Bare link — never embed ADMIN_TOKEN in mail (it travels through Resend and
+  // sits in the mailbox indefinitely). Rob pastes the token on the page.
+  const adminUrl = 'https://canivibecodeit.com/admin/builds';
   const held = async (build, why) => {
     await alertRob(
       `[cvci] build held for you: ${build.name}`,

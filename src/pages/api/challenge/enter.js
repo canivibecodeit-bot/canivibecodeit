@@ -17,13 +17,13 @@ import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
 import { parsePublicUrl } from '../../../lib/builds.js';
 import {
-  blockableHost,
   canonicalUrl,
   challengeState,
   currentChallenge,
   fetchPageMeta,
   newEntryId,
   normalizeHandle,
+  registrableHost,
 } from '../../../lib/challenge.js';
 import { assertSafeBrowsingReady, checkUrl, safeBrowsingOn } from '../../../lib/safe-browsing.js';
 import { selfHostOgImage } from '../../../lib/challenge-image.js';
@@ -80,9 +80,10 @@ export async function POST({ request, clientAddress }) {
   if (!handle) return json({ error: 'an X handle: 1-15 letters, numbers, underscores' }, 400);
 
   // Host blocklist first: a site an admin unlisted (or Safe Browsing flagged)
-  // can't come back under a fresh query string. Neutral message — don't
-  // confirm to the attacker that their host is specifically blocked.
-  if (await isHostBlocked(blockableHost(url.hostname))) {
+  // can't come back under a fresh query string OR a fresh subdomain. Keyed on
+  // the registrable host, so blocking evil.com also stops a.evil.com. Neutral
+  // message — don't confirm the host is specifically blocked.
+  if (await isHostBlocked(registrableHost(url.hostname))) {
     return json({ error: "that site can't be entered" }, 403);
   }
 
@@ -110,31 +111,38 @@ export async function POST({ request, clientAddress }) {
   }
 
   // Derive title + og:image from the page. fetchPageMeta walks redirects
-  // through the SSRF-safe fetcher and reports the URL it actually LANDED on —
-  // that final URL is what the gate screens and what we store.
+  // through the SSRF-safe fetcher and reports the URL it actually LANDED on
+  // (meta.finalUrl) plus whether it reached a definitive destination at all.
   const meta = await fetchPageMeta(url);
   const finalUrl = parsePublicUrl(meta.finalUrl) ?? url;
 
   // Re-check the blocklist against the final host too: a clean host that
   // redirects to a blocked one doesn't get a free pass.
-  if (finalUrl.href !== url.href && (await isHostBlocked(blockableHost(finalUrl.hostname)))) {
+  if (finalUrl.href !== url.href && (await isHostBlocked(registrableHost(finalUrl.hostname)))) {
     return json({ error: "that site can't be entered" }, 403);
   }
 
-  // Safe Browsing on the FINAL url: a match holds, and — unlike before — an
-  // API error/timeout ('unknown') ALSO holds, for human review, rather than
-  // listing live. On the mirror (unchecked explicitly allowed, no key) the
-  // gate is skipped and entries list; production always has the key.
+  // Safe Browsing gate — fail CLOSED. Three ways an entry holds for review:
+  //  - the walk never reached a definitive destination (can't screen it),
+  //  - the API was unavailable ('unknown'),
+  //  - a positive threat match.
+  // On the mirror (unchecked explicitly allowed, no key) the gate is skipped
+  // and entries list; production always carries the key.
   let status = 'live';
   let heldReason = null;
   if (safeBrowsingOn()) {
-    const verdict = await checkUrl(finalUrl.href);
-    if (verdict === 'unknown') {
+    if (!meta.reached) {
       status = 'held';
-      heldReason = 'safe-browsing: check unavailable, pending review';
-    } else if (verdict) {
-      status = 'held';
-      heldReason = `safe-browsing: ${verdict.join(', ')}`;
+      heldReason = 'safe-browsing: destination unreachable, pending review';
+    } else {
+      const verdict = await checkUrl(finalUrl.href);
+      if (verdict === 'unknown') {
+        status = 'held';
+        heldReason = 'safe-browsing: check unavailable, pending review';
+      } else if (verdict) {
+        status = 'held';
+        heldReason = `safe-browsing: ${verdict.join(', ')}`;
+      }
     }
   }
 
@@ -158,7 +166,11 @@ export async function POST({ request, clientAddress }) {
     created_at: Date.now(),
   });
 
-  if (status === 'held') {
+  // Rate-limit the held-alert mail: now that an unavailable Safe Browsing API
+  // correctly HOLDS every submission, an outage would otherwise fire one email
+  // per entry up to the daily cap. Cap the mail at 6/hour — the entries still
+  // sit in the admin queue regardless (audit N3).
+  if (status === 'held' && (await rateLimit('challenge:held-alert', 6, 60 * 60 * 1000))) {
     alertRob(
       '[cvci] challenge entry held',
       `<p>A challenge entry needs review:</p>

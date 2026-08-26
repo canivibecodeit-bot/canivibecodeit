@@ -6,7 +6,7 @@
 import { blockHost, challengeEntryById, unblockHost, updateChallengeEntry } from '../../../lib/db.js';
 import { json, readBody } from '../../../lib/request.js';
 import { isAdmin } from '../../../lib/sponsors.js';
-import { blockableHost, ENTRY_ID_RE } from '../../../lib/challenge.js';
+import { ENTRY_ID_RE, registrableHost } from '../../../lib/challenge.js';
 
 const ACTIONS = {
   release: { status: 'live', held_reason: null },
@@ -58,7 +58,7 @@ export async function POST({ request }) {
   // so it lifts the block. Host derived from the stored URL.
   if (action === 'unlist' || action === 'relist') {
     try {
-      const host = blockableHost(new URL(entry.url).hostname);
+      const host = registrableHost(new URL(entry.url).hostname);
       if (action === 'unlist') await blockHost(host, 'admin unlist', Date.now());
       else await unblockHost(host);
     } catch {

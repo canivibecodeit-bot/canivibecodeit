@@ -115,28 +115,57 @@ export function normalizeHandle(raw) {
   return XHANDLE_RE.test(h) ? h : null;
 }
 
-/* Canonical form for dedupe: lowercase host, no fragment, sorted query, no
-   trailing "?" — so evil.com/?2, evil.com/#x and evil.com// collapse into one
-   row instead of minting infinite distinct entries (audit H4). */
+/* Canonical form for dedupe: lowercase host, no fragment, sorted value-bearing
+   query, no trailing "?" — so evil.com/?2, evil.com/#x and evil.com// collapse
+   into one row (audit H4). Query is rebuilt via URLSearchParams so the stored
+   URL is RE-ENCODED, not left in decoded form — otherwise the URL we screen
+   could differ from the one we publish (audit N1). */
 export function canonicalUrl(u) {
   const c = new URL(u.href);
   c.hash = '';
   c.hostname = c.hostname.toLowerCase();
   c.pathname = c.pathname.replace(/\/+/g, '/').replace(/\/+$/, '') || '/';
-  // Keep only value-bearing params, sorted — so cosmetic junk (?2, ?, ?x=)
-  // collapses onto the base URL while real params (?id=5) still distinguish.
-  const params = [...c.searchParams.entries()]
-    .filter(([, v]) => v !== '')
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-  c.search = params.length ? '?' + params.map(([k, v]) => `${k}=${v}`).join('&') : '';
+  const sp = new URLSearchParams();
+  for (const [k, v] of [...c.searchParams.entries()].filter(([, v]) => v !== '').sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
+    sp.append(k, v);
+  }
+  const q = sp.toString();
+  c.search = q ? `?${q}` : '';
   return c.href;
 }
 
-/* The registrable host we block on. Not a full public-suffix parse (that
-   needs a list we don't ship); the last two labels catch the common case and
-   a moderator can always block a longer host explicitly. */
-export function blockableHost(hostname) {
-  return hostname.toLowerCase().replace(/^www\./, '');
+/* Hosting suffixes where the registrable unit is one label DEEPER than the
+   last two labels — either multi-label public suffixes (co.uk) or shared
+   platforms where every user owns a subdomain (*.vercel.app). For these the
+   block unit is "<one label>.<suffix>" so blocking one project's host does
+   NOT blanket-block every sibling on the platform. Not the full PSL — the
+   common cases vibe-coders actually ship on, extendable as needed. */
+const SHARED_SUFFIXES = new Set([
+  // free/app hosting one label per user
+  'vercel.app', 'netlify.app', 'pages.dev', 'workers.dev', 'github.io',
+  'gitlab.io', 'herokuapp.com', 'web.app', 'firebaseapp.com', 'onrender.com',
+  'fly.dev', 'railway.app', 'up.railway.app', 'surge.sh', 'glitch.me',
+  'replit.app', 'repl.co', 'streamlit.app', 'deno.dev', 'cloudflareaccess.com',
+  // common multi-label public suffixes
+  'co.uk', 'org.uk', 'me.uk', 'com.au', 'net.au', 'org.au', 'co.nz', 'co.jp',
+  'co.in', 'co.za', 'com.br', 'com.mx', 'com.sg',
+]);
+
+/* The unit we block on, computed identically when STORING and when CHECKING
+   so a bare exact-match lookup catches apex + every subdomain of a blocked
+   registrable domain (audit H4). evil.com, www.evil.com and deep.sub.evil.com
+   all collapse to "evil.com"; foo.vercel.app collapses to "foo.vercel.app"
+   (siblings unaffected). */
+export function registrableHost(hostname) {
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  const labels = host.split('.');
+  if (labels.length <= 2) return host;
+  for (let i = 1; i < labels.length - 1; i += 1) {
+    if (SHARED_SUFFIXES.has(labels.slice(i).join('.'))) {
+      return labels.slice(i - 1).join('.');
+    }
+  }
+  return labels.slice(-2).join('.');
 }
 
 /* ---------- page metadata fetch (title + the page's own og:image) ----------
@@ -171,9 +200,11 @@ export function sanitizeTitle(raw) {
 }
 
 export async function fetchPageMeta(url) {
-  // finalUrl defaults to the submitted URL so a failed fetch still gives the
-  // gate a concrete address to screen.
-  const meta = { title: url.hostname, ogImage: null, finalUrl: url.href };
+  // reached=false means the walk never resolved to a definitive final
+  // response (a hop was refused, the chain was too deep, or the transport
+  // failed) — the caller must treat that as unknown and HOLD, never screen
+  // only the clean first hop and list live (audit re-pass H3).
+  const meta = { title: url.hostname, ogImage: null, finalUrl: url.href, reached: false };
   const res = await safeFetch(url, {
     screen: screenHop,
     maxBytes: META_BYTES,
@@ -181,8 +212,14 @@ export async function fetchPageMeta(url) {
     maxHops: MAX_HOPS,
     headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'text/html' },
   });
-  if (!res || !res.body || !res.contentType.includes('html')) return meta;
+  if (!res) return meta; // refused/failed walk → reached stays false
+
+  // We reached a real final response. Record WHERE we landed BEFORE looking at
+  // content-type, so a non-HTML / 4xx / empty-body final is screened at its
+  // true destination instead of silently reverting to the submitted URL.
+  meta.reached = true;
   meta.finalUrl = res.finalUrl.href;
+  if (!res.body || !res.contentType.includes('html')) return meta;
 
   const html = res.body.toString('utf8');
 

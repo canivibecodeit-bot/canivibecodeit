@@ -89,7 +89,12 @@ async function renderCard(entry, challengeTitle) {
         fontFamily: 'Space Grotesk', fontSize: 64, fontWeight: 700,
         color: COLORS.fg, lineHeight: 1.15,
       }, title),
-      el('div', { ...mono(30, COLORS.green, 700) }, `built by @${entry.x_handle}`),
+      el('div', { display: 'flex', alignItems: 'baseline', gap: 12 }, [
+        el('div', { ...mono(30, COLORS.green, 700) }, `built by @${entry.x_handle}`),
+        // The card is the impersonation artefact — mark the handle unverified
+        // so "@someone-famous" can't read as a real endorsement (audit M4).
+        el('div', { ...mono(20, COLORS.muted) }, 'handle unverified'),
+      ]),
     ]),
     el('div', { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }, [
       el('div', { ...mono(24, COLORS.muted) }, 'vibecoded during the window · the twist proves it'),

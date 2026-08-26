@@ -207,7 +207,7 @@ export async function POST({ request, locals, clientAddress }) {
       `<p>New build waiting for approval:</p>
        <p><b>${esc(name)}</b> · ${esc(oneLiner)}</p>
        <p>${esc(GOES[goes])} · ${esc(tool)}${model ? ` · ${esc(model)}` : ''}${appSlug ? ` · on ${esc(appSlug)}` : ''}${affiliation ? ` · affiliation: ${esc(affiliation)}` : ''}</p>
-       <p><a href="https://canivibecodeit.com/admin/builds?token=${encodeURIComponent(process.env.ADMIN_TOKEN ?? '')}">open the queue</a></p>`
+       <p><a href="https://canivibecodeit.com/admin/builds">open the queue and paste your token</a></p>`
     ).catch((err) => console.error(`build queue alert failed: ${err.message}`));
   }
 

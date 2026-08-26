@@ -11,9 +11,13 @@ import { ENTRY_ID_RE } from '../../../lib/challenge.js';
 
 const HOLD_AT = 5; // distinct reporters
 
-// Daily-rotating salt so reporter hashes can't be precomputed or correlated
-// across days, and the per-(entry,reporter) dedupe still holds within a day.
-const dailySalt = () => Math.floor(Date.now() / 86_400_000);
+// A STABLE server-side salt: the per-(entry, reporter) dedupe must hold for
+// the whole challenge window, not reset at each UTC midnight — otherwise one
+// IP earns a fresh "distinct" identity every day and can auto-hold a rival
+// across five calendar days inside a seven-day window (audit N2). Any set
+// server secret works as the pepper; it only needs to be stable and private.
+const REPORT_SALT =
+  process.env.SPONSOR_SIGNING_SECRET || process.env.BETTER_AUTH_SECRET || process.env.ADMIN_TOKEN || 'cvci-challenge-reports';
 
 export async function POST({ request, clientAddress }) {
   if (!challengeLive()) return new Response(null, { status: 404 });
@@ -34,7 +38,7 @@ export async function POST({ request, clientAddress }) {
   const id = String(body.id ?? '');
   if (!ENTRY_ID_RE.test(id)) return json({ error: 'bad id' }, 400);
 
-  const reporterHash = createHash('sha256').update(`${ip}:${id}:${dailySalt()}`).digest('hex').slice(0, 32);
+  const reporterHash = createHash('sha256').update(`${REPORT_SALT}:${id}:${ip}`).digest('hex').slice(0, 32);
   const distinct = await addEntryReport(id, reporterHash);
 
   // Duplicate report from this reporter, or unknown entry: nothing moves, but
