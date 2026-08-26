@@ -157,7 +157,10 @@ const hostOf = (u) => {
               </label>
               <label>
                 <span>your X handle</span>
-                <input type="text" name="x_handle" required placeholder="@you" maxlength="16" />
+                <span class="ch-at-wrap">
+                  <span class="ch-at" aria-hidden="true">@</span>
+                  <input type="text" name="x_handle" required placeholder="you" maxlength="15" />
+                </span>
               </label>
             </div>
             <label class="ch-email">
@@ -168,14 +171,14 @@ const hostOf = (u) => {
               class="ch-email-input"
               type="email"
               name="email"
+              aria-label="email address"
               placeholder="you@wherever.dev"
               maxlength="254"
-              hidden
             />
             <div class="ch-form-actions">
               <button class="btn primary" type="submit">enter the challenge</button>
               <span class="ch-form-note">
-                no account, no upload — we grab the title and image from your page. entries appear instantly.
+                title and image come from your page. entries list instantly.
               </span>
             </div>
             <p class="ch-form-err" data-form-err hidden></p>
@@ -292,9 +295,11 @@ const hostOf = (u) => {
     max-width: 70ch;
   }
 
+  /* Baseline, not center: the window timestamp and both number groups share
+     one text baseline, so nothing floats at a different height in the band. */
   .ch-band {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 18px;
     flex-wrap: wrap;
     margin-top: 26px;
@@ -346,9 +351,28 @@ const hostOf = (u) => {
   }
 
   .ch-counter b {
+    display: inline-block;
     font-size: 26px;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Movement only, per the interactivity rules: the pulse is a transform on
+     a value change, never a hover decoration. */
+  .ch-counter b.tick {
+    animation: ch-tick 0.45s ease-out;
+  }
+
+  @keyframes ch-tick {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ch-counter b.tick {
+      animation: none;
+    }
   }
 
   .ch-counter span {
@@ -512,7 +536,9 @@ const hostOf = (u) => {
     }
   }
 
-  .ch-form label span {
+  /* First child only: the caption. The @-prefix wrap is also a span inside
+     the label and must keep its flex layout. */
+  .ch-form label > span:first-child {
     display: block;
     padding-bottom: 6px;
     font: 12px var(--font-mono);
@@ -520,7 +546,6 @@ const hostOf = (u) => {
   }
 
   .ch-form input[type='url'],
-  .ch-form input[type='text']:not(.hp input),
   .ch-form .ch-email-input {
     width: 100%;
     padding: 10px 12px;
@@ -529,6 +554,53 @@ const hostOf = (u) => {
     border-radius: 6px;
     color: var(--fg);
     font: 14px var(--font-mono);
+  }
+
+  /* The @ is furniture, not something you type: fixed prefix inside the
+     field, input itself borderless so the pair reads as one control. */
+  .ch-at-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .ch-at-wrap:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
+  }
+
+  .ch-at {
+    padding: 10px 0 10px 12px;
+    font: 700 14px var(--font-mono);
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .ch-at-wrap input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px 10px 4px;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  /* Sub-16px inputs make iOS zoom the page on focus: mobile gets 16px,
+     desktop keeps the site's 14px mono. */
+  @media (max-width: 640px) {
+    .ch-form input[type='url'],
+    .ch-form .ch-email-input,
+    .ch-at-wrap input {
+      font-size: 16px;
+    }
+
+    .ch-at {
+      font-size: 16px;
+    }
   }
 
   .ch-email {
@@ -540,8 +612,13 @@ const hostOf = (u) => {
     cursor: pointer;
   }
 
-  .ch-email-input[hidden] {
+  /* CSS state, not JS: the email field exists only while the box is checked. */
+  .ch-email-input {
     display: none;
+  }
+
+  .ch-email:has(input:checked) + .ch-email-input {
+    display: block;
   }
 
   .ch-form-actions {

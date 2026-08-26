@@ -20,7 +20,10 @@ export const CHALLENGES = [
     id: 1,
     slug: 'one',
     title: 'Challenge #1',
-    headline: 'One prompt. One working thing. One week.',
+    // placeholder — final headline from the Lead. NOTE: parallel-triple
+    // constructions ("one X. one Y. one Z.") are banned by the humanizer
+    // rules; whatever lands here must not have that shape.
+    headline: 'Prompt a working build into existence before the window closes.',
     // The spec card: what the build must DO. 5-6 required behaviors.
     behaviors: [
       'placeholder · required behavior one',
@@ -50,7 +53,7 @@ export const CHALLENGES = [
     twist: null,
     // Why the twist exists — always visible, so the mechanic reads as fair.
     twistExplainer:
-      'one requirement stays sealed until kickoff. if your build handles it, it was built during the window — that is the whole point.',
+      'one requirement stays sealed until kickoff. if your build handles it, it was built during the window. that is the whole point.',
     opensAt: Date.UTC(2026, 8, 1, 16, 0, 0), // placeholder — final date in the copy PR
     closesAt: Date.UTC(2026, 8, 8, 16, 0, 0),
     // Partner credit block: null renders nothing. kind: 'sponsor' | 'wave'.

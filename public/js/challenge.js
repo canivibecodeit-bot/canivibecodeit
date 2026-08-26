@@ -47,12 +47,55 @@
       setInterval(tick, 30000);
     }
 
-    /* ---------- email opt-in reveal ---------- */
+    /* ---------- live counter: count-up on load, tick on change ---------- */
+    const counter = claim($('[data-entry-count]'));
+    if (counter) {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const setValue = (n, animate) => {
+        counter.textContent = n;
+        if (animate && !reduced) {
+          counter.classList.remove('tick');
+          void counter.offsetWidth; // restart the animation
+          counter.classList.add('tick');
+        }
+      };
+      const target = parseInt(counter.textContent, 10) || 0;
+      if (!reduced && target > 0) {
+        const t0 = performance.now();
+        const DUR = 800;
+        const step = (t) => {
+          const p = Math.min(1, (t - t0) / DUR);
+          setValue(Math.round(target * (1 - Math.pow(1 - p, 3))), false);
+          if (p < 1) requestAnimationFrame(step);
+        };
+        setValue(0, false);
+        requestAnimationFrame(step);
+      }
+      // Gentle poll keeps the number honest while the page sits open; a
+      // change gets the tick. Stops itself when the tab is hidden.
+      let last = target;
+      setInterval(async () => {
+        if (document.hidden || !document.contains(counter)) return;
+        try {
+          const res = await fetch('/api/challenge/stats');
+          if (!res.ok) return;
+          const { count } = await res.json();
+          if (typeof count === 'number' && count !== last) {
+            last = count;
+            setValue(count, true);
+          }
+        } catch {
+          /* next poll gets another chance */
+        }
+      }, 45000);
+    }
+
+    /* ---------- email opt-in: visibility is CSS (:has); JS only clears a
+       typed value on uncheck so nothing submits invisibly ---------- */
     const emailToggle = claim($('[data-email-toggle]'));
     if (emailToggle) {
       const input = $('.ch-email-input');
       emailToggle.addEventListener('change', () => {
-        input.hidden = !emailToggle.checked;
         if (emailToggle.checked) input.focus();
         else input.value = '';
       });
@@ -86,7 +129,7 @@
             form.reset();
             return;
           }
-          toast(out.existing ? 'already in — here it is' : 'you are in 🎉');
+          toast(out.existing ? 'already in · here it is' : 'you are in.');
           location.href = out.url || '/challenge';
         } catch {
           err.textContent = 'network hiccup — try again';

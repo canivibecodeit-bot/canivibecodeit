@@ -23,7 +23,7 @@ export function GET() {
     a.href = ORIGIN + '/challenge' + (entry ? '?e=' + entry : '');
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = '\\u{1F579}\\uFE0F i vibecoded it';
+    a.textContent = 'i vibecoded it';
     a.setAttribute('aria-label', 'This site was vibecoded for the canivibecodeit challenge');
     a.style.cssText = [
       'position:fixed', 'right:12px', 'bottom:12px', 'z-index:2147483646',
