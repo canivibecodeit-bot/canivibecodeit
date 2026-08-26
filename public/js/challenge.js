@@ -38,14 +38,16 @@
     const cd = claim($('[data-countdown]'));
     if (cd && cd.dataset.state !== 'closed') {
       const target = Number(cd.dataset.target);
+      const d = $('[data-cd-days]', cd);
+      const h = $('[data-cd-hours]', cd);
+      const m = $('[data-cd-mins]', cd);
+      const sec = $('[data-cd-secs]', cd);
       const tick = () => {
         const s = Math.max(0, Math.floor((target - Date.now()) / 1000));
-        const d = $('[data-cd-days]', cd);
-        const h = $('[data-cd-hours]', cd);
-        const m = $('[data-cd-mins]', cd);
         if (d) d.textContent = Math.floor(s / 86400);
         if (h) h.textContent = Math.floor((s % 86400) / 3600);
         if (m) m.textContent = Math.floor((s % 3600) / 60);
+        if (sec) sec.textContent = s % 60;
         // The moment passes: a reload flips the page to its next state
         // (open form appears, or the gallery closes). One reload, not a loop.
         if (s === 0 && !cd.dataset.done) {
@@ -54,7 +56,7 @@
         }
       };
       tick();
-      setInterval(tick, 30000);
+      setInterval(tick, 1000);
     }
 
     /* ---------- live counter: count-up on load, tick on change ---------- */

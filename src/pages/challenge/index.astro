@@ -60,38 +60,38 @@ const hostOf = (u) => {
   description={`${challenge.headline} Enter with a live URL and an X handle — entries appear instantly.`}
 >
   <main class="wrap ch-index">
-    <h1>{challenge.title}</h1>
-    <p class="ch-sub">{challenge.headline}</p>
-
-    <div class="ch-band">
+    {/* One shared band: title and brief left, the live clock right. The
+        clock is the page's pulse — big, top right, ticking seconds. */}
+    <header class="ch-hero">
+      <div class="ch-hero-text">
+        <h1>{challenge.title}</h1>
+        <p class="ch-sub">{challenge.headline}</p>
+      </div>
       <div
-        class="ch-countdown"
+        class="ch-clock"
         data-countdown
         data-target={String(target)}
         data-state={state}
       >
         {
           state === 'closed' ? (
-            <b>closed</b>
+            <span class="ch-clock-closed">closed</span>
           ) : (
-            <>
+            <span class="ch-clock-row">
               <span class="ch-cd-num" data-cd-days>{cd.days}</span><span class="ch-cd-unit">d</span>
               <span class="ch-cd-num" data-cd-hours>{cd.hours}</span><span class="ch-cd-unit">h</span>
               <span class="ch-cd-num" data-cd-mins>{cd.minutes}</span><span class="ch-cd-unit">m</span>
-            </>
+              <span class="ch-cd-num" data-cd-secs>{cd.seconds}</span><span class="ch-cd-unit">s</span>
+            </span>
           )
         }
-        <span class="ch-cd-label">{cdLabel}</span>
+        <span class="ch-cd-label">{cdLabel} · {fmtUtc(challenge.opensAt)} → {fmtUtc(challenge.closesAt)}</span>
+        <span class="ch-counter">
+          <b data-entry-count>{entryCount}</b>
+          {entryCount === 1 ? 'entry' : 'entries'} so far
+        </span>
       </div>
-      <div class="ch-window">
-        {fmtUtc(challenge.opensAt)} → {fmtUtc(challenge.closesAt)}
-      </div>
-      <span class="ch-band-gap"></span>
-      <div class="ch-counter">
-        <b data-entry-count>{entryCount}</b>
-        <span>{entryCount === 1 ? 'entry' : 'entries'} so far</span>
-      </div>
-    </div>
+    </header>
 
     <section class="ch-spec">
       <div class="ch-spec-card">
@@ -177,9 +177,6 @@ const hostOf = (u) => {
             />
             <div class="ch-form-actions">
               <button class="btn primary" type="submit">enter the challenge</button>
-              <span class="ch-form-note">
-                title and image come from your page. entries list instantly.
-              </span>
             </div>
             <p class="ch-form-err" data-form-err hidden></p>
           </form>
@@ -269,10 +266,7 @@ const hostOf = (u) => {
       }
     </section>
 
-    <p class="ch-honesty">
-      entries appear instantly and are what their makers told us · links are checked against
-      google safe browsing, that's all · see something nasty? the report button holds it for a human.
-    </p>
+    <p class="ch-honesty">every entry here is what its maker told us.</p>
   </main>
 </Base>
 
@@ -293,6 +287,20 @@ const hostOf = (u) => {
     }
   }
 
+  /* Title left, clock right — one band, no container. */
+  .ch-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px 48px;
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .ch-hero {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .ch-index h1 {
     font-size: clamp(32px, 5vw, 44px);
   }
@@ -302,67 +310,72 @@ const hostOf = (u) => {
     font-size: 17px;
     line-height: 1.5;
     color: var(--muted);
-    max-width: 70ch;
+    max-width: 52ch;
   }
 
-  /* Baseline, not center: the window timestamp and both number groups share
-     one text baseline, so nothing floats at a different height in the band. */
-  .ch-band {
+  .ch-clock {
     display: flex;
-    align-items: baseline;
-    gap: 18px;
-    flex-wrap: wrap;
-    margin-top: 26px;
-    padding: 14px 18px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding-top: 8px;
   }
 
-  .ch-countdown {
+  @media (max-width: 760px) {
+    .ch-clock {
+      align-items: flex-start;
+      padding-top: 0;
+    }
+  }
+
+  .ch-clock-row {
     display: flex;
     align-items: baseline;
     gap: 4px;
     font-family: var(--font-mono);
+    white-space: nowrap;
   }
 
   .ch-cd-num {
-    font-size: 26px;
+    font-size: clamp(34px, 4vw, 46px);
     font-weight: 700;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
+    line-height: 1;
   }
 
   .ch-cd-unit {
-    font-size: 13px;
+    font-size: 15px;
     color: var(--muted);
-    margin-right: 8px;
+    margin-right: 10px;
+  }
+
+  .ch-clock-row .ch-cd-unit:last-child {
+    margin-right: 0;
+  }
+
+  .ch-clock-closed {
+    font: 700 clamp(34px, 4vw, 46px) var(--font-mono);
+    color: var(--muted);
+    line-height: 1;
   }
 
   .ch-cd-label {
-    margin-left: 6px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .ch-window {
     font: 12px var(--font-mono);
     color: var(--muted);
-  }
-
-  .ch-band-gap {
-    flex: 1;
   }
 
   .ch-counter {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--muted);
   }
 
   .ch-counter b {
     display: inline-block;
-    font-size: 26px;
+    font-size: 20px;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
   }
@@ -390,25 +403,21 @@ const hostOf = (u) => {
     color: var(--muted);
   }
 
+  /* Open composition, no card chrome: the two columns are separated by
+     whitespace and their headings, not boxes. The twist keeps its border
+     because a sealed box SHOULD look like one. */
   .ch-spec {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-    gap: 20px;
-    padding-top: 26px;
+    gap: 20px 56px;
+    padding-top: 40px;
   }
 
   @media (max-width: 760px) {
     .ch-spec {
       grid-template-columns: 1fr;
+      gap: 34px;
     }
-  }
-
-  .ch-spec-card,
-  .ch-rules {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    padding: 22px;
   }
 
   .ch-spec h2,
@@ -419,10 +428,8 @@ const hostOf = (u) => {
 
   .ch-method {
     margin-top: 12px;
-    padding: 12px 14px;
+    padding: 2px 0 2px 14px;
     border-left: 3px solid var(--primary);
-    background: var(--bg);
-    border-radius: 0 6px 6px 0;
     font-size: 14px;
     line-height: 1.55;
   }
@@ -516,11 +523,9 @@ const hostOf = (u) => {
   }
 
   .ch-enter {
-    margin-top: 30px;
-    padding: 22px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    margin-top: 44px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
   }
 
   .ch-enter h2 {
@@ -636,13 +641,6 @@ const hostOf = (u) => {
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
-  }
-
-  .ch-form-note {
-    font-size: 12px;
-    color: var(--muted);
-    max-width: 44ch;
-    line-height: 1.5;
   }
 
   .ch-form-err {

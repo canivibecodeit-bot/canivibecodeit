@@ -63,22 +63,18 @@ const embed = `<script src="https://canivibecodeit.com/challenge/badge.js" data-
     }
 
     <section class="ce-badge">
-      <h2>wearing the badge?</h2>
-      <p>
-        drop this on the build and it links back here — the counter on it is how we see the
-        badge spread.
-      </p>
+      <h2>wear the badge</h2>
       <div class="ce-embed">
         <code data-embed>{embed}</code>
         <button class="btn ghost" type="button" data-copy-embed>copy</button>
       </div>
       {entry.badge_hits > 0 && (
-        <p class="ce-hits">this badge has phoned home <b>{entry.badge_hits}</b> times so far.</p>
+        <p class="ce-hits">seen <b>{entry.badge_hits}</b> {entry.badge_hits === 1 ? 'time' : 'times'} in the wild.</p>
       )}
     </section>
 
     <p class="ce-honesty">
-      entries are what their makers told us · this page was generated from the submitted URL ·
+      what its maker told us ·
       <button class="ce-report" type="button" data-report={entry.id}>report this entry</button>
     </p>
   </main>
