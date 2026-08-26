@@ -29,12 +29,17 @@ export const CHALLENGES = [
       'placeholder · required behavior four',
       'placeholder · required behavior five',
     ],
+    // The method line: the one-sentence contract of the whole exercise.
+    // Final copy (operator-approved) — do not paraphrase.
+    method:
+      'Build it by prompting an AI agent, not by writing the code yourself. We cannot verify that, so we are taking your word for it.',
+    // Final copy (operator-approved) — do not paraphrase.
     rules: [
-      'placeholder · ship a live URL anyone can open',
-      'placeholder · built during the window, not before',
-      'placeholder · any AI coding tool, any stack',
-      'placeholder · the twist requirement is part of the spec',
-      'placeholder · keep it honest — this is for fun, not lawyers',
+      'Enter by posting a live URL along with your X handle. That is how we credit you if you win.',
+      'Build during the challenge window. Work that started before the opening date does not count.',
+      'Your build has to include the twist. Entries without it will not be judged.',
+      'Already sell a product that does this? Submit it to the directory instead — the challenge is for new builds.',
+      'Say plainly that an AI built it. That is the point of the exercise, not a disclaimer.',
     ],
     // Sealed requirement. null until the copy PR; rendered only after reveal.
     twist: null,

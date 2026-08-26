@@ -96,6 +96,7 @@ const hostOf = (u) => {
     <section class="ch-spec">
       <div class="ch-spec-card">
         <h2>the spec</h2>
+        {challenge.method && <p class="ch-method">{challenge.method}</p>}
         <p class="ch-spec-note">your build must, demonstrably:</p>
         <ol class="ch-behaviors">
           {challenge.behaviors.map((b) => <li>{b}</li>)}
@@ -380,6 +381,16 @@ const hostOf = (u) => {
   .ch-rules h2 {
     font-size: 15px;
     text-transform: lowercase;
+  }
+
+  .ch-method {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--primary);
+    background: var(--bg);
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    line-height: 1.55;
   }
 
   .ch-spec-note {
