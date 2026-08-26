@@ -41,7 +41,12 @@ export const CHALLENGES = [
       'Already sell a product that does this? Submit it to the directory instead — the challenge is for new builds.',
       'Say plainly that an AI built it. That is the point of the exercise, not a disclaimer.',
     ],
-    // Sealed requirement. null until the copy PR; rendered only after reveal.
+    // ⛔ The twist content NEVER lives in this file. The repo is public and
+    // its watchers are exactly the people most likely to enter — twist text
+    // in merged source leaks days early and defeats the built-during-the-
+    // window mechanism entirely. Content arrives via the CHALLENGE_TWIST env
+    // var (set on Railway at the launch-morning flip, same lifecycle as
+    // CHALLENGE_LIVE); render still waits for opensAt. Keep this null.
     twist: null,
     // Why the twist exists — always visible, so the mechanic reads as fair.
     twistExplainer:
@@ -69,6 +74,8 @@ export function currentChallenge() {
     ...c,
     opensAt: envTime('CHALLENGE_OPENS_AT') ?? c.opensAt,
     closesAt: envTime('CHALLENGE_CLOSES_AT') ?? c.closesAt,
+    // Environment-only on purpose — see the note on the twist field above.
+    twist: process.env.CHALLENGE_TWIST?.trim() || c.twist,
   };
 }
 
