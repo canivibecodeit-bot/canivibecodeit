@@ -26,9 +26,24 @@ const envTime = (name) => {
 };
 export const gamesStartAt = () => envTime('BUILDGAMES_START_AT') ?? Date.UTC(2026, 8, 1, 4, 0, 0);
 
-// The fill goal the pot visual maps against (cents). The vessel reads "full"
-// at this pot; overridable so Rob can retune how fast it looks like it fills.
-export const fillGoalCents = () => envTime('BUILDGAMES_GOAL_CENTS') ?? 1_000_000; // $10k
+// The pool is UNCAPPED — there is no goal and the orb is never "full". Fill
+// level maps pot size onto a hyperbolic curve that asymptotically approaches
+// MAX_FILL but never reaches it, so there's always headroom: a little money
+// shows a little pool, a lot shows a lot, and it never looks "done".
+//   level = MAX_FILL * pot / (pot + SCALE)
+// SCALE sets where the curve bends (bigger = slower to look full). At $25k:
+//   $500 → ~2%, $5k → ~15%, $50k → ~60%, $500k → ~86%, ∞ → 90% (never).
+// A small floor keeps even a $5 bid visibly wetting the bottom.
+const FILL_SCALE_CENTS = () => envTime('BUILDGAMES_FILL_SCALE_CENTS') ?? 2_500_000; // $25k
+const MAX_FILL = 0.9;
+const FILL_FLOOR = 0.03;
+
+export function fillLevel(potCents) {
+  if (potCents <= 0) return 0;
+  const scale = FILL_SCALE_CENTS();
+  const curve = MAX_FILL * (potCents / (potCents + scale));
+  return Math.min(MAX_FILL, Math.max(FILL_FLOOR, curve));
+}
 
 /* ---------- ids ---------- */
 
@@ -68,9 +83,6 @@ export const seedBids = () => SEED_BIDS.map((b) => ({ ...b }));
 export function usd(cents) {
   return '$' + Math.round(cents / 100).toLocaleString('en-US');
 }
-
-// Fill fraction 0..1 for the vessel, capped.
-export const fillFraction = (potCents, goalCents) => Math.max(0, Math.min(1, goalCents > 0 ? potCents / goalCents : 0));
 
 export function countdownParts(untilMs, now = Date.now()) {
   const s = Math.max(0, Math.floor((untilMs - now) / 1000));

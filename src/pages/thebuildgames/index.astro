@@ -7,8 +7,7 @@ import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import {
   countdownParts,
-  fillFraction,
-  fillGoalCents,
+  fillLevel,
   gamesStartAt,
   monogram,
   potFromBids,
@@ -24,8 +23,10 @@ const bids = seedBids();
 const ranked = rankBids(bids);
 
 const potCents = potFromBids(bids);
-const goalCents = fillGoalCents();
-const fill = fillFraction(potCents, goalCents); // 0..1
+const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
+
+// Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
+const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
 const startAt = gamesStartAt();
 const cd = countdownParts(startAt);
@@ -56,45 +57,49 @@ const hostOf = (u) => {
 
     <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
     <section class="bg-pot" aria-label="Prize pool">
-      <div class="bg-orb-stage" data-pot data-fill={fill.toFixed(4)} data-goal={goalCents} data-pot-cents={potCents}>
+      <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
         <svg class="bg-orb" viewBox="0 0 300 400" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
           <defs>
             <clipPath id="bg-orb-clip">
               <circle cx="150" cy="270" r="118" />
             </clipPath>
+            <!-- Subtle cash gradient: premium, not photorealistic bills. -->
             <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stop-color="var(--primary-dim)" />
-              <stop offset="60%" stop-color="var(--primary)" />
+              <stop offset="55%" stop-color="var(--primary)" />
               <stop offset="100%" stop-color="var(--primary)" />
             </linearGradient>
-            <pattern id="bg-bills" width="240" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)">
-              <rect width="240" height="15" fill="url(#bg-cash)" />
-              <rect y="14" width="240" height="1" fill="rgba(0,0,0,0.2)" />
-              <rect x="60" y="4" width="30" height="7" rx="1" fill="rgba(255,255,255,0.08)" />
-              <rect x="150" y="4" width="30" height="7" rx="1" fill="rgba(255,255,255,0.08)" />
+            <!-- a faint stacked-note hint: one soft line every 22px, low contrast -->
+            <pattern id="bg-bills" width="300" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
+              <rect width="300" height="22" fill="url(#bg-cash)" />
+              <rect y="21" width="300" height="1" fill="rgba(0,0,0,0.10)" />
             </pattern>
-            <radialGradient id="bg-glass-grad" cx="0.38" cy="0.32" r="0.75">
+            <radialGradient id="bg-glass-grad" cx="0.38" cy="0.30" r="0.8">
               <stop offset="0%" stop-color="rgba(255,255,255,0.10)" />
               <stop offset="55%" stop-color="rgba(255,255,255,0.02)" />
               <stop offset="100%" stop-color="rgba(255,255,255,0)" />
             </radialGradient>
           </defs>
 
-          <!-- ceiling cable + hook (fixed) -->
-          <line x1="150" y1="0" x2="150" y2="120" class="bg-cable" />
-          <path d="M150 120 q -12 10 0 22 q 12 12 0 22" class="bg-hook" />
+          <!-- ceiling cable + hook (fixed) — toggled off via ?cable=off -->
+          {cableOn && (
+            <g class="bg-cable-group">
+              <line x1="150" y1="0" x2="150" y2="120" class="bg-cable" />
+              <path d="M150 120 q -11 9 0 20 q 11 11 0 20" class="bg-hook" />
+            </g>
+          )}
 
           <!-- the swinging orb: everything below the cable sways as one -->
           <g class="bg-orb-swing">
             <!-- money fill, clipped to the sphere, scaled from the bottom -->
             <g clip-path="url(#bg-orb-clip)">
               <rect class="bg-fill" x="32" y="152" width="236" height="236" fill="url(#bg-bills)" />
-              <rect class="bg-fill-top" x="32" width="236" height="3" fill="var(--primary)" />
+              <rect class="bg-fill-top" x="32" width="236" height="2" fill="var(--primary)" />
               <g class="bg-drops" aria-hidden="true"></g>
             </g>
             <!-- glass sphere: body tint, reflection, rim -->
             <circle cx="150" cy="270" r="118" fill="url(#bg-glass-grad)" class="bg-glass" />
-            <ellipse cx="112" cy="222" rx="46" ry="30" class="bg-glass-shine" />
+            <ellipse cx="112" cy="222" rx="44" ry="28" class="bg-glass-shine" />
             <circle cx="150" cy="270" r="118" class="bg-glass-rim" />
           </g>
         </svg>

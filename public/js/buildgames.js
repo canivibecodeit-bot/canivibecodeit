@@ -44,32 +44,31 @@
       const amountEl = $('[data-pot-amount]');
       const fillEls = [$('.bg-fill'), $('.bg-fill-top')].filter(Boolean);
       const drops = $('.bg-drops', stage);
-      const goal = Number(stage.dataset.goal) || 1;
+      // The server computes the asymptotic fill level (uncapped, never 100%);
+      // the JS just applies it and re-applies on poll. No goal math here.
       let potCents = Number(stage.dataset.potCents) || 0;
+      let fillTarget = Number(stage.dataset.fill) || 0;
 
       const setFill = (frac) => {
         const f = Math.max(0, Math.min(1, frac));
         stage.style.setProperty('--fill', f.toFixed(4));
         fillEls.forEach((el) => el.style.setProperty('--fill', f.toFixed(4)));
       };
-      // Server rendered the fill inline; mirror it onto the scaling elements.
-      setFill(Number(stage.dataset.fill) || 0);
+      setFill(fillTarget);
 
-      // Count the hero figure up from zero on first load.
+      // On first load: figure counts up from zero, fill rises from empty.
       if (amountEl && !reduced()) {
         const t0 = performance.now();
         const DUR = 1100;
-        const from = 0;
         const step = (t) => {
           const p = Math.min(1, (t - t0) / DUR);
           const eased = 1 - Math.pow(1 - p, 3);
-          amountEl.textContent = fmtUsd(from + (potCents - from) * eased);
+          amountEl.textContent = fmtUsd(potCents * eased);
           if (p < 1) requestAnimationFrame(step);
           else amountEl.textContent = fmtUsd(potCents);
         };
-        // start the fill from empty too, so it visibly rises on load
         setFill(0);
-        requestAnimationFrame(() => setFill(potCents / goal));
+        requestAnimationFrame(() => setFill(fillTarget));
         requestAnimationFrame(step);
       }
 
@@ -108,7 +107,7 @@
           const grew = data.pot_cents > potCents;
           const from = potCents;
           potCents = data.pot_cents;
-          setFill(typeof data.fill === 'number' ? data.fill : potCents / goal);
+          if (typeof data.fill === 'number') setFill(data.fill);
           if (amountEl && !reduced()) {
             const t0 = performance.now();
             const DUR = 700;
