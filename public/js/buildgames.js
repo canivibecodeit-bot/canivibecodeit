@@ -107,6 +107,10 @@
         }
       };
 
+      // A poke rains a few bills — satisfying, free, and honest (the total
+      // never changes). Reduced-motion users get stillness via rain()'s gate.
+      stage.addEventListener('click', () => rain(4));
+
       // Poll: when the pot grows, raise the fill, count the figure up, rain bills.
       setInterval(async () => {
         if (document.hidden || !document.contains(stage)) return;

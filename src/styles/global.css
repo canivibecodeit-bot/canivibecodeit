@@ -4348,6 +4348,12 @@ button.sp-banner {
     top: 46px;
   }
 
+  /* Pages without the sponsor tape (hideSponsors): the header parks at the
+     very top — a 46px offset with no tape leaves it floating over content. */
+  body.no-tape .site-header {
+    top: 0;
+  }
+
   .digest-bar {
     bottom: 52px;
   }

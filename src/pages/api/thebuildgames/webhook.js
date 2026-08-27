@@ -19,7 +19,7 @@
    one endpoint serves both). Events: checkout.session.completed,
    checkout.session.expired, charge.refunded, charge.dispute.created. */
 import { bgPaymentByProcessorRef, expireBgPaymentAtomic } from '../../../lib/db.js';
-import { alertRob, esc } from '../../../lib/mail.js';
+import { alertRob, brandShell, esc, sendMail } from '../../../lib/mail.js';
 import { json } from '../../../lib/request.js';
 import { verifyStripeSignature } from '../../../lib/stripe.js';
 import { PAYMENT_ID_RE, usd } from '../../../lib/buildgames.js';
@@ -70,7 +70,31 @@ export async function POST({ request }) {
       }
       const ref = object.payment_intent || object.id;
       const cleared = await clearPayment(paymentId, { capturedCents: captured, processorRef: ref });
-      if (cleared) console.log(`bg payment ${paymentId} cleared · ${usd(captured)} · ${ref}`);
+      if (cleared) {
+        console.log(`bg payment ${paymentId} cleared · ${usd(captured)} · ${ref}`);
+        // Our own receipt, to the address the payer used AT CHECKOUT (Stripe
+        // always collects it; it's payment-verified, unlike contact_email).
+        // Belt for Stripe's dashboard-configured receipt/invoice emails —
+        // guaranteed to land whatever that setting says. One per capture, so
+        // it's inherently money-gated; no caps apply. Copy discipline holds:
+        // placement/advertising language only.
+        const payerEmail = object.customer_details?.email;
+        if (payerEmail) {
+          sendMail({
+            to: payerEmail,
+            subject: `receipt · ${usd(captured)} sponsored placement — canivibecodeit.com`,
+            html: brandShell(
+              `<p>Payment received: <b>${usd(captured)}</b> for a sponsored placement on the`
+              + ` canivibecodeit.com board.</p>`
+              + `<p>Your placement is live and ranks by cumulative sponsorship — you keep your spot`
+              + ` until another sponsor's total passes yours.</p>`
+              + `<p><a href="https://canivibecodeit.com/thebuildgames">see the board</a></p>`
+              + `<p style="color:#6e6e67; font-size:12px;">Reference: ${esc(String(ref))}. Stripe also`
+              + ` emails an invoice for your records. Questions? Reply to this email.</p>`
+            ),
+          }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
+        }
+      }
     } else if (event.type === 'checkout.session.expired' && object?.metadata?.kind === 'buildgames') {
       const paymentId = String(object.metadata.payment_id || '');
       if (PAYMENT_ID_RE.test(paymentId)) await expireBgPaymentAtomic(paymentId);
