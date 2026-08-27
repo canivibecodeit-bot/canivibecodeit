@@ -1248,22 +1248,6 @@ async function pgDriver() {
       const r = await pool.query("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')");
       return r.rows.map(bgSponsorRow);
     },
-    // Release an unfunded identity: delete the sponsor and its (all-pending)
-    // payments, guarded so a row that ever cleared can never be dropped.
-    async releaseBgSponsor(id) {
-      const g = await pool.query('SELECT first_cleared_at FROM buildgames_sponsors WHERE id = $1', [id]);
-      if (!g.rows[0] || g.rows[0].first_cleared_at != null) return 0;
-      await pool.query('DELETE FROM buildgames_payments WHERE sponsor_id = $1', [id]);
-      const r = await pool.query('DELETE FROM buildgames_sponsors WHERE id = $1 AND first_cleared_at IS NULL', [id]);
-      return r.rowCount;
-    },
-    async bgExpiredUnfunded(beforeTs) {
-      const r = await pool.query(
-        "SELECT * FROM buildgames_sponsors WHERE first_cleared_at IS NULL AND status <> 'removed' AND created_at < $1",
-        [beforeTs]
-      );
-      return r.rows.map(bgSponsorRow);
-    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -1790,18 +1774,6 @@ async function sqliteDriver() {
     async bgSponsorsForRecheck() {
       return db.prepare("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')").all().map(bgSponsorRow);
     },
-    async releaseBgSponsor(id) {
-      const g = db.prepare('SELECT first_cleared_at FROM buildgames_sponsors WHERE id = ?').get(id);
-      if (!g || g.first_cleared_at != null) return 0;
-      db.prepare('DELETE FROM buildgames_payments WHERE sponsor_id = ?').run(id);
-      return db.prepare('DELETE FROM buildgames_sponsors WHERE id = ? AND first_cleared_at IS NULL').run(id).changes;
-    },
-    async bgExpiredUnfunded(beforeTs) {
-      return db
-        .prepare("SELECT * FROM buildgames_sponsors WHERE first_cleared_at IS NULL AND status <> 'removed' AND created_at < ?")
-        .all(beforeTs)
-        .map(bgSponsorRow);
-    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -2080,8 +2052,6 @@ export async function bgBlockHost(host, reason, ts = Date.now()) { return (await
 export async function bgUnblockHost(host) { return (await getDriver()).bgUnblockHost(host); }
 export async function bgIsHostBlocked(host) { return (await getDriver()).bgIsHostBlocked(host); }
 export async function bgSponsorsForRecheck() { return (await getDriver()).bgSponsorsForRecheck(); }
-export async function releaseBgSponsor(id) { return (await getDriver()).releaseBgSponsor(id); }
-export async function bgExpiredUnfunded(beforeTs) { return (await getDriver()).bgExpiredUnfunded(beforeTs); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });
