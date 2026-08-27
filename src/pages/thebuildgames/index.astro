@@ -210,11 +210,13 @@ const hostOf = (u) => {
               <b class="bg-claim-rank" data-claim-rank>#1</b>
               <button class="bg-step" type="button" data-rank-up aria-label="a lower spot">+</button>
             </span>
-            <span class="bg-claim-word">for</span>
-            <span class="bg-stepper">
-              <button class="bg-step" type="button" data-amt-dn aria-label="bid less">−</button>
-              <b class="bg-claim-amt" data-claim-amt>{usd(claimCost(1))}</b>
-              <button class="bg-step" type="button" data-amt-up aria-label="bid more">+</button>
+            <span class="bg-claim-buy">
+              <span class="bg-claim-word">for</span>
+              <span class="bg-stepper">
+                <button class="bg-step" type="button" data-amt-dn aria-label="bid less">−</button>
+                <b class="bg-claim-amt" data-claim-amt>{usd(claimCost(1))}</b>
+                <button class="bg-step" type="button" data-amt-up aria-label="bid more">+</button>
+              </span>
             </span>
           </p>
 
@@ -381,7 +383,7 @@ const hostOf = (u) => {
 
 <style>
   .bg-wrap {
-    padding-top: 18px;
+    padding-top: 30px;
     padding-bottom: 120px;
   }
 
@@ -446,7 +448,7 @@ const hostOf = (u) => {
     }
 
     .bg-wrap {
-      padding-top: 14px;
+      padding-top: 26px;
     }
 
     .bg-list-head {
@@ -628,6 +630,14 @@ const hostOf = (u) => {
   /* ---------- board ---------- */
   .bg-board {
     padding-top: 52px;
+  }
+
+  .bg-claim + .bg-board {
+    padding-top: 20px;
+  }
+
+  .bg-claim + .bg-board .bg-list-head {
+    padding-top: 0;
   }
 
   .bg-list-head {
@@ -859,6 +869,14 @@ const hostOf = (u) => {
     gap: 7px;
   }
 
+  /* Inline and invisible on a wide screen; on a phone it claims a whole row
+     so the headline breaks as "take spot #1" / "for $7,750". */
+  .bg-claim-buy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
   .bg-step {
     width: 28px;
     height: 28px;
@@ -1051,6 +1069,13 @@ const hostOf = (u) => {
     width: fit-content;
     margin-inline: auto;
     background: color-mix(in srgb, var(--surface) 70%, transparent);
+  }
+
+  /* The gap under the pill is set here, after the shorthand above, so it
+     survives the `margin: 0 0 12px` and the `margin-inline: auto` both
+     landing on the same rule. */
+  .bg-stats {
+    margin-bottom: 24px;
   }
 
   /* every stat is one centred inline-flex line — number and label share a
@@ -1258,7 +1283,7 @@ const hostOf = (u) => {
       gap: 6px 14px;
       padding: 8px 14px;
       font-size: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 22px;
     }
 
     .bg-stat b {
@@ -1278,6 +1303,11 @@ const hostOf = (u) => {
 
     .bg-claim-head {
       gap: 6px 9px;
+    }
+
+    .bg-claim-buy {
+      flex: 1 0 100%;
+      justify-content: center;
     }
 
     /* Full-width tap targets beat a squeezed side-by-side row on a phone. */
