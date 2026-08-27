@@ -4,6 +4,7 @@
    favicon pulled from the page we actually land on, and a Safe Browsing check
    on the FINAL url that fails CLOSED (unreachable / API-down → held). */
 import { parsePublicUrl } from './builds.js';
+import { xAvatarUrl } from './sponsors.js';
 import { safeFetch } from './safe-fetch.js';
 import { checkUrl, safeBrowsingOn, uncheckedAllowed } from './safe-browsing.js';
 
@@ -95,5 +96,10 @@ export async function screenSubmission(rawLink) {
     verdict = 'held';
     reason = 'safe-browsing: gate not armed, pending review';
   }
-  return { ok: true, verdict, finalUrl: site.finalUrl, faviconUrl: site.faviconUrl, reason };
+  // X/Twitter profile links: the page favicon is just the X logo — use the
+  // profile picture instead. Computed on the FINAL url (so shorteners that
+  // land on a profile get it too) and fed through the same self-host pipeline
+  // as any favicon, so nothing is hotlinked on the board.
+  const avatar = xAvatarUrl(site.finalUrl);
+  return { ok: true, verdict, finalUrl: site.finalUrl, faviconUrl: avatar ?? site.faviconUrl, reason };
 }
