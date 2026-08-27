@@ -270,11 +270,11 @@ const hostOf = (u) => {
                   {s.icon_url ? (
                     <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
                   ) : (
-                    <span class="bg-monogram">{monogram(hostOf(s.link) ?? displayName(s))}</span>
+                    <span class="bg-monogram">{monogram(s.name ?? hostOf(s.link) ?? displayName(s))}</span>
                   )}
                 </span>
                 <span class="bg-name">
-                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{hostOf(s.link) ?? displayName(s)}</a>
+                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{s.name ?? hostOf(s.link) ?? displayName(s)}</a>
                   {s.tagline && <span class="bg-row-tagline">{s.tagline}</span>}
                   <span class="bg-host">
                     added {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}

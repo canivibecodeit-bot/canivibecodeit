@@ -158,7 +158,7 @@ export async function POST({ request, clientAddress }) {
       // Success lands on the post-checkout details page: token identifies the
       // payer, the session id settles the redirect-vs-webhook race there
       // (same mechanic as /sponsor/details). Cancel keeps the ?paid=0 toast.
-      successUrl: `${siteUrl('/thebuildgames/details')}?t=${result.detailsToken}&session_id={CHECKOUT_SESSION_ID}`,
+      successUrl: `${siteUrl('/thebuildgames/details')}?token=${result.detailsToken}&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${siteUrl('/thebuildgames')}?paid=0`,
       customerEmail: contactEmail || undefined,
     });

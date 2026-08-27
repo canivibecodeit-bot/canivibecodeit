@@ -14,15 +14,16 @@ import {
   bgSponsorClearedTotal,
 } from '../../lib/db.js';
 import { buildGamesLive } from '../../lib/flags.js';
-import { TAGLINE_MAX, monogram, usd } from '../../lib/buildgames.js';
+import { NAME_MAX, TAGLINE_MAX, monogram, usd } from '../../lib/buildgames.js';
 import { getSession } from '../../lib/stripe.js';
 import { clearPayment } from '../../lib/buildgames-payments.js';
+import { sendBgReceipt } from '../../lib/buildgames-mail.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
 const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // a month to fill in details
 
-const token = Astro.url.searchParams.get('t') || '';
+const token = Astro.url.searchParams.get('token') || '';
 const sessionId = Astro.url.searchParams.get('session_id') || '';
 let payment = token ? await bgPaymentByDetailsToken(token) : null;
 if (payment && Date.now() - Number(payment.created_at) > TOKEN_TTL_MS) payment = null;
@@ -43,7 +44,14 @@ if (payment && payment.status === 'pending' && sessionId) {
       Number.isInteger(captured) &&
       captured > 0
     ) {
-      await clearPayment(payment.id, { capturedCents: captured, processorRef: s.payment_intent || s.id });
+      const clearedHere = await clearPayment(payment.id, { capturedCents: captured, processorRef: s.payment_intent || s.id });
+      if (clearedHere) {
+        // The payer beat the webhook (the common case — Stripe redirects
+        // instantly, the delivery lags). This side won the atomic clear, so
+        // THIS side sends the one receipt; the webhook's clear will return
+        // false and send nothing. Exactly-once either way.
+        sendBgReceipt({ to: s.customer_details?.email, capturedCents: captured, ref: s.payment_intent || s.id });
+      }
       payment = await bgPaymentByDetailsToken(token);
     }
   } catch (err) {
@@ -52,7 +60,12 @@ if (payment && payment.status === 'pending' && sessionId) {
 }
 
 const sponsor = payment ? await bgSponsorById(payment.sponsor_id) : null;
-const winner = sponsor?.first_cleared_at != null ? await bgFirstClearedScreenedPayment(sponsor.id) : null;
+// The ACTUAL claim winner is recorded at claim time (claimed_by); the
+// earliest-cleared proxy remains only for rows claimed before the column
+// existed. The two can diverge under razor-thin concurrent clears.
+const winnerId =
+  sponsor?.claimed_by ??
+  (sponsor?.first_cleared_at != null ? (await bgFirstClearedScreenedPayment(sponsor.id))?.id : null);
 
 /* One state string drives the whole page. */
 let state = 'missing';
@@ -60,7 +73,7 @@ if (payment && sponsor) {
   if (payment.status === 'pending') state = 'processing';
   else if (payment.status !== 'cleared') state = 'missing';
   else if (sponsor.status !== 'active' || sponsor.first_cleared_at == null) state = 'held';
-  else if (winner?.id !== payment.id) state = 'topup';
+  else if (winnerId !== payment.id) state = 'topup';
   else state = 'editable';
 }
 
@@ -94,7 +107,7 @@ const description = 'Finish setting up your Build Games placement.';
         <h1>payment processing</h1>
         <p class="bgd-sub">
           Your payment is being confirmed. This usually takes a few seconds ·
-          <a href={`/thebuildgames/details?t=${token}${sessionId ? `&session_id=${sessionId}` : ''}`}>refresh</a>.
+          <a href={`/thebuildgames/details?token=${token}${sessionId ? `&session_id=${sessionId}` : ''}`}>refresh</a>.
         </p>
       </>
     )}
@@ -135,15 +148,26 @@ const description = 'Finish setting up your Build Games placement.';
             )}
           </span>
           <span class="bgd-name">
-            <b>{hostName}</b>
+            <b data-preview-name>{sponsor.name ?? hostName}</b>
             <span class="bgd-tagline" data-preview-tagline>{sponsor.tagline ?? 'your tagline appears here'}</span>
           </span>
           <span class="bgd-amount">{usd(clearedTotal)}</span>
         </div>
 
         <form class="bgd-form" method="post" action="/api/thebuildgames/details" data-details-form>
-          <input type="hidden" name="t" value={token} />
+          <input type="hidden" name="token" value={token} />
           <label>
+            <span>name · up to {NAME_MAX} characters</span>
+            <input
+              type="text"
+              name="name"
+              maxlength={NAME_MAX}
+              value={sponsor.name ?? ''}
+              placeholder={hostName}
+              data-name-input
+            />
+          </label>
+          <label class="bgd-tagline-label">
             <span>tagline · up to {TAGLINE_MAX} characters, no links</span>
             <input
               type="text"
@@ -175,6 +199,11 @@ const description = 'Finish setting up your Build Games placement.';
     input?.addEventListener('input', () => {
       if (preview) preview.textContent = input.value.trim() || 'your tagline appears here';
     });
+    const nameInput = document.querySelector('[data-name-input]');
+    const namePreview = document.querySelector('[data-preview-name]');
+    nameInput?.addEventListener('input', () => {
+      if (namePreview) namePreview.textContent = nameInput.value.trim() || nameInput.placeholder;
+    });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('button[type="submit"]');
@@ -189,7 +218,7 @@ const description = 'Finish setting up your Build Games placement.';
         const res = await fetch(form.action, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ t: data.t, tagline: data.tagline }),
+          body: JSON.stringify({ token: data.token, name: data.name, tagline: data.tagline }),
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -303,6 +332,11 @@ const description = 'Finish setting up your Build Games placement.';
   .bgd-form {
     margin-top: 22px;
     text-align: left;
+  }
+
+  .bgd-tagline-label {
+    display: block;
+    padding-top: 12px;
   }
 
   .bgd-form label > span {

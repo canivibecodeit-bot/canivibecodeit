@@ -107,6 +107,23 @@ const URL_ISH = /(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,}(\/|\b))/i;
 // (553px at ~7.8px/char = 70 chars/line); past it the 2-line clamp cuts.
 export const TAGLINE_MAX = 140;
 
+// Display name cap — matches the sponsor-card name limit; the row's line 1.
+export const NAME_MAX = 40;
+
+/* Same hygiene as taglines minus the URL rejection: names like "acme.io" are
+   legitimate, and the name only renders as text inside the sponsor's own
+   screened link. */
+export function cleanName(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw
+    .replace(/[<>]/g, '')
+    .replace(UNSAFE_GLYPHS, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, NAME_MAX);
+  return t.length >= 2 ? t : null;
+}
+
 /* Clean a public tagline: strip markup chars and bidi/zero-width glyphs,
    collapse whitespace, cap length. Returns null if it's empty or contains a
    URL (links belong in the entry link, which is screened; a URL in the
@@ -172,8 +189,9 @@ export function monogram(name) {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 }
 
-// A display name for a sponsor with no chosen name: the registrable host.
+// A display name: the sponsor's chosen name, else tagline, else the host.
 export function displayName(sponsor) {
+  if (sponsor.name) return sponsor.name;
   if (sponsor.tagline) return sponsor.tagline;
   try {
     return new URL(sponsor.link).hostname.replace(/^www\./, '');

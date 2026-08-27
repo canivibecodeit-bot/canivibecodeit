@@ -14,7 +14,8 @@
    All Build Games sponsor-facing mail goes through here. alertRob and the
    opt-in LIST path (waitlist + Resend, its own unsubscribe) are separate. */
 import { rateLimit } from './db.js';
-import { sendMail, unmailable } from './mail.js';
+import { brandShell, esc, sendMail, unmailable } from './mail.js';
+import { usd } from './buildgames.js';
 
 async function suppressed(email) {
   const key = process.env.RESEND_API_KEY;
@@ -30,6 +31,30 @@ async function suppressed(email) {
   } catch {
     return false;
   }
+}
+
+/* The payer's receipt — ONE implementation, called by whichever side's
+   clearPayment actually returned true (webhook OR the details page's
+   race-settler), so it sends exactly once per capture and never depends on
+   which of the two arrived first. Fire-and-forget by construction: nothing
+   here can block or fail the money path. Goes to the Stripe-checkout email
+   (payment-verified), so the E1 caps deliberately do not apply — receipts
+   are 1:1 with real captures. */
+export function sendBgReceipt({ to, capturedCents, ref }) {
+  if (!to) return;
+  sendMail({
+    to,
+    subject: `receipt · ${usd(capturedCents)} sponsored placement — canivibecodeit.com`,
+    html: brandShell(
+      `<p>Payment received: <b>${usd(capturedCents)}</b> for a sponsored placement on the`
+      + ` canivibecodeit.com board.</p>`
+      + `<p>Your placement is live and ranks by cumulative sponsorship — you keep your spot`
+      + ` until another sponsor's total passes yours.</p>`
+      + `<p><a href="https://canivibecodeit.com/thebuildgames">see the board</a></p>`
+      + `<p style="color:#6e6e67; font-size:12px;">Reference: ${esc(String(ref))}. Stripe also`
+      + ` emails an invoice for your records. Questions? Reply to this email.</p>`
+    ),
+  }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
 }
 
 /* Returns true if the mail was actually handed to sendMail. */

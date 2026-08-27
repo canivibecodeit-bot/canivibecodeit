@@ -157,7 +157,8 @@ export async function clearPayment(paymentId, capture = null) {
         p.proposed_status,
         p.proposed_reason ?? null,
         p.contact_email ?? null, // the owner email for held/outbid notifications
-        Date.now()
+        Date.now(),
+        p.id // recorded as claimed_by: the payment that actually won
       )
     : 0;
   if (won && p.proposed_icon_src) {

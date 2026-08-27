@@ -258,6 +258,8 @@ const SCHEMA_SQLITE = `
     last_checked_at INTEGER,
     check_result TEXT,
     contact_email TEXT,
+    name TEXT,
+    claimed_by TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -538,6 +540,8 @@ const SCHEMA_PG = `
     last_checked_at BIGINT,
     check_result TEXT,
     contact_email TEXT,
+    name TEXT,
+    claimed_by TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -693,7 +697,7 @@ const chRow = numericRow(['created_at', 'last_checked_at']);
 /* Build Games sponsors: writable fields for admin/moderation updates, and the
    BIGINT columns for the PG string→number fix. cleared_total/pending_total are
    query-computed and coerced here too when present. */
-const BG_SPONSOR_FIELDS = ['status', 'held_reason', 'tagline', 'icon_url', 'first_cleared_at', 'last_checked_at', 'check_result'];
+const BG_SPONSOR_FIELDS = ['status', 'held_reason', 'tagline', 'icon_url', 'first_cleared_at', 'last_checked_at', 'check_result', 'name'];
 
 function bgSponsorParts(fields) {
   const keys = Object.keys(fields).filter((k) => BG_SPONSOR_FIELDS.includes(k));
@@ -781,6 +785,8 @@ async function pgDriver() {
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_reason TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS contact_email TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS details_token TEXT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS name TEXT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS claimed_by TEXT');
   // Public click counter for board rows (social proof for buyers).
   await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS click_count INTEGER NOT NULL DEFAULT 0');
   // H4.2: one processor capture clears exactly one payment — a replayed or
@@ -1292,11 +1298,15 @@ async function pgDriver() {
     // ONLY if not already frozen. Exactly one concurrent clear wins (1); the
     // rest add money without touching identity (0). Status comes from THIS
     // payment's screen, closing held-poisoning.
-    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts, paymentId) {
+      // status <> 'removed': an admin-removed sponsor's in-flight session must
+      // never force it back onto the board (B1) — the money still clears, the
+      // identity stays unclaimed. claimed_by records the ACTUAL winner so edit
+      // authorisation never needs a time-ordering proxy.
       const r = await pool.query(
-        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, contact_email = $5, first_cleared_at = $6
-         WHERE id = $1 AND first_cleared_at IS NULL`,
-        [sponsorId, tagline, status, heldReason, contactEmail, ts]
+        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, contact_email = $5, first_cleared_at = $6, claimed_by = $7
+         WHERE id = $1 AND first_cleared_at IS NULL AND status <> 'removed'`,
+        [sponsorId, tagline, status, heldReason, contactEmail, ts, paymentId ?? null]
       );
       return r.rowCount;
     },
@@ -1480,6 +1490,8 @@ async function sqliteDriver() {
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_reason TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN contact_email TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN details_token TEXT');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN name TEXT');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN claimed_by TEXT');
   // Public click counter for board rows (social proof for buyers).
   addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0');
   // H4.2: one processor capture clears exactly one payment — a replayed or
@@ -1914,13 +1926,14 @@ async function sqliteDriver() {
     async reverseBgPaymentAtomic(id) {
       return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status IN ('pending','cleared')").run(id).changes;
     },
-    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts, paymentId) {
+      // See pg driver: refuses removed rows (B1) and records the winner.
       return db
         .prepare(
-          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, contact_email = ?, first_cleared_at = ?
-           WHERE id = ? AND first_cleared_at IS NULL`
+          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, contact_email = ?, first_cleared_at = ?, claimed_by = ?
+           WHERE id = ? AND first_cleared_at IS NULL AND status <> 'removed'`
         )
-        .run(tagline, status, heldReason, contactEmail, ts, sponsorId).changes;
+        .run(tagline, status, heldReason, contactEmail, ts, paymentId ?? null, sponsorId).changes;
     },
     async bgSponsorClearedTotal(sponsorId) {
       return db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE sponsor_id = ? AND status = 'cleared'").get(sponsorId).t;
@@ -2252,7 +2265,7 @@ export async function bgPaymentByProcessorRef(ref) { return (await getDriver()).
 export async function bgIncrementClicks(id) { return (await getDriver()).bgIncrementClicks(id); }
 export async function bgClearedSponsorByHost(host, excludeLink) { return (await getDriver()).bgClearedSponsorByHost(host, excludeLink); }
 export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
-export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts); }
+export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts, paymentId) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts, paymentId); }
 export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }
 export async function bgLeaderboard() { return (await getDriver()).bgLeaderboard(); }
 export async function bgSponsorsForAdmin() { return (await getDriver()).bgSponsorsForAdmin(); }
