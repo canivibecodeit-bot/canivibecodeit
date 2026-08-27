@@ -1,0 +1,52 @@
+---
+// The Build Games lockup (V5): the ○△□ mark carrying one coral→teal gradient
+// across all three shapes, stacked above the "THE BUILD GAMES" wordmark.
+// Mark is SVG (crisp at any size, theme-independent gradient); wordmark is
+// web-font text in currentColor, so it's white on dark / near-black on light
+// automatically. Reusable for the hero, and later the favicon/social mark.
+const { class: cls } = Astro.props;
+---
+<div class:list={['bgl', cls]}>
+  <svg class="bgl-mark" viewBox="0 0 232 72" role="img" aria-label="The Build Games">
+    <defs>
+      <linearGradient id="bgl-ct" gradientUnits="userSpaceOnUse" x1="0" y1="8" x2="232" y2="64">
+        <stop offset="0" stop-color="#ff7a5c" />
+        <stop offset="0.5" stop-color="#f08a86" />
+        <stop offset="1" stop-color="#2fd6a6" />
+      </linearGradient>
+    </defs>
+    <circle cx="36" cy="36" r="32" fill="url(#bgl-ct)" />
+    <polygon points="116,4 150,68 82,68" fill="url(#bgl-ct)" />
+    <rect x="168" y="6" width="60" height="60" fill="url(#bgl-ct)" />
+  </svg>
+  <span class="bgl-word">THE BUILD GAMES</span>
+</div>
+
+<style>
+  /* Compact lockup (Rob's round-2 compression): the mark and wordmark keep
+     their hierarchy but stop eating the first screen — the sponsor list is
+     the destination, the lockup is the doorway. */
+  .bgl {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(8px, 1.6vw, 14px);
+  }
+
+  .bgl-mark {
+    width: clamp(76px, 15vw, 108px);
+    height: auto;
+    display: block;
+  }
+
+  .bgl-word {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 5.5vw, 44px);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    /* currentColor = --fg: white on dark, near-black on light. */
+    color: var(--fg);
+    text-align: center;
+  }
+</style>

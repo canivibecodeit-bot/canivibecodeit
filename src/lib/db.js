@@ -197,6 +197,106 @@ const SCHEMA_SQLITE = `
     build_id TEXT,
     created_at INTEGER NOT NULL
   );
+
+  /* Build challenges: challenge content lives in src/lib/challenge.js (the
+     repo is the admin panel, same as apps); this is runtime state only.
+     Entries are keyed by a self-declared X handle — future portfolio pages
+     hang off it. status: live | held | unlisted. kind: entry | seed | demo. */
+  CREATE TABLE IF NOT EXISTS challenge_entries (
+    id TEXT PRIMARY KEY,
+    challenge_id INTEGER NOT NULL,
+    x_handle TEXT NOT NULL,
+    url TEXT NOT NULL,
+    page_title TEXT,
+    og_image TEXT,
+    email_opted INTEGER NOT NULL DEFAULT 0,
+    kind TEXT NOT NULL DEFAULT 'entry',
+    status TEXT NOT NULL DEFAULT 'live',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    badge_hits INTEGER NOT NULL DEFAULT 0,
+    country TEXT,
+    created_at INTEGER NOT NULL,
+    last_checked_at INTEGER,
+    check_result TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
+  CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
+  CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
+
+  /* One row per (entry, reporter) so a single IP can't run the report count
+     up on its own — the auto-hold weighs DISTINCT reporters, not raw hits. */
+  CREATE TABLE IF NOT EXISTS challenge_reports (
+    entry_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (entry_id, reporter_hash)
+  );
+
+  /* Registrable hosts an admin has removed (or Safe Browsing flagged): a new
+     entry on the same host is rejected before it ever lists, so re-posting
+     the same site under a fresh query string can't dodge a moderation call. */
+  CREATE TABLE IF NOT EXISTS challenge_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at INTEGER NOT NULL
+  );
+
+  /* The Build Games: sponsor bidding. Identity = canonical link (one row).
+     tagline/icon set by the first cleared payment, immutable via payments.
+     status = active | held | removed (moderation). */
+  CREATE TABLE IF NOT EXISTS buildgames_sponsors (
+    id TEXT PRIMARY KEY,
+    link TEXT NOT NULL UNIQUE,
+    host TEXT NOT NULL,
+    tagline TEXT,
+    icon_url TEXT,
+    status TEXT NOT NULL DEFAULT 'held',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    first_cleared_at INTEGER,
+    last_checked_at INTEGER,
+    check_result TEXT,
+    contact_email TEXT,
+    created_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
+  /* Append-only payment ledger. status = pending | cleared | reversed. */
+  /* Each payment carries the tagline + icon source PROPOSED with it. On the
+     FIRST payment to clear for a sponsor, those freeze onto the sponsor row
+     (first-cleared-payer sets identity, immutable thereafter). Later payments
+     add money only. */
+  /* Each payment carries the tagline, icon source AND the screening outcome
+     PROPOSED with it. On the FIRST payment to clear for a sponsor, those
+     freeze onto the sponsor row (first-cleared-payer sets identity AND the
+     status is re-evaluated from THAT payment's screen — so a squatter's
+     unpaid 'held' can't poison a paying sponsor's placement). Later payments
+     add money only. */
+  CREATE TABLE IF NOT EXISTS buildgames_payments (
+    id TEXT PRIMARY KEY,
+    sponsor_id TEXT NOT NULL,
+    amount_cents INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    processor_ref TEXT,
+    proposed_tagline TEXT,
+    proposed_icon_src TEXT,
+    proposed_status TEXT,
+    proposed_reason TEXT,
+    contact_email TEXT,
+    created_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
+  CREATE TABLE IF NOT EXISTS buildgames_reports (
+    sponsor_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (sponsor_id, reporter_hash)
+  );
+  CREATE TABLE IF NOT EXISTS buildgames_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at INTEGER NOT NULL
+  );
 `;
 
 const SCHEMA_PG = `
@@ -387,6 +487,84 @@ const SCHEMA_PG = `
     build_id TEXT,
     created_at BIGINT NOT NULL
   );
+
+  /* Build challenges: content in src/lib/challenge.js, runtime state here.
+     See the SQLite schema for the field notes. */
+  CREATE TABLE IF NOT EXISTS challenge_entries (
+    id TEXT PRIMARY KEY,
+    challenge_id INTEGER NOT NULL,
+    x_handle TEXT NOT NULL,
+    url TEXT NOT NULL,
+    page_title TEXT,
+    og_image TEXT,
+    email_opted INTEGER NOT NULL DEFAULT 0,
+    kind TEXT NOT NULL DEFAULT 'entry',
+    status TEXT NOT NULL DEFAULT 'live',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    badge_hits INTEGER NOT NULL DEFAULT 0,
+    country TEXT,
+    created_at BIGINT NOT NULL,
+    last_checked_at BIGINT,
+    check_result TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS challenge_entries_url ON challenge_entries (challenge_id, url);
+  CREATE INDEX IF NOT EXISTS challenge_entries_feed ON challenge_entries (challenge_id, status, created_at);
+  CREATE INDEX IF NOT EXISTS challenge_entries_handle ON challenge_entries (lower(x_handle));
+
+  CREATE TABLE IF NOT EXISTS challenge_reports (
+    entry_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at BIGINT NOT NULL,
+    PRIMARY KEY (entry_id, reporter_hash)
+  );
+  CREATE TABLE IF NOT EXISTS challenge_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at BIGINT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS buildgames_sponsors (
+    id TEXT PRIMARY KEY,
+    link TEXT NOT NULL UNIQUE,
+    host TEXT NOT NULL,
+    tagline TEXT,
+    icon_url TEXT,
+    status TEXT NOT NULL DEFAULT 'held',
+    held_reason TEXT,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    first_cleared_at BIGINT,
+    last_checked_at BIGINT,
+    check_result TEXT,
+    contact_email TEXT,
+    created_at BIGINT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
+  CREATE TABLE IF NOT EXISTS buildgames_payments (
+    id TEXT PRIMARY KEY,
+    sponsor_id TEXT NOT NULL,
+    amount_cents INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    processor_ref TEXT,
+    proposed_tagline TEXT,
+    proposed_icon_src TEXT,
+    proposed_status TEXT,
+    proposed_reason TEXT,
+    contact_email TEXT,
+    created_at BIGINT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
+  CREATE TABLE IF NOT EXISTS buildgames_reports (
+    sponsor_id TEXT NOT NULL,
+    reporter_hash TEXT NOT NULL,
+    created_at BIGINT NOT NULL,
+    PRIMARY KEY (sponsor_id, reporter_hash)
+  );
+  CREATE TABLE IF NOT EXISTS buildgames_blocked_hosts (
+    host TEXT PRIMARY KEY,
+    reason TEXT,
+    created_at BIGINT NOT NULL
+  );
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -494,6 +672,42 @@ function numericRow(cols) {
 
 const buildRow = numericRow(BUILD_NUMERIC);
 
+/* Challenge entries: writable fields for updates, BIGINT columns for the
+   PG string → number fix. Counters (report_count, badge_hits) are bumped by
+   dedicated atomic methods, never through update. */
+const CH_ENTRY_FIELDS = [
+  'status', 'held_reason', 'kind', 'page_title', 'og_image',
+  'last_checked_at', 'check_result',
+];
+
+function chParts(fields) {
+  const keys = Object.keys(fields).filter((k) => CH_ENTRY_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateChallengeEntry: no writable fields');
+  return keys;
+}
+
+const chRow = numericRow(['created_at', 'last_checked_at']);
+
+/* Build Games sponsors: writable fields for admin/moderation updates, and the
+   BIGINT columns for the PG string→number fix. cleared_total/pending_total are
+   query-computed and coerced here too when present. */
+const BG_SPONSOR_FIELDS = ['status', 'held_reason', 'tagline', 'icon_url', 'first_cleared_at', 'last_checked_at', 'check_result'];
+
+function bgSponsorParts(fields) {
+  const keys = Object.keys(fields).filter((k) => BG_SPONSOR_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateBgSponsor: no writable fields');
+  return keys;
+}
+
+function bgSponsorRow(row) {
+  if (!row) return null;
+  const out = { ...row };
+  for (const c of ['first_cleared_at', 'last_checked_at', 'created_at', 'report_count', 'click_count', 'cleared_total', 'pending_total']) {
+    if (out[c] != null) out[c] = Number(out[c]);
+  }
+  return out;
+}
+
 let driver;
 
 /* Raw connection handles, shared between the query driver below and Better
@@ -554,6 +768,26 @@ async function pgDriver() {
   // Moderation: a pinned row's count is frozen. Votes still get a normal 200
   // so vote-stuffers see nothing, but nothing is written.
   await pool.query('ALTER TABLE votes ADD COLUMN IF NOT EXISTS pinned INTEGER NOT NULL DEFAULT 0');
+  // Build Games columns added after the tables first shipped (N1): a table
+  // created by an earlier schema is missing them and every bid would 500.
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS last_checked_at BIGINT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS check_result TEXT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS contact_email TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_tagline TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_icon_src TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_status TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_reason TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS contact_email TEXT');
+  // Public click counter for board rows (social proof for buyers).
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS click_count INTEGER NOT NULL DEFAULT 0');
+  // H4.2: one processor capture clears exactly one payment — a replayed or
+  // cross-wired webhook citing an already-used ref must fail loudly, not
+  // double-credit. Legacy 'admin' refs are first made unique so the index can
+  // build; NULL refs (pending rows) stay exempt.
+  await pool.query("UPDATE buildgames_payments SET processor_ref = 'admin:' || id WHERE processor_ref = 'admin'");
+  await pool.query(
+    'CREATE UNIQUE INDEX IF NOT EXISTS buildgames_payments_ref ON buildgames_payments (processor_ref) WHERE processor_ref IS NOT NULL'
+  );
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -866,6 +1100,255 @@ async function pgDriver() {
       );
       return r.rows[0] ?? null;
     },
+    async insertChallengeEntry(e) {
+      await pool.query(
+        `INSERT INTO challenge_entries
+           (id, challenge_id, x_handle, url, page_title, og_image, email_opted,
+            kind, status, held_reason, country, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [e.id, e.challenge_id, e.x_handle, e.url, e.page_title, e.og_image,
+         e.email_opted, e.kind, e.status, e.held_reason, e.country, e.created_at]
+      );
+    },
+    async updateChallengeEntry(id, fields) {
+      const keys = chParts(fields);
+      const params = [id, ...keys.map((k) => fields[k])];
+      const r = await pool.query(
+        `UPDATE challenge_entries SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        params
+      );
+      return r.rowCount;
+    },
+    async challengeEntryById(id) {
+      const r = await pool.query('SELECT * FROM challenge_entries WHERE id = $1', [id]);
+      return chRow(r.rows[0]);
+    },
+    async challengeEntryByUrl(challengeId, url) {
+      const r = await pool.query(
+        'SELECT * FROM challenge_entries WHERE challenge_id = $1 AND url = $2',
+        [challengeId, url]
+      );
+      return chRow(r.rows[0]);
+    },
+    async challengeEntries(challengeId, statuses) {
+      const r = await pool.query(
+        'SELECT * FROM challenge_entries WHERE challenge_id = $1 AND status = ANY($2) ORDER BY created_at DESC',
+        [challengeId, statuses]
+      );
+      return r.rows.map(chRow);
+    },
+    async challengeEntriesForCheck() {
+      const r = await pool.query(
+        "SELECT * FROM challenge_entries WHERE status IN ('live', 'held') ORDER BY created_at ASC"
+      );
+      return r.rows.map(chRow);
+    },
+    async liveEntryCount(challengeId) {
+      const r = await pool.query(
+        "SELECT COUNT(*) AS n FROM challenge_entries WHERE challenge_id = $1 AND status = 'live' AND kind != 'demo'",
+        [challengeId]
+      );
+      return Number(r.rows[0].n);
+    },
+    async bumpEntryBadge(id) {
+      const r = await pool.query(
+        "UPDATE challenge_entries SET badge_hits = badge_hits + 1 WHERE id = $1 AND status = 'live'",
+        [id]
+      );
+      return r.rowCount;
+    },
+    // Records the report if this reporter hasn't already flagged this entry;
+    // returns the resulting DISTINCT reporter count, or null if it was a
+    // duplicate (so a repeat report from one IP moves nothing).
+    async addEntryReport(entryId, reporterHash, ts) {
+      const ins = await pool.query(
+        'INSERT INTO challenge_reports (entry_id, reporter_hash, created_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        [entryId, reporterHash, ts]
+      );
+      if (ins.rowCount === 0) return null;
+      const c = await pool.query('SELECT COUNT(*) AS n FROM challenge_reports WHERE entry_id = $1', [entryId]);
+      const n = Number(c.rows[0].n);
+      await pool.query('UPDATE challenge_entries SET report_count = $2 WHERE id = $1', [entryId, n]);
+      return n;
+    },
+    async blockHost(host, reason, ts) {
+      await pool.query(
+        'INSERT INTO challenge_blocked_hosts (host, reason, created_at) VALUES ($1, $2, $3) ON CONFLICT (host) DO NOTHING',
+        [host, reason, ts]
+      );
+    },
+    async isHostBlocked(host) {
+      const r = await pool.query('SELECT 1 FROM challenge_blocked_hosts WHERE host = $1', [host]);
+      return r.rowCount > 0;
+    },
+    async unblockHost(host) {
+      await pool.query('DELETE FROM challenge_blocked_hosts WHERE host = $1', [host]);
+    },
+
+    /* ---- The Build Games ---- */
+    // ON CONFLICT (link) DO NOTHING: two concurrent first submits for one link
+    // both succeed — whichever insert lost re-reads the winner's row (H4.4).
+    async insertBgSponsor(s) {
+      await pool.query(
+        `INSERT INTO buildgames_sponsors (id, link, host, tagline, icon_url, status, held_reason, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (link) DO NOTHING`,
+        [s.id, s.link, s.host, s.tagline, s.icon_url, s.status, s.held_reason, s.created_at]
+      );
+    },
+    async bgSponsorByLink(link) {
+      const r = await pool.query('SELECT * FROM buildgames_sponsors WHERE link = $1', [link]);
+      return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
+    },
+    // M4 residual: a host that already has a PAID identity can't be split
+    // into more board slots via a different path/URL. Unpaid rows never block
+    // (or a free squat submission could lock a brand out of bidding).
+    async bgClearedSponsorByHost(host, excludeLink) {
+      const r = await pool.query(
+        `SELECT * FROM buildgames_sponsors
+         WHERE host = $1 AND link <> $2 AND first_cleared_at IS NOT NULL AND status IN ('active','held') LIMIT 1`,
+        [host, excludeLink]
+      );
+      return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
+    },
+    async bgSponsorById(id) {
+      const r = await pool.query('SELECT * FROM buildgames_sponsors WHERE id = $1', [id]);
+      return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
+    },
+    async updateBgSponsor(id, fields) {
+      const keys = bgSponsorParts(fields);
+      const r = await pool.query(
+        `UPDATE buildgames_sponsors SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        [id, ...keys.map((k) => fields[k])]
+      );
+      return r.rowCount;
+    },
+    async insertBgPayment(p) {
+      await pool.query(
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at]
+      );
+    },
+    async bgPaymentById(id) {
+      const r = await pool.query('SELECT * FROM buildgames_payments WHERE id = $1', [id]);
+      return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
+    },
+    // Atomic pending→cleared: only the FIRST concurrent caller wins (returns 1);
+    // a retry-storm or double webhook gets 0 and must not act (audit H4.3).
+    async clearBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'cleared' WHERE id = $1 AND status = 'pending'", [id]);
+      return r.rowCount;
+    },
+    // Processor clear (H4.1/H4.2): one atomic statement stamps CLEARED with the
+    // amount the processor actually CAPTURED (the recorded/claimed amount is
+    // never trusted for money) and the capture's unique ref. The partial
+    // unique index makes a reused ref THROW rather than double-credit.
+    async clearBgPaymentCaptured(id, capturedCents, processorRef) {
+      const r = await pool.query(
+        "UPDATE buildgames_payments SET status = 'cleared', amount_cents = $2, processor_ref = $3 WHERE id = $1 AND status = 'pending'",
+        [id, capturedCents, processorRef]
+      );
+      return r.rowCount;
+    },
+    // Expired/abandoned checkout: retire a PENDING payment only — an expired
+    // event must never touch a payment that has already cleared.
+    async expireBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'reversed' WHERE id = $1 AND status = 'pending'", [id]);
+      return r.rowCount;
+    },
+    // Refund/dispute lookup: which payment did this processor capture clear?
+    async bgPaymentByProcessorRef(ref) {
+      const r = await pool.query('SELECT * FROM buildgames_payments WHERE processor_ref = $1', [ref]);
+      return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
+    },
+    async bgIncrementClicks(id) {
+      const r = await pool.query('UPDATE buildgames_sponsors SET click_count = click_count + 1 WHERE id = $1', [id]);
+      return r.rowCount;
+    },
+    // Atomic reverse: only a currently pending/cleared payment reverses (1);
+    // reversing an already-reversed one is a no-op (0).
+    async reverseBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'reversed' WHERE id = $1 AND status IN ('pending','cleared')", [id]);
+      return r.rowCount;
+    },
+    // Atomic first-clear claim: freezes tagline + status + first_cleared_at
+    // ONLY if not already frozen. Exactly one concurrent clear wins (1); the
+    // rest add money without touching identity (0). Status comes from THIS
+    // payment's screen, closing held-poisoning.
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
+      const r = await pool.query(
+        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, contact_email = $5, first_cleared_at = $6
+         WHERE id = $1 AND first_cleared_at IS NULL`,
+        [sponsorId, tagline, status, heldReason, contactEmail, ts]
+      );
+      return r.rowCount;
+    },
+    // Cumulative cleared, non-reversed total for a sponsor.
+    async bgSponsorClearedTotal(sponsorId) {
+      const r = await pool.query(
+        "SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE sponsor_id = $1 AND status = 'cleared'",
+        [sponsorId]
+      );
+      return Number(r.rows[0].t);
+    },
+    // Board: active sponsors with cleared money, ranked totals attached.
+    async bgLeaderboard() {
+      const r = await pool.query(
+        `SELECT s.*, COALESCE(SUM(p.amount_cents) FILTER (WHERE p.status='cleared'),0) AS cleared_total
+         FROM buildgames_sponsors s LEFT JOIN buildgames_payments p ON p.sponsor_id = s.id
+         WHERE s.status = 'active'
+         GROUP BY s.id HAVING COALESCE(SUM(p.amount_cents) FILTER (WHERE p.status='cleared'),0) > 0`
+      );
+      return r.rows.map(bgSponsorRow);
+    },
+    // Admin view: every sponsor with cleared + pending totals.
+    async bgSponsorsForAdmin() {
+      const r = await pool.query(
+        `SELECT s.*,
+           COALESCE(SUM(p.amount_cents) FILTER (WHERE p.status='cleared'),0) AS cleared_total,
+           COALESCE(SUM(p.amount_cents) FILTER (WHERE p.status='pending'),0) AS pending_total
+         FROM buildgames_sponsors s LEFT JOIN buildgames_payments p ON p.sponsor_id = s.id
+         GROUP BY s.id ORDER BY cleared_total DESC, s.created_at ASC`
+      );
+      return r.rows.map(bgSponsorRow);
+    },
+    // Pot: all cleared, non-reversed money across every sponsor (removed too).
+    async bgPotCents() {
+      const r = await pool.query("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE status = 'cleared'");
+      return Number(r.rows[0].t);
+    },
+    async addBgReport(sponsorId, reporterHash, ts) {
+      const ins = await pool.query(
+        'INSERT INTO buildgames_reports (sponsor_id, reporter_hash, created_at) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',
+        [sponsorId, reporterHash, ts]
+      );
+      if (ins.rowCount === 0) return null;
+      const c = await pool.query('SELECT COUNT(*) AS n FROM buildgames_reports WHERE sponsor_id = $1', [sponsorId]);
+      const n = Number(c.rows[0].n);
+      await pool.query('UPDATE buildgames_sponsors SET report_count = $2 WHERE id = $1', [sponsorId, n]);
+      return n;
+    },
+    async bgFirstReportAt(sponsorId) {
+      const r = await pool.query('SELECT MIN(created_at) AS t FROM buildgames_reports WHERE sponsor_id = $1', [sponsorId]);
+      return r.rows[0]?.t != null ? Number(r.rows[0].t) : null;
+    },
+    async bgBlockHost(host, reason, ts) {
+      await pool.query(
+        'INSERT INTO buildgames_blocked_hosts (host, reason, created_at) VALUES ($1,$2,$3) ON CONFLICT (host) DO NOTHING',
+        [host, reason, ts]
+      );
+    },
+    async bgUnblockHost(host) {
+      await pool.query('DELETE FROM buildgames_blocked_hosts WHERE host = $1', [host]);
+    },
+    async bgIsHostBlocked(host) {
+      const r = await pool.query('SELECT 1 FROM buildgames_blocked_hosts WHERE host = $1', [host]);
+      return r.rowCount > 0;
+    },
+    async bgSponsorsForRecheck() {
+      const r = await pool.query("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')");
+      return r.rows.map(bgSponsorRow);
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -962,6 +1445,33 @@ async function sqliteDriver() {
   } catch (err) {
     if (!/duplicate column/i.test(err.message)) throw err;
   }
+  // Build Games columns added after the tables first shipped (N1): a table
+  // created by an earlier schema is missing them and every bid would 500.
+  const addBgColumn = (sql) => {
+    try {
+      db.exec(sql);
+    } catch (err) {
+      if (!/duplicate column/i.test(err.message)) throw err;
+    }
+  };
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN last_checked_at INTEGER');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN check_result TEXT');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN contact_email TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_tagline TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_icon_src TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_status TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_reason TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN contact_email TEXT');
+  // Public click counter for board rows (social proof for buyers).
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0');
+  // H4.2: one processor capture clears exactly one payment — a replayed or
+  // cross-wired webhook citing an already-used ref must fail loudly, not
+  // double-credit. Legacy 'admin' refs are first made unique so the index can
+  // build; NULL refs (pending rows) stay exempt.
+  db.exec("UPDATE buildgames_payments SET processor_ref = 'admin:' || id WHERE processor_ref = 'admin'");
+  db.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS buildgames_payments_ref ON buildgames_payments (processor_ref) WHERE processor_ref IS NOT NULL'
+  );
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);
@@ -1236,6 +1746,204 @@ async function sqliteDriver() {
         db.prepare('SELECT * FROM builds WHERE user_id = ? AND slug = ?').get(userId, slug)
       );
     },
+    async insertChallengeEntry(e) {
+      db.prepare(
+        `INSERT INTO challenge_entries
+           (id, challenge_id, x_handle, url, page_title, og_image, email_opted,
+            kind, status, held_reason, country, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).run(
+        e.id, e.challenge_id, e.x_handle, e.url, e.page_title, e.og_image,
+        e.email_opted, e.kind, e.status, e.held_reason, e.country, e.created_at
+      );
+    },
+    async updateChallengeEntry(id, fields) {
+      const keys = chParts(fields);
+      return db
+        .prepare(`UPDATE challenge_entries SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async challengeEntryById(id) {
+      return chRow(db.prepare('SELECT * FROM challenge_entries WHERE id = ?').get(id));
+    },
+    async challengeEntryByUrl(challengeId, url) {
+      return chRow(
+        db.prepare('SELECT * FROM challenge_entries WHERE challenge_id = ? AND url = ?')
+          .get(challengeId, url)
+      );
+    },
+    async challengeEntries(challengeId, statuses) {
+      const marks = statuses.map(() => '?').join(', ');
+      return db
+        .prepare(
+          `SELECT * FROM challenge_entries WHERE challenge_id = ? AND status IN (${marks}) ORDER BY created_at DESC`
+        )
+        .all(challengeId, ...statuses)
+        .map(chRow);
+    },
+    async challengeEntriesForCheck() {
+      return db
+        .prepare("SELECT * FROM challenge_entries WHERE status IN ('live', 'held') ORDER BY created_at ASC")
+        .all()
+        .map(chRow);
+    },
+    async liveEntryCount(challengeId) {
+      return db
+        .prepare("SELECT COUNT(*) AS n FROM challenge_entries WHERE challenge_id = ? AND status = 'live' AND kind != 'demo'")
+        .get(challengeId).n;
+    },
+    async bumpEntryBadge(id) {
+      return db
+        .prepare("UPDATE challenge_entries SET badge_hits = badge_hits + 1 WHERE id = ? AND status = 'live'")
+        .run(id).changes;
+    },
+    async addEntryReport(entryId, reporterHash, ts) {
+      const ins = db
+        .prepare('INSERT OR IGNORE INTO challenge_reports (entry_id, reporter_hash, created_at) VALUES (?, ?, ?)')
+        .run(entryId, reporterHash, ts);
+      if (ins.changes === 0) return null;
+      const n = db.prepare('SELECT COUNT(*) AS n FROM challenge_reports WHERE entry_id = ?').get(entryId).n;
+      db.prepare('UPDATE challenge_entries SET report_count = ? WHERE id = ?').run(n, entryId);
+      return n;
+    },
+    async blockHost(host, reason, ts) {
+      db.prepare(
+        'INSERT OR IGNORE INTO challenge_blocked_hosts (host, reason, created_at) VALUES (?, ?, ?)'
+      ).run(host, reason, ts);
+    },
+    async isHostBlocked(host) {
+      return !!db.prepare('SELECT 1 FROM challenge_blocked_hosts WHERE host = ?').get(host);
+    },
+    async unblockHost(host) {
+      db.prepare('DELETE FROM challenge_blocked_hosts WHERE host = ?').run(host);
+    },
+
+    /* ---- The Build Games ---- */
+    // INSERT OR IGNORE: two concurrent first submits for one link both
+    // succeed — whichever insert lost re-reads the winner's row (H4.4).
+    async insertBgSponsor(s) {
+      db.prepare(
+        `INSERT OR IGNORE INTO buildgames_sponsors (id, link, host, tagline, icon_url, status, held_reason, created_at)
+         VALUES (?,?,?,?,?,?,?,?)`
+      ).run(s.id, s.link, s.host, s.tagline, s.icon_url, s.status, s.held_reason, s.created_at);
+    },
+    async bgSponsorByLink(link) {
+      return bgSponsorRow(db.prepare('SELECT * FROM buildgames_sponsors WHERE link = ?').get(link));
+    },
+    // M4 residual: one PAID identity per host (see pg driver comment).
+    async bgClearedSponsorByHost(host, excludeLink) {
+      return bgSponsorRow(
+        db
+          .prepare(
+            "SELECT * FROM buildgames_sponsors WHERE host = ? AND link <> ? AND first_cleared_at IS NOT NULL AND status IN ('active','held') LIMIT 1"
+          )
+          .get(host, excludeLink)
+      );
+    },
+    async bgSponsorById(id) {
+      return bgSponsorRow(db.prepare('SELECT * FROM buildgames_sponsors WHERE id = ?').get(id));
+    },
+    async updateBgSponsor(id, fields) {
+      const keys = bgSponsorParts(fields);
+      return db
+        .prepare(`UPDATE buildgames_sponsors SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async insertBgPayment(p) {
+      db.prepare(
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at);
+    },
+    async bgPaymentById(id) {
+      return db.prepare('SELECT * FROM buildgames_payments WHERE id = ?').get(id) ?? null;
+    },
+    async clearBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'cleared' WHERE id = ? AND status = 'pending'").run(id).changes;
+    },
+    // Processor clear (H4.1/H4.2): CLEARED with the amount the processor
+    // actually CAPTURED + the capture's unique ref, in one atomic statement.
+    // The partial unique index makes a reused ref THROW, never double-credit.
+    async clearBgPaymentCaptured(id, capturedCents, processorRef) {
+      return db
+        .prepare("UPDATE buildgames_payments SET status = 'cleared', amount_cents = ?, processor_ref = ? WHERE id = ? AND status = 'pending'")
+        .run(capturedCents, processorRef, id).changes;
+    },
+    // Expired/abandoned checkout: retire a PENDING payment only.
+    async expireBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status = 'pending'").run(id).changes;
+    },
+    async bgPaymentByProcessorRef(ref) {
+      return db.prepare('SELECT * FROM buildgames_payments WHERE processor_ref = ?').get(ref) ?? null;
+    },
+    async bgIncrementClicks(id) {
+      return db.prepare('UPDATE buildgames_sponsors SET click_count = click_count + 1 WHERE id = ?').run(id).changes;
+    },
+    async reverseBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status IN ('pending','cleared')").run(id).changes;
+    },
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
+      return db
+        .prepare(
+          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, contact_email = ?, first_cleared_at = ?
+           WHERE id = ? AND first_cleared_at IS NULL`
+        )
+        .run(tagline, status, heldReason, contactEmail, ts, sponsorId).changes;
+    },
+    async bgSponsorClearedTotal(sponsorId) {
+      return db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE sponsor_id = ? AND status = 'cleared'").get(sponsorId).t;
+    },
+    async bgLeaderboard() {
+      return db
+        .prepare(
+          `SELECT s.*, COALESCE(SUM(CASE WHEN p.status='cleared' THEN p.amount_cents ELSE 0 END),0) AS cleared_total
+           FROM buildgames_sponsors s LEFT JOIN buildgames_payments p ON p.sponsor_id = s.id
+           WHERE s.status = 'active'
+           GROUP BY s.id HAVING cleared_total > 0`
+        )
+        .all()
+        .map(bgSponsorRow);
+    },
+    async bgSponsorsForAdmin() {
+      return db
+        .prepare(
+          `SELECT s.*,
+             COALESCE(SUM(CASE WHEN p.status='cleared' THEN p.amount_cents ELSE 0 END),0) AS cleared_total,
+             COALESCE(SUM(CASE WHEN p.status='pending' THEN p.amount_cents ELSE 0 END),0) AS pending_total
+           FROM buildgames_sponsors s LEFT JOIN buildgames_payments p ON p.sponsor_id = s.id
+           GROUP BY s.id ORDER BY cleared_total DESC, s.created_at ASC`
+        )
+        .all()
+        .map(bgSponsorRow);
+    },
+    async bgPotCents() {
+      return db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE status = 'cleared'").get().t;
+    },
+    async addBgReport(sponsorId, reporterHash, ts) {
+      const ins = db
+        .prepare('INSERT OR IGNORE INTO buildgames_reports (sponsor_id, reporter_hash, created_at) VALUES (?,?,?)')
+        .run(sponsorId, reporterHash, ts);
+      if (ins.changes === 0) return null;
+      const n = db.prepare('SELECT COUNT(*) AS n FROM buildgames_reports WHERE sponsor_id = ?').get(sponsorId).n;
+      db.prepare('UPDATE buildgames_sponsors SET report_count = ? WHERE id = ?').run(n, sponsorId);
+      return n;
+    },
+    async bgFirstReportAt(sponsorId) {
+      const r = db.prepare('SELECT MIN(created_at) AS t FROM buildgames_reports WHERE sponsor_id = ?').get(sponsorId);
+      return r?.t != null ? Number(r.t) : null;
+    },
+    async bgBlockHost(host, reason, ts) {
+      db.prepare('INSERT OR IGNORE INTO buildgames_blocked_hosts (host, reason, created_at) VALUES (?,?,?)').run(host, reason, ts);
+    },
+    async bgUnblockHost(host) {
+      db.prepare('DELETE FROM buildgames_blocked_hosts WHERE host = ?').run(host);
+    },
+    async bgIsHostBlocked(host) {
+      return !!db.prepare('SELECT 1 FROM buildgames_blocked_hosts WHERE host = ?').get(host);
+    },
+    async bgSponsorsForRecheck() {
+      return db.prepare("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')").all().map(bgSponsorRow);
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -1447,6 +2155,80 @@ export async function openSubmissionBySlug(slug) {
 export async function insertBuild(b) {
   return (await getDriver()).insertBuild(b);
 }
+
+export async function insertChallengeEntry(e) {
+  return (await getDriver()).insertChallengeEntry(e);
+}
+
+export async function updateChallengeEntry(id, fields) {
+  return (await getDriver()).updateChallengeEntry(id, fields);
+}
+
+export async function challengeEntryById(id) {
+  return (await getDriver()).challengeEntryById(id);
+}
+
+export async function challengeEntryByUrl(challengeId, url) {
+  return (await getDriver()).challengeEntryByUrl(challengeId, url);
+}
+
+export async function challengeEntries(challengeId, statuses = ['live']) {
+  return (await getDriver()).challengeEntries(challengeId, statuses);
+}
+
+export async function challengeEntriesForCheck() {
+  return (await getDriver()).challengeEntriesForCheck();
+}
+
+export async function liveEntryCount(challengeId) {
+  return (await getDriver()).liveEntryCount(challengeId);
+}
+
+export async function bumpEntryBadge(id) {
+  return (await getDriver()).bumpEntryBadge(id);
+}
+
+export async function addEntryReport(entryId, reporterHash, ts = Date.now()) {
+  return (await getDriver()).addEntryReport(entryId, reporterHash, ts);
+}
+
+export async function blockHost(host, reason, ts = Date.now()) {
+  return (await getDriver()).blockHost(host, reason, ts);
+}
+
+export async function isHostBlocked(host) {
+  return (await getDriver()).isHostBlocked(host);
+}
+
+export async function unblockHost(host) {
+  return (await getDriver()).unblockHost(host);
+}
+
+/* ---- The Build Games ---- */
+export async function insertBgSponsor(s) { return (await getDriver()).insertBgSponsor(s); }
+export async function bgSponsorByLink(link) { return (await getDriver()).bgSponsorByLink(link); }
+export async function bgSponsorById(id) { return (await getDriver()).bgSponsorById(id); }
+export async function updateBgSponsor(id, fields) { return (await getDriver()).updateBgSponsor(id, fields); }
+export async function insertBgPayment(p) { return (await getDriver()).insertBgPayment(p); }
+export async function bgPaymentById(id) { return (await getDriver()).bgPaymentById(id); }
+export async function clearBgPaymentAtomic(id) { return (await getDriver()).clearBgPaymentAtomic(id); }
+export async function clearBgPaymentCaptured(id, capturedCents, processorRef) { return (await getDriver()).clearBgPaymentCaptured(id, capturedCents, processorRef); }
+export async function expireBgPaymentAtomic(id) { return (await getDriver()).expireBgPaymentAtomic(id); }
+export async function bgPaymentByProcessorRef(ref) { return (await getDriver()).bgPaymentByProcessorRef(ref); }
+export async function bgIncrementClicks(id) { return (await getDriver()).bgIncrementClicks(id); }
+export async function bgClearedSponsorByHost(host, excludeLink) { return (await getDriver()).bgClearedSponsorByHost(host, excludeLink); }
+export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
+export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts); }
+export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }
+export async function bgLeaderboard() { return (await getDriver()).bgLeaderboard(); }
+export async function bgSponsorsForAdmin() { return (await getDriver()).bgSponsorsForAdmin(); }
+export async function bgPotCents() { return (await getDriver()).bgPotCents(); }
+export async function addBgReport(sponsorId, reporterHash, ts = Date.now()) { return (await getDriver()).addBgReport(sponsorId, reporterHash, ts); }
+export async function bgFirstReportAt(sponsorId) { return (await getDriver()).bgFirstReportAt(sponsorId); }
+export async function bgBlockHost(host, reason, ts = Date.now()) { return (await getDriver()).bgBlockHost(host, reason, ts); }
+export async function bgUnblockHost(host) { return (await getDriver()).bgUnblockHost(host); }
+export async function bgIsHostBlocked(host) { return (await getDriver()).bgIsHostBlocked(host); }
+export async function bgSponsorsForRecheck() { return (await getDriver()).bgSponsorsForRecheck(); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });

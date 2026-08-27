@@ -59,6 +59,9 @@ export async function createCheckoutSession({
     client_reference_id: purchaseId,
     metadata: { purchase_id: purchaseId, slot_id: slotId, months },
     payment_intent_data: { metadata: { purchase_id: purchaseId, slot_id: slotId, months } },
+    // Same reason as the Build Games checkout: Adaptive Pricing would settle a
+    // non-US buyer in their own currency, which our handlers do not accept.
+    adaptive_pricing: { enabled: false },
     // Sponsors buy as businesses: let them enter a VAT/tax ID and company name,
     // and have Stripe email a proper invoice PDF after payment (0.4% capped at
     // $2 per invoice). The tax ID needs a Customer to live on.
@@ -84,6 +87,63 @@ export async function createCheckoutSession({
       },
     ],
   });
+}
+
+/* Checkout for a Build Games placement. COPY DISCIPLINE (non-negotiable, from
+   the payments research): the checkout page and the Stripe product/description
+   say "sponsor placement / advertising" and NEVER bid/stake/prize/entry —
+   site copy can say bid, the payment surface cannot. metadata.kind is the
+   webhook's discriminator; the payment_intent carries it too so refund and
+   dispute events can be traced back without a session lookup. */
+export async function createBidCheckoutSession({
+  paymentId, sponsorId, amountCents, successUrl, cancelUrl, customerEmail,
+}) {
+  const metadata = { kind: 'buildgames', payment_id: paymentId, sponsor_id: sponsorId };
+  return stripeFetch(
+    '/v1/checkout/sessions',
+    {
+      mode: 'payment',
+      'payment_method_types[]': 'card',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      // Unpaid sessions die after 30 minutes so pending rows don't linger.
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+      client_reference_id: paymentId,
+      metadata,
+      payment_intent_data: { metadata },
+      ...(customerEmail ? { customer_email: customerEmail } : {}),
+      // Adaptive Pricing is ON by default and would charge non-US buyers in
+      // their local currency. The webhook only accepts a usd capture, so an
+      // international sponsor would be charged and get NO placement and no
+      // message. Force usd for everyone: one currency in, one currency out.
+      adaptive_pricing: { enabled: false },
+      // Same business-buyer posture as the sponsor checkout: tax id field and
+      // a proper invoice PDF after payment.
+      tax_id_collection: { enabled: true },
+      billing_address_collection: 'required',
+      customer_creation: 'always',
+      invoice_creation: { enabled: true },
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: 'usd',
+            unit_amount: amountCents,
+            product_data: {
+              name: 'canivibecodeit.com · sponsored placement',
+              description:
+                'Advertising placement on the canivibecodeit.com board: your icon, name,'
+                + ' tagline and link, ranked by cumulative sponsorship. Subject to the'
+                + ' Build Games terms: canivibecodeit.com/thebuildgames/terms',
+            },
+          },
+        },
+      ],
+    },
+    'POST',
+    // Retried submits reuse the same session instead of minting a second.
+    `bgcheckout-${paymentId}`
+  );
 }
 
 /* A shareable, non-expiring checkout URL for exactly one sale: the link

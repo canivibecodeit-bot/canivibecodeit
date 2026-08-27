@@ -1,0 +1,1403 @@
+---
+// The Build Games — the public sponsor/hype surface. Flag-gated: 404s until
+// BUILDGAMES_LIVE is set, so it merges dark and goes live the moment the
+// launch video posts. Phase A renders seed data; Phase B swaps in the DB.
+import Base from '../../layouts/Base.astro';
+import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
+import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
+import { buildGamesLive } from '../../lib/flags.js';
+import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
+import {
+  MAX_BID_CENTS,
+  MIN_ENTRY_CENTS,
+  MIN_TOPUP_CENTS,
+  TAGLINE_MAX,
+  biddingOpen,
+  countdownParts,
+  displayName,
+  fillLevel,
+  gamesStartAt,
+  monogram,
+  rankSponsors,
+  timeAgo,
+  usd,
+} from '../../lib/buildgames.js';
+import { dashboardStats } from '../../lib/analytics.js';
+import { withUtm } from '../../lib/sponsors.js';
+import { onlineCount } from '../../lib/presence.js';
+
+if (!buildGamesLive()) return new Response(null, { status: 404 });
+
+// Live board + pot from the DB.
+const [potCents, board] = await Promise.all([bgPotCents(), bgLeaderboard()]);
+const ranked = rankSponsors(board);
+const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
+const bidsOpen = biddingOpen();
+
+// Proper pagination past 50 sponsors (?page=N), rank numbering continuous
+// across pages so #51 is #51, not a fresh #1.
+const PAGE_SIZE = 50;
+const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+const page = Math.min(totalPages, Math.max(1, Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10) || 1));
+const pageRows = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const rankOf = (i) => (page - 1) * PAGE_SIZE + i + 1;
+
+// Newsletter placement (Rob's rule): 6+ rows on page 1 -> inline between row
+// #5 and #6; otherwise directly below the sponsors section. Repeated at the
+// bottom of the page either way. Page 1 only, no pagination-aware logic.
+const nlInline = page === 1 && pageRows.length >= 6;
+
+// Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
+const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
+
+const startAt = gamesStartAt();
+const cd = countdownParts(startAt);
+
+// Social proof for buyers: live presence (own in-process counter) + the real
+// all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
+// than showing a made-up number).
+const online = onlineCount();
+let allTime = null;
+let weekVisitors = null;
+try {
+  const stats = await dashboardStats();
+  allTime = stats?.allTime ?? null;
+  weekVisitors = stats?.tiles?.visitors7d ?? null;
+} catch {
+  /* strip renders without the totals */
+}
+const compact = (n) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : String(n);
+
+// Floors render from the same config the API enforces — an env change moves
+// the copy, the input bounds and the validation together. The form's min is
+// the LOWER floor (a top-up can be less than an entry); the API applies the
+// exact one once it knows which this is.
+const minEntryUsd = Math.ceil(MIN_ENTRY_CENTS / 100);
+const minFormUsd = Math.ceil(Math.min(MIN_ENTRY_CENTS, MIN_TOPUP_CENTS) / 100);
+const maxUsd = Math.floor(MAX_BID_CENTS / 100);
+
+/* Top claim bar. Picking a spot prices itself off the LIVE board: to hold
+   spot N your cumulative total has to sit above whoever holds it now, so the
+   ask is that sponsor's cleared total plus one increment, floored at the entry
+   minimum the API enforces for a link's first appearance. Spots past the end
+   of the board are unclaimed, so they cost exactly that minimum. This is a
+   CALCULATOR, never a promise — the server re-derives every floor, and the
+   board re-ranks on cleared totals, so a spot can move between here and
+   checkout. The copy under the bar says so. */
+const CLAIM_STEP_CENTS = MIN_TOPUP_CENTS;
+const claimTotals = ranked.slice(0, 100).map((r) => r.cleared_total);
+const claimCost = (rank) => {
+  const heldBy = claimTotals[rank - 1];
+  return heldBy == null ? MIN_ENTRY_CENTS : Math.max(MIN_ENTRY_CENTS, heldBy + CLAIM_STEP_CENTS);
+};
+// The first unclaimed spot is the cheapest honest ask; below it every spot is
+// someone else's to beat.
+const openRank = claimTotals.length + 1;
+
+const hostOf = (u) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+};
+---
+
+<Base
+  title="The Build Games · canivibecodeit"
+  description="Sponsors bid for the top spot. 100% of every bid goes to the builders' prize pool. The games begin September 1."
+  hideSponsors={true}
+  hideDigest={true}
+>
+  <main class="wrap bg-wrap">
+    <!-- Logo lockup: the ○△□ mark above the wordmark (V5) -->
+    <header class="bg-hero">
+      <!-- The proof a placement is worth $500 — above everything else -->
+      <p class="bg-stats" aria-label="Site traffic">
+        <span class="bg-stat bg-stat-live"><span class="bg-live-dot" aria-hidden="true"></span><b data-bg-online>{online}</b> online now</span>
+        {weekVisitors ? <span class="bg-stat"><b>{compact(weekVisitors)}</b> visitors this week</span> : null}
+        {allTime?.visitors ? <span class="bg-stat"><b>{compact(allTime.visitors)}</b> visitors all-time</span> : null}
+        <a class="bg-stat bg-stat-link" href="/stats">see stats →</a>
+      </p>
+      <p class="bg-eyebrow">canivibecodeit presents</p>
+      <BuildGamesLogo class="bg-logo" />
+      <p class="bg-tagline">
+        Sponsors bid for the top spot. Every dollar goes to the builders.
+      </p>
+    </header>
+
+    <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
+    <section class="bg-pot" aria-label="Prize pool">
+      <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
+        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+          <defs>
+            <clipPath id="bg-orb-clip">
+              <circle cx="150" cy="270" r="118" />
+            </clipPath>
+            <!-- Subtle cash gradient: premium, not photorealistic bills. -->
+            <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="var(--primary-dim)" />
+              <stop offset="55%" stop-color="var(--primary)" />
+              <stop offset="100%" stop-color="var(--primary)" />
+            </linearGradient>
+            <!-- a faint stacked-note hint: one soft line every 22px, low contrast -->
+            <pattern id="bg-bills" width="300" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
+              <rect width="300" height="22" fill="url(#bg-cash)" />
+              <rect y="21" width="300" height="1" fill="rgba(0,0,0,0.10)" />
+            </pattern>
+            <radialGradient id="bg-glass-grad" cx="0.38" cy="0.30" r="0.8">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.10)" />
+              <stop offset="55%" stop-color="rgba(255,255,255,0.02)" />
+              <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+            </radialGradient>
+          </defs>
+
+          <!-- ceiling cable + hook (fixed) — toggled off via ?cable=off -->
+          {cableOn && (
+            <g class="bg-cable-group">
+              <line x1="150" y1="108" x2="150" y2="120" class="bg-cable" />
+              <path d="M150 120 q -11 9 0 20 q 11 11 0 20" class="bg-hook" />
+            </g>
+          )}
+
+          <!-- the swinging orb: everything below the cable sways as one -->
+          <g class="bg-orb-swing">
+            <!-- money fill, clipped to the sphere, scaled from the bottom -->
+            <g clip-path="url(#bg-orb-clip)">
+              <rect class="bg-fill" x="32" y="152" width="236" height="236" fill="url(#bg-bills)" />
+              <rect class="bg-fill-top" x="32" width="236" height="2" fill="var(--primary)" />
+              <g class="bg-drops" aria-hidden="true"></g>
+            </g>
+            <!-- glass sphere: body tint, reflection, rim -->
+            <circle cx="150" cy="270" r="118" fill="url(#bg-glass-grad)" class="bg-glass" />
+            <ellipse cx="112" cy="222" rx="44" ry="28" class="bg-glass-shine" />
+            <circle cx="150" cy="270" r="118" class="bg-glass-rim" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="bg-pot-readout">
+        <span class="bg-pot-label">prize pool</span>
+        <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
+      </div>
+    </section>
+
+    <!-- Countdown — below the pot so it doesn't fight the visual -->
+    <section class="bg-countdown" data-countdown data-target={String(startAt)} aria-label="Countdown to the first game">
+      <span class="bg-cd-lead">the first game opens</span>
+      <span class="bg-cd-row">
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-days>{cd.days}</b><span class="bg-cd-unit">d</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-hours>{cd.hours}</b><span class="bg-cd-unit">h</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-mins>{cd.minutes}</b><span class="bg-cd-unit">m</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-secs>{cd.seconds}</b><span class="bg-cd-unit">s</span></span>
+      </span>
+      <span class="bg-cd-when">september 1 · midnight new york</span>
+    </section>
+
+    <!-- The buy button, where a buyer actually is: straight under the clock,
+         above the board. Scrolling to the bottom to find out how to sponsor
+         was costing us the impulse. -->
+    {
+      bidsOpen && (
+        <section
+          class="bg-claim"
+          data-claim
+          data-totals={JSON.stringify(claimTotals)}
+          data-step={String(CLAIM_STEP_CENTS)}
+          data-min={String(MIN_ENTRY_CENTS)}
+          data-max={String(MAX_BID_CENTS)}
+          data-open-rank={String(openRank)}
+          aria-label="Take a spot on the board"
+        >
+          <p class="bg-claim-head">
+            <span class="bg-claim-word">take spot</span>
+            <span class="bg-stepper">
+              <button class="bg-step" type="button" data-rank-dn aria-label="a higher spot">−</button>
+              <b class="bg-claim-rank" data-claim-rank>#1</b>
+              <button class="bg-step" type="button" data-rank-up aria-label="a lower spot">+</button>
+            </span>
+            <span class="bg-claim-buy">
+              <span class="bg-claim-word">for</span>
+              <span class="bg-stepper">
+                <button class="bg-step" type="button" data-amt-dn aria-label="bid less">−</button>
+                <b class="bg-claim-amt" data-claim-amt>{usd(claimCost(1))}</b>
+                <button class="bg-step" type="button" data-amt-up aria-label="bid more">+</button>
+              </span>
+            </span>
+          </p>
+
+          <form class="bg-claim-form" method="post" action="/api/thebuildgames/bid" data-bid-form>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            {/* text, not url: a pasted bare domain must reach the server, which
+                normalizes it. Same reasoning as the full form below. */}
+            <input
+              class="bg-claim-link"
+              type="text"
+              inputmode="url"
+              autocomplete="url"
+              spellcheck="false"
+              name="link"
+              required
+              maxlength="300"
+              placeholder="your product url"
+              aria-label="your product url"
+            />
+            <input type="hidden" name="amount_dollars" data-claim-amount value={String(Math.ceil(claimCost(1) / 100))} />
+            <button class="btn primary bg-claim-go" type="submit">take the spot</button>
+            <p class="bg-bid-err bg-claim-err" data-bid-err hidden />
+          </form>
+        </section>
+      )
+    }
+
+    <!-- Leaderboard -->
+    <section class="bg-board">
+      <div class="list-head bg-list-head">
+        <h2>the sponsors</h2>
+      </div>
+
+      {
+        ranked.length > 0 ? (
+          <ol class="bg-rows">
+            {pageRows.map((s, i) => (<>
+              <li class:list={['bg-row', { lead: rankOf(i) === 1, p2: rankOf(i) === 2, p3: rankOf(i) === 3 }]}>
+                <span class="bg-rank">{rankOf(i)}</span>
+                <span class="bg-logo">
+                  {s.icon_url ? (
+                    <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : (
+                    <span class="bg-monogram">{monogram(hostOf(s.link) ?? displayName(s))}</span>
+                  )}
+                </span>
+                <span class="bg-name">
+                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{hostOf(s.link) ?? displayName(s)}</a>
+                  {s.tagline && <span class="bg-row-tagline">{s.tagline}</span>}
+                  <span class="bg-host">
+                    added {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}
+                  </span>
+                </span>
+                <span class="bg-amount-cell">
+                  <span class="bg-amount">{usd(s.cleared_total)}</span>
+                </span>
+              </li>
+              {nlInline && i === 4 && (
+                <li class="bg-nl-li">
+                  <BuildGamesNewsletter variant="inline" />
+                </li>
+              )}
+            </>))}
+          </ol>
+        ) : (
+          <p class="bg-empty">no sponsors yet · the first bid starts the pool.</p>
+        )
+      }
+
+      {totalPages > 1 && (
+        <nav class="bg-pager" aria-label="Sponsor pages">
+          {page > 1 ? <a href={`/thebuildgames?page=${page - 1}`} rel="prev">← previous</a> : <span />}
+          <span class="bg-pager-at">page {page} of {totalPages}</span>
+          {page < totalPages ? <a href={`/thebuildgames?page=${page + 1}`} rel="next">next →</a> : <span />}
+        </nav>
+      )}
+
+      {!nlInline && (
+        <div class="bg-nl-below">
+          <BuildGamesNewsletter variant="inline" />
+        </div>
+      )}
+
+      <div class="bg-cta">
+        {bidsOpen ? (
+          <>
+            <button class="btn primary" type="button" data-bid-open>Take this spot.</button>
+            <span class="bg-cta-note">or bid from the top of the page · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
+          </>
+        ) : (
+          <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
+        )}
+      </div>
+
+      {
+        bidsOpen && (
+          <form class="bg-bid-form" method="post" action="/api/thebuildgames/bid" data-bid-form data-collapsible hidden>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            <div class="bg-bid-row">
+              <label>
+                <span>your link</span>
+                <!-- type=text, not url: a pasted bare domain must not be
+                     rejected by browser validation — the server normalizes
+                     (https:// added, http upgraded, www/trailing-slash folded). -->
+                <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="link" required placeholder="your-tool.com" maxlength="300" />
+              </label>
+              <label>
+                <span>amount (usd)</span>
+                <input type="number" name="amount_dollars" required min={minFormUsd} max={maxUsd} step="1" placeholder={String(minEntryUsd)} />
+              </label>
+            </div>
+            <label class="bg-bid-tag">
+              <span>tagline · optional</span>
+              <input type="text" name="tagline" maxlength={TAGLINE_MAX} placeholder="what you're about, in a few words" />
+            </label>
+            <label class="bg-bid-tag">
+              <span>email · optional</span>
+              <input type="email" name="email" maxlength="254" placeholder="so we can tell you if you're outbid or held" />
+            </label>
+            <label class="bg-bid-tag">
+              <span>icon · optional</span>
+              <input type="file" name="icon" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" />
+              <span class="bg-bid-hint">png/jpg/webp up to 1MB · otherwise we use your site's favicon</span>
+            </label>
+            <label class="bg-bid-optin">
+              <input type="checkbox" name="email_optin" value="1" />
+              <span>email me Build Games updates too</span>
+            </label>
+            <div class="bg-bid-actions">
+              <button class="btn primary" type="submit">place bid</button>
+              <span class="bg-bid-note">
+                it lists once payment clears · by bidding you agree to the
+                <a href="/thebuildgames/terms">terms</a>
+              </span>
+            </div>
+            <p class="bg-bid-err" data-bid-err hidden></p>
+          </form>
+        )
+      }
+    </section>
+
+    <BuildGamesNewsletter variant="section" />
+
+    <!-- The per-row report buttons are gone (they were visual noise on the
+         product itself), but a way to flag a listing has to survive: a paid
+         placement can still point somewhere it shouldn't, and "no route to
+         tell us" is not a defensible position. One quiet line, out of the
+         way of the board. -->
+    <p class="bg-terms-foot">
+      free skill-judged entry · independent judging ·
+      <a href="/thebuildgames/terms">the Build Games terms</a> ·
+      <a href="mailto:digest@canivibecodeit.com?subject=Build%20Games%20listing%20report">report a listing</a>
+    </p>
+  </main>
+</Base>
+
+<script is:inline src={`/js/buildgames.js?v=${__BUILD_ID__}`} defer></script>
+
+<style>
+  .bg-wrap {
+    padding-top: 30px;
+    padding-bottom: 120px;
+  }
+
+  /* ---------- hero / logo ---------- */
+  .bg-hero {
+    text-align: center;
+    padding-bottom: 2px;
+  }
+
+  .bg-eyebrow {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding-bottom: 10px;
+  }
+
+  .bg-tagline {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 44ch;
+    margin-inline: auto;
+    text-wrap: pretty;
+  }
+
+  /* ---------- the orb ---------- */
+  .bg-pot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+  }
+
+  .bg-orb-stage {
+    width: min(200px, 52vw);
+  }
+
+  /* Desktop density: taller viewports still put the podium above the fold.
+     Same order, smaller hero furniture. */
+  @media (min-width: 1024px) {
+    .bg-orb-stage {
+      width: 150px;
+    }
+
+    .bg-pot-amount {
+      font-size: 52px;
+    }
+
+    .bg-countdown {
+      padding-top: 10px;
+      gap: 2px;
+    }
+
+    .bg-cd-num {
+      font-size: 19px;
+    }
+
+    .bg-tagline {
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .bg-wrap {
+      padding-top: 26px;
+    }
+
+    .bg-list-head {
+      padding-top: 10px;
+    }
+  }
+
+  .bg-orb {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+    /* the green glow that makes the orb the money shot on a dark page */
+    filter: drop-shadow(0 0 42px color-mix(in srgb, var(--primary) 35%, transparent))
+      drop-shadow(0 18px 34px rgba(0, 0, 0, 0.45));
+  }
+
+  .bg-cable {
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+
+  .bg-hook {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+
+  /* everything below the cable sways gently, as if hanging */
+  .bg-orb-swing {
+    transform-box: fill-box;
+    transform-origin: 150px 120px;
+    animation: bg-sway 6s ease-in-out infinite;
+  }
+
+  @keyframes bg-sway {
+    0%, 100% { transform: rotate(-1.4deg); }
+    50% { transform: rotate(1.4deg); }
+  }
+
+  /* the money fill scales from its own bottom edge by --fill (0..1) */
+  .bg-fill {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    transform: scaleY(var(--fill, 0));
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bg-fill-top {
+    transform-box: fill-box;
+    transform: translateY(calc((1 - var(--fill, 0)) * 236px));
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.85;
+  }
+
+  .bg-glass {
+    stroke: rgba(255, 255, 255, 0.14);
+    stroke-width: 1.5;
+  }
+
+  .bg-glass-rim {
+    fill: none;
+    stroke: color-mix(in srgb, var(--primary) 45%, transparent);
+    stroke-width: 2;
+  }
+
+  .bg-glass-shine {
+    fill: rgba(255, 255, 255, 0.16);
+  }
+
+  :global([data-theme='light']) .bg-glass {
+    stroke: rgba(20, 24, 20, 0.16);
+  }
+  :global([data-theme='light']) .bg-glass-shine {
+    fill: rgba(255, 255, 255, 0.55);
+  }
+  :global([data-theme='light']) .bg-cable,
+  :global([data-theme='light']) .bg-hook {
+    stroke: var(--fg);
+    opacity: 0.4;
+  }
+
+  .bg-drop {
+    /* a falling bill inside the orb; JS positions x and removes on end */
+    fill: var(--primary);
+    opacity: 0.9;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-orb-swing {
+      animation: none;
+    }
+  }
+
+  .bg-pot-readout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding-top: 8px;
+  }
+
+  .bg-pot-label {
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bg-pot-amount {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(46px, 9vw, 80px);
+    line-height: 1;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* ---------- countdown ---------- */
+  .bg-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding-top: 18px;
+  }
+
+  .bg-cd-lead {
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .bg-cd-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--font-mono);
+  }
+
+  .bg-cd-cell {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+  }
+
+  .bg-cd-num {
+    font-size: clamp(20px, 3.5vw, 26px);
+    font-weight: 700;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    min-width: 2ch;
+    text-align: right;
+    line-height: 1;
+  }
+
+  .bg-cd-unit {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .bg-cd-when {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    opacity: 0.85;
+  }
+
+  /* ---------- board ---------- */
+  .bg-board {
+    padding-top: 52px;
+  }
+
+  .bg-claim + .bg-board {
+    padding-top: 20px;
+  }
+
+  .bg-claim + .bg-board .bg-list-head {
+    padding-top: 0;
+  }
+
+  .bg-list-head {
+    padding-top: 14px;
+  }
+
+  .bg-rows {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 10px;
+  }
+
+  /* The leaderboard IS the product: every row is one hover target and one
+     click — a stretched link on the name anchor covers the whole row, with
+     nothing competing for the click. Rank numerals carry a podium hierarchy. */
+  .bg-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 34px 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .bg-row:hover,
+  .bg-row:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px -8px color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+
+  .bg-row.lead {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary);
+    padding-block: 13px;
+  }
+
+  .bg-row.lead:hover,
+  .bg-row.lead:focus-within {
+    box-shadow: inset 0 0 0 1px var(--primary), 0 6px 22px -8px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+
+  /* Whole row navigates: the name anchor stretches over the row. */
+  .bg-name a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+  }
+
+  .bg-rank {
+    font: 800 16px var(--font-display);
+    color: var(--muted);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  /* Podium: #1 gets the brand gradient, #2–3 step down, the field is quiet. */
+  .bg-row.lead .bg-rank {
+    font-size: 26px;
+    background: linear-gradient(135deg, #ff7a68, #35d0a5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-row.p2 .bg-rank {
+    font-size: 21px;
+    color: var(--fg);
+  }
+
+  .bg-row.p3 .bg-rank {
+    font-size: 18px;
+    color: color-mix(in srgb, var(--fg) 70%, var(--muted));
+  }
+
+  .bg-row:hover .bg-logo img,
+  .bg-row:hover .bg-monogram {
+    transform: scale(1.06);
+  }
+
+  .bg-logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.18s ease;
+  }
+
+  .bg-monogram {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font: 700 14px var(--font-mono);
+    color: var(--primary);
+    transition: transform 0.18s ease;
+  }
+
+  .bg-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .bg-name a,
+  .bg-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+    overflow: hidden;
+  }
+
+  /* line 1: the name (host) — one line, bold */
+  .bg-name a {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+  }
+
+  /* lines 2-3: the sponsor's own description — breathes to two lines, quiet */
+  .bg-row-tagline {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--fg) 78%, var(--muted));
+    padding: 1px 0 2px;
+  }
+
+  /* the newsletter li sits between rows without pretending to be one */
+  .bg-nl-li {
+    padding: 4px 0;
+  }
+
+  .bg-nl-below {
+    padding-top: 18px;
+  }
+
+  .bg-name a:hover {
+    color: var(--primary);
+  }
+
+  .bg-host {
+    font: 11px var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .bg-amount-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+
+  .bg-meta {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-amount {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bg-empty {
+    padding: 28px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .bg-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    font: 12px var(--font-mono);
+  }
+
+  .bg-pager a {
+    color: var(--primary);
+  }
+
+  .bg-pager-at {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 26px;
+  }
+
+  .bg-soon {
+    font-size: 13px;
+  }
+
+  /* ---------- the claim bar (under the clock, above the board) ---------- */
+  .bg-claim {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 0 8px;
+  }
+
+  .bg-claim-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    font: 800 clamp(23px, 5.2vw, 36px) / 1 var(--font-display);
+    color: var(--fg);
+    text-align: center;
+  }
+
+  .bg-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  /* Inline and invisible on a wide screen; on a phone it claims a whole row
+     so the headline breaks as "take spot #1" / "for $7,750". */
+  .bg-claim-buy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  .bg-step {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font: 600 16px / 1 var(--font-mono);
+    cursor: pointer;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  }
+
+  .bg-step:hover:not(:disabled),
+  .bg-step:focus-visible:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .bg-step:active:not(:disabled) {
+    transform: translateY(0) scale(0.93);
+  }
+
+  .bg-step:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Tabular + a reserved width so stepping never nudges the line around. */
+  .bg-claim-rank,
+  .bg-claim-amt {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    text-align: center;
+    transition: color 0.16s ease;
+  }
+
+  .bg-claim-rank {
+    min-width: 2.4ch;
+  }
+
+  .bg-claim-amt {
+    color: var(--primary);
+    min-width: 5ch;
+  }
+
+  .bg-claim-form {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: min(680px, 100%);
+    position: relative;
+  }
+
+  .bg-claim-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 13px 18px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 15px;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  .bg-claim-link::placeholder {
+    color: var(--muted);
+  }
+
+  .bg-claim-link:hover {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  }
+
+  .bg-claim-link:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+
+  .bg-claim-go {
+    flex: none;
+    border-radius: 999px;
+    padding-inline: 24px;
+    white-space: nowrap;
+  }
+
+  .bg-claim-err {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-step,
+    .bg-step:hover:not(:disabled),
+    .bg-step:active:not(:disabled) {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  /* ---------- bid form ---------- */
+  .bg-bid-form {
+    max-width: 520px;
+    margin: 20px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+
+  .bg-bid-form[hidden] {
+    display: none;
+  }
+
+  .bg-bid-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 520px) {
+    .bg-bid-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .bg-bid-form label > span {
+    display: block;
+    padding-bottom: 6px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-bid-form input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bg-bid-form input {
+      font-size: 16px;
+    }
+  }
+
+  .bg-bid-optin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .bg-bid-hint {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* traffic strip ABOVE the lockup — the "why a placement is worth $500"
+     numbers lead the page */
+  .bg-stats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 12px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    line-height: 1;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    width: fit-content;
+    margin-inline: auto;
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+  }
+
+  /* The gap under the pill is set here, after the shorthand above, so it
+     survives the `margin: 0 0 12px` and the `margin-inline: auto` both
+     landing on the same rule. */
+  .bg-stats {
+    margin-bottom: 24px;
+  }
+
+  /* every stat is one centred inline-flex line — number and label share a
+     vertical centre instead of fighting baselines of two font sizes */
+  .bg-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+  }
+
+  .bg-stat b {
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Hover reads as a soft lift, never an underline: the strip is a pill of
+     quiet furniture and a rule through it looks like a broken link. */
+  .bg-stat-link {
+    color: var(--primary);
+    text-decoration: none;
+    padding: 3px 9px;
+    margin: -3px -3px -3px 0;
+    border-radius: 999px;
+    transition: color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .bg-stat-link:hover,
+  .bg-stat-link:focus-visible {
+    color: color-mix(in srgb, var(--primary) 78%, var(--fg));
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+  }
+
+  .bg-stat-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .bg-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+    animation: bg-live-pulse 2.4s ease-out infinite;
+  }
+
+  @keyframes bg-live-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
+    70% { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-live-dot { animation: none; }
+  }
+
+  .bg-bid-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bg-bid-note {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 34ch;
+    line-height: 1.5;
+  }
+
+  .bg-bid-err {
+    font-size: 13px;
+    color: var(--no-bg);
+  }
+
+  .bg-cta-note {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    text-align: center;
+    max-width: 48ch;
+  }
+
+  /* ---------- notify ---------- */
+  .bg-notify {
+    margin-top: 52px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .bg-notify h2 {
+    font-size: 15px;
+  }
+
+  .bg-wl {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 14px;
+  }
+
+  .bg-wl input[type='email'] {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bg-wl input[type='email'] {
+      font-size: 16px;
+    }
+  }
+
+  .bg-terms-foot {
+    padding-top: 40px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-terms-foot a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bg-terms-foot a:hover {
+    color: var(--fg);
+  }
+
+  /* ---------- micro-interactions (page-scoped) ---------- */
+  .bg-wrap :global(.btn) {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+
+  .bg-wrap :global(.btn:hover) {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+  }
+
+  .bg-wrap :global(.btn:active) {
+    transform: translateY(0);
+    filter: brightness(0.96);
+  }
+
+  .bg-wrap :global(.btn:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .bg-wrap :global(.btn.primary:hover) {
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+
+  /* The orb invites a poke: soft glow on hover, and the client JS rains a few
+     bills on click (reduced-motion users get neither). */
+  .bg-orb-stage {
+    cursor: pointer;
+    transition: filter 0.25s ease;
+  }
+
+  .bg-orb-stage:hover {
+    filter: drop-shadow(0 0 26px color-mix(in srgb, var(--primary) 22%, transparent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-row,
+    .bg-logo img,
+    .bg-monogram,
+    .bg-orb-stage,
+    .bg-wrap :global(.btn) {
+      transition: none;
+    }
+
+    .bg-row:hover,
+    .bg-row:focus-within,
+    .bg-wrap :global(.btn:hover) {
+      transform: none;
+    }
+
+    .bg-row:hover .bg-logo img,
+    .bg-row:hover .bg-monogram {
+      transform: none;
+    }
+  }
+
+  /* ---------- small screens: the viral-tweet landing surface ---------- */
+  @media (max-width: 640px) {
+    .bg-wrap {
+      padding-top: 24px;
+    }
+
+    .bg-stats {
+      gap: 6px 14px;
+      padding: 8px 14px;
+      font-size: 12px;
+      margin-bottom: 22px;
+    }
+
+    .bg-stat b {
+      font-size: 13px;
+    }
+
+    .bg-row {
+      grid-template-columns: 24px 34px minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+
+    .bg-claim {
+      padding: 20px 0 4px;
+      gap: 12px;
+    }
+
+    .bg-claim-head {
+      gap: 6px 9px;
+    }
+
+    .bg-claim-buy {
+      flex: 1 0 100%;
+      justify-content: center;
+    }
+
+    /* Full-width tap targets beat a squeezed side-by-side row on a phone. */
+    .bg-claim-form {
+      flex-direction: column;
+    }
+
+    .bg-claim-go {
+      width: 100%;
+      padding-block: 13px;
+    }
+
+    .bg-claim-err {
+      position: static;
+      margin-top: 2px;
+    }
+
+    .bg-amount-cell {
+      grid-column: 4;
+      grid-row: 1;
+    }
+
+    .bg-logo img,
+    .bg-monogram {
+      width: 34px;
+      height: 34px;
+    }
+
+    .bg-rank {
+      font-size: 14px;
+    }
+
+    .bg-row.lead .bg-rank {
+      font-size: 21px;
+    }
+
+    .bg-row.p2 .bg-rank {
+      font-size: 17px;
+    }
+
+    .bg-row.p3 .bg-rank {
+      font-size: 15px;
+    }
+
+    .bg-amount {
+      font-size: 21px;
+    }
+
+    .bg-meta {
+      font-size: 10px;
+    }
+
+    /* A one-line ellipsis leaves ~10 chars of tagline next to the amount;
+       two clamped lines keeps rows tight AND readable. */
+    .bg-name a {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+  }
+</style>

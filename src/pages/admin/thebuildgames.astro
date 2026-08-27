@@ -1,0 +1,175 @@
+---
+// /admin/thebuildgames: the Build Games funding + moderation console. Add a
+// sponsor with a cleared payment (manual funding = the launch path), top up,
+// release/remove/restore, edit taglines. Token-gated like the sponsor admin;
+// reachable with the flag off so the queue never goes dark.
+import Base from '../../layouts/Base.astro';
+import { bgPotCents, bgSponsorsForAdmin } from '../../lib/db.js';
+import { MAX_BID_CENTS, MIN_ENTRY_CENTS, MIN_TOPUP_CENTS, displayName, usd } from '../../lib/buildgames.js';
+import { isAdmin } from '../../lib/sponsors.js';
+
+// Token from an HttpOnly cookie (M3 — kept out of the URL/logs/history). A
+// one-time ?token= bootstraps it: set the cookie, then redirect to the bare
+// path so the token never lingers in the address bar. Thereafter the cookie
+// alone authenticates and forms post no token at all.
+const urlToken = Astro.url.searchParams.get('token');
+if (urlToken && isAdmin(urlToken)) {
+  Astro.cookies.set('bg_admin', urlToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  });
+  return Astro.redirect('/admin/thebuildgames');
+}
+const token = Astro.cookies.get('bg_admin')?.value || '';
+if (!isAdmin(token)) return new Response(null, { status: 404 });
+
+// Same config the API enforces: env change moves the console's bounds too.
+const minEntryUsd = Math.ceil(MIN_ENTRY_CENTS / 100);
+const minTopupUsd = Math.ceil(MIN_TOPUP_CENTS / 100);
+const maxUsd = Math.floor(MAX_BID_CENTS / 100);
+
+const [potCents, sponsors] = await Promise.all([bgPotCents(), bgSponsorsForAdmin()]);
+const held = sponsors.filter((s) => s.status === 'held');
+const active = sponsors.filter((s) => s.status === 'active');
+const removed = sponsors.filter((s) => s.status === 'removed');
+
+const msg = Astro.url.searchParams.get('msg') || '';
+// No token in return_to — the cookie carries it on the POST.
+const returnTo = '/admin/thebuildgames';
+
+const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
+---
+
+<Base title="build games admin" description="" ogImage="/og/home.png">
+  <main class="wrap admin">
+    <div class="list-head">
+      <h2>The Build Games</h2>
+      <span class="note">pool {usd(potCents)} · {active.length} live · {held.length} held</span>
+    </div>
+    {msg && <p class="admin-msg">{msg}</p>}
+
+    <div class="admin-card" style="margin-top:16px;">
+      <h3 style="font-size:14px;">add a sponsor (manual funding)</h3>
+      <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-add">
+        {Object.entries(hidden({ action: 'add' })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+        <input type="url" name="link" required placeholder="https://sponsor.com" />
+        <input type="text" name="tagline" maxlength="100" placeholder="tagline (optional)" />
+        <input type="number" name="amount_dollars" required min={minEntryUsd} max={maxUsd} step="1" placeholder="amount $" />
+        <button class="btn primary" type="submit">add + fund</button>
+      </form>
+      <p class="note" style="padding-top:8px;">the link is screened (SSRF-safe + Safe Browsing) and the favicon self-hosted, same as a public bid.</p>
+    </div>
+
+    {held.length > 0 && (
+      <>
+        <div class="list-head" style="padding-top:28px;"><h2>Held</h2><span class="note">{held.length} pending review</span></div>
+        <div class="admin-rows">
+          {held.map((s) => (
+            <div class="admin-card bga-row">
+              <div class="bga-top">
+                <a class="admin-strong" href={s.link} target="_blank" rel="ugc nofollow noopener">{displayName(s)} ↗</a>
+                <span class="microlabel">{usd(s.cleared_total)} live · {usd(s.pending_total)} pending</span>
+              </div>
+              <p class="admin-sub">held: {s.held_reason ?? 'unknown'}{s.report_count > 0 && ` · ${s.report_count} reports`}</p>
+              <div class="admin-actions">
+                <form method="post" action="/api/thebuildgames/admin" data-astro-reload>
+                  {Object.entries(hidden({ action: 'release', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+                  <button class="btn primary" type="submit">release · list it</button>
+                </form>
+                <form method="post" action="/api/thebuildgames/admin" data-astro-reload>
+                  {Object.entries(hidden({ action: 'remove', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+                  <button class="btn ghost" type="submit">remove</button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    <div class="list-head" style="padding-top:28px;"><h2>Live</h2><span class="note">{active.length} on the board</span></div>
+    <div class="admin-rows">
+      {active.map((s) => (
+        <div class="admin-card bga-row">
+          <div class="bga-top">
+            <a class="admin-strong" href={s.link} target="_blank" rel="ugc nofollow noopener">{displayName(s)} ↗</a>
+            <span class="microlabel">{usd(s.cleared_total)}{s.pending_total > 0 && ` · ${usd(s.pending_total)} pending`}</span>
+            {s.report_count > 0 && <span class="microlabel" style="color:var(--no-bg)">{s.report_count} reports</span>}
+          </div>
+          <div class="admin-actions">
+            <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-inline">
+              {Object.entries(hidden({ action: 'topup', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+              <input type="number" name="amount_dollars" min={minTopupUsd} max={maxUsd} step="1" placeholder="$" style="width:90px;" />
+              <button class="btn ghost" type="submit">top up</button>
+            </form>
+            <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-inline">
+              {Object.entries(hidden({ action: 'edit-tagline', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+              <input type="text" name="tagline" maxlength="100" placeholder="edit tagline" style="width:180px;" />
+              <button class="btn ghost" type="submit">save</button>
+            </form>
+            <form method="post" action="/api/thebuildgames/admin" data-astro-reload>
+              {Object.entries(hidden({ action: 'remove', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+              <button class="btn ghost" type="submit">remove</button>
+            </form>
+          </div>
+        </div>
+      ))}
+      {active.length === 0 && <p class="note" style="padding-top:12px;">no live sponsors yet.</p>}
+    </div>
+
+    {removed.length > 0 && (
+      <>
+        <div class="list-head" style="padding-top:28px;"><h2>Removed</h2><span class="note">{removed.length} · money stays in pool</span></div>
+        <div class="admin-rows">
+          {removed.map((s) => (
+            <div class="admin-card bga-row">
+              <div class="bga-top">
+                <span class="admin-strong">{displayName(s)}</span>
+                <span class="microlabel">{usd(s.cleared_total)} in pool</span>
+              </div>
+              <div class="admin-actions">
+                <form method="post" action="/api/thebuildgames/admin" data-astro-reload>
+                  {Object.entries(hidden({ action: 'restore', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+                  <button class="btn ghost" type="submit">restore</button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+  </main>
+</Base>
+
+<style>
+  .bga-add {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+  }
+  .bga-add input {
+    padding: 9px 11px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 13px var(--font-mono);
+  }
+  .bga-add input[type='url'] { flex: 1; min-width: 200px; }
+  .bga-add input[type='number'] { width: 120px; }
+  .bga-row { display: flex; flex-direction: column; gap: 8px; }
+  .bga-top { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .bga-inline { display: inline-flex; gap: 6px; align-items: center; }
+  .bga-inline input {
+    padding: 7px 9px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 12px var(--font-mono);
+  }
+</style>

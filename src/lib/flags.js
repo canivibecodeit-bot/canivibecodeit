@@ -6,3 +6,7 @@
 const on = (name) => ['1', 'true'].includes(process.env[name]);
 
 export const buildsLive = () => on('BUILDS_LIVE');
+
+export const challengeLive = () => on('CHALLENGE_LIVE');
+
+export const buildGamesLive = () => on('BUILDGAMES_LIVE');

@@ -1,29 +1,14 @@
 // Security headers on every rendered response, plus the session lookup that
 // puts the signed-in user (or null) on Astro.locals. CSP ships from
 // lib/csp.js: report-only until CSP_ENFORCE is set.
-import { timingSafeEqual } from 'node:crypto';
 import { getAuth } from './lib/auth.js';
 import { cspHeader } from './lib/csp.js';
+import { touchPresence } from './lib/presence.js';
+import { clientIp, originVerdict } from './lib/request.js';
 
-/* Cloudflare origin lock. A Transform Rule on the zone stamps a secret
-   x-origin-verify header onto every request CF forwards to the origin, so a
-   request without it reached Railway directly and its client-sent headers
-   (x-forwarded-for above all) can't be trusted. Three states, all env-driven
-   so rollback is an env change, never a deploy:
-   - ORIGIN_VERIFY_SECRET unset            → off (local dev, instant disable)
-   - secret set, ORIGIN_VERIFY_ENFORCE!=1  → log-only: count the miss, serve
-   - secret set, ORIGIN_VERIFY_ENFORCE=1   → 403 the request */
-function originVerdict(request) {
-  const secret = process.env.ORIGIN_VERIFY_SECRET;
-  if (!secret) return 'ok';
-  const got = request.headers.get('x-origin-verify') ?? '';
-  // Node hands header values over as latin1; re-encoding them as UTF-8 would
-  // make any secret with a byte over 0x7F unmatchable and 403 the whole site.
-  const a = Buffer.from(got, 'latin1');
-  const b = Buffer.from(secret, 'utf8');
-  if (a.length === b.length && timingSafeEqual(a, b)) return 'ok';
-  return ['1', 'true'].includes(process.env.ORIGIN_VERIFY_ENFORCE) ? 'block' : 'log';
-}
+/* The Cloudflare origin lock lives in lib/request.js (a leaf util) so this
+   middleware and clientIp share exactly one verdict. See the doc-comment
+   there for the three-state ladder. */
 
 // Session-varying surfaces: never cacheable, anywhere. Everything else on the
 // site stays cache-friendly for the ~99% anonymous traffic.
@@ -49,6 +34,22 @@ export async function onRequest(context, next) {
       });
     }
   }
+  // Presence: page navigations only (never API/asset/proxy traffic), so the
+  // "N people here" figure counts humans looking at pages, not pollers.
+  if (
+    !context.isPrerendered &&
+    context.request.method === 'GET' &&
+    !path.startsWith('/api/') &&
+    !path.startsWith('/ph/') &&
+    !path.includes('.')
+  ) {
+    try {
+      touchPresence(clientIp(context.request, context.clientAddress));
+    } catch {
+      /* presence is decorative — never the request's problem */
+    }
+  }
+
   // Skip the lookup where it can't matter: the PostHog proxy and Better
   // Auth's own routes (its handler reads the cookie itself). Anonymous
   // visitors carry no session cookie and skip the DB entirely. Any failure
