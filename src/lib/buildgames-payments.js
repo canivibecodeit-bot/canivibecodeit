@@ -25,7 +25,8 @@ import {
   reverseBgPaymentAtomic,
   updateBgSponsor,
 } from './db.js';
-import { alertRob, sendMail, esc } from './mail.js';
+import { alertRob, esc } from './mail.js';
+import { sendSponsorMail } from './buildgames-mail.js';
 import { displayName, newPaymentId, newSponsorId, rankSponsors, registrableHost, sponsorIdentity, usd } from './buildgames.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
@@ -150,7 +151,7 @@ export async function clearPayment(paymentId, capture = null) {
       prevLeader.id !== p.sponsor_id &&
       prevLeader.contact_email
     ) {
-      sendMail({
+      sendSponsorMail({
         to: prevLeader.contact_email,
         subject: 'You’ve been outbid — The Build Games',
         html: `<p>Someone just took the #1 spot on The Build Games with ${esc(usd(newLeader.cleared_total))}.</p>

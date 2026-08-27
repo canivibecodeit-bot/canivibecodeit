@@ -19,7 +19,8 @@ import {
   updateBgSponsor,
 } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
-import { alertRob, esc, sendMail } from '../../../lib/mail.js';
+import { alertRob, esc } from '../../../lib/mail.js';
+import { sendSponsorMail } from '../../../lib/buildgames-mail.js';
 import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
 import { SPONSOR_ID_RE, displayName } from '../../../lib/buildgames.js';
 
@@ -85,8 +86,9 @@ export async function POST({ request, clientAddress }) {
          <p><a href="https://canivibecodeit.com/admin/thebuildgames">open the queue and paste your token</a></p>`
       ).catch((err) => console.error(`bg report alert failed: ${err.message}`));
       // Tell the sponsor their placement was held (if they left an email).
+      // Suppression + per-address caps live inside sendSponsorMail (E1).
       if (s.contact_email) {
-        sendMail({
+        sendSponsorMail({
           to: s.contact_email,
           subject: 'Your Build Games placement is under review',
           html: `<p>Your placement (<b>${esc(displayName(s))}</b>) has been temporarily held after community reports and is being reviewed.</p>
