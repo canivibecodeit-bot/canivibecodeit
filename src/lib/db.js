@@ -259,18 +259,12 @@ const SCHEMA_SQLITE = `
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
   /* Append-only payment ledger. status = pending | cleared | reversed. */
-  /* Each payment carries the tagline + icon source PROPOSED with it. On the
-     FIRST payment to clear for a sponsor, those freeze onto the sponsor row
-     (first-cleared-payer sets identity, immutable thereafter). Later payments
-     add money only. */
   CREATE TABLE IF NOT EXISTS buildgames_payments (
     id TEXT PRIMARY KEY,
     sponsor_id TEXT NOT NULL,
     amount_cents INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     processor_ref TEXT,
-    proposed_tagline TEXT,
-    proposed_icon_src TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -531,8 +525,6 @@ const SCHEMA_PG = `
     amount_cents INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     processor_ref TEXT,
-    proposed_tagline TEXT,
-    proposed_icon_src TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -1173,9 +1165,9 @@ async function pgDriver() {
     },
     async insertBgPayment(p) {
       await pool.query(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.created_at]
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.created_at]
       );
     },
     async bgPaymentById(id) {
@@ -1719,9 +1711,9 @@ async function sqliteDriver() {
     },
     async insertBgPayment(p) {
       db.prepare(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, created_at)
-         VALUES (?,?,?,?,?,?,?,?)`
-      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.created_at);
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, created_at)
+         VALUES (?,?,?,?,?,?)`
+      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.created_at);
     },
     async bgPaymentById(id) {
       return db.prepare('SELECT * FROM buildgames_payments WHERE id = ?').get(id) ?? null;
