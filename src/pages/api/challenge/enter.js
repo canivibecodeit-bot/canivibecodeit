@@ -14,7 +14,7 @@ import {
 } from '../../../lib/db.js';
 import { challengeLive } from '../../../lib/flags.js';
 import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
-import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
+import { clientIp, crossOrigin, json, readBody, unreachableEmail, validEmail } from '../../../lib/request.js';
 import { parsePublicUrl } from '../../../lib/builds.js';
 import {
   canonicalUrl,
@@ -108,7 +108,8 @@ export async function POST({ request, clientAddress }) {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (email) {
     if (!validEmail(email)) return json({ error: 'that email does not look sendable' }, 400);
-    if (await addToWaitlist(email, 'challenge')) mirrorToResend(email);
+    // N3: reserved RFC-2606 addresses never reach the waitlist/audience.
+    if (!unreachableEmail(email) && (await addToWaitlist(email, 'challenge'))) mirrorToResend(email);
     emailOpted = 1;
   }
 

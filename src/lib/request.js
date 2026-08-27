@@ -76,7 +76,19 @@ export function json(data, status = 200) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function validEmail(email) {
-  return typeof email === 'string' && email.length <= 254 && EMAIL_RE.test(email);
+  return typeof email === 'string' && email.length <= 254 && !email.includes('\0') && EMAIL_RE.test(email);
+}
+
+/* RFC 2606 reserved names can never receive mail — and one such contact in
+   the Resend audience makes Resend refuse to send ANY broadcast, so a single
+   poisoned signup silently kills the newsletter. Every path that adds to the
+   waitlist/audience must gate on this, not just the main signup endpoint. */
+const RESERVED_DOMAINS = new Set(['example.com', 'example.org', 'example.net', 'example.edu']);
+const RESERVED_TLDS = ['.test', '.invalid', '.example', '.localhost'];
+
+export function unreachableEmail(email) {
+  const domain = String(email).slice(String(email).lastIndexOf('@') + 1).toLowerCase();
+  return RESERVED_DOMAINS.has(domain) || RESERVED_TLDS.some((t) => domain.endsWith(t));
 }
 
 // Cross-site writes are already blocked by the session cookie's SameSite=Lax;
@@ -96,9 +108,18 @@ export function crossOrigin(request) {
 }
 
 // Accepts JSON or classic form posts, so the forms work without JS too.
+// Every string value is stripped of NUL bytes: better-sqlite3 throws on NUL
+// (a %00 in any field turned into a 500 on every endpoint), and no legitimate
+// input contains one. Applied shallowly — our endpoints read flat fields.
+const stripNul = (v) => (typeof v === 'string' ? v.replaceAll('\0', '') : v);
+
 export async function readBody(request) {
   const type = request.headers.get('content-type') || '';
-  if (type.includes('application/json')) return await request.json();
-  const form = await request.formData();
-  return Object.fromEntries(form.entries());
+  const body = type.includes('application/json')
+    ? await request.json()
+    : Object.fromEntries((await request.formData()).entries());
+  if (body && typeof body === 'object') {
+    for (const k of Object.keys(body)) body[k] = stripNul(body[k]);
+  }
+  return body;
 }

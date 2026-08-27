@@ -1199,6 +1199,17 @@ async function pgDriver() {
       const r = await pool.query('SELECT * FROM buildgames_sponsors WHERE link = $1', [link]);
       return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
     },
+    // M4 residual: a host that already has a PAID identity can't be split
+    // into more board slots via a different path/URL. Unpaid rows never block
+    // (or a free squat submission could lock a brand out of bidding).
+    async bgClearedSponsorByHost(host, excludeLink) {
+      const r = await pool.query(
+        `SELECT * FROM buildgames_sponsors
+         WHERE host = $1 AND link <> $2 AND first_cleared_at IS NOT NULL AND status IN ('active','held') LIMIT 1`,
+        [host, excludeLink]
+      );
+      return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
+    },
     async bgSponsorById(id) {
       const r = await pool.query('SELECT * FROM buildgames_sponsors WHERE id = $1', [id]);
       return r.rows[0] ? bgSponsorRow(r.rows[0]) : null;
@@ -1819,6 +1830,16 @@ async function sqliteDriver() {
     async bgSponsorByLink(link) {
       return bgSponsorRow(db.prepare('SELECT * FROM buildgames_sponsors WHERE link = ?').get(link));
     },
+    // M4 residual: one PAID identity per host (see pg driver comment).
+    async bgClearedSponsorByHost(host, excludeLink) {
+      return bgSponsorRow(
+        db
+          .prepare(
+            "SELECT * FROM buildgames_sponsors WHERE host = ? AND link <> ? AND first_cleared_at IS NOT NULL AND status IN ('active','held') LIMIT 1"
+          )
+          .get(host, excludeLink)
+      );
+    },
     async bgSponsorById(id) {
       return bgSponsorRow(db.prepare('SELECT * FROM buildgames_sponsors WHERE id = ?').get(id));
     },
@@ -2195,6 +2216,7 @@ export async function clearBgPaymentCaptured(id, capturedCents, processorRef) { 
 export async function expireBgPaymentAtomic(id) { return (await getDriver()).expireBgPaymentAtomic(id); }
 export async function bgPaymentByProcessorRef(ref) { return (await getDriver()).bgPaymentByProcessorRef(ref); }
 export async function bgIncrementClicks(id) { return (await getDriver()).bgIncrementClicks(id); }
+export async function bgClearedSponsorByHost(host, excludeLink) { return (await getDriver()).bgClearedSponsorByHost(host, excludeLink); }
 export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
 export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts); }
 export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }

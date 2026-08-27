@@ -16,12 +16,14 @@
 import {
   bgLeaderboard,
   bgPaymentById,
+  bgSponsorById,
   bgSponsorByLink,
   claimFirstClear,
   clearBgPaymentAtomic,
   clearBgPaymentCaptured,
   insertBgPayment,
   insertBgSponsor,
+  rateLimit,
   reverseBgPaymentAtomic,
   updateBgSponsor,
 } from './db.js';
@@ -125,14 +127,23 @@ export async function clearPayment(paymentId, capture = null) {
   if (!cleared) return false; // already cleared / not pending
   const p = await bgPaymentById(paymentId);
 
-  const won = await claimFirstClear(
-    p.sponsor_id,
-    p.proposed_tagline ?? null,
-    p.proposed_status || 'held',
-    p.proposed_reason ?? null,
-    p.contact_email ?? null, // the owner email for held/outbid notifications
-    Date.now()
-  );
+  // N6 — the identity guard lives HERE, on the payment interface itself, not
+  // at any route: a payment that carries NO screening result (proposed_status
+  // null — e.g. a top-up) must NEVER spend the one-shot identity claim, or it
+  // would freeze the sponsor blank+'held' forever. Its money still clears and
+  // counts; the identity stays unclaimed for a future SCREENED payment. Every
+  // path (admin, webhook, anything later) inherits this by construction.
+  const carriesScreen = p.proposed_status != null;
+  const won = carriesScreen
+    ? await claimFirstClear(
+        p.sponsor_id,
+        p.proposed_tagline ?? null,
+        p.proposed_status,
+        p.proposed_reason ?? null,
+        p.contact_email ?? null, // the owner email for held/outbid notifications
+        Date.now()
+      )
+    : 0;
   if (won && p.proposed_icon_src) {
     // Icon fetched/re-encoded ONLY after this payment won the identity — never
     // for bids that never clear, and never racing a competing clear's icon.
@@ -140,16 +151,35 @@ export async function clearPayment(paymentId, capture = null) {
     if (iconUrl) await updateBgSponsor(p.sponsor_id, { icon_url: iconUrl });
   }
 
+  // H2 residual: with unattended clears, a paid defacement (someone else's
+  // brand + a hostile tagline) would list itself. Screening can't judge
+  // ownership, so the mitigation is price (entry floor) + IMMEDIATE human
+  // visibility: Rob is alerted on every first-clear, one mail per placement
+  // ever (inherently money-gated), and can edit/remove with money kept.
+  if (won) {
+    const s = await bgSponsorById(p.sponsor_id);
+    alertRob(
+      `[cvci] build games: new placement listed · ${usd(p.amount_cents)}`,
+      `<p><b>${esc(displayName(s))}</b> · ${esc(s.link)} · ${usd(p.amount_cents)} · status ${esc(s.status)}</p>
+       <p>Identity just froze from this payment's screen. If this is someone else's brand or a hostile tagline:
+       <a href="https://canivibecodeit.com/admin/thebuildgames">edit or remove it</a> — the money stays in the pool.</p>`
+    ).catch((err) => console.error(`bg new-placement alert failed: ${err.message}`));
+  }
+
   // Outbid nudge (best-effort, never blocks the clear): if this clear changed
   // the #1 spot, email the displaced leader "you've been outbid, top up to
   // reclaim it" — a revenue prompt. Only when they left a contact email.
+  // N5: concurrent clears can BOTH observe the same displacement; the
+  // per-displaced-sponsor dedupe key lets exactly one nudge through per
+  // window (belt on top of sendSponsorMail's per-address caps).
   try {
     const newLeader = rankSponsors(await bgLeaderboard())[0] ?? null;
     if (
       prevLeader && newLeader &&
       prevLeader.id !== newLeader.id &&
       prevLeader.id !== p.sponsor_id &&
-      prevLeader.contact_email
+      prevLeader.contact_email &&
+      (await rateLimit(`bgoutbid:${prevLeader.id}`, 1, 15 * 60 * 1000))
     ) {
       sendSponsorMail({
         to: prevLeader.contact_email,

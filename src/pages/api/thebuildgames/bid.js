@@ -7,13 +7,13 @@
 // pipeline the admin drives; when a processor lands, the public checkout calls
 // it and the webhook clears. It stays gated behind BUILDGAMES_BIDDING_OPEN.
 import { createHash, randomUUID } from 'node:crypto';
-import { addToWaitlist, bgIsHostBlocked, bgSponsorByLink, rateLimit } from '../../../lib/db.js';
+import { addToWaitlist, bgClearedSponsorByHost, bgIsHostBlocked, bgSponsorByLink, rateLimit } from '../../../lib/db.js';
 import { selfHostUploadedIcon } from '../../../lib/challenge-image.js';
 import { siteUrl } from '../../../lib/sponsors.js';
 import { createBidCheckoutSession } from '../../../lib/stripe.js';
 import { buildGamesLive } from '../../../lib/flags.js';
 import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
-import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
+import { clientIp, crossOrigin, json, readBody, unreachableEmail, validEmail } from '../../../lib/request.js';
 import {
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
@@ -85,11 +85,21 @@ export async function POST({ request, clientAddress }) {
   // Exact floor, now that screening resolved the identity: a bid on a sponsor
   // that has already CLEARED is a top-up; everything else (new link, or a link
   // whose bids never cleared) is an entry and pays the entry floor.
-  const existing = await bgSponsorByLink(sponsorIdentity(screen.finalUrl));
+  const identityLink = sponsorIdentity(screen.finalUrl);
+  const existing = await bgSponsorByLink(identityLink);
   const isTopup = existing?.first_cleared_at != null;
   const minCents = isTopup ? MIN_TOPUP_CENTS : MIN_ENTRY_CENTS;
   if (amountCents < minCents) {
     return json({ error: `minimum ${isTopup ? 'top-up' : 'entry'} is $${minCents / 100}` }, 400);
+  }
+
+  // M4 residual: one PAID placement per registrable host on the public path.
+  // Different paths/URLs on a host that already bought its identity can't mint
+  // extra board slots (N slots for N payments). Unpaid rows never block, so a
+  // free squat submission can't lock a brand out. Admin add stays free of this
+  // check — exceptions are human judgment.
+  if (!isTopup && (await bgClearedSponsorByHost(registrableHost(screen.finalUrl.hostname), identityLink))) {
+    return json({ error: 'that site already has a placement — top it up instead' }, 409);
   }
 
   // The flow runs UNATTENDED (pay → screened → listed, no human). So a link
@@ -124,8 +134,14 @@ export async function POST({ request, clientAddress }) {
   if (result.error === 'blocked') return json({ error: "that site can't be entered" }, 403);
 
   // List capture (opt-in): a new waitlist row mirrors to Resend; existing
-  // unsubscribes stay unsubscribed. Only when the bidder ticked the box.
-  if (contactEmail && ['1', 'true', 'on', 'yes'].includes(String(body.email_optin ?? '').toLowerCase())) {
+  // unsubscribes stay unsubscribed. Only when the bidder ticked the box, and
+  // never for an RFC-2606 reserved address (audit N3 — one @example.com
+  // contact in the audience makes Resend refuse every broadcast).
+  if (
+    contactEmail &&
+    !unreachableEmail(contactEmail) &&
+    ['1', 'true', 'on', 'yes'].includes(String(body.email_optin ?? '').toLowerCase())
+  ) {
     if (await addToWaitlist(contactEmail, 'buildgames')) mirrorToResend(contactEmail);
   }
 
