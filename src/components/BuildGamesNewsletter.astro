@@ -1,0 +1,95 @@
+---
+/* The Games newsletter signup. Rendered up to twice on /thebuildgames per
+   Rob's placement rule: inline inside the board (6+ rows, between #5 and #6)
+   or directly below the sponsors section (<6 rows) — plus the bottom of the
+   page either way. Posts to the existing /api/waitlist (honeypot, RFC-2606
+   gate, caps all live there); source=buildgames. The inline variant is
+   deliberately QUIETER than a sponsor row: no border glow, no bid affordance,
+   plainly not a paid placement. */
+const { variant = 'section' } = Astro.props; // 'inline' | 'section'
+---
+
+<div class:list={['bgn', `bgn-${variant}`]}>
+  <p class="bgn-lead">
+    {variant === 'inline' ? 'building instead of sponsoring?' : 'be there when it starts'}
+  </p>
+  <form class="bgn-form" method="post" action="/api/waitlist" data-digest>
+    <label class="hp" aria-hidden="true">
+      Leave this field empty
+      <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+    <input type="hidden" name="source" value="buildgames" />
+    <input type="email" name="email" required placeholder="you@wherever.dev" maxlength="254" aria-label="email address" />
+    <button class="btn primary" type="submit">notify me</button>
+  </form>
+  <p class="bgn-sub">join the newsletter · one email when the games open</p>
+</div>
+
+<style>
+  .bgn {
+    text-align: center;
+  }
+
+  .bgn-lead {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .bgn-sub {
+    padding-top: 8px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgn-form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 12px;
+  }
+
+  .bgn-form input[type='email'] {
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bgn-form input[type='email'] {
+      font-size: 16px;
+    }
+  }
+
+  /* Inline (inside the board): quieter than a row — flat tint, dashed border,
+     nothing that reads as a placement. */
+  .bgn-inline {
+    padding: 14px 16px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+  }
+
+  .bgn-inline .bgn-lead {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .bgn-inline .bgn-sub {
+    font-size: 11px;
+  }
+
+  /* Section (below the sponsors / bottom of the page). */
+  .bgn-section {
+    margin-top: 52px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+</style>

@@ -4,6 +4,7 @@
 // launch video posts. Phase A renders seed data; Phase B swaps in the DB.
 import Base from '../../layouts/Base.astro';
 import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
+import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
@@ -40,6 +41,11 @@ const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
 const page = Math.min(totalPages, Math.max(1, Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10) || 1));
 const pageRows = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 const rankOf = (i) => (page - 1) * PAGE_SIZE + i + 1;
+
+// Newsletter placement (Rob's rule): 6+ rows on page 1 -> inline between row
+// #5 and #6; otherwise directly below the sponsors section. Repeated at the
+// bottom of the page either way. Page 1 only, no pagination-aware logic.
+const nlInline = page === 1 && pageRows.length >= 6;
 
 // Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
@@ -257,28 +263,33 @@ const hostOf = (u) => {
       {
         ranked.length > 0 ? (
           <ol class="bg-rows">
-            {pageRows.map((s, i) => (
+            {pageRows.map((s, i) => (<>
               <li class:list={['bg-row', { lead: rankOf(i) === 1, p2: rankOf(i) === 2, p3: rankOf(i) === 3 }]}>
                 <span class="bg-rank">{rankOf(i)}</span>
                 <span class="bg-logo">
                   {s.icon_url ? (
                     <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
                   ) : (
-                    <span class="bg-monogram">{monogram(displayName(s))}</span>
+                    <span class="bg-monogram">{monogram(hostOf(s.link) ?? displayName(s))}</span>
                   )}
                 </span>
                 <span class="bg-name">
-                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{displayName(s)}</a>
-                  <span class="bg-host">{hostOf(s.link)}</span>
+                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{hostOf(s.link) ?? displayName(s)}</a>
+                  {s.tagline && <span class="bg-row-tagline">{s.tagline}</span>}
+                  <span class="bg-host">
+                    added {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}
+                  </span>
                 </span>
                 <span class="bg-amount-cell">
                   <span class="bg-amount">{usd(s.cleared_total)}</span>
-                  <span class="bg-meta">
-                    {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}
-                  </span>
                 </span>
               </li>
-            ))}
+              {nlInline && i === 4 && (
+                <li class="bg-nl-li">
+                  <BuildGamesNewsletter variant="inline" />
+                </li>
+              )}
+            </>))}
           </ol>
         ) : (
           <p class="bg-empty">no sponsors yet · the first bid starts the pool.</p>
@@ -293,10 +304,16 @@ const hostOf = (u) => {
         </nav>
       )}
 
+      {!nlInline && (
+        <div class="bg-nl-below">
+          <BuildGamesNewsletter variant="inline" />
+        </div>
+      )}
+
       <div class="bg-cta">
         {bidsOpen ? (
           <>
-            <button class="btn primary" type="button" data-bid-open>add a tagline, icon or email</button>
+            <button class="btn primary" type="button" data-bid-open>Take this spot.</button>
             <span class="bg-cta-note">or bid from the top of the page · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
@@ -354,18 +371,7 @@ const hostOf = (u) => {
       }
     </section>
 
-    <section class="bg-notify">
-      <h2>be there when it starts</h2>
-      <form class="bg-wl" method="post" action="/api/waitlist" data-digest>
-        <label class="hp" aria-hidden="true">
-          Leave this field empty
-          <input type="text" name="website" tabindex="-1" autocomplete="off" />
-        </label>
-        <input type="hidden" name="source" value="buildgames" />
-        <input type="email" name="email" required placeholder="you@wherever.dev" maxlength="254" aria-label="email address" />
-        <button class="btn primary" type="submit">notify me</button>
-      </form>
-    </section>
+    <BuildGamesNewsletter variant="section" />
 
     <!-- The per-row report buttons are gone (they were visual noise on the
          product itself), but a way to flag a listing has to survive: a paid
@@ -765,13 +771,34 @@ const hostOf = (u) => {
     overflow: hidden;
   }
 
-  /* taglines breathe: up to two lines at every width, never a hard ellipsis
-     at ten characters */
+  /* line 1: the name (host) — one line, bold */
   .bg-name a {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+  }
+
+  /* lines 2-3: the sponsor's own description — breathes to two lines, quiet */
+  .bg-row-tagline {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-height: 1.3;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--fg) 78%, var(--muted));
+    padding: 1px 0 2px;
+  }
+
+  /* the newsletter li sits between rows without pretending to be one */
+  .bg-nl-li {
+    padding: 4px 0;
+  }
+
+  .bg-nl-below {
+    padding-top: 18px;
   }
 
   .bg-name a:hover {
