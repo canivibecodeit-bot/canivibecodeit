@@ -1,39 +1,47 @@
-/* The Build Games: sponsor-facing hype + bidding surface. 100% of sponsor
-   bids go to the builders' prize pool — so the pot IS the sum of active bids,
-   no separate ledger. Bids are ADMIN-ENTERED in v1 (manual funding, no payment
-   processor); the shape leaves room for a real payment hook later via status.
+/* The Build Games — sponsor bidding surface. OUTBID-style PUBLIC self-serve:
+   anyone pays any amount, submits a link + tagline, the favicon is pulled and
+   self-hosted, and they appear on the board at their cumulative rank. 100% of
+   cleared money goes to the builders' prize pool.
 
-   Ranking: amount desc, earliest placed wins ties — so a spot holds until
-   someone bids strictly MORE. "Whoever's on top stays on top till the games
-   end" is then literally true: you only drop when out-bid.
+   Data model (two tables, see db.js):
+   - buildgames_sponsors : identity = canonical link (one row per link).
+     tagline + icon are set by the FIRST cleared payment and are immutable via
+     payments thereafter (admin can still correct) — kills the $5 defacement
+     vector. status = active | held | removed (moderation).
+   - buildgames_payments : append-only ledger. status = pending | cleared |
+     reversed. Ranking = SUM(cleared, non-reversed) per sponsor; pot = SUM over
+     ALL sponsors (removed-for-abuse money stays in the pool). A reversed
+     chargeback drops out of both sums automatically.
 
-   Phase A ships with SEED_BIDS so Rob can eyeball the pot + leaderboard before
-   the DB/admin exist. Phase B swaps activeBids()/potCents() to read the
-   buildgames_bids table; the page and animation don't change. */
+   Payments are behind an interface (buildgames-payments.js): admin-entry is
+   the launch impl; a processor webhook slots in later. Checkout stays dark
+   until the entity/processor decision lands. */
 import { randomBytes } from 'node:crypto';
+import { canonicalUrl, registrableHost } from './challenge.js';
 
 /* ---------- config ---------- */
 
-// Countdown target: midnight at the start of Sept 1 in America/New_York.
-// Sept 1 is EDT (UTC-4), so local 00:00 = 04:00 UTC. Env-overridable for
-// mirror testing. (The video says "midnight EST" colloquially; the code does
-// actual New York local midnight.)
 const envTime = (name) => {
   const v = process.env[name];
   if (!v) return null;
   const n = /^\d+$/.test(v) ? Number(v) : Date.parse(v);
   return Number.isFinite(n) ? n : null;
 };
+
+// Countdown target: New York local midnight, Sept 1 (EDT = 04:00 UTC).
 export const gamesStartAt = () => envTime('BUILDGAMES_START_AT') ?? Date.UTC(2026, 8, 1, 4, 0, 0);
 
-// The pool is UNCAPPED — there is no goal and the orb is never "full". Fill
-// level maps pot size onto a hyperbolic curve that asymptotically approaches
-// MAX_FILL but never reaches it, so there's always headroom: a little money
-// shows a little pool, a lot shows a lot, and it never looks "done".
-//   level = MAX_FILL * pot / (pot + SCALE)
-// SCALE sets where the curve bends (bigger = slower to look full). At $25k:
-//   $500 → ~2%, $5k → ~15%, $50k → ~60%, $500k → ~86%, ∞ → 90% (never).
-// A small floor keeps even a $5 bid visibly wetting the bottom.
+// Public bidding accepts submissions only when this is on. Off = the board
+// still renders (admin can seed) but the CTA reads "opening soon" and the
+// submit endpoint 409s — the slip-protection state for launch morning.
+export const biddingOpen = () => ['1', 'true'].includes(process.env.BUILDGAMES_BIDDING_OPEN ?? '');
+
+// $5 floor, matching outbid: spam costs something, micro-disputes stay sane.
+export const MIN_BID_CENTS = 500;
+export const MAX_BID_CENTS = 1_500_000; // $15k ceiling per single payment
+
+/* ---------- uncapped asymptotic fill (never 100%) ---------- */
+
 const FILL_SCALE_CENTS = () => envTime('BUILDGAMES_FILL_SCALE_CENTS') ?? 2_500_000; // $25k
 const MAX_FILL = 0.9;
 const FILL_FLOOR = 0.03;
@@ -41,45 +49,61 @@ const FILL_FLOOR = 0.03;
 export function fillLevel(potCents) {
   if (potCents <= 0) return 0;
   const scale = FILL_SCALE_CENTS();
-  const curve = MAX_FILL * (potCents / (potCents + scale));
-  return Math.min(MAX_FILL, Math.max(FILL_FLOOR, curve));
+  return Math.min(MAX_FILL, Math.max(FILL_FLOOR, MAX_FILL * (potCents / (potCents + scale))));
 }
 
 /* ---------- ids ---------- */
 
 const ID_ALPHABET = 'abcdefghjkmnpqrstvwxyz23456789';
-export function newBidId() {
-  return `bg_${[...randomBytes(10)].map((b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('')}`;
-}
-export const BID_ID_RE = /^bg_[a-z2-9]{10}$/;
+const mkId = (prefix) => `${prefix}_${[...randomBytes(10)].map((b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('')}`;
+export const newSponsorId = () => mkId('bgs');
+export const newPaymentId = () => mkId('bgp');
+export const SPONSOR_ID_RE = /^bgs_[a-z2-9]{10}$/;
+export const PAYMENT_ID_RE = /^bgp_[a-z2-9]{10}$/;
 
-/* ---------- seed data (Phase A only) ---------- */
+/* ---------- identity + input hygiene ---------- */
 
-const SEED_BIDS = [
-  { id: 'bg_seedaaaaaa', sponsor_name: 'Placeholder Labs', sponsor_url: 'https://example.com', logo_url: null, amount_cents: 250000, placed_at: 1, status: 'active' },
-  { id: 'bg_seedbbbbbb', sponsor_name: 'Vibe Ventures', sponsor_url: 'https://example.com', logo_url: null, amount_cents: 180000, placed_at: 2, status: 'active' },
-  { id: 'bg_seedcccccc', sponsor_name: 'One-Shot Capital', sponsor_url: null, logo_url: null, amount_cents: 120000, placed_at: 3, status: 'active' },
-  { id: 'bg_seeddddddd', sponsor_name: 'Weekend Builders Co', sponsor_url: null, logo_url: null, amount_cents: 75000, placed_at: 4, status: 'active' },
-  { id: 'bg_seedeeeeee', sponsor_name: 'The House', sponsor_url: null, logo_url: null, amount_cents: 40000, placed_at: 5, status: 'active' },
-];
-
-/* ---------- ranking + pot (pure, reused by page and endpoints) ---------- */
-
-// Active bids, ranked. amount desc, earliest placed wins ties.
-export function rankBids(bids) {
-  return bids
-    .filter((b) => b.status === 'active')
-    .sort((a, b) => b.amount_cents - a.amount_cents || a.placed_at - b.placed_at);
+// The identity key for a sponsor: the canonical link (lowercased host, no
+// fragment, sorted value-bearing query). Same-link submissions collapse to one
+// cumulative identity.
+export function sponsorIdentity(url) {
+  return canonicalUrl(url);
 }
 
-export const potFromBids = (bids) => rankBids(bids).reduce((sum, b) => sum + b.amount_cents, 0);
+export { registrableHost };
 
-// Phase A stubs — Phase B replaces these two with DB reads.
-export const seedBids = () => SEED_BIDS.map((b) => ({ ...b }));
+const UNSAFE_GLYPHS = /[​-‏‪-‮⁠-⁯﻿]/g;
+const URL_ISH = /(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,}(\/|\b))/i;
+
+/* Clean a public tagline: strip markup chars and bidi/zero-width glyphs,
+   collapse whitespace, cap length. Returns null if it's empty or contains a
+   URL (links belong in the entry link, which is screened; a URL in the
+   tagline would be an unscreened link on a high-traffic page). */
+export function cleanTagline(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw
+    .replace(/[<>]/g, '')
+    .replace(UNSAFE_GLYPHS, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80);
+  if (t.length < 2) return null;
+  if (URL_ISH.test(t)) return null;
+  return t;
+}
+
+/* ---------- ranking (rows carry cleared_total + first_cleared_at from SQL) ---------- */
+
+// Board order: cumulative cleared money desc, earliest first-cleared wins ties
+// so a spot holds until someone's total is strictly higher.
+export function rankSponsors(rows) {
+  return [...rows].sort(
+    (a, b) => b.cleared_total - a.cleared_total || (a.first_cleared_at ?? Infinity) - (b.first_cleared_at ?? Infinity)
+  );
+}
 
 /* ---------- display ---------- */
 
-// Whole-dollar money, grouped. Cents dropped for the big hero figure.
 export function usd(cents) {
   return '$' + Math.round(cents / 100).toLocaleString('en-US');
 }
@@ -94,8 +118,17 @@ export function countdownParts(untilMs, now = Date.now()) {
   };
 }
 
-// Monogram for a sponsor with no logo — first two initials, uppercased.
 export function monogram(name) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
+}
+
+// A display name for a sponsor with no chosen name: the registrable host.
+export function displayName(sponsor) {
+  if (sponsor.tagline) return sponsor.tagline;
+  try {
+    return new URL(sponsor.link).hostname.replace(/^www\./, '');
+  } catch {
+    return sponsor.link;
+  }
 }

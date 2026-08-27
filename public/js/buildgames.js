@@ -3,11 +3,22 @@
    Follows the same ClientRouter contract as the other page scripts. */
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
   const claim = (el) => {
     if (!el || el.dataset.bgBound) return null;
     el.dataset.bgBound = '1';
     return el;
+  };
+
+  let toastTimer;
+  const toast = (msg) => {
+    const el = $('#toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
   };
 
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -128,6 +139,72 @@
         }
       }, 30000);
     }
+
+    /* ---------- bid form: reveal + submit ---------- */
+    const bidOpen = claim($('[data-bid-open]'));
+    if (bidOpen) {
+      const form = $('[data-bid-form]');
+      bidOpen.addEventListener('click', () => {
+        if (!form) return;
+        form.hidden = !form.hidden;
+        if (!form.hidden) form.querySelector('input[name="link"]').focus();
+      });
+    }
+    const bidForm = claim($('[data-bid-form]'));
+    if (bidForm) {
+      bidForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = $('button[type="submit"]', bidForm);
+        const err = $('[data-bid-err]', bidForm);
+        err.hidden = true;
+        btn.disabled = true;
+        btn.textContent = 'placing…';
+        try {
+          const data = Object.fromEntries(new FormData(bidForm).entries());
+          const amountCents = Math.round(Number(data.amount_dollars) * 100);
+          const res = await fetch(bidForm.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ link: data.link, tagline: data.tagline, amount_cents: amountCents, website: data.website }),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            err.textContent = out.error || 'something broke — try again';
+            err.hidden = false;
+            return;
+          }
+          toast(out.message || 'bid placed');
+          bidForm.reset();
+          bidForm.hidden = true;
+        } catch {
+          err.textContent = 'network hiccup — try again';
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'place bid';
+        }
+      });
+    }
+
+    /* ---------- report buttons ---------- */
+    $$('[data-report]').forEach((raw) => {
+      const btn = claim(raw);
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          await fetch('/api/thebuildgames/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: btn.dataset.report }),
+          });
+        } catch {
+          /* best effort */
+        }
+        btn.textContent = 'reported ✓';
+        toast('reported · a human will look');
+      });
+    });
   };
 
   init();

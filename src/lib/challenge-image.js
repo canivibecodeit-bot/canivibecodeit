@@ -18,19 +18,19 @@ const FETCH_TIMEOUT = 8000;
 
 const screenHop = (raw) => parsePublicUrl(raw, { maxLen: 500 });
 
-/* Fetch, validate, re-encode, store. Returns the R2 public URL of our copy,
-   or null (fetch failed, not an image, too big, or R2 not configured) — the
-   caller then leaves og_image null and the fallback tile shows. */
-export async function selfHostOgImage(ogUrl, entryId) {
+/* Generic: fetch an attacker-supplied image URL through the SSRF-safe path,
+   re-encode with sharp (drops polyglot/container trickery), store on R2 under
+   `key`. Returns the R2 public URL, or null (fetch failed, not an image, too
+   big, undecodable, or R2 not configured → caller uses a fallback). `resize`
+   is {w, h, fit}. */
+export async function selfHostImage(rawUrl, key, resize) {
   if (!r2Configured()) return null;
-
   let start;
   try {
-    start = new URL(ogUrl);
+    start = new URL(rawUrl);
   } catch {
     return null;
   }
-
   const res = await safeFetch(start, {
     screen: screenHop,
     maxBytes: MAX_IMAGE_BYTES,
@@ -39,19 +39,23 @@ export async function selfHostOgImage(ogUrl, entryId) {
     headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'image/*' },
   });
   if (!res || !res.body || !res.contentType.startsWith('image/')) return null;
-
   try {
-    // Re-encode to a bounded WebP: normalises dimensions, strips metadata and
-    // any non-image payload, and gives us a predictable content-type.
     const out = await sharp(res.body, { failOn: 'error', limitInputPixels: 24_000_000 })
       .rotate()
-      .resize(1200, 630, { fit: 'cover', position: 'attention' })
-      .webp({ quality: 80 })
+      .resize(resize.w, resize.h, { fit: resize.fit ?? 'cover', position: 'attention' })
+      .webp({ quality: 82 })
       .toBuffer();
-    const key = `challenge/${entryId}.webp`;
     await r2Put(key, out, 'image/webp');
     return r2PublicUrl(key);
   } catch {
-    return null; // undecodable / hostile image → fallback tile
+    return null;
   }
 }
+
+// og:image for a challenge entry (1200x630 card).
+export const selfHostOgImage = (ogUrl, entryId) =>
+  selfHostImage(ogUrl, `challenge/${entryId}.webp`, { w: 1200, h: 630, fit: 'cover' });
+
+// favicon/icon for a Build Games sponsor (small square).
+export const selfHostSponsorIcon = (iconUrl, sponsorId) =>
+  selfHostImage(iconUrl, `buildgames/${sponsorId}.webp`, { w: 96, h: 96, fit: 'cover' });

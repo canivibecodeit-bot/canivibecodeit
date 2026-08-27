@@ -5,25 +5,25 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import { buildGamesLive } from '../../lib/flags.js';
+import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
+  biddingOpen,
   countdownParts,
+  displayName,
   fillLevel,
   gamesStartAt,
   monogram,
-  potFromBids,
-  rankBids,
-  seedBids,
+  rankSponsors,
   usd,
 } from '../../lib/buildgames.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
-// Phase A: seed data. Phase B replaces these two lines with DB reads.
-const bids = seedBids();
-const ranked = rankBids(bids);
-
-const potCents = potFromBids(bids);
+// Live board + pot from the DB.
+const [potCents, board] = await Promise.all([bgPotCents(), bgLeaderboard()]);
+const ranked = rankSponsors(board);
 const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
+const bidsOpen = biddingOpen();
 
 // Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
@@ -131,36 +131,73 @@ const hostOf = (u) => {
         <span class="note">top spot holds till the games end · outbid to take it</span>
       </div>
 
-      <ol class="bg-rows">
-        {
-          ranked.map((b, i) => (
-            <li class:list={['bg-row', { lead: i === 0 }]}>
-              <span class="bg-rank">{i + 1}</span>
-              <span class="bg-logo">
-                {b.logo_url ? (
-                  <img src={b.logo_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
-                ) : (
-                  <span class="bg-monogram">{monogram(b.sponsor_name)}</span>
-                )}
-              </span>
-              <span class="bg-name">
-                {b.sponsor_url ? (
-                  <a href={b.sponsor_url} rel="ugc nofollow noopener" target="_blank">{b.sponsor_name}</a>
-                ) : (
-                  b.sponsor_name
-                )}
-                {hostOf(b.sponsor_url) && <span class="bg-host">{hostOf(b.sponsor_url)}</span>}
-              </span>
-              <span class="bg-amount">{usd(b.amount_cents)}</span>
-            </li>
-          ))
-        }
-      </ol>
+      {
+        ranked.length > 0 ? (
+          <ol class="bg-rows">
+            {ranked.map((s, i) => (
+              <li class:list={['bg-row', { lead: i === 0 }]}>
+                <span class="bg-rank">{i + 1}</span>
+                <span class="bg-logo">
+                  {s.icon_url ? (
+                    <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : (
+                    <span class="bg-monogram">{monogram(displayName(s))}</span>
+                  )}
+                </span>
+                <span class="bg-name">
+                  <a href={s.link} rel="ugc nofollow noopener" target="_blank">{displayName(s)}</a>
+                  <span class="bg-host">{hostOf(s.link)}</span>
+                </span>
+                <span class="bg-amount">{usd(s.cleared_total)}</span>
+                <button class="bg-report" type="button" data-report={s.id} title="report this entry">report</button>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="bg-empty">the board is empty — the first bid starts the pool.</p>
+        )
+      }
 
       <div class="bg-cta">
-        <a class="btn primary" href="mailto:rob@canivibecodeit.com?subject=The%20Build%20Games%20bid">bid for a top spot</a>
-        <span class="bg-cta-note">bids are placed by hand for now · you keep the spot until someone bids more</span>
+        {bidsOpen ? (
+          <>
+            <button class="btn primary" type="button" data-bid-open>bid for a top spot</button>
+            <span class="bg-cta-note">any amount from $5 · you keep your spot until someone's total is higher</span>
+          </>
+        ) : (
+          <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
+        )}
       </div>
+
+      {
+        bidsOpen && (
+          <form class="bg-bid-form" method="post" action="/api/thebuildgames/bid" data-bid-form hidden>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            <div class="bg-bid-row">
+              <label>
+                <span>your link</span>
+                <input type="url" name="link" required placeholder="https://your-tool.com" maxlength="300" />
+              </label>
+              <label>
+                <span>amount (usd)</span>
+                <input type="number" name="amount_dollars" required min="5" max="15000" step="1" placeholder="50" />
+              </label>
+            </div>
+            <label class="bg-bid-tag">
+              <span>tagline · optional</span>
+              <input type="text" name="tagline" maxlength="80" placeholder="what you're about, in a few words" />
+            </label>
+            <div class="bg-bid-actions">
+              <button class="btn primary" type="submit">place bid</button>
+              <span class="bg-bid-note">the favicon and title come from your link · it lists once payment clears</span>
+            </div>
+            <p class="bg-bid-err" data-bid-err hidden></p>
+          </form>
+        )
+      }
     </section>
 
     <section class="bg-notify">
@@ -412,7 +449,7 @@ const hostOf = (u) => {
 
   .bg-row {
     display: grid;
-    grid-template-columns: 28px 40px minmax(0, 1fr) auto;
+    grid-template-columns: 28px 40px minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 14px;
     padding: 12px 16px;
@@ -493,12 +530,110 @@ const hostOf = (u) => {
     white-space: nowrap;
   }
 
+  .bg-empty {
+    padding: 28px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .bg-report {
+    background: none;
+    border: none;
+    padding: 0 0 0 6px;
+    font: 11px var(--font-mono);
+    color: var(--muted);
+    opacity: 0.55;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .bg-report:hover {
+    opacity: 1;
+    color: var(--no-bg);
+  }
+
   .bg-cta {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     padding-top: 26px;
+  }
+
+  .bg-soon {
+    font-size: 13px;
+  }
+
+  /* ---------- bid form ---------- */
+  .bg-bid-form {
+    max-width: 520px;
+    margin: 20px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+
+  .bg-bid-form[hidden] {
+    display: none;
+  }
+
+  .bg-bid-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 520px) {
+    .bg-bid-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .bg-bid-form label > span {
+    display: block;
+    padding-bottom: 6px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-bid-form input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bg-bid-form input {
+      font-size: 16px;
+    }
+  }
+
+  .bg-bid-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bg-bid-note {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 34ch;
+    line-height: 1.5;
+  }
+
+  .bg-bid-err {
+    font-size: 13px;
+    color: var(--no-bg);
   }
 
   .bg-cta-note {
