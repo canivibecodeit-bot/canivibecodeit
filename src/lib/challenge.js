@@ -20,7 +20,7 @@ export const CHALLENGES = [
   {
     id: 1,
     slug: 'one',
-    title: 'Challenge #1',
+    title: 'Game #1',
     // placeholder — final headline from the Lead. NOTE: parallel-triple
     // constructions ("one X. one Y. one Z.") are banned by the humanizer
     // rules; whatever lands here must not have that shape.
