@@ -23,15 +23,18 @@ const { class: cls } = Astro.props;
 </div>
 
 <style>
+  /* Compact lockup (Rob's round-2 compression): the mark and wordmark keep
+     their hierarchy but stop eating the first screen — the sponsor list is
+     the destination, the lockup is the doorway. */
   .bgl {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(14px, 2.4vw, 26px);
+    gap: clamp(8px, 1.6vw, 14px);
   }
 
   .bgl-mark {
-    width: clamp(120px, 26vw, 260px);
+    width: clamp(76px, 15vw, 108px);
     height: auto;
     display: block;
   }
@@ -39,7 +42,7 @@ const { class: cls } = Astro.props;
   .bgl-word {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(34px, 8.5vw, 92px);
+    font-size: clamp(28px, 5.5vw, 44px);
     line-height: 0.95;
     letter-spacing: -0.01em;
     /* currentColor = --fg: white on dark, near-black on light. */

@@ -32,6 +32,14 @@ const ranked = rankSponsors(board);
 const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
 const bidsOpen = biddingOpen();
 
+// Proper pagination past 50 sponsors (?page=N), rank numbering continuous
+// across pages so #51 is #51, not a fresh #1.
+const PAGE_SIZE = 50;
+const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+const page = Math.min(totalPages, Math.max(1, Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10) || 1));
+const pageRows = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const rankOf = (i) => (page - 1) * PAGE_SIZE + i + 1;
+
 // Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
@@ -80,8 +88,8 @@ const hostOf = (u) => {
       <!-- The proof a placement is worth $500 — above everything else -->
       <p class="bg-stats" aria-label="Site traffic">
         <span class="bg-stat bg-stat-live"><span class="bg-live-dot" aria-hidden="true"></span><b data-bg-online>{online}</b> online now</span>
-        {allTime?.views ? <span class="bg-stat"><b>{compact(allTime.views)}</b> pageviews</span> : null}
         {allTime?.visitors ? <span class="bg-stat"><b>{compact(allTime.visitors)}</b> visitors all-time</span> : null}
+        <a class="bg-stat bg-stat-link" href="/stats">see stats →</a>
       </p>
       <p class="bg-eyebrow">canivibecodeit presents</p>
       <BuildGamesLogo class="bg-logo" />
@@ -93,7 +101,7 @@ const hostOf = (u) => {
     <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
     <section class="bg-pot" aria-label="Prize pool">
       <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
-        <svg class="bg-orb" viewBox="0 0 300 400" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
           <defs>
             <clipPath id="bg-orb-clip">
               <circle cx="150" cy="270" r="118" />
@@ -119,7 +127,7 @@ const hostOf = (u) => {
           <!-- ceiling cable + hook (fixed) — toggled off via ?cable=off -->
           {cableOn && (
             <g class="bg-cable-group">
-              <line x1="150" y1="0" x2="150" y2="120" class="bg-cable" />
+              <line x1="150" y1="108" x2="150" y2="120" class="bg-cable" />
               <path d="M150 120 q -11 9 0 20 q 11 11 0 20" class="bg-hook" />
             </g>
           )}
@@ -161,16 +169,16 @@ const hostOf = (u) => {
 
     <!-- Leaderboard -->
     <section class="bg-board">
-      <div class="list-head">
-        <h2>the board</h2>
+      <div class="list-head bg-list-head">
+        <h2>the sponsors</h2>
       </div>
 
       {
         ranked.length > 0 ? (
           <ol class="bg-rows">
-            {ranked.map((s, i) => (
-              <li class:list={['bg-row', { lead: i === 0, p2: i === 1, p3: i === 2 }]}>
-                <span class="bg-rank">{i + 1}</span>
+            {pageRows.map((s, i) => (
+              <li class:list={['bg-row', { lead: rankOf(i) === 1, p2: rankOf(i) === 2, p3: rankOf(i) === 3 }]}>
+                <span class="bg-rank">{rankOf(i)}</span>
                 <span class="bg-logo">
                   {s.icon_url ? (
                     <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
@@ -193,9 +201,17 @@ const hostOf = (u) => {
             ))}
           </ol>
         ) : (
-          <p class="bg-empty">the board is empty — the first bid starts the pool.</p>
+          <p class="bg-empty">no sponsors yet · the first bid starts the pool.</p>
         )
       }
+
+      {totalPages > 1 && (
+        <nav class="bg-pager" aria-label="Sponsor pages">
+          {page > 1 ? <a href={`/thebuildgames?page=${page - 1}`} rel="prev">← previous</a> : <span />}
+          <span class="bg-pager-at">page {page} of {totalPages}</span>
+          {page < totalPages ? <a href={`/thebuildgames?page=${page + 1}`} rel="next">next →</a> : <span />}
+        </nav>
+      )}
 
       <div class="bg-cta">
         {bidsOpen ? (
@@ -282,27 +298,27 @@ const hostOf = (u) => {
 
 <style>
   .bg-wrap {
-    padding-top: 40px;
+    padding-top: 18px;
     padding-bottom: 120px;
   }
 
   /* ---------- hero / logo ---------- */
   .bg-hero {
     text-align: center;
-    padding-bottom: 8px;
+    padding-bottom: 2px;
   }
 
   .bg-eyebrow {
-    font: 12px var(--font-mono);
+    font: 11px var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: var(--muted);
-    padding-bottom: 22px;
+    padding-bottom: 10px;
   }
 
   .bg-tagline {
-    margin-top: 20px;
-    font-size: 16px;
+    margin-top: 10px;
+    font-size: 14px;
     color: var(--muted);
     max-width: 44ch;
     margin-inline: auto;
@@ -318,7 +334,41 @@ const hostOf = (u) => {
   }
 
   .bg-orb-stage {
-    width: min(340px, 84vw);
+    width: min(200px, 52vw);
+  }
+
+  /* Desktop density: taller viewports still put the podium above the fold.
+     Same order, smaller hero furniture. */
+  @media (min-width: 1024px) {
+    .bg-orb-stage {
+      width: 150px;
+    }
+
+    .bg-pot-amount {
+      font-size: 52px;
+    }
+
+    .bg-countdown {
+      padding-top: 10px;
+      gap: 2px;
+    }
+
+    .bg-cd-num {
+      font-size: 19px;
+    }
+
+    .bg-tagline {
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .bg-wrap {
+      padding-top: 14px;
+    }
+
+    .bg-list-head {
+      padding-top: 10px;
+    }
   }
 
   .bg-orb {
@@ -416,8 +466,8 @@ const hostOf = (u) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding-top: 22px;
+    gap: 2px;
+    padding-top: 8px;
   }
 
   .bg-pot-label {
@@ -430,7 +480,7 @@ const hostOf = (u) => {
   .bg-pot-amount {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(44px, 9vw, 76px);
+    font-size: clamp(46px, 9vw, 80px);
     line-height: 1;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
@@ -447,8 +497,8 @@ const hostOf = (u) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding-top: 40px;
+    gap: 3px;
+    padding-top: 18px;
   }
 
   .bg-cd-lead {
@@ -472,7 +522,7 @@ const hostOf = (u) => {
   }
 
   .bg-cd-num {
-    font-size: clamp(28px, 5vw, 40px);
+    font-size: clamp(20px, 3.5vw, 26px);
     font-weight: 700;
     color: var(--fg);
     font-variant-numeric: tabular-nums;
@@ -502,12 +552,16 @@ const hostOf = (u) => {
     padding-top: 52px;
   }
 
+  .bg-list-head {
+    padding-top: 14px;
+  }
+
   .bg-rows {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-top: 16px;
+    gap: 6px;
+    padding-top: 10px;
   }
 
   /* The leaderboard IS the product: every row is one hover target and one
@@ -518,8 +572,8 @@ const hostOf = (u) => {
     display: grid;
     grid-template-columns: 34px 40px minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 9px 14px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
@@ -537,7 +591,7 @@ const hostOf = (u) => {
   .bg-row.lead {
     border-color: var(--primary);
     box-shadow: inset 0 0 0 1px var(--primary);
-    padding-block: 16px;
+    padding-block: 13px;
   }
 
   .bg-row.lead:hover,
@@ -620,8 +674,15 @@ const hostOf = (u) => {
     font-weight: 600;
     color: var(--fg);
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+
+  /* taglines breathe: up to two lines at every width, never a hard ellipsis
+     at ten characters */
+  .bg-name a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
   }
 
   .bg-name a:hover {
@@ -650,8 +711,8 @@ const hostOf = (u) => {
 
   .bg-amount {
     font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 20px;
+    font-weight: 800;
+    font-size: 26px;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
@@ -663,6 +724,23 @@ const hostOf = (u) => {
     text-align: center;
     font-size: 14px;
     color: var(--muted);
+  }
+
+  .bg-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    font: 12px var(--font-mono);
+  }
+
+  .bg-pager a {
+    color: var(--primary);
+  }
+
+  .bg-pager-at {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
   }
 
   .bg-report {
@@ -773,11 +851,13 @@ const hostOf = (u) => {
   .bg-stats {
     display: flex;
     justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 8px 26px;
-    margin: 0 0 22px;
-    padding: 10px 18px;
-    font-size: 13px;
+    gap: 6px 18px;
+    margin: 0 0 12px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    line-height: 1;
     color: var(--muted);
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -786,11 +866,30 @@ const hostOf = (u) => {
     background: color-mix(in srgb, var(--surface) 70%, transparent);
   }
 
+  /* every stat is one centred inline-flex line — number and label share a
+     vertical centre instead of fighting baselines of two font sizes */
+  .bg-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+  }
+
   .bg-stat b {
     color: var(--fg);
-    font-size: 15px;
+    font-size: 14px;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-stat-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .bg-stat-link:hover {
+    text-decoration: underline;
   }
 
   .bg-stat-live {
@@ -1013,7 +1112,7 @@ const hostOf = (u) => {
     }
 
     .bg-amount {
-      font-size: 17px;
+      font-size: 21px;
     }
 
     .bg-meta {
