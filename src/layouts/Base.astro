@@ -30,6 +30,9 @@ const {
   // Surfaces with their own sponsor system (The Build Games) suppress the
   // sitewide sponsor rails/tape so the two don't clash.
   hideSponsors = false,
+  // Pages with their OWN email capture suppress the sticky digest bar too —
+  // one page, one ask (and on mobile the bar overlapped the inline form).
+  hideDigest = false,
 } = Astro.props;
 
 const user = Astro.locals.user ?? null;
@@ -187,7 +190,7 @@ const headerLinks = navSections.filter((s) => s.top);
         <SponsorTape side="right" />
       </>
     )}
-    <DigestBar />
+    {!hideDigest && <DigestBar />}
 
     {!user && <SignupModal />}
 
