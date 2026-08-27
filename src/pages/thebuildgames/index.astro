@@ -1,0 +1,530 @@
+---
+// The Build Games — the public sponsor/hype surface. Flag-gated: 404s until
+// BUILDGAMES_LIVE is set, so it merges dark and goes live the moment the
+// launch video posts. Phase A renders seed data; Phase B swaps in the DB.
+import Base from '../../layouts/Base.astro';
+import { buildGamesLive } from '../../lib/flags.js';
+import {
+  countdownParts,
+  fillFraction,
+  fillGoalCents,
+  gamesStartAt,
+  monogram,
+  potFromBids,
+  rankBids,
+  seedBids,
+  usd,
+} from '../../lib/buildgames.js';
+
+if (!buildGamesLive()) return new Response(null, { status: 404 });
+
+// Phase A: seed data. Phase B replaces these two lines with DB reads.
+const bids = seedBids();
+const ranked = rankBids(bids);
+
+const potCents = potFromBids(bids);
+const goalCents = fillGoalCents();
+const fill = fillFraction(potCents, goalCents); // 0..1
+
+const startAt = gamesStartAt();
+const cd = countdownParts(startAt);
+
+const hostOf = (u) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+};
+---
+
+<Base
+  title="The Build Games · canivibecodeit"
+  description="Sponsors bid for the top spot. 100% of every bid goes to the builders' prize pool. The games begin September 1."
+>
+  <main class="wrap bg-wrap">
+    <!-- Title — clean slot for the final logo, strong text treatment until then -->
+    <header class="bg-hero">
+      <p class="bg-eyebrow">canivibecodeit presents</p>
+      <h1 class="bg-title">
+        <span class="bg-title-line">THE BUILD</span>
+        <span class="bg-title-line bg-title-accent">GAMES</span>
+      </h1>
+      <p class="bg-tagline">
+        Sponsors bid for the top spot. Every dollar goes to the builders.
+      </p>
+    </header>
+
+    <!-- THE POT: a suspended vault that fills as the pool grows -->
+    <section class="bg-pot" aria-label="Prize pool">
+      <div class="bg-pot-stage" data-pot data-fill={fill.toFixed(4)} data-goal={goalCents} data-pot-cents={potCents}>
+        <div class="bg-cord" aria-hidden="true"></div>
+        <svg class="bg-vessel" viewBox="0 0 300 320" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+          <defs>
+            <clipPath id="bg-vessel-clip">
+              <rect x="24" y="20" width="252" height="280" rx="20" />
+            </clipPath>
+            <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="var(--primary-dim)" />
+              <stop offset="100%" stop-color="var(--primary)" />
+            </linearGradient>
+            <pattern id="bg-bills" width="252" height="16" patternUnits="userSpaceOnUse">
+              <rect width="252" height="16" fill="url(#bg-cash)" />
+              <rect x="0" y="15" width="252" height="1" fill="rgba(0,0,0,0.18)" />
+            </pattern>
+          </defs>
+
+          <!-- glass body -->
+          <rect x="24" y="20" width="252" height="280" rx="20" class="bg-glass" />
+
+          <!-- the fill: full-height rect scaled from the bottom by --fill -->
+          <g clip-path="url(#bg-vessel-clip)">
+            <rect class="bg-fill" x="24" y="20" width="252" height="280" fill="url(#bg-bills)" />
+            <rect class="bg-fill-top" x="24" width="252" height="4" fill="var(--primary)" />
+          </g>
+
+          <!-- glass rim + highlight over the fill -->
+          <rect x="24" y="20" width="252" height="280" rx="20" class="bg-glass-rim" />
+          <rect x="40" y="34" width="10" height="252" rx="5" class="bg-glass-shine" />
+        </svg>
+        <div class="bg-drops" aria-hidden="true"></div>
+      </div>
+
+      <div class="bg-pot-readout">
+        <span class="bg-pot-label">prize pool</span>
+        <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
+        <span class="bg-pot-note">100% of sponsor bids · Rob keeps $0</span>
+      </div>
+    </section>
+
+    <!-- Countdown — below the pot so it doesn't fight the visual -->
+    <section class="bg-countdown" data-countdown data-target={String(startAt)} aria-label="Countdown to the first challenge">
+      <span class="bg-cd-lead">first challenge opens</span>
+      <span class="bg-cd-row">
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-days>{cd.days}</b><span class="bg-cd-unit">d</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-hours>{cd.hours}</b><span class="bg-cd-unit">h</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-mins>{cd.minutes}</b><span class="bg-cd-unit">m</span></span>
+        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-secs>{cd.seconds}</b><span class="bg-cd-unit">s</span></span>
+      </span>
+      <span class="bg-cd-when">september 1 · midnight new york</span>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="bg-board">
+      <div class="list-head">
+        <h2>the board</h2>
+        <span class="note">top spot holds till the games end · outbid to take it</span>
+      </div>
+
+      <ol class="bg-rows">
+        {
+          ranked.map((b, i) => (
+            <li class:list={['bg-row', { lead: i === 0 }]}>
+              <span class="bg-rank">{i + 1}</span>
+              <span class="bg-logo">
+                {b.logo_url ? (
+                  <img src={b.logo_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
+                ) : (
+                  <span class="bg-monogram">{monogram(b.sponsor_name)}</span>
+                )}
+              </span>
+              <span class="bg-name">
+                {b.sponsor_url ? (
+                  <a href={b.sponsor_url} rel="ugc nofollow noopener" target="_blank">{b.sponsor_name}</a>
+                ) : (
+                  b.sponsor_name
+                )}
+                {hostOf(b.sponsor_url) && <span class="bg-host">{hostOf(b.sponsor_url)}</span>}
+              </span>
+              <span class="bg-amount">{usd(b.amount_cents)}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="bg-cta">
+        <a class="btn primary" href="mailto:rob@canivibecodeit.com?subject=The%20Build%20Games%20bid">bid for a top spot</a>
+        <span class="bg-cta-note">bids are placed by hand for now · you keep the spot until someone bids more</span>
+      </div>
+    </section>
+
+    <section class="bg-notify">
+      <h2>be there when it starts</h2>
+      <form class="bg-wl" method="post" action="/api/waitlist" data-digest>
+        <label class="hp" aria-hidden="true">
+          Leave this field empty
+          <input type="text" name="website" tabindex="-1" autocomplete="off" />
+        </label>
+        <input type="hidden" name="source" value="buildgames" />
+        <input type="email" name="email" required placeholder="you@wherever.dev" maxlength="254" aria-label="email address" />
+        <button class="btn primary" type="submit">notify me</button>
+      </form>
+    </section>
+  </main>
+</Base>
+
+<script is:inline src={`/js/buildgames.js?v=${__BUILD_ID__}`} defer></script>
+
+<style>
+  .bg-wrap {
+    padding-top: 40px;
+    padding-bottom: 120px;
+  }
+
+  /* ---------- title ---------- */
+  .bg-hero {
+    text-align: center;
+    padding-bottom: 8px;
+  }
+
+  .bg-eyebrow {
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+
+  .bg-title {
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(48px, 12vw, 128px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+
+  .bg-title-line {
+    display: block;
+  }
+
+  .bg-title-accent {
+    color: var(--primary);
+  }
+
+  .bg-tagline {
+    margin-top: 16px;
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 44ch;
+    margin-inline: auto;
+    text-wrap: pretty;
+  }
+
+  /* ---------- the pot ---------- */
+  .bg-pot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 24px;
+  }
+
+  .bg-pot-stage {
+    position: relative;
+    width: min(300px, 80vw);
+  }
+
+  .bg-cord {
+    width: 2px;
+    height: 34px;
+    margin: 0 auto;
+    background: linear-gradient(var(--border), var(--muted));
+  }
+
+  .bg-vessel {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.4));
+  }
+
+  .bg-glass {
+    fill: rgba(255, 255, 255, 0.02);
+    stroke: var(--border);
+    stroke-width: 2;
+  }
+
+  /* the fill rect scales from its own bottom edge by --fill (0..1) */
+  .bg-fill {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    transform: scaleY(var(--fill, 0));
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .bg-fill-top {
+    transform-box: fill-box;
+    /* sits at the top of the fill: translate up by fill * interior height */
+    transform: translateY(calc((1 - var(--fill, 0)) * 280px));
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.9;
+  }
+
+  .bg-glass-rim {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+  }
+
+  .bg-glass-shine {
+    fill: rgba(255, 255, 255, 0.06);
+  }
+
+  .bg-drops {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .bg-drop {
+    position: absolute;
+    top: -12px;
+    width: 22px;
+    height: 11px;
+    border-radius: 2px;
+    background: var(--primary);
+    opacity: 0.9;
+    animation: bg-drop-fall 700ms cubic-bezier(0.4, 0, 0.7, 1) forwards;
+  }
+
+  @keyframes bg-drop-fall {
+    to {
+      transform: translateY(300px) rotate(180deg);
+      opacity: 0;
+    }
+  }
+
+  .bg-pot-readout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-top: 22px;
+  }
+
+  .bg-pot-label {
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bg-pot-amount {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(44px, 9vw, 76px);
+    line-height: 1;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-pot-note {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  /* ---------- countdown ---------- */
+  .bg-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-top: 40px;
+  }
+
+  .bg-cd-lead {
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .bg-cd-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--font-mono);
+  }
+
+  .bg-cd-cell {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+  }
+
+  .bg-cd-num {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    min-width: 2ch;
+    text-align: right;
+    line-height: 1;
+  }
+
+  .bg-cd-unit {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .bg-cd-when {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    opacity: 0.85;
+  }
+
+  /* ---------- board ---------- */
+  .bg-board {
+    padding-top: 52px;
+  }
+
+  .bg-rows {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+  }
+
+  .bg-row {
+    display: grid;
+    grid-template-columns: 28px 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+
+  .bg-row.lead {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary);
+  }
+
+  .bg-rank {
+    font: 700 15px var(--font-mono);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .bg-row.lead .bg-rank {
+    color: var(--primary);
+  }
+
+  .bg-logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bg-monogram {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font: 700 14px var(--font-mono);
+    color: var(--primary);
+  }
+
+  .bg-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .bg-name a,
+  .bg-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bg-name a:hover {
+    color: var(--primary);
+  }
+
+  .bg-host {
+    font: 11px var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .bg-amount {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bg-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 26px;
+  }
+
+  .bg-cta-note {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    text-align: center;
+    max-width: 48ch;
+  }
+
+  /* ---------- notify ---------- */
+  .bg-notify {
+    margin-top: 52px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .bg-notify h2 {
+    font-size: 15px;
+  }
+
+  .bg-wl {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 14px;
+  }
+
+  .bg-wl input[type='email'] {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bg-wl input[type='email'] {
+      font-size: 16px;
+    }
+  }
+</style>
