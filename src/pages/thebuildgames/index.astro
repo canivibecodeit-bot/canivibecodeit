@@ -22,6 +22,7 @@ import {
   usd,
 } from '../../lib/buildgames.js';
 import { dashboardStats } from '../../lib/analytics.js';
+import { withUtm } from '../../lib/sponsors.js';
 import { onlineCount } from '../../lib/presence.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
@@ -267,7 +268,7 @@ const hostOf = (u) => {
                   )}
                 </span>
                 <span class="bg-name">
-                  <a href={s.link} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{displayName(s)}</a>
+                  <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{displayName(s)}</a>
                   <span class="bg-host">{hostOf(s.link)}</span>
                 </span>
                 <span class="bg-amount-cell">
