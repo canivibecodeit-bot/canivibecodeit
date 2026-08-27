@@ -51,8 +51,11 @@ const cd = countdownParts(startAt);
 // than showing a made-up number).
 const online = onlineCount();
 let allTime = null;
+let weekVisitors = null;
 try {
-  allTime = (await dashboardStats())?.allTime ?? null;
+  const stats = await dashboardStats();
+  allTime = stats?.allTime ?? null;
+  weekVisitors = stats?.tiles?.visitors7d ?? null;
 } catch {
   /* strip renders without the totals */
 }
@@ -66,6 +69,24 @@ const compact = (n) =>
 const minEntryUsd = Math.ceil(MIN_ENTRY_CENTS / 100);
 const minFormUsd = Math.ceil(Math.min(MIN_ENTRY_CENTS, MIN_TOPUP_CENTS) / 100);
 const maxUsd = Math.floor(MAX_BID_CENTS / 100);
+
+/* Top claim bar. Picking a spot prices itself off the LIVE board: to hold
+   spot N your cumulative total has to sit above whoever holds it now, so the
+   ask is that sponsor's cleared total plus one increment, floored at the entry
+   minimum the API enforces for a link's first appearance. Spots past the end
+   of the board are unclaimed, so they cost exactly that minimum. This is a
+   CALCULATOR, never a promise — the server re-derives every floor, and the
+   board re-ranks on cleared totals, so a spot can move between here and
+   checkout. The copy under the bar says so. */
+const CLAIM_STEP_CENTS = MIN_TOPUP_CENTS;
+const claimTotals = ranked.slice(0, 100).map((r) => r.cleared_total);
+const claimCost = (rank) => {
+  const heldBy = claimTotals[rank - 1];
+  return heldBy == null ? MIN_ENTRY_CENTS : Math.max(MIN_ENTRY_CENTS, heldBy + CLAIM_STEP_CENTS);
+};
+// The first unclaimed spot is the cheapest honest ask; below it every spot is
+// someone else's to beat.
+const openRank = claimTotals.length + 1;
 
 const hostOf = (u) => {
   try {
@@ -88,6 +109,7 @@ const hostOf = (u) => {
       <!-- The proof a placement is worth $500 — above everything else -->
       <p class="bg-stats" aria-label="Site traffic">
         <span class="bg-stat bg-stat-live"><span class="bg-live-dot" aria-hidden="true"></span><b data-bg-online>{online}</b> online now</span>
+        {weekVisitors ? <span class="bg-stat"><b>{compact(weekVisitors)}</b> visitors this week</span> : null}
         {allTime?.visitors ? <span class="bg-stat"><b>{compact(allTime.visitors)}</b> visitors all-time</span> : null}
         <a class="bg-stat bg-stat-link" href="/stats">see stats →</a>
       </p>
@@ -167,6 +189,65 @@ const hostOf = (u) => {
       <span class="bg-cd-when">september 1 · midnight new york</span>
     </section>
 
+    <!-- The buy button, where a buyer actually is: straight under the clock,
+         above the board. Scrolling to the bottom to find out how to sponsor
+         was costing us the impulse. -->
+    {
+      bidsOpen && (
+        <section
+          class="bg-claim"
+          data-claim
+          data-totals={JSON.stringify(claimTotals)}
+          data-step={String(CLAIM_STEP_CENTS)}
+          data-min={String(MIN_ENTRY_CENTS)}
+          data-max={String(MAX_BID_CENTS)}
+          data-open-rank={String(openRank)}
+          aria-label="Take a spot on the board"
+        >
+          <p class="bg-claim-head">
+            <span class="bg-claim-word">take spot</span>
+            <span class="bg-stepper">
+              <button class="bg-step" type="button" data-rank-dn aria-label="a higher spot">−</button>
+              <b class="bg-claim-rank" data-claim-rank>#1</b>
+              <button class="bg-step" type="button" data-rank-up aria-label="a lower spot">+</button>
+            </span>
+            <span class="bg-claim-word">for</span>
+            <span class="bg-stepper">
+              <button class="bg-step" type="button" data-amt-dn aria-label="bid less">−</button>
+              <b class="bg-claim-amt" data-claim-amt>{usd(claimCost(1))}</b>
+              <button class="bg-step" type="button" data-amt-up aria-label="bid more">+</button>
+            </span>
+          </p>
+
+          <form class="bg-claim-form" method="post" action="/api/thebuildgames/bid" data-bid-form>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            {/* text, not url: a pasted bare domain must reach the server, which
+                normalizes it. Same reasoning as the full form below. */}
+            <input
+              class="bg-claim-link"
+              type="text"
+              inputmode="url"
+              autocomplete="url"
+              spellcheck="false"
+              name="link"
+              required
+              maxlength="300"
+              placeholder="your product url"
+              aria-label="your product url"
+            />
+            <input type="hidden" name="amount_dollars" data-claim-amount value={String(Math.ceil(claimCost(1) / 100))} />
+            <button class="btn primary bg-claim-go" type="submit">take the spot</button>
+            <p class="bg-bid-err bg-claim-err" data-bid-err hidden />
+          </form>
+
+          <p class="bg-claim-note" data-claim-note />
+        </section>
+      )
+    }
+
     <!-- Leaderboard -->
     <section class="bg-board">
       <div class="list-head bg-list-head">
@@ -196,7 +277,6 @@ const hostOf = (u) => {
                     {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}
                   </span>
                 </span>
-                <button class="bg-report" type="button" data-report={s.id} title="report this entry">report</button>
               </li>
             ))}
           </ol>
@@ -216,8 +296,8 @@ const hostOf = (u) => {
       <div class="bg-cta">
         {bidsOpen ? (
           <>
-            <button class="btn primary" type="button" data-bid-open>bid for a top spot</button>
-            <span class="bg-cta-note">enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
+            <button class="btn primary" type="button" data-bid-open>add a tagline, icon or email</button>
+            <span class="bg-cta-note">or bid from the top of the page · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
           <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
@@ -226,7 +306,7 @@ const hostOf = (u) => {
 
       {
         bidsOpen && (
-          <form class="bg-bid-form" method="post" action="/api/thebuildgames/bid" data-bid-form hidden>
+          <form class="bg-bid-form" method="post" action="/api/thebuildgames/bid" data-bid-form data-collapsible hidden>
             <label class="hp" aria-hidden="true">
               Leave this field empty
               <input type="text" name="website" tabindex="-1" autocomplete="off" />
@@ -287,9 +367,15 @@ const hostOf = (u) => {
       </form>
     </section>
 
+    <!-- The per-row report buttons are gone (they were visual noise on the
+         product itself), but a way to flag a listing has to survive: a paid
+         placement can still point somewhere it shouldn't, and "no route to
+         tell us" is not a defensible position. One quiet line, out of the
+         way of the board. -->
     <p class="bg-terms-foot">
       free skill-judged entry · independent judging ·
-      <a href="/thebuildgames/terms">the Build Games terms</a>
+      <a href="/thebuildgames/terms">the Build Games terms</a> ·
+      <a href="mailto:digest@canivibecodeit.com?subject=Build%20Games%20listing%20report">report a listing</a>
     </p>
   </main>
 </Base>
@@ -565,12 +651,12 @@ const hostOf = (u) => {
   }
 
   /* The leaderboard IS the product: every row is one hover target and one
-     click (a stretched link on the name anchor covers the row; the report
-     button sits above it). Rank numerals carry a podium hierarchy. */
+     click — a stretched link on the name anchor covers the whole row, with
+     nothing competing for the click. Rank numerals carry a podium hierarchy. */
   .bg-row {
     position: relative;
     display: grid;
-    grid-template-columns: 34px 40px minmax(0, 1fr) auto auto;
+    grid-template-columns: 34px 40px minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
     padding: 9px 14px;
@@ -743,31 +829,6 @@ const hostOf = (u) => {
     font-variant-numeric: tabular-nums;
   }
 
-  .bg-report {
-    background: none;
-    border: none;
-    padding: 0 0 0 6px;
-    font: 11px var(--font-mono);
-    color: var(--muted);
-    opacity: 0.55;
-    cursor: pointer;
-    white-space: nowrap;
-    position: relative; /* above the row's stretched link */
-    z-index: 1;
-    transition: opacity 0.15s ease, color 0.15s ease;
-  }
-
-  .bg-report:hover,
-  .bg-report:focus-visible {
-    opacity: 1;
-    color: var(--fg);
-  }
-
-  .bg-report:hover {
-    opacity: 1;
-    color: var(--no-bg);
-  }
-
   .bg-cta {
     display: flex;
     flex-direction: column;
@@ -778,6 +839,149 @@ const hostOf = (u) => {
 
   .bg-soon {
     font-size: 13px;
+  }
+
+  /* ---------- the claim bar (under the clock, above the board) ---------- */
+  .bg-claim {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 26px 0 8px;
+  }
+
+  .bg-claim-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    font: 800 clamp(23px, 5.2vw, 36px) / 1 var(--font-display);
+    color: var(--fg);
+    text-align: center;
+  }
+
+  .bg-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .bg-step {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font: 600 16px / 1 var(--font-mono);
+    cursor: pointer;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  }
+
+  .bg-step:hover:not(:disabled),
+  .bg-step:focus-visible:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .bg-step:active:not(:disabled) {
+    transform: translateY(0) scale(0.93);
+  }
+
+  .bg-step:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Tabular + a reserved width so stepping never nudges the line around. */
+  .bg-claim-rank,
+  .bg-claim-amt {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    text-align: center;
+    transition: color 0.16s ease;
+  }
+
+  .bg-claim-rank {
+    min-width: 2.4ch;
+  }
+
+  .bg-claim-amt {
+    color: var(--primary);
+    min-width: 5ch;
+  }
+
+  .bg-claim-form {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: min(680px, 100%);
+    position: relative;
+  }
+
+  .bg-claim-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 13px 18px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--fg);
+    font-size: 15px;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+
+  .bg-claim-link::placeholder {
+    color: var(--muted);
+  }
+
+  .bg-claim-link:hover {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  }
+
+  .bg-claim-link:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  }
+
+  .bg-claim-go {
+    flex: none;
+    border-radius: 999px;
+    padding-inline: 24px;
+    white-space: nowrap;
+  }
+
+  .bg-claim-note {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-align: center;
+    max-width: 54ch;
+    text-wrap: pretty;
+  }
+
+  .bg-claim-err {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-step,
+    .bg-step:hover:not(:disabled),
+    .bg-step:active:not(:disabled) {
+      transition: none;
+      transform: none;
+    }
   }
 
   /* ---------- bid form ---------- */
@@ -883,13 +1087,21 @@ const hostOf = (u) => {
     font-feature-settings: 'tnum' 1;
   }
 
+  /* Hover reads as a soft lift, never an underline: the strip is a pill of
+     quiet furniture and a rule through it looks like a broken link. */
   .bg-stat-link {
     color: var(--primary);
     text-decoration: none;
+    padding: 3px 9px;
+    margin: -3px -3px -3px 0;
+    border-radius: 999px;
+    transition: color 0.18s ease, background-color 0.18s ease;
   }
 
-  .bg-stat-link:hover {
-    text-decoration: underline;
+  .bg-stat-link:hover,
+  .bg-stat-link:focus-visible {
+    color: color-mix(in srgb, var(--primary) 78%, var(--fg));
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
   .bg-stat-live {
@@ -1076,12 +1288,28 @@ const hostOf = (u) => {
       padding: 10px 12px;
     }
 
-    /* Report tucks under the amount instead of owning a column. */
-    .bg-report {
-      grid-column: 4;
-      grid-row: 2;
-      justify-self: end;
-      padding: 2px 0 0;
+    .bg-claim {
+      padding: 20px 0 4px;
+      gap: 12px;
+    }
+
+    .bg-claim-head {
+      gap: 6px 9px;
+    }
+
+    /* Full-width tap targets beat a squeezed side-by-side row on a phone. */
+    .bg-claim-form {
+      flex-direction: column;
+    }
+
+    .bg-claim-go {
+      width: 100%;
+      padding-block: 13px;
+    }
+
+    .bg-claim-err {
+      position: static;
+      margin-top: 2px;
     }
 
     .bg-amount-cell {

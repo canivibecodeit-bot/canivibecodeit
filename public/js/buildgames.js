@@ -157,11 +157,17 @@
         if (!form.hidden) form.querySelector('input[name="link"]').focus();
       });
     }
-    const bidForm = claim($('[data-bid-form]'));
-    if (bidForm) {
+    // One submit path, two forms: the top claim bar and the full form below
+    // post the same fields to the same endpoint, and the only difference is
+    // which optional inputs exist in the DOM. One handler means the money path
+    // has a single client implementation instead of two that drift apart.
+    $$('[data-bid-form]').forEach((rawForm) => {
+      const bidForm = claim(rawForm);
+      if (!bidForm) return;
       bidForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = $('button[type="submit"]', bidForm);
+        const label = btn.textContent;
         const err = $('[data-bid-err]', bidForm);
         err.hidden = true;
         btn.disabled = true;
@@ -205,15 +211,115 @@
           }
           toast(out.message || 'bid placed');
           bidForm.reset();
-          bidForm.hidden = true;
+          // Only the collapsible full form folds away again; the claim bar is
+          // permanent furniture and has to stay on screen.
+          if (bidForm.dataset.collapsible) bidForm.hidden = true;
         } catch {
           err.textContent = 'network hiccup — try again';
           err.hidden = false;
         } finally {
           btn.disabled = false;
-          btn.textContent = 'place bid';
+          btn.textContent = label;
         }
       });
+    });
+
+    /* ---------- the claim bar: pick a spot, see its price ---------- */
+    // Two controls over one number. `cents` is the state; the spot label is
+    // always DERIVED from it, never asserted, so the bar can't offer a spot
+    // the money wouldn't actually buy. Nothing here is authoritative — the
+    // server re-derives every floor and the board re-ranks on cleared totals —
+    // so this is a calculator, and the note under it says exactly that.
+    const claimBar = claim($('[data-claim]'));
+    if (claimBar) {
+      let totals = [];
+      try {
+        totals = JSON.parse(claimBar.dataset.totals || '[]');
+      } catch {
+        totals = [];
+      }
+      const STEP = Number(claimBar.dataset.step) || 25000;
+      const MIN = Number(claimBar.dataset.min) || 50000;
+      const MAX = Number(claimBar.dataset.max) || 1500000;
+      // The first unclaimed spot: everything above it is someone else's to beat.
+      const OPEN = Math.max(1, Number(claimBar.dataset.openRank) || totals.length + 1);
+
+      const rankEl = $('[data-claim-rank]', claimBar);
+      const amtEl = $('[data-claim-amt]', claimBar);
+      const noteEl = $('[data-claim-note]', claimBar);
+      const amountInput = $('[data-claim-amount]', claimBar);
+      const rankDn = $('[data-rank-dn]', claimBar);
+      const rankUp = $('[data-rank-up]', claimBar);
+      const amtDn = $('[data-amt-dn]', claimBar);
+      const amtUp = $('[data-amt-up]', claimBar);
+
+      // What a payment of `cents` actually buys. A tie does NOT take the spot
+      // (the board breaks ties on who cleared first), so `>=` is deliberate:
+      // it under-promises rather than over-promises.
+      const rankOf = (cents) => totals.filter((t) => t >= cents).length + 1;
+      // Beat whoever holds spot n, floored at the entry minimum the API
+      // enforces for a link's first appearance and capped at the per-payment
+      // ceiling. Mirrors the server's arithmetic.
+      const costOf = (n) => {
+        const held = totals[n - 1];
+        return held == null ? MIN : Math.min(MAX, Math.max(MIN, held + STEP));
+      };
+
+      // Only spots that a SINGLE payment can genuinely take. Where two
+      // sponsors sit closer together than one increment, the money for the
+      // lower spot would actually land you higher — so that rung is dropped
+      // instead of being advertised as something it isn't. Same for a leader
+      // sitting at the per-payment ceiling: unbeatable in one go, so not
+      // offered.
+      const rungs = [];
+      for (let n = 1; n <= OPEN; n += 1) {
+        const c = costOf(n);
+        if (rankOf(c) === n) rungs.push({ rank: n, cents: c });
+      }
+      if (!rungs.length) rungs.push({ rank: rankOf(MIN), cents: MIN });
+
+      let cents = rungs[0].cents;
+
+      const render = () => {
+        const rank = rankOf(cents);
+        const at = rungs.findIndex((r) => r.rank === rank);
+        if (rankEl) rankEl.textContent = '#' + rank;
+        if (amtEl) amtEl.textContent = fmtUsd(cents);
+        // The server takes whole dollars; round UP so the rounding can never
+        // land the buyer a cent short of the spot the bar just promised.
+        if (amountInput) amountInput.value = String(Math.ceil(cents / 100));
+        if (rankDn) rankDn.disabled = at <= 0;
+        if (rankUp) rankUp.disabled = at < 0 || at >= rungs.length - 1;
+        if (amtDn) amtDn.disabled = cents <= MIN;
+        if (amtUp) amtUp.disabled = cents >= MAX;
+        if (noteEl) {
+          const held = totals[rank - 1];
+          noteEl.textContent =
+            (held == null
+              ? 'spot #' + rank + ' is open · ' + fmtUsd(MIN) + ' is the entry minimum'
+              : 'beats the ' + fmtUsd(held) + ' sitting at spot #' + rank) +
+            ' · you get whatever your total buys when the payment lands, and anyone can outbid it after';
+        }
+      };
+
+      const setCents = (next) => {
+        cents = Math.min(MAX, Math.max(MIN, Math.round(next)));
+        render();
+      };
+      // The spot stepper walks the rungs; + is a lower (cheaper) spot.
+      const stepRank = (dir) => {
+        const at = rungs.findIndex((r) => r.rank === rankOf(cents));
+        const to = at < 0 ? 0 : Math.min(rungs.length - 1, Math.max(0, at + dir));
+        setCents(rungs[to].cents);
+      };
+
+      if (rankDn) rankDn.addEventListener('click', () => stepRank(-1));
+      if (rankUp) rankUp.addEventListener('click', () => stepRank(1));
+      // Money moves on the increment grid so repeated taps stay on round numbers.
+      if (amtDn) amtDn.addEventListener('click', () => setCents(Math.ceil(cents / STEP) * STEP - STEP));
+      if (amtUp) amtUp.addEventListener('click', () => setCents(Math.floor(cents / STEP) * STEP + STEP));
+
+      render();
     }
 
     /* ---------- outbound click beacons (board rows) ---------- */
@@ -237,26 +343,6 @@
       history.replaceState(null, '', location.pathname);
       if (paid === '1') setTimeout(() => location.reload(), 4000);
     }
-
-    /* ---------- report buttons ---------- */
-    $$('[data-report]').forEach((raw) => {
-      const btn = claim(raw);
-      if (!btn) return;
-      btn.addEventListener('click', async () => {
-        btn.disabled = true;
-        try {
-          await fetch('/api/thebuildgames/report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: btn.dataset.report }),
-          });
-        } catch {
-          /* best effort */
-        }
-        btn.textContent = 'reported ✓';
-        toast('reported · a human will look');
-      });
-    });
   };
 
   init();
