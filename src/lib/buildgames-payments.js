@@ -175,6 +175,33 @@ export async function clearPayment(paymentId, capture = null) {
     ).catch((err) => console.error(`bg new-placement alert failed: ${err.message}`));
   }
 
+  // S1 — submitBid's guard runs at BID time. A sponsor can go 'held' (report
+  // bomb, recheck flag) or 'removed' (admin) inside the <=30-minute life of an
+  // already-minted checkout session, and the capture then clears onto a
+  // sponsor that is NOT on the board: money in, nothing delivered, and — since
+  // the first-clear alert above only fires on `won` — nobody told, while the
+  // receipt tells the payer their placement is live. Same trade as the webhook
+  // alert: turn a silent loss into a message. Scoped to non-first clears
+  // because a first clear already alerts and carries the status.
+  if (!won) {
+    try {
+      const s = await bgSponsorById(p.sponsor_id);
+      if (s && s.status !== 'active') {
+        alertRob(
+          '[cvci] build games: capture cleared onto a NON-ACTIVE sponsor',
+          `<p>${usd(p.amount_cents)} cleared for <code>${esc(p.sponsor_id)}</code>
+             (${esc(s.link)}) but its status is <b>${esc(s.status)}</b> — the payer is
+             NOT on the board and their receipt says otherwise.</p>
+           <p>Release it or refund the payment:
+             <a href="https://canivibecodeit.com/admin/thebuildgames">the queue</a></p>`
+        ).catch((err) => console.error(`bg non-active clear alert failed: ${err.message}`));
+      }
+    } catch (err) {
+      // Never let the warning path undo a clear that already succeeded.
+      console.error(`bg non-active clear check failed: ${err.message}`);
+    }
+  }
+
   // Outbid nudge (best-effort, never blocks the clear): if this clear changed
   // the #1 spot, email the displaced leader "you've been outbid, top up to
   // reclaim it" — a revenue prompt. Only when they left a contact email.
