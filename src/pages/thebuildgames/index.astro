@@ -246,7 +246,10 @@ const hostOf = (u) => {
             </label>
             <div class="bg-bid-actions">
               <button class="btn primary" type="submit">place bid</button>
-              <span class="bg-bid-note">the favicon and title come from your link · it lists once payment clears</span>
+              <span class="bg-bid-note">
+                it lists once payment clears · by bidding you agree to the
+                <a href="/thebuildgames/terms">terms</a>
+              </span>
             </div>
             <p class="bg-bid-err" data-bid-err hidden></p>
           </form>
@@ -266,6 +269,11 @@ const hostOf = (u) => {
         <button class="btn primary" type="submit">notify me</button>
       </form>
     </section>
+
+    <p class="bg-terms-foot">
+      free skill-judged entry · independent judging ·
+      <a href="/thebuildgames/terms">the Build Games terms</a>
+    </p>
   </main>
 </Base>
 
@@ -871,6 +879,22 @@ const hostOf = (u) => {
     .bg-wl input[type='email'] {
       font-size: 16px;
     }
+  }
+
+  .bg-terms-foot {
+    padding-top: 40px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-terms-foot a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bg-terms-foot a:hover {
+    color: var(--fg);
   }
 
   /* ---------- micro-interactions (page-scoped) ---------- */

@@ -125,7 +125,8 @@ export async function createBidCheckoutSession({
               name: 'canivibecodeit.com · sponsored placement',
               description:
                 'Advertising placement on the canivibecodeit.com board: your icon, name,'
-                + ' tagline and link, ranked by cumulative sponsorship.',
+                + ' tagline and link, ranked by cumulative sponsorship. Subject to the'
+                + ' Build Games terms: canivibecodeit.com/thebuildgames/terms',
             },
           },
         },
