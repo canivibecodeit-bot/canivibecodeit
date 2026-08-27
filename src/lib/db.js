@@ -263,6 +263,12 @@ const SCHEMA_SQLITE = `
      FIRST payment to clear for a sponsor, those freeze onto the sponsor row
      (first-cleared-payer sets identity, immutable thereafter). Later payments
      add money only. */
+  /* Each payment carries the tagline, icon source AND the screening outcome
+     PROPOSED with it. On the FIRST payment to clear for a sponsor, those
+     freeze onto the sponsor row (first-cleared-payer sets identity AND the
+     status is re-evaluated from THAT payment's screen — so a squatter's
+     unpaid 'held' can't poison a paying sponsor's placement). Later payments
+     add money only. */
   CREATE TABLE IF NOT EXISTS buildgames_payments (
     id TEXT PRIMARY KEY,
     sponsor_id TEXT NOT NULL,
@@ -271,6 +277,8 @@ const SCHEMA_SQLITE = `
     processor_ref TEXT,
     proposed_tagline TEXT,
     proposed_icon_src TEXT,
+    proposed_status TEXT,
+    proposed_reason TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -533,6 +541,8 @@ const SCHEMA_PG = `
     processor_ref TEXT,
     proposed_tagline TEXT,
     proposed_icon_src TEXT,
+    proposed_status TEXT,
+    proposed_reason TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -1173,26 +1183,38 @@ async function pgDriver() {
     },
     async insertBgPayment(p) {
       await pool.query(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.created_at]
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.created_at]
       );
     },
     async bgPaymentById(id) {
       const r = await pool.query('SELECT * FROM buildgames_payments WHERE id = $1', [id]);
       return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
     },
-    async setBgPaymentStatus(id, status) {
-      const r = await pool.query('UPDATE buildgames_payments SET status = $2 WHERE id = $1', [id, status]);
+    // Atomic pending→cleared: only the FIRST concurrent caller wins (returns 1);
+    // a retry-storm or double webhook gets 0 and must not act (audit H4.3).
+    async clearBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'cleared' WHERE id = $1 AND status = 'pending'", [id]);
       return r.rowCount;
     },
-    // First cleared payment stamps the sponsor's first_cleared_at (tie-break)
-    // only if not already set — set-once.
-    async stampFirstCleared(sponsorId, ts) {
-      await pool.query(
-        'UPDATE buildgames_sponsors SET first_cleared_at = $2 WHERE id = $1 AND first_cleared_at IS NULL',
-        [sponsorId, ts]
+    // Atomic reverse: only a currently pending/cleared payment reverses (1);
+    // reversing an already-reversed one is a no-op (0).
+    async reverseBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'reversed' WHERE id = $1 AND status IN ('pending','cleared')", [id]);
+      return r.rowCount;
+    },
+    // Atomic first-clear claim: freezes tagline + status + first_cleared_at
+    // ONLY if not already frozen. Exactly one concurrent clear wins (1); the
+    // rest add money without touching identity (0). Status comes from THIS
+    // payment's screen, closing held-poisoning.
+    async claimFirstClear(sponsorId, tagline, status, heldReason, ts) {
+      const r = await pool.query(
+        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, first_cleared_at = $5
+         WHERE id = $1 AND first_cleared_at IS NULL`,
+        [sponsorId, tagline, status, heldReason, ts]
       );
+      return r.rowCount;
     },
     // Cumulative cleared, non-reversed total for a sponsor.
     async bgSponsorClearedTotal(sponsorId) {
@@ -1719,18 +1741,26 @@ async function sqliteDriver() {
     },
     async insertBgPayment(p) {
       db.prepare(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, created_at)
-         VALUES (?,?,?,?,?,?,?,?)`
-      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.created_at);
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, created_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?)`
+      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.created_at);
     },
     async bgPaymentById(id) {
       return db.prepare('SELECT * FROM buildgames_payments WHERE id = ?').get(id) ?? null;
     },
-    async setBgPaymentStatus(id, status) {
-      return db.prepare('UPDATE buildgames_payments SET status = ? WHERE id = ?').run(status, id).changes;
+    async clearBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'cleared' WHERE id = ? AND status = 'pending'").run(id).changes;
     },
-    async stampFirstCleared(sponsorId, ts) {
-      db.prepare('UPDATE buildgames_sponsors SET first_cleared_at = ? WHERE id = ? AND first_cleared_at IS NULL').run(ts, sponsorId);
+    async reverseBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status IN ('pending','cleared')").run(id).changes;
+    },
+    async claimFirstClear(sponsorId, tagline, status, heldReason, ts) {
+      return db
+        .prepare(
+          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, first_cleared_at = ?
+           WHERE id = ? AND first_cleared_at IS NULL`
+        )
+        .run(tagline, status, heldReason, ts, sponsorId).changes;
     },
     async bgSponsorClearedTotal(sponsorId) {
       return db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE sponsor_id = ? AND status = 'cleared'").get(sponsorId).t;
@@ -2049,8 +2079,9 @@ export async function bgSponsorById(id) { return (await getDriver()).bgSponsorBy
 export async function updateBgSponsor(id, fields) { return (await getDriver()).updateBgSponsor(id, fields); }
 export async function insertBgPayment(p) { return (await getDriver()).insertBgPayment(p); }
 export async function bgPaymentById(id) { return (await getDriver()).bgPaymentById(id); }
-export async function setBgPaymentStatus(id, status) { return (await getDriver()).setBgPaymentStatus(id, status); }
-export async function stampFirstCleared(sponsorId, ts) { return (await getDriver()).stampFirstCleared(sponsorId, ts); }
+export async function clearBgPaymentAtomic(id) { return (await getDriver()).clearBgPaymentAtomic(id); }
+export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
+export async function claimFirstClear(sponsorId, tagline, status, heldReason, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, ts); }
 export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }
 export async function bgLeaderboard() { return (await getDriver()).bgLeaderboard(); }
 export async function bgSponsorsForAdmin() { return (await getDriver()).bgSponsorsForAdmin(); }
