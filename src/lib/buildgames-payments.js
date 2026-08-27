@@ -16,20 +16,31 @@ import {
   bgSponsorById,
   insertBgPayment,
   insertBgSponsor,
+  releaseBgSponsor,
   setBgPaymentStatus,
   stampFirstCleared,
 } from './db.js';
-import { newPaymentId, newSponsorId, registrableHost, sponsorIdentity } from './buildgames.js';
+import { isExpiredUnfunded, newPaymentId, newSponsorId, registrableHost, sponsorIdentity } from './buildgames.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
 /* Create (or find) the sponsor for a screened submission and append a pending
    payment. `screen` is the result of screenSubmission(); `tagline` is already
-   cleaned by the caller. Returns { sponsorId, paymentId } or { error }. */
+   cleaned by the caller. Returns { sponsorId, paymentId } or { error }.
+
+   Identity is first-submission (immutable), but an UNFUNDED row whose payment
+   never cleared is released after IDENTITY_TTL_MS so an abandoned checkout
+   can't squat a brand's link forever — checked lazily here (belt) and by the
+   expiry sweep (braces). */
 export async function submitBid({ screen, tagline, amountCents }) {
   const link = sponsorIdentity(screen.finalUrl);
   const host = registrableHost(screen.finalUrl.hostname);
 
   let sponsor = await bgSponsorByLink(link);
+  if (sponsor && isExpiredUnfunded(sponsor)) {
+    // Abandoned squat past its TTL — free the link for this real submission.
+    await releaseBgSponsor(sponsor.id);
+    sponsor = null;
+  }
   if (sponsor) {
     // A removed sponsor can't be topped back into visibility.
     if (sponsor.status === 'removed') return { error: 'blocked' };
