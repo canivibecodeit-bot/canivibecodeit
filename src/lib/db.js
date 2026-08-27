@@ -702,7 +702,7 @@ function bgSponsorParts(fields) {
 function bgSponsorRow(row) {
   if (!row) return null;
   const out = { ...row };
-  for (const c of ['first_cleared_at', 'last_checked_at', 'created_at', 'report_count', 'cleared_total', 'pending_total']) {
+  for (const c of ['first_cleared_at', 'last_checked_at', 'created_at', 'report_count', 'click_count', 'cleared_total', 'pending_total']) {
     if (out[c] != null) out[c] = Number(out[c]);
   }
   return out;
@@ -778,6 +778,16 @@ async function pgDriver() {
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_status TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_reason TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS contact_email TEXT');
+  // Public click counter for board rows (social proof for buyers).
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS click_count INTEGER NOT NULL DEFAULT 0');
+  // H4.2: one processor capture clears exactly one payment — a replayed or
+  // cross-wired webhook citing an already-used ref must fail loudly, not
+  // double-credit. Legacy 'admin' refs are first made unique so the index can
+  // build; NULL refs (pending rows) stay exempt.
+  await pool.query("UPDATE buildgames_payments SET processor_ref = 'admin:' || id WHERE processor_ref = 'admin'");
+  await pool.query(
+    'CREATE UNIQUE INDEX IF NOT EXISTS buildgames_payments_ref ON buildgames_payments (processor_ref) WHERE processor_ref IS NOT NULL'
+  );
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -1176,10 +1186,12 @@ async function pgDriver() {
     },
 
     /* ---- The Build Games ---- */
+    // ON CONFLICT (link) DO NOTHING: two concurrent first submits for one link
+    // both succeed — whichever insert lost re-reads the winner's row (H4.4).
     async insertBgSponsor(s) {
       await pool.query(
         `INSERT INTO buildgames_sponsors (id, link, host, tagline, icon_url, status, held_reason, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (link) DO NOTHING`,
         [s.id, s.link, s.host, s.tagline, s.icon_url, s.status, s.held_reason, s.created_at]
       );
     },
@@ -1214,6 +1226,32 @@ async function pgDriver() {
     // a retry-storm or double webhook gets 0 and must not act (audit H4.3).
     async clearBgPaymentAtomic(id) {
       const r = await pool.query("UPDATE buildgames_payments SET status = 'cleared' WHERE id = $1 AND status = 'pending'", [id]);
+      return r.rowCount;
+    },
+    // Processor clear (H4.1/H4.2): one atomic statement stamps CLEARED with the
+    // amount the processor actually CAPTURED (the recorded/claimed amount is
+    // never trusted for money) and the capture's unique ref. The partial
+    // unique index makes a reused ref THROW rather than double-credit.
+    async clearBgPaymentCaptured(id, capturedCents, processorRef) {
+      const r = await pool.query(
+        "UPDATE buildgames_payments SET status = 'cleared', amount_cents = $2, processor_ref = $3 WHERE id = $1 AND status = 'pending'",
+        [id, capturedCents, processorRef]
+      );
+      return r.rowCount;
+    },
+    // Expired/abandoned checkout: retire a PENDING payment only — an expired
+    // event must never touch a payment that has already cleared.
+    async expireBgPaymentAtomic(id) {
+      const r = await pool.query("UPDATE buildgames_payments SET status = 'reversed' WHERE id = $1 AND status = 'pending'", [id]);
+      return r.rowCount;
+    },
+    // Refund/dispute lookup: which payment did this processor capture clear?
+    async bgPaymentByProcessorRef(ref) {
+      const r = await pool.query('SELECT * FROM buildgames_payments WHERE processor_ref = $1', [ref]);
+      return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
+    },
+    async bgIncrementClicks(id) {
+      const r = await pool.query('UPDATE buildgames_sponsors SET click_count = click_count + 1 WHERE id = $1', [id]);
       return r.rowCount;
     },
     // Atomic reverse: only a currently pending/cleared payment reverses (1);
@@ -1413,6 +1451,16 @@ async function sqliteDriver() {
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_status TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_reason TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN contact_email TEXT');
+  // Public click counter for board rows (social proof for buyers).
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0');
+  // H4.2: one processor capture clears exactly one payment — a replayed or
+  // cross-wired webhook citing an already-used ref must fail loudly, not
+  // double-credit. Legacy 'admin' refs are first made unique so the index can
+  // build; NULL refs (pending rows) stay exempt.
+  db.exec("UPDATE buildgames_payments SET processor_ref = 'admin:' || id WHERE processor_ref = 'admin'");
+  db.exec(
+    'CREATE UNIQUE INDEX IF NOT EXISTS buildgames_payments_ref ON buildgames_payments (processor_ref) WHERE processor_ref IS NOT NULL'
+  );
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);
@@ -1760,9 +1808,11 @@ async function sqliteDriver() {
     },
 
     /* ---- The Build Games ---- */
+    // INSERT OR IGNORE: two concurrent first submits for one link both
+    // succeed — whichever insert lost re-reads the winner's row (H4.4).
     async insertBgSponsor(s) {
       db.prepare(
-        `INSERT INTO buildgames_sponsors (id, link, host, tagline, icon_url, status, held_reason, created_at)
+        `INSERT OR IGNORE INTO buildgames_sponsors (id, link, host, tagline, icon_url, status, held_reason, created_at)
          VALUES (?,?,?,?,?,?,?,?)`
       ).run(s.id, s.link, s.host, s.tagline, s.icon_url, s.status, s.held_reason, s.created_at);
     },
@@ -1789,6 +1839,24 @@ async function sqliteDriver() {
     },
     async clearBgPaymentAtomic(id) {
       return db.prepare("UPDATE buildgames_payments SET status = 'cleared' WHERE id = ? AND status = 'pending'").run(id).changes;
+    },
+    // Processor clear (H4.1/H4.2): CLEARED with the amount the processor
+    // actually CAPTURED + the capture's unique ref, in one atomic statement.
+    // The partial unique index makes a reused ref THROW, never double-credit.
+    async clearBgPaymentCaptured(id, capturedCents, processorRef) {
+      return db
+        .prepare("UPDATE buildgames_payments SET status = 'cleared', amount_cents = ?, processor_ref = ? WHERE id = ? AND status = 'pending'")
+        .run(capturedCents, processorRef, id).changes;
+    },
+    // Expired/abandoned checkout: retire a PENDING payment only.
+    async expireBgPaymentAtomic(id) {
+      return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status = 'pending'").run(id).changes;
+    },
+    async bgPaymentByProcessorRef(ref) {
+      return db.prepare('SELECT * FROM buildgames_payments WHERE processor_ref = ?').get(ref) ?? null;
+    },
+    async bgIncrementClicks(id) {
+      return db.prepare('UPDATE buildgames_sponsors SET click_count = click_count + 1 WHERE id = ?').run(id).changes;
     },
     async reverseBgPaymentAtomic(id) {
       return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status IN ('pending','cleared')").run(id).changes;
@@ -2123,6 +2191,10 @@ export async function updateBgSponsor(id, fields) { return (await getDriver()).u
 export async function insertBgPayment(p) { return (await getDriver()).insertBgPayment(p); }
 export async function bgPaymentById(id) { return (await getDriver()).bgPaymentById(id); }
 export async function clearBgPaymentAtomic(id) { return (await getDriver()).clearBgPaymentAtomic(id); }
+export async function clearBgPaymentCaptured(id, capturedCents, processorRef) { return (await getDriver()).clearBgPaymentCaptured(id, capturedCents, processorRef); }
+export async function expireBgPaymentAtomic(id) { return (await getDriver()).expireBgPaymentAtomic(id); }
+export async function bgPaymentByProcessorRef(ref) { return (await getDriver()).bgPaymentByProcessorRef(ref); }
+export async function bgIncrementClicks(id) { return (await getDriver()).bgIncrementClicks(id); }
 export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
 export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts); }
 export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }

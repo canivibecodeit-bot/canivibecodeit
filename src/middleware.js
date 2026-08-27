@@ -3,7 +3,8 @@
 // lib/csp.js: report-only until CSP_ENFORCE is set.
 import { getAuth } from './lib/auth.js';
 import { cspHeader } from './lib/csp.js';
-import { originVerdict } from './lib/request.js';
+import { touchPresence } from './lib/presence.js';
+import { clientIp, originVerdict } from './lib/request.js';
 
 /* The Cloudflare origin lock lives in lib/request.js (a leaf util) so this
    middleware and clientIp share exactly one verdict. See the doc-comment
@@ -33,6 +34,22 @@ export async function onRequest(context, next) {
       });
     }
   }
+  // Presence: page navigations only (never API/asset/proxy traffic), so the
+  // "N people here" figure counts humans looking at pages, not pollers.
+  if (
+    !context.isPrerendered &&
+    context.request.method === 'GET' &&
+    !path.startsWith('/api/') &&
+    !path.startsWith('/ph/') &&
+    !path.includes('.')
+  ) {
+    try {
+      touchPresence(clientIp(context.request, context.clientAddress));
+    } catch {
+      /* presence is decorative — never the request's problem */
+    }
+  }
+
   // Skip the lookup where it can't matter: the PostHog proxy and Better
   // Auth's own routes (its handler reads the cookie itself). Anonymous
   // visitors carry no session cookie and skip the DB entirely. Any failure

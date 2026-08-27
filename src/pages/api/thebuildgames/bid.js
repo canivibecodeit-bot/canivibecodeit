@@ -6,15 +6,19 @@
 // In admin-entry mode the public checkout is dark, so this endpoint is the
 // pipeline the admin drives; when a processor lands, the public checkout calls
 // it and the webhook clears. It stays gated behind BUILDGAMES_BIDDING_OPEN.
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { addToWaitlist, bgIsHostBlocked, bgSponsorByLink, rateLimit } from '../../../lib/db.js';
+import { selfHostUploadedIcon } from '../../../lib/challenge-image.js';
+import { siteUrl } from '../../../lib/sponsors.js';
+import { createBidCheckoutSession } from '../../../lib/stripe.js';
 import { buildGamesLive } from '../../../lib/flags.js';
-import { alertRob, mirrorToResend } from '../../../lib/mail.js';
+import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
 import {
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
+  TAGLINE_MAX,
   biddingOpen,
   cleanTagline,
   registrableHost,
@@ -58,7 +62,7 @@ export async function POST({ request, clientAddress }) {
 
   const tagline = cleanTagline(body.tagline);
   if (body.tagline && !tagline) {
-    return json({ error: 'tagline: up to 80 characters, no links' }, 400);
+    return json({ error: `tagline: up to ${TAGLINE_MAX} characters, no links` }, 400);
   }
 
   // Optional contact email: reachable for held/outbid alerts, and (opt-in) it
@@ -88,7 +92,35 @@ export async function POST({ request, clientAddress }) {
     return json({ error: `minimum ${isTopup ? 'top-up' : 'entry'} is $${minCents / 100}` }, 400);
   }
 
-  const result = await submitBid({ screen, tagline, amountCents, contactEmail: contactEmail || null });
+  // The flow runs UNATTENDED (pay → screened → listed, no human). So a link
+  // that screens anything but clean is refused BEFORE money moves — we never
+  // take a payment we'd have to hold or refund while Rob sleeps. Admin `add`
+  // remains the exception path for judgment calls.
+  if (screen.verdict !== 'ok') {
+    if (await rateLimit('bg:held-alert', 6, 60 * 60 * 1000)) {
+      alertRob(
+        '[cvci] build games bid refused at screening',
+        `<p>A Build Games submission was refused before checkout: ${esc(screen.reason || 'flagged')}</p>`
+      ).catch((err) => console.error(`bg held alert failed: ${err.message}`));
+    }
+    return json({ error: "that link can't be listed automatically — nothing was charged" }, 403);
+  }
+
+  // Optional uploaded icon (raster only, ≤1MB — SVG never reaches sharp). An
+  // upload that doesn't validate is a clear 400, not a silent fallback.
+  let iconSrc = null;
+  const upload = body.icon && typeof body.icon === 'object' && typeof body.icon.arrayBuffer === 'function' ? body.icon : null;
+  if (upload && upload.size > 0) {
+    if (upload.size > 1024 * 1024) return json({ error: 'icon: png/jpg/webp up to 1MB' }, 400);
+    iconSrc = await selfHostUploadedIcon(
+      Buffer.from(await upload.arrayBuffer()),
+      upload.type,
+      `buildgames/upload-${randomUUID()}.webp`
+    );
+    if (!iconSrc) return json({ error: 'icon: png/jpg/webp up to 1MB' }, 400);
+  }
+
+  const result = await submitBid({ screen, tagline, amountCents, contactEmail: contactEmail || null, iconSrc });
   if (result.error === 'blocked') return json({ error: "that site can't be entered" }, 403);
 
   // List capture (opt-in): a new waitlist row mirrors to Resend; existing
@@ -97,23 +129,24 @@ export async function POST({ request, clientAddress }) {
     if (await addToWaitlist(contactEmail, 'buildgames')) mirrorToResend(contactEmail);
   }
 
-  if (screen.verdict === 'held') {
-    if (await rateLimit('bg:held-alert', 6, 60 * 60 * 1000)) {
-      alertRob(
-        '[cvci] build games bid held',
-        `<p>A Build Games bid needs review: ${screen.reason}</p>
-         <p><a href="https://canivibecodeit.com/admin/thebuildgames">open the queue and paste your token</a></p>`
-      ).catch((err) => console.error(`bg held alert failed: ${err.message}`));
-    }
-  }
-
   // Hashed IP distinct_id only — no address stored.
   const _did = createHash('sha256').update(ip).digest('hex').slice(0, 32);
 
-  return json(
-    screen.verdict === 'held'
-      ? { ok: true, held: true, message: 'bid received · it needs a quick look before it lists' }
-      : { ok: true, id: result.sponsorId, message: 'bid placed · it lists once payment clears' },
-    201
-  );
+  // Real money path: hand the buyer to Stripe. The webhook clears the payment
+  // with the CAPTURED amount and the placement lists itself — no human step.
+  try {
+    const session = await createBidCheckoutSession({
+      paymentId: result.paymentId,
+      sponsorId: result.sponsorId,
+      amountCents,
+      successUrl: `${siteUrl('/thebuildgames')}?paid=1`,
+      cancelUrl: `${siteUrl('/thebuildgames')}?paid=0`,
+      customerEmail: contactEmail || undefined,
+    });
+    if (!session?.url) throw new Error('no checkout url on session');
+    return json({ ok: true, url: session.url }, 201);
+  } catch (err) {
+    console.error(`bg checkout create failed: ${err.message}`);
+    return json({ error: 'checkout is unavailable right now — nothing was charged, try again in a minute' }, 502);
+  }
 }

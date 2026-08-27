@@ -20,6 +20,7 @@ import {
   MIN_TOPUP_CENTS,
   PAYMENT_ID_RE,
   SPONSOR_ID_RE,
+  TAGLINE_MAX,
   cleanTagline,
   newPaymentId,
   registrableHost,
@@ -126,7 +127,8 @@ export async function POST({ request, clientAddress, cookies }) {
       return fail('bad amount', 400);
     }
     const pid = newPaymentId();
-    await insertBgPayment({ id: pid, sponsor_id: id, amount_cents: amountCents, status: 'pending', processor_ref: 'admin', created_at: Date.now() });
+    // Ref is unique per payment (processor_ref carries a unique index now).
+    await insertBgPayment({ id: pid, sponsor_id: id, amount_cents: amountCents, status: 'pending', processor_ref: `admin:${pid}`, created_at: Date.now() });
     await clearPayment(pid);
     return done(`topped up · $${amountCents / 100}`);
   }
@@ -163,7 +165,7 @@ export async function POST({ request, clientAddress, cookies }) {
   }
   if (action === 'edit-tagline') {
     const tagline = cleanTagline(body.tagline);
-    if (body.tagline && !tagline) return fail('tagline: up to 80 chars, no links', 400);
+    if (body.tagline && !tagline) return fail(`tagline: up to ${TAGLINE_MAX} chars, no links`, 400);
     await updateBgSponsor(id, { tagline: tagline ?? null });
     return done('tagline updated');
   }

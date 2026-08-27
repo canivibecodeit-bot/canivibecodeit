@@ -17,15 +17,15 @@ import {
   bgLeaderboard,
   bgPaymentById,
   bgSponsorByLink,
-  bgSponsorById,
   claimFirstClear,
   clearBgPaymentAtomic,
+  clearBgPaymentCaptured,
   insertBgPayment,
   insertBgSponsor,
   reverseBgPaymentAtomic,
   updateBgSponsor,
 } from './db.js';
-import { sendMail, esc } from './mail.js';
+import { alertRob, sendMail, esc } from './mail.js';
 import { displayName, newPaymentId, newSponsorId, rankSponsors, registrableHost, sponsorIdentity, usd } from './buildgames.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
@@ -36,7 +36,7 @@ import { selfHostSponsorIcon } from './challenge-image.js';
    clearing payer's verdict wins, not the row creator's. `screen` is
    screenSubmission()'s result; `tagline` is already cleaned. Returns
    { sponsorId, paymentId } or { error }. */
-export async function submitBid({ screen, tagline, amountCents, contactEmail }) {
+export async function submitBid({ screen, tagline, amountCents, contactEmail, iconSrc }) {
   const link = sponsorIdentity(screen.finalUrl);
   const host = registrableHost(screen.finalUrl.hostname);
 
@@ -47,7 +47,9 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail }) 
   } else {
     // First submission for this link creates the identity row — 'held' and
     // blank until a payment clears. No screening result is trusted from an
-    // unpaid submission.
+    // unpaid submission. The insert is ON CONFLICT/OR IGNORE and the re-read
+    // is BY LINK: concurrent first submits for one link all land on whichever
+    // row won, instead of one 500ing on the UNIQUE constraint (audit H4.4).
     const id = newSponsorId();
     await insertBgSponsor({
       id,
@@ -59,7 +61,9 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail }) 
       held_reason: 'awaiting first cleared payment',
       created_at: Date.now(),
     });
-    sponsor = await bgSponsorById(id);
+    sponsor = await bgSponsorByLink(link);
+    if (!sponsor) return { error: 'blocked' }; // vanished between insert and read — bail safe
+    if (sponsor.status === 'removed') return { error: 'blocked' };
   }
 
   const paymentId = newPaymentId();
@@ -70,7 +74,9 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail }) 
     status: 'pending',
     processor_ref: null,
     proposed_tagline: tagline ?? null,
-    proposed_icon_src: screen.faviconUrl ?? null,
+    // An uploaded icon (already re-encoded + parked on our R2) beats the
+    // screened favicon; either way the final icon is re-hosted at clear.
+    proposed_icon_src: iconSrc ?? screen.faviconUrl ?? null,
     // This payment's screening becomes the sponsor's status if it wins the
     // first-clear claim: clean → active, anything else → held.
     proposed_status: screen.verdict === 'ok' ? 'active' : 'held',
@@ -83,17 +89,39 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail }) 
 
 /* Clear a pending payment. Two atomic steps:
    1. pending→cleared, and only the FIRST concurrent caller proceeds (a retry
-      storm / double webhook gets false) — so side effects fire once.
+      storm / double webhook gets false) — so side effects fire once. When the
+      caller is a PROCESSOR webhook it passes { capturedCents, processorRef }:
+      the same statement then also stamps the amount the processor actually
+      CAPTURED (H4.1 — the recorded amount is never trusted for money) and the
+      capture's unique ref (H4.2 — a reused ref throws on the unique index and
+      clears nothing, so a replayed/cross-wired delivery can't double-credit).
    2. If this is the sponsor's first clear, atomically claim the identity:
       freeze tagline + status (from THIS payment's screen) + first_cleared_at,
       but only if not already frozen. Exactly one concurrent clear wins the
       claim; the icon is self-hosted only after winning it. */
-export async function clearPayment(paymentId) {
+export async function clearPayment(paymentId, capture = null) {
   // Who leads before this clear counts — for the outbid nudge below.
   let prevLeader = null;
   try { prevLeader = rankSponsors(await bgLeaderboard())[0] ?? null; } catch { /* best-effort */ }
 
-  if (!(await clearBgPaymentAtomic(paymentId))) return false; // already cleared / not pending
+  let cleared;
+  if (capture) {
+    try {
+      cleared = await clearBgPaymentCaptured(paymentId, capture.capturedCents, capture.processorRef);
+    } catch (err) {
+      // Almost certainly the unique processor_ref index: this capture already
+      // cleared some payment. Money moved somewhere — a human must look.
+      alertRob(
+        '[cvci] build games: processor ref REUSED — payment not cleared',
+        `<p>Clearing payment <code>${esc(paymentId)}</code> with ref <code>${esc(String(capture.processorRef))}</code> failed: ${esc(err.message)}.</p>
+         <p>That ref has already cleared a payment. Nothing was credited; reconcile by hand in Stripe + the admin queue.</p>`
+      ).catch(() => {});
+      return false;
+    }
+  } else {
+    cleared = await clearBgPaymentAtomic(paymentId);
+  }
+  if (!cleared) return false; // already cleared / not pending
   const p = await bgPaymentById(paymentId);
 
   const won = await claimFirstClear(

@@ -4,6 +4,7 @@
 import { bgLeaderboard, bgPotCents } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
 import { fillLevel } from '../../../lib/buildgames.js';
+import { onlineCount } from '../../../lib/presence.js';
 import { json } from '../../../lib/request.js';
 
 export async function GET() {
@@ -13,6 +14,7 @@ export async function GET() {
     pot_cents: potCents,
     count: board.length,
     fill: Number(fillLevel(potCents).toFixed(4)),
+    online: onlineCount(),
   });
   res.headers.set('Cache-Control', 'public, max-age=15');
   return res;

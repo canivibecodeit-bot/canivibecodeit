@@ -59,3 +59,32 @@ export const selfHostOgImage = (ogUrl, entryId) =>
 // favicon/icon for a Build Games sponsor (small square).
 export const selfHostSponsorIcon = (iconUrl, sponsorId) =>
   selfHostImage(iconUrl, `buildgames/${sponsorId}.webp`, { w: 96, h: 96, fit: 'cover' });
+
+const UPLOAD_MAX_BYTES = 1024 * 1024; // 1 MB is plenty for a 96px icon source
+const UPLOAD_MIMES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']);
+
+/* An icon UPLOADED at bid time (bytes in hand, no fetch). Raster only: SVG is
+   rejected outright — both by declared mime and by sniffing for markup — so
+   attacker XML never reaches sharp/librsvg (audit M6). Re-encoded to webp and
+   parked on R2 under `key`; the clear-time pipeline then re-hosts it under the
+   sponsor's id like any icon URL. Returns the R2 URL or null. */
+export async function selfHostUploadedIcon(buffer, declaredMime, key) {
+  if (!r2Configured()) return null;
+  if (!buffer || buffer.length === 0 || buffer.length > UPLOAD_MAX_BYTES) return null;
+  if (!UPLOAD_MIMES.has(String(declaredMime || '').toLowerCase())) return null;
+  // Sniff: every accepted raster format starts with a binary signature; a
+  // buffer that opens as text/markup (svg, html, xml) is refused unseen.
+  const head = buffer.subarray(0, 256).toString('latin1').trimStart().toLowerCase();
+  if (head.startsWith('<') || head.includes('<svg') || head.includes('<?xml')) return null;
+  try {
+    const out = await sharp(buffer, { failOn: 'error', limitInputPixels: 24_000_000, pages: 1 })
+      .rotate()
+      .resize(96, 96, { fit: 'cover', position: 'attention' })
+      .webp({ quality: 82 })
+      .toBuffer();
+    await r2Put(key, out, 'image/webp');
+    return r2PublicUrl(key);
+  } catch {
+    return null;
+  }
+}

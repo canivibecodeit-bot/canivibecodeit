@@ -114,6 +114,9 @@
           const res = await fetch('/api/thebuildgames/stats');
           if (!res.ok) return;
           const data = await res.json();
+          // Live "here right now" figure rides the same poll.
+          const onlineEl = $('[data-bg-online]');
+          if (onlineEl && typeof data.online === 'number') onlineEl.textContent = data.online;
           if (typeof data.pot_cents !== 'number' || data.pot_cents === potCents) return;
           const grew = data.pot_cents > potCents;
           const from = potCents;
@@ -158,26 +161,42 @@
         const err = $('[data-bid-err]', bidForm);
         err.hidden = true;
         btn.disabled = true;
-        btn.textContent = 'placing…';
+        btn.textContent = 'starting checkout…';
         try {
-          const data = Object.fromEntries(new FormData(bidForm).entries());
-          const amountCents = Math.round(Number(data.amount_dollars) * 100);
-          const res = await fetch(bidForm.action, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              link: data.link,
-              tagline: data.tagline,
-              amount_cents: amountCents,
-              email: data.email,
-              email_optin: data.email_optin,
-              website: data.website,
-            }),
-          });
+          const fd = new FormData(bidForm);
+          const amountCents = Math.round(Number(fd.get('amount_dollars')) * 100);
+          const icon = fd.get('icon');
+          const hasIcon = icon && typeof icon === 'object' && icon.size > 0;
+          let res;
+          if (hasIcon) {
+            // Multipart only when there's a file to carry.
+            fd.set('amount_cents', String(amountCents));
+            fd.delete('amount_dollars');
+            res = await fetch(bidForm.action, { method: 'POST', body: fd });
+          } else {
+            const data = Object.fromEntries(fd.entries());
+            res = await fetch(bidForm.action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                link: data.link,
+                tagline: data.tagline,
+                amount_cents: amountCents,
+                email: data.email,
+                email_optin: data.email_optin,
+                website: data.website,
+              }),
+            });
+          }
           const out = await res.json().catch(() => ({}));
           if (!res.ok) {
             err.textContent = out.error || 'something broke — try again';
             err.hidden = false;
+            return;
+          }
+          if (out.url) {
+            // Off to Stripe; the webhook lists the placement when payment lands.
+            window.location.href = out.url;
             return;
           }
           toast(out.message || 'bid placed');
@@ -191,6 +210,28 @@
           btn.textContent = 'place bid';
         }
       });
+    }
+
+    /* ---------- outbound click beacons (board rows) ---------- */
+    $$('[data-bg-out]').forEach((raw) => {
+      const a = claim(raw);
+      if (!a) return;
+      a.addEventListener('click', () => {
+        try {
+          navigator.sendBeacon('/api/thebuildgames/click', JSON.stringify({ id: a.dataset.bgOut }));
+        } catch {
+          /* the navigation always wins */
+        }
+      });
+    });
+
+    /* ---------- back from Stripe: say what happened, once ---------- */
+    const paid = new URLSearchParams(location.search).get('paid');
+    if (paid !== null && !document.body.dataset.bgPaidToast) {
+      document.body.dataset.bgPaidToast = '1';
+      toast(paid === '1' ? 'payment received · your placement lists in a moment' : 'checkout cancelled — nothing was charged');
+      history.replaceState(null, '', location.pathname);
+      if (paid === '1') setTimeout(() => location.reload(), 4000);
     }
 
     /* ---------- report buttons ---------- */

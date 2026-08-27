@@ -41,14 +41,15 @@ export const biddingOpen = () => ['1', 'true'].includes(process.env.BUILDGAMES_B
    link's FIRST appearance on the board; TOPUP gates adding to a sponsor that
    has already cleared. Raising ENTRY isn't just pricing: everything below
    ~$1000 is also the report-bomb (H5) and small-payment (M4/chargeback)
-   surface, so a high entry floor deletes those classes outright. Defaults
-   preserve current behaviour: $5 entry, $5 top-up, $15k per payment. */
+   surface, so a high entry floor deletes those classes outright. Launch
+   defaults: $500 entry / $250 top-up / $15k per payment (Rob may still move
+   entry to $1000 — that's the env, not code). */
 const envCents = (name, fallback) => {
   const v = Math.round(Number(process.env[name]));
   return Number.isFinite(v) && v > 0 ? v : fallback;
 };
-export const MIN_ENTRY_CENTS = envCents('BUILDGAMES_MIN_ENTRY_CENTS', 500);
-export const MIN_TOPUP_CENTS = envCents('BUILDGAMES_MIN_TOPUP_CENTS', MIN_ENTRY_CENTS);
+export const MIN_ENTRY_CENTS = envCents('BUILDGAMES_MIN_ENTRY_CENTS', 50000);
+export const MIN_TOPUP_CENTS = envCents('BUILDGAMES_MIN_TOPUP_CENTS', 25000);
 export const MAX_BID_CENTS = envCents('BUILDGAMES_MAX_BID_CENTS', 1_500_000);
 
 /* ---------- uncapped asymptotic fill (never 100%) ---------- */
@@ -101,6 +102,9 @@ export { registrableHost };
 const UNSAFE_GLYPHS = /[​-‏‪-‮⁠-⁯﻿]/g;
 const URL_ISH = /(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,}(\/|\b))/i;
 
+// Board taglines get more room than sponsor cards (a row, not a chip).
+export const TAGLINE_MAX = 100;
+
 /* Clean a public tagline: strip markup chars and bidi/zero-width glyphs,
    collapse whitespace, cap length. Returns null if it's empty or contains a
    URL (links belong in the entry link, which is screened; a URL in the
@@ -112,7 +116,7 @@ export function cleanTagline(raw) {
     .replace(UNSAFE_GLYPHS, '')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 80);
+    .slice(0, TAGLINE_MAX);
   if (t.length < 2) return null;
   if (URL_ISH.test(t)) return null;
   return t;
@@ -142,6 +146,23 @@ export function countdownParts(untilMs, now = Date.now()) {
     minutes: Math.floor((s % 3600) / 60),
     seconds: s % 60,
   };
+}
+
+// Compact relative time for board rows: "just now" → "5m ago" → "3h ago" →
+// "2d ago" → "3w ago" → "4mo ago".
+export function timeAgo(ms, now = Date.now()) {
+  if (!ms) return '';
+  const s = Math.max(0, Math.floor((now - ms) / 1000));
+  if (s < 90) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 90) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 36) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 14) return `${d}d ago`;
+  const w = Math.floor(d / 7);
+  if (w < 9) return `${w}w ago`;
+  return `${Math.floor(d / 30)}mo ago`;
 }
 
 export function monogram(name) {

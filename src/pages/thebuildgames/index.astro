@@ -10,6 +10,7 @@ import {
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
+  TAGLINE_MAX,
   biddingOpen,
   countdownParts,
   displayName,
@@ -17,8 +18,11 @@ import {
   gamesStartAt,
   monogram,
   rankSponsors,
+  timeAgo,
   usd,
 } from '../../lib/buildgames.js';
+import { dashboardStats } from '../../lib/analytics.js';
+import { onlineCount } from '../../lib/presence.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -33,6 +37,19 @@ const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
 const startAt = gamesStartAt();
 const cd = countdownParts(startAt);
+
+// Social proof for buyers: live presence (own in-process counter) + the real
+// all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
+// than showing a made-up number).
+const online = onlineCount();
+let allTime = null;
+try {
+  allTime = (await dashboardStats())?.allTime ?? null;
+} catch {
+  /* strip renders without the totals */
+}
+const compact = (n) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : String(n);
 
 // Floors render from the same config the API enforces — an env change moves
 // the copy, the input bounds and the validation together. The form's min is
@@ -63,6 +80,12 @@ const hostOf = (u) => {
       <BuildGamesLogo class="bg-logo" />
       <p class="bg-tagline">
         Sponsors bid for the top spot. Every dollar goes to the builders.
+      </p>
+      <!-- Why a placement is worth buying: real traffic, right now + all-time -->
+      <p class="bg-stats" aria-label="Site traffic">
+        <span class="bg-stat bg-stat-live"><span class="bg-live-dot" aria-hidden="true"></span><b data-bg-online>{online}</b> here right now</span>
+        {allTime?.views ? <span class="bg-stat"><b>{compact(allTime.views)}</b> pageviews</span> : null}
+        {allTime?.visitors ? <span class="bg-stat"><b>{compact(allTime.visitors)}</b> visitors</span> : null}
       </p>
     </header>
 
@@ -156,10 +179,15 @@ const hostOf = (u) => {
                   )}
                 </span>
                 <span class="bg-name">
-                  <a href={s.link} rel="ugc nofollow noopener" target="_blank">{displayName(s)}</a>
+                  <a href={s.link} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>{displayName(s)}</a>
                   <span class="bg-host">{hostOf(s.link)}</span>
                 </span>
-                <span class="bg-amount">{usd(s.cleared_total)}</span>
+                <span class="bg-amount-cell">
+                  <span class="bg-amount">{usd(s.cleared_total)}</span>
+                  <span class="bg-meta">
+                    {timeAgo(s.first_cleared_at)}{s.click_count > 0 ? ` · ${s.click_count.toLocaleString('en-US')} click${s.click_count === 1 ? '' : 's'}` : ''}
+                  </span>
+                </span>
                 <button class="bg-report" type="button" data-report={s.id} title="report this entry">report</button>
               </li>
             ))}
@@ -199,11 +227,16 @@ const hostOf = (u) => {
             </div>
             <label class="bg-bid-tag">
               <span>tagline · optional</span>
-              <input type="text" name="tagline" maxlength="80" placeholder="what you're about, in a few words" />
+              <input type="text" name="tagline" maxlength={TAGLINE_MAX} placeholder="what you're about, in a few words" />
             </label>
             <label class="bg-bid-tag">
               <span>email · optional</span>
               <input type="email" name="email" maxlength="254" placeholder="so we can tell you if you're outbid or held" />
+            </label>
+            <label class="bg-bid-tag">
+              <span>icon · optional</span>
+              <input type="file" name="icon" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" />
+              <span class="bg-bid-hint">png/jpg/webp up to 1MB · otherwise we use your site's favicon</span>
             </label>
             <label class="bg-bid-optin">
               <input type="checkbox" name="email_optin" value="1" />
@@ -539,6 +572,20 @@ const hostOf = (u) => {
     color: var(--muted);
   }
 
+  .bg-amount-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+
+  .bg-meta {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
   .bg-amount {
     font-family: var(--font-display);
     font-weight: 700;
@@ -643,6 +690,53 @@ const hostOf = (u) => {
     font-size: 13px;
     color: var(--muted);
     cursor: pointer;
+  }
+
+  .bg-bid-hint {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* traffic strip under the hero — the "why buy this" numbers */
+  .bg-stats {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .bg-stat b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-stat-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .bg-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent);
+    animation: bg-live-pulse 2.4s ease-out infinite;
+  }
+
+  @keyframes bg-live-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
+    70% { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg-live-dot { animation: none; }
   }
 
   .bg-bid-actions {

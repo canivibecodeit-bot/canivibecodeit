@@ -86,6 +86,57 @@ export async function createCheckoutSession({
   });
 }
 
+/* Checkout for a Build Games placement. COPY DISCIPLINE (non-negotiable, from
+   the payments research): the checkout page and the Stripe product/description
+   say "sponsor placement / advertising" and NEVER bid/stake/prize/entry —
+   site copy can say bid, the payment surface cannot. metadata.kind is the
+   webhook's discriminator; the payment_intent carries it too so refund and
+   dispute events can be traced back without a session lookup. */
+export async function createBidCheckoutSession({
+  paymentId, sponsorId, amountCents, successUrl, cancelUrl, customerEmail,
+}) {
+  const metadata = { kind: 'buildgames', payment_id: paymentId, sponsor_id: sponsorId };
+  return stripeFetch(
+    '/v1/checkout/sessions',
+    {
+      mode: 'payment',
+      'payment_method_types[]': 'card',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      // Unpaid sessions die after 30 minutes so pending rows don't linger.
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+      client_reference_id: paymentId,
+      metadata,
+      payment_intent_data: { metadata },
+      ...(customerEmail ? { customer_email: customerEmail } : {}),
+      // Same business-buyer posture as the sponsor checkout: tax id field and
+      // a proper invoice PDF after payment.
+      tax_id_collection: { enabled: true },
+      billing_address_collection: 'required',
+      customer_creation: 'always',
+      invoice_creation: { enabled: true },
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: 'usd',
+            unit_amount: amountCents,
+            product_data: {
+              name: 'canivibecodeit.com · sponsored placement',
+              description:
+                'Advertising placement on the canivibecodeit.com board: your icon, name,'
+                + ' tagline and link, ranked by cumulative sponsorship.',
+            },
+          },
+        },
+      ],
+    },
+    'POST',
+    // Retried submits reuse the same session instead of minting a second.
+    `bgcheckout-${paymentId}`
+  );
+}
+
 /* A shareable, non-expiring checkout URL for exactly one sale: the link
    deactivates after its first completed payment, so a forwarded or re-clicked
    link can't charge twice. Payment links need a real Price object, so this is
