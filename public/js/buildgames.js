@@ -148,10 +148,27 @@
     }
 
     /* ---------- bid form: reveal + submit ---------- */
+    // The "add a tagline, icon or email" link opens the FULL form — selected
+    // explicitly, never first-match (the claim bar is also a [data-bid-form]).
     const bidOpen = claim($('[data-bid-open]'));
     if (bidOpen) {
-      const form = $('[data-bid-form]');
-      bidOpen.addEventListener('click', () => {
+      const form = $('[data-bid-form][data-collapsible]');
+      bidOpen.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!form) return;
+        form.hidden = !form.hidden;
+        if (!form.hidden) {
+          form.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          form.querySelector('input[name="link"]').focus();
+        }
+      });
+    }
+
+    // "take the top spot": one URL field, amount pre-locked to the cost of #1.
+    const topOpen = claim($('[data-top-open]'));
+    if (topOpen) {
+      const form = $('[data-top-form]');
+      topOpen.addEventListener('click', () => {
         if (!form) return;
         form.hidden = !form.hidden;
         if (!form.hidden) form.querySelector('input[name="link"]').focus();

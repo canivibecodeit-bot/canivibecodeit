@@ -23,7 +23,7 @@ import {
   usd,
 } from '../../lib/buildgames.js';
 import { dashboardStats } from '../../lib/analytics.js';
-import { withUtm } from '../../lib/sponsors.js';
+import { faviconUrl, withUtm } from '../../lib/sponsors.js';
 import { onlineCount } from '../../lib/presence.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
@@ -269,6 +269,8 @@ const hostOf = (u) => {
                 <span class="bg-logo">
                   {s.icon_url ? (
                     <img src={s.icon_url} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : faviconUrl(s.link) ? (
+                    <img src={faviconUrl(s.link)} alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer" />
                   ) : (
                     <span class="bg-monogram">{monogram(s.name ?? hostOf(s.link) ?? displayName(s))}</span>
                   )}
@@ -313,8 +315,33 @@ const hostOf = (u) => {
       <div class="bg-cta">
         {bidsOpen ? (
           <>
-            <button class="btn primary" type="button" data-bid-open>Take this spot.</button>
-            <span class="bg-cta-note">or bid from the top of the page · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
+            <button class="btn primary" type="button" data-top-open>take the top spot · {usd(claimCost(1))}</button>
+            {/* One field between the button and Stripe: the checkout needs a
+                product URL, nothing else. Amount is pre-locked to the cost of
+                #1 — the SAME claimCost math as the top bar, rendered server-
+                side; the API re-derives every floor regardless. Posts through
+                the shared [data-bid-form] handler. */}
+            <form class="bg-top-form" method="post" action="/api/thebuildgames/bid" data-bid-form data-top-form hidden>
+              <label class="hp" aria-hidden="true">
+                Leave this field empty
+                <input type="text" name="website" tabindex="-1" autocomplete="off" />
+              </label>
+              <input type="hidden" name="amount_dollars" value={Math.ceil(claimCost(1) / 100)} />
+              <input
+                type="text"
+                inputmode="url"
+                autocomplete="url"
+                spellcheck="false"
+                name="link"
+                required
+                maxlength="300"
+                placeholder="your product url"
+                aria-label="your product url"
+              />
+              <button class="btn primary" type="submit">pay {usd(claimCost(1))} →</button>
+              <p class="bg-bid-err" data-bid-err hidden></p>
+            </form>
+            <span class="bg-cta-note">or <a href="#" data-bid-open>add a tagline, icon or email</a> · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
           <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
@@ -1227,6 +1254,46 @@ const hostOf = (u) => {
     .bg-wl input[type='email'] {
       font-size: 16px;
     }
+  }
+
+  /* the one-field "take the top spot" mini-form under the board */
+  .bg-top-form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 14px 0 4px;
+  }
+
+  .bg-top-form[hidden] {
+    display: none;
+  }
+
+  .bg-top-form input[name='link'] {
+    flex: 1;
+    min-width: 220px;
+    max-width: 360px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+  }
+
+  @media (max-width: 640px) {
+    .bg-top-form input[name='link'] {
+      font-size: 16px;
+    }
+  }
+
+  .bg-top-form .bg-bid-err {
+    width: 100%;
+    text-align: center;
+  }
+
+  .bg-cta-note a {
+    color: var(--primary);
   }
 
   .bg-terms-foot {

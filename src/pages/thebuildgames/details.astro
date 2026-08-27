@@ -1,7 +1,7 @@
 ---
 /* Post-checkout details for a Build Games placement — the payer lands here
    from Stripe and writes the tagline their row shows. Clone of the
-   /sponsor/details mechanic: the buyer is identified by TOKEN ONLY (?t=),
+   /sponsor/details mechanic: the buyer is identified by TOKEN ONLY (?token=),
    and the redirect-vs-webhook race is settled by asking Stripe directly —
    clearPayment is atomic and idempotent, so whoever arrives second changes
    nothing. Editing is allowed only when THIS payment cleared AND won the
@@ -15,6 +15,7 @@ import {
 } from '../../lib/db.js';
 import { buildGamesLive } from '../../lib/flags.js';
 import { NAME_MAX, TAGLINE_MAX, monogram, usd } from '../../lib/buildgames.js';
+import { faviconUrl } from '../../lib/sponsors.js';
 import { getSession } from '../../lib/stripe.js';
 import { clearPayment } from '../../lib/buildgames-payments.js';
 import { sendBgReceipt } from '../../lib/buildgames-mail.js';
@@ -143,6 +144,8 @@ const description = 'Finish setting up your Build Games placement.';
           <span class="bgd-logo">
             {sponsor.icon_url ? (
               <img src={sponsor.icon_url} alt="" width="40" height="40" referrerpolicy="no-referrer" />
+            ) : faviconUrl(sponsor.link) ? (
+              <img src={faviconUrl(sponsor.link)} alt="" width="40" height="40" referrerpolicy="no-referrer" />
             ) : (
               <span class="bgd-monogram">{monogram(hostName)}</span>
             )}
