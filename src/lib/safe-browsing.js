@@ -20,17 +20,17 @@ export const safeBrowsingOn = () => !!process.env.GOOGLE_SAFEBROWSING_KEY;
 // than a silent no-gate (audit H3-4). Set only on the test mirror.
 export const uncheckedAllowed = () => ['1', 'true'].includes(process.env.CHALLENGE_ALLOW_UNCHECKED ?? '');
 
-/* Entry/boot assertion: when the vertical is live the gate must be armed OR
-   the operator must have explicitly opted into unchecked mode. A missing key
-   with no opt-out throws, so "unset" can't silently mean "no gate". */
+/* Entry/boot assertion: when ANY user-submission surface is live (the
+   challenge OR the build games) the malware gate must be armed OR the operator
+   must have explicitly opted into unchecked mode. A missing key with no opt-out
+   throws, so "unset" can't silently mean "no gate" on either surface (audit
+   H3-4 for the challenge, H1 for the build games — the assert must not key off
+   one surface's flag while another surface is what's actually live). */
 export function assertSafeBrowsingReady() {
-  if (
-    process.env.CHALLENGE_LIVE &&
-    !process.env.GOOGLE_SAFEBROWSING_KEY &&
-    !uncheckedAllowed()
-  ) {
+  const anyLive = process.env.CHALLENGE_LIVE || process.env.BUILDGAMES_LIVE;
+  if (anyLive && !process.env.GOOGLE_SAFEBROWSING_KEY && !uncheckedAllowed()) {
     throw new Error(
-      'CHALLENGE_LIVE is set but GOOGLE_SAFEBROWSING_KEY is missing and CHALLENGE_ALLOW_UNCHECKED is not set — refusing to list entries unchecked'
+      'A submission surface is live (CHALLENGE_LIVE / BUILDGAMES_LIVE) but GOOGLE_SAFEBROWSING_KEY is missing and CHALLENGE_ALLOW_UNCHECKED is not set — refusing to list entries unchecked'
     );
   }
 }

@@ -7,10 +7,13 @@ import {
   bgSponsorById,
   bgUnblockHost,
   insertBgPayment,
+  rateLimit,
   updateBgSponsor,
 } from '../../../lib/db.js';
-import { json, readBody } from '../../../lib/request.js';
+import { alertRob } from '../../../lib/mail.js';
+import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
 import { isAdmin } from '../../../lib/sponsors.js';
+import { assertSafeBrowsingReady } from '../../../lib/safe-browsing.js';
 import {
   MAX_BID_CENTS,
   MIN_BID_CENTS,
@@ -23,8 +26,27 @@ import {
 import { screenSubmission } from '../../../lib/buildgames-screen.js';
 import { clearPayment, reversePayment, submitBid } from '../../../lib/buildgames-payments.js';
 
-export async function POST({ request }) {
+export async function POST({ request, clientAddress, cookies }) {
+  // Same-origin only, and never accept the malware gate being unarmed on an
+  // endpoint that moves the pot (H1: admin path must assert too).
+  if (crossOrigin(request)) return json({ error: 'bad origin' }, 403);
+  assertSafeBrowsingReady();
+
   const wantsJson = (request.headers.get('content-type') || '').includes('application/json');
+
+  // Rate-limit + alert on this financial endpoint (M2): 10 attempts / 15 min /
+  // IP, and a one-shot alert when that trips, so token-guessing can't run
+  // unlimited and unlogged against the pot/leaderboard mutators.
+  const ip = clientIp(request, clientAddress);
+  if (!(await rateLimit(`bgadmin:${ip}`, 10, 15 * 60 * 1000))) {
+    if (await rateLimit('bgadmin:alert', 1, 60 * 60 * 1000)) {
+      alertRob(
+        '[cvci] build games admin rate limit tripped',
+        `<p>10+ admin POSTs from one IP in 15 min — possible token guessing against the Build Games admin. IP hash withheld; check logs.</p>`
+      ).catch((err) => console.error(`bgadmin alert failed: ${err.message}`));
+    }
+    return json({ error: 'slow down' }, 429);
+  }
 
   let body;
   try {
@@ -32,13 +54,21 @@ export async function POST({ request }) {
   } catch {
     return json({ error: 'bad request' }, 400);
   }
-  if (!isAdmin(body.token)) return json({ error: 'not found' }, 404);
 
+  // Token comes from the HttpOnly cookie the console set (M3 — keeps it out of
+  // the URL/logs), or the request BODY for JSON/programmatic callers. Never
+  // from the query string.
+  const token = cookies?.get('bg_admin')?.value || body.token;
+  if (!isAdmin(token)) return json({ error: 'not found' }, 404);
+
+  // return_to carries NO token now (cookie holds it); bounce to the bare path.
   const backTo = (message) => {
     const back = String(body.return_to || '');
-    const target = /^\/(?![/\\])/.test(back) ? back : '/thebuildgames';
-    const sep = target.includes('?') ? '&' : '?';
-    return new Response(null, { status: 303, headers: { Location: `${target}${sep}msg=${encodeURIComponent(message)}` } });
+    const target = /^\/(?![/\\])/.test(back) ? back.split('?')[0] : '/thebuildgames';
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `${target}?msg=${encodeURIComponent(message)}` },
+    });
   };
   const done = (m) => (wantsJson ? json({ ok: true, message: m }) : backTo(m));
   const fail = (e, s) => (wantsJson ? json({ error: e }, s) : backTo(e));

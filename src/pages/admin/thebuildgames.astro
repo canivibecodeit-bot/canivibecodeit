@@ -8,7 +8,22 @@ import { bgPotCents, bgSponsorsForAdmin } from '../../lib/db.js';
 import { displayName, usd } from '../../lib/buildgames.js';
 import { isAdmin } from '../../lib/sponsors.js';
 
-const token = Astro.url.searchParams.get('token') || '';
+// Token from an HttpOnly cookie (M3 — kept out of the URL/logs/history). A
+// one-time ?token= bootstraps it: set the cookie, then redirect to the bare
+// path so the token never lingers in the address bar. Thereafter the cookie
+// alone authenticates and forms post no token at all.
+const urlToken = Astro.url.searchParams.get('token');
+if (urlToken && isAdmin(urlToken)) {
+  Astro.cookies.set('bg_admin', urlToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  });
+  return Astro.redirect('/admin/thebuildgames');
+}
+const token = Astro.cookies.get('bg_admin')?.value || '';
 if (!isAdmin(token)) return new Response(null, { status: 404 });
 
 const [potCents, sponsors] = await Promise.all([bgPotCents(), bgSponsorsForAdmin()]);
@@ -17,9 +32,10 @@ const active = sponsors.filter((s) => s.status === 'active');
 const removed = sponsors.filter((s) => s.status === 'removed');
 
 const msg = Astro.url.searchParams.get('msg') || '';
-const returnTo = `/admin/thebuildgames?token=${encodeURIComponent(token)}`;
+// No token in return_to — the cookie carries it on the POST.
+const returnTo = '/admin/thebuildgames';
 
-const hidden = (extra = {}) => ({ token, return_to: returnTo, ...extra });
+const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
 ---
 
 <Base title="build games admin" description="" ogImage="/og/home.png">

@@ -5,7 +5,7 @@
    on the FINAL url that fails CLOSED (unreachable / API-down → held). */
 import { parsePublicUrl } from './builds.js';
 import { safeFetch } from './safe-fetch.js';
-import { checkUrl, safeBrowsingOn } from './safe-browsing.js';
+import { checkUrl, safeBrowsingOn, uncheckedAllowed } from './safe-browsing.js';
 
 const FETCH_BYTES = 262144;
 const FETCH_TIMEOUT = 8000;
@@ -83,6 +83,12 @@ export async function screenSubmission(rawLink) {
       verdict = 'held';
       reason = `safe-browsing: ${sb.join(', ')}`;
     }
+  } else if (!uncheckedAllowed()) {
+    // Gate unarmed and not explicitly opted out: fail CLOSED. This is the
+    // belt to assertSafeBrowsingReady()'s braces — even a caller that forgot
+    // the assert can never list a link that was never malware-screened (H1).
+    verdict = 'held';
+    reason = 'safe-browsing: gate not armed, pending review';
   }
   return { ok: true, verdict, finalUrl: site.finalUrl, faviconUrl: site.faviconUrl, reason };
 }
