@@ -173,7 +173,6 @@ const hostOf = (u) => {
       <div class="bg-pot-readout">
         <span class="bg-pot-label">prize pool</span>
         <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
-        <span class="bg-pot-note">100% of sponsor bids</span>
       </div>
     </section>
 
@@ -242,8 +241,6 @@ const hostOf = (u) => {
             <button class="btn primary bg-claim-go" type="submit">take the spot</button>
             <p class="bg-bid-err bg-claim-err" data-bid-err hidden />
           </form>
-
-          <p class="bg-claim-note" data-claim-note />
         </section>
       )
     }
@@ -571,11 +568,6 @@ const hostOf = (u) => {
     color: var(--primary);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
-  }
-
-  .bg-pot-note {
-    font: 12px var(--font-mono);
-    color: var(--muted);
   }
 
   /* ---------- countdown ---------- */
@@ -956,15 +948,6 @@ const hostOf = (u) => {
     border-radius: 999px;
     padding-inline: 24px;
     white-space: nowrap;
-  }
-
-  .bg-claim-note {
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--muted);
-    text-align: center;
-    max-width: 54ch;
-    text-wrap: pretty;
   }
 
   .bg-claim-err {

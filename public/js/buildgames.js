@@ -246,7 +246,6 @@
 
       const rankEl = $('[data-claim-rank]', claimBar);
       const amtEl = $('[data-claim-amt]', claimBar);
-      const noteEl = $('[data-claim-note]', claimBar);
       const amountInput = $('[data-claim-amount]', claimBar);
       const rankDn = $('[data-rank-dn]', claimBar);
       const rankUp = $('[data-rank-up]', claimBar);
@@ -292,14 +291,6 @@
         if (rankUp) rankUp.disabled = at < 0 || at >= rungs.length - 1;
         if (amtDn) amtDn.disabled = cents <= MIN;
         if (amtUp) amtUp.disabled = cents >= MAX;
-        if (noteEl) {
-          const held = totals[rank - 1];
-          noteEl.textContent =
-            (held == null
-              ? 'spot #' + rank + ' is open · ' + fmtUsd(MIN) + ' is the entry minimum'
-              : 'beats the ' + fmtUsd(held) + ' sitting at spot #' + rank) +
-            ' · you get whatever your total buys when the payment lands, and anyone can outbid it after';
-        }
       };
 
       const setCents = (next) => {
