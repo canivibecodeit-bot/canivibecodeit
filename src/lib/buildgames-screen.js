@@ -14,7 +14,7 @@ const screenHop = (raw) => parsePublicUrl(raw, { maxLen: 500 });
 /* Fetch the page (SSRF-safe), report the url we landed on, whether we reached
    a definitive destination, and the best favicon URL we can find. */
 async function fetchSiteFavicon(url) {
-  const out = { reached: false, finalUrl: url, faviconUrl: null };
+  const out = { reached: false, ok2xx: false, finalUrl: url, faviconUrl: null };
   const res = await safeFetch(url, {
     screen: screenHop,
     maxBytes: FETCH_BYTES,
@@ -24,6 +24,7 @@ async function fetchSiteFavicon(url) {
   });
   if (!res) return out;
   out.reached = true;
+  out.ok2xx = res.status >= 200 && res.status < 300;
   out.finalUrl = res.finalUrl;
   if (!res.body || !res.contentType.includes('html')) {
     // No HTML to parse — try the conventional /favicon.ico at the origin.
@@ -64,12 +65,16 @@ export async function screenSubmission(rawLink) {
 
   const site = await fetchSiteFavicon(url);
 
-  // Reachability is a basic validity check, independent of Safe Browsing: a
-  // link that never reached a definitive public destination (dead site, or a
-  // host that resolves internally and the SSRF guard refused) is held for a
-  // human — even on the mirror where malware screening is off.
+  // Reachability + a 2xx are basic validity checks, independent of Safe
+  // Browsing: a link that never reached a definitive public destination (dead
+  // site, or an internal host the SSRF guard refused) OR that answered non-2xx
+  // (404 / error / a bare redirect that didn't resolve to a page) is held —
+  // a paid #1 spot must not point at a dead link (audit M7).
   if (!site.reached) {
     return { ok: true, verdict: 'held', finalUrl: url, faviconUrl: null, reason: 'link unreachable, pending review' };
+  }
+  if (!site.ok2xx) {
+    return { ok: true, verdict: 'held', finalUrl: site.finalUrl, faviconUrl: null, reason: 'link did not return a live page (non-2xx), pending review' };
   }
 
   let verdict = 'ok';

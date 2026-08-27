@@ -255,6 +255,8 @@ const SCHEMA_SQLITE = `
     held_reason TEXT,
     report_count INTEGER NOT NULL DEFAULT 0,
     first_cleared_at INTEGER,
+    last_checked_at INTEGER,
+    check_result TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -530,6 +532,8 @@ const SCHEMA_PG = `
     held_reason TEXT,
     report_count INTEGER NOT NULL DEFAULT 0,
     first_cleared_at BIGINT,
+    last_checked_at BIGINT,
+    check_result TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -683,7 +687,7 @@ const chRow = numericRow(['created_at', 'last_checked_at']);
 /* Build Games sponsors: writable fields for admin/moderation updates, and the
    BIGINT columns for the PG string→number fix. cleared_total/pending_total are
    query-computed and coerced here too when present. */
-const BG_SPONSOR_FIELDS = ['status', 'held_reason', 'tagline', 'icon_url', 'first_cleared_at'];
+const BG_SPONSOR_FIELDS = ['status', 'held_reason', 'tagline', 'icon_url', 'first_cleared_at', 'last_checked_at', 'check_result'];
 
 function bgSponsorParts(fields) {
   const keys = Object.keys(fields).filter((k) => BG_SPONSOR_FIELDS.includes(k));
@@ -694,7 +698,7 @@ function bgSponsorParts(fields) {
 function bgSponsorRow(row) {
   if (!row) return null;
   const out = { ...row };
-  for (const c of ['first_cleared_at', 'created_at', 'report_count', 'cleared_total', 'pending_total']) {
+  for (const c of ['first_cleared_at', 'last_checked_at', 'created_at', 'report_count', 'cleared_total', 'pending_total']) {
     if (out[c] != null) out[c] = Number(out[c]);
   }
   return out;
@@ -1261,6 +1265,10 @@ async function pgDriver() {
       await pool.query('UPDATE buildgames_sponsors SET report_count = $2 WHERE id = $1', [sponsorId, n]);
       return n;
     },
+    async bgFirstReportAt(sponsorId) {
+      const r = await pool.query('SELECT MIN(created_at) AS t FROM buildgames_reports WHERE sponsor_id = $1', [sponsorId]);
+      return r.rows[0]?.t != null ? Number(r.rows[0].t) : null;
+    },
     async bgBlockHost(host, reason, ts) {
       await pool.query(
         'INSERT INTO buildgames_blocked_hosts (host, reason, created_at) VALUES ($1,$2,$3) ON CONFLICT (host) DO NOTHING',
@@ -1800,6 +1808,10 @@ async function sqliteDriver() {
       db.prepare('UPDATE buildgames_sponsors SET report_count = ? WHERE id = ?').run(n, sponsorId);
       return n;
     },
+    async bgFirstReportAt(sponsorId) {
+      const r = db.prepare('SELECT MIN(created_at) AS t FROM buildgames_reports WHERE sponsor_id = ?').get(sponsorId);
+      return r?.t != null ? Number(r.t) : null;
+    },
     async bgBlockHost(host, reason, ts) {
       db.prepare('INSERT OR IGNORE INTO buildgames_blocked_hosts (host, reason, created_at) VALUES (?,?,?)').run(host, reason, ts);
     },
@@ -2087,6 +2099,7 @@ export async function bgLeaderboard() { return (await getDriver()).bgLeaderboard
 export async function bgSponsorsForAdmin() { return (await getDriver()).bgSponsorsForAdmin(); }
 export async function bgPotCents() { return (await getDriver()).bgPotCents(); }
 export async function addBgReport(sponsorId, reporterHash, ts = Date.now()) { return (await getDriver()).addBgReport(sponsorId, reporterHash, ts); }
+export async function bgFirstReportAt(sponsorId) { return (await getDriver()).bgFirstReportAt(sponsorId); }
 export async function bgBlockHost(host, reason, ts = Date.now()) { return (await getDriver()).bgBlockHost(host, reason, ts); }
 export async function bgUnblockHost(host) { return (await getDriver()).bgUnblockHost(host); }
 export async function bgIsHostBlocked(host) { return (await getDriver()).bgIsHostBlocked(host); }

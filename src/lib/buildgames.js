@@ -63,11 +63,26 @@ export const PAYMENT_ID_RE = /^bgp_[a-z2-9]{10}$/;
 
 /* ---------- identity + input hygiene ---------- */
 
-// The identity key for a sponsor: the canonical link (lowercased host, no
-// fragment, sorted value-bearing query). Same-link submissions collapse to one
-// cumulative identity.
+// Tracking params that must NOT split one brand into many identities (M4).
+const TRACKING_PARAMS = new Set([
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  'ref', 'referrer', 'fbclid', 'gclid', 'mc_eid', 'mc_cid', 'igshid', 'yclid', '_hsenc', '_hsmi',
+]);
+
+/* The identity key for a sponsor. Beyond canonicalUrl (lowercase host, no
+   fragment, sorted value-bearing query), this ALSO strips a leading www.,
+   drops tracking params, and collapses /index.html — so one brand can't be
+   split into N rows (or N leaderboard slots for N×$5) via cosmetic URL
+   variants, and cumulative top-ups from slightly different links still merge
+   (audit M4). Kept separate from canonicalUrl, which the challenge relies on. */
 export function sponsorIdentity(url) {
-  return canonicalUrl(url);
+  const u = new URL(url.href);
+  u.hostname = u.hostname.replace(/^www\./i, '');
+  u.pathname = u.pathname.replace(/\/index\.html?$/i, '/');
+  for (const k of [...u.searchParams.keys()]) {
+    if (TRACKING_PARAMS.has(k.toLowerCase())) u.searchParams.delete(k);
+  }
+  return canonicalUrl(u);
 }
 
 export { registrableHost };
