@@ -34,7 +34,7 @@ else if (!process.env.DATABASE_URL && process.env.DATABASE_PUBLIC_URL) process.e
 
 const { bgSponsorsForRecheck, updateBgSponsor } = await import('../src/lib/db.js');
 const { checkUrls, safeBrowsingOn } = await import('../src/lib/safe-browsing.js');
-const { alertRob, esc } = await import('../src/lib/mail.js');
+const { alertRob, esc, sendMail } = await import('../src/lib/mail.js');
 const { displayName } = await import('../src/lib/buildgames.js');
 
 if (!safeBrowsingOn()) {
@@ -73,6 +73,13 @@ for (const s of sponsors) {
         last_checked_at: now,
         check_result: `match: ${threats.join(', ')}`,
       });
+      if (s.contact_email) {
+        await sendMail({
+          to: s.contact_email,
+          subject: 'Your Build Games placement is under review',
+          html: `<p>Your placement (<b>${esc(displayName(s))}</b>) was flagged by Safe Browsing and is temporarily held. Your contribution stays in the prize pool.</p>`,
+        }).catch((err) => console.error(`recheck held mail failed: ${err.message}`));
+      }
     }
   } else if (threats) {
     if (!DRY) await updateBgSponsor(s.id, { last_checked_at: now, check_result: `match: ${threats.join(', ')}` });

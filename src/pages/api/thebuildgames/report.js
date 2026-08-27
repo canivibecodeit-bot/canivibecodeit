@@ -19,7 +19,7 @@ import {
   updateBgSponsor,
 } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
-import { alertRob, esc } from '../../../lib/mail.js';
+import { alertRob, esc, sendMail } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
 import { SPONSOR_ID_RE, displayName } from '../../../lib/buildgames.js';
 
@@ -84,6 +84,15 @@ export async function POST({ request, clientAddress }) {
         `<p><b>${esc(displayName(s))}</b> (${esc(s.link)}) hit ${distinct} distinct reports spread over time and is off the board pending a look. Its cleared money stays in the pool.</p>
          <p><a href="https://canivibecodeit.com/admin/thebuildgames">open the queue and paste your token</a></p>`
       ).catch((err) => console.error(`bg report alert failed: ${err.message}`));
+      // Tell the sponsor their placement was held (if they left an email).
+      if (s.contact_email) {
+        sendMail({
+          to: s.contact_email,
+          subject: 'Your Build Games placement is under review',
+          html: `<p>Your placement (<b>${esc(displayName(s))}</b>) has been temporarily held after community reports and is being reviewed.</p>
+                 <p>Your contribution stays in the prize pool. We'll be in touch if anything's needed.</p>`,
+        }).catch((err) => console.error(`held mail failed: ${err.message}`));
+      }
     } else if (distinct === need) {
       alertReview('report threshold hit as a BURST — possible brigade, not auto-held');
     }

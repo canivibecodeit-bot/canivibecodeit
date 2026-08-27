@@ -257,6 +257,7 @@ const SCHEMA_SQLITE = `
     first_cleared_at INTEGER,
     last_checked_at INTEGER,
     check_result TEXT,
+    contact_email TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -281,6 +282,7 @@ const SCHEMA_SQLITE = `
     proposed_icon_src TEXT,
     proposed_status TEXT,
     proposed_reason TEXT,
+    contact_email TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -534,6 +536,7 @@ const SCHEMA_PG = `
     first_cleared_at BIGINT,
     last_checked_at BIGINT,
     check_result TEXT,
+    contact_email TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_sponsors_host ON buildgames_sponsors (host);
@@ -547,6 +550,7 @@ const SCHEMA_PG = `
     proposed_icon_src TEXT,
     proposed_status TEXT,
     proposed_reason TEXT,
+    contact_email TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -1187,9 +1191,9 @@ async function pgDriver() {
     },
     async insertBgPayment(p) {
       await pool.query(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.created_at]
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at]
       );
     },
     async bgPaymentById(id) {
@@ -1212,11 +1216,11 @@ async function pgDriver() {
     // ONLY if not already frozen. Exactly one concurrent clear wins (1); the
     // rest add money without touching identity (0). Status comes from THIS
     // payment's screen, closing held-poisoning.
-    async claimFirstClear(sponsorId, tagline, status, heldReason, ts) {
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
       const r = await pool.query(
-        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, first_cleared_at = $5
+        `UPDATE buildgames_sponsors SET tagline = $2, status = $3, held_reason = $4, contact_email = $5, first_cleared_at = $6
          WHERE id = $1 AND first_cleared_at IS NULL`,
-        [sponsorId, tagline, status, heldReason, ts]
+        [sponsorId, tagline, status, heldReason, contactEmail, ts]
       );
       return r.rowCount;
     },
@@ -1749,9 +1753,9 @@ async function sqliteDriver() {
     },
     async insertBgPayment(p) {
       db.prepare(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, created_at)
-         VALUES (?,?,?,?,?,?,?,?,?,?)`
-      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.created_at);
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at);
     },
     async bgPaymentById(id) {
       return db.prepare('SELECT * FROM buildgames_payments WHERE id = ?').get(id) ?? null;
@@ -1762,13 +1766,13 @@ async function sqliteDriver() {
     async reverseBgPaymentAtomic(id) {
       return db.prepare("UPDATE buildgames_payments SET status = 'reversed' WHERE id = ? AND status IN ('pending','cleared')").run(id).changes;
     },
-    async claimFirstClear(sponsorId, tagline, status, heldReason, ts) {
+    async claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) {
       return db
         .prepare(
-          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, first_cleared_at = ?
+          `UPDATE buildgames_sponsors SET tagline = ?, status = ?, held_reason = ?, contact_email = ?, first_cleared_at = ?
            WHERE id = ? AND first_cleared_at IS NULL`
         )
-        .run(tagline, status, heldReason, ts, sponsorId).changes;
+        .run(tagline, status, heldReason, contactEmail, ts, sponsorId).changes;
     },
     async bgSponsorClearedTotal(sponsorId) {
       return db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS t FROM buildgames_payments WHERE sponsor_id = ? AND status = 'cleared'").get(sponsorId).t;
@@ -2093,7 +2097,7 @@ export async function insertBgPayment(p) { return (await getDriver()).insertBgPa
 export async function bgPaymentById(id) { return (await getDriver()).bgPaymentById(id); }
 export async function clearBgPaymentAtomic(id) { return (await getDriver()).clearBgPaymentAtomic(id); }
 export async function reverseBgPaymentAtomic(id) { return (await getDriver()).reverseBgPaymentAtomic(id); }
-export async function claimFirstClear(sponsorId, tagline, status, heldReason, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, ts); }
+export async function claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts) { return (await getDriver()).claimFirstClear(sponsorId, tagline, status, heldReason, contactEmail, ts); }
 export async function bgSponsorClearedTotal(sponsorId) { return (await getDriver()).bgSponsorClearedTotal(sponsorId); }
 export async function bgLeaderboard() { return (await getDriver()).bgLeaderboard(); }
 export async function bgSponsorsForAdmin() { return (await getDriver()).bgSponsorsForAdmin(); }

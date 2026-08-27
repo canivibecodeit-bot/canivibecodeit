@@ -165,7 +165,14 @@
           const res = await fetch(bidForm.action, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ link: data.link, tagline: data.tagline, amount_cents: amountCents, website: data.website }),
+            body: JSON.stringify({
+              link: data.link,
+              tagline: data.tagline,
+              amount_cents: amountCents,
+              email: data.email,
+              email_optin: data.email_optin,
+              website: data.website,
+            }),
           });
           const out = await res.json().catch(() => ({}));
           if (!res.ok) {

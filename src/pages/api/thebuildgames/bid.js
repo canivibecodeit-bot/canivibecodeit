@@ -7,10 +7,10 @@
 // pipeline the admin drives; when a processor lands, the public checkout calls
 // it and the webhook clears. It stays gated behind BUILDGAMES_BIDDING_OPEN.
 import { createHash } from 'node:crypto';
-import { bgIsHostBlocked, rateLimit } from '../../../lib/db.js';
+import { addToWaitlist, bgIsHostBlocked, rateLimit } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
-import { alertRob } from '../../../lib/mail.js';
-import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
+import { alertRob, mirrorToResend } from '../../../lib/mail.js';
+import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
 import {
   MAX_BID_CENTS,
   MIN_BID_CENTS,
@@ -57,6 +57,14 @@ export async function POST({ request, clientAddress }) {
     return json({ error: 'tagline: up to 80 characters, no links' }, 400);
   }
 
+  // Optional contact email: reachable for held/outbid alerts, and (opt-in) it
+  // joins the Build Games list — every bidder is an email on THE metric. Stored
+  // on the payment, frozen to the sponsor at first clear, never shown publicly.
+  const contactEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  if (contactEmail && !validEmail(contactEmail)) {
+    return json({ error: 'that email does not look sendable' }, 400);
+  }
+
   // Screen the link (parse + SSRF-safe fetch + Safe Browsing + favicon).
   const screen = await screenSubmission(body.link);
   if (!screen.ok) return json({ error: screen.reason || 'that link cannot be entered' }, 400);
@@ -66,8 +74,14 @@ export async function POST({ request, clientAddress }) {
     return json({ error: "that site can't be entered" }, 403);
   }
 
-  const result = await submitBid({ screen, tagline, amountCents });
+  const result = await submitBid({ screen, tagline, amountCents, contactEmail: contactEmail || null });
   if (result.error === 'blocked') return json({ error: "that site can't be entered" }, 403);
+
+  // List capture (opt-in): a new waitlist row mirrors to Resend; existing
+  // unsubscribes stay unsubscribed. Only when the bidder ticked the box.
+  if (contactEmail && ['1', 'true', 'on', 'yes'].includes(String(body.email_optin ?? '').toLowerCase())) {
+    if (await addToWaitlist(contactEmail, 'buildgames')) mirrorToResend(contactEmail);
+  }
 
   if (screen.verdict === 'held') {
     if (await rateLimit('bg:held-alert', 6, 60 * 60 * 1000)) {

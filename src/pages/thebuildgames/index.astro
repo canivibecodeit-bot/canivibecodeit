@@ -190,6 +190,14 @@ const hostOf = (u) => {
               <span>tagline · optional</span>
               <input type="text" name="tagline" maxlength="80" placeholder="what you're about, in a few words" />
             </label>
+            <label class="bg-bid-tag">
+              <span>email · optional</span>
+              <input type="email" name="email" maxlength="254" placeholder="so we can tell you if you're outbid or held" />
+            </label>
+            <label class="bg-bid-optin">
+              <input type="checkbox" name="email_optin" value="1" />
+              <span>email me Build Games updates too</span>
+            </label>
             <div class="bg-bid-actions">
               <button class="btn primary" type="submit">place bid</button>
               <span class="bg-bid-note">the favicon and title come from your link · it lists once payment clears</span>
@@ -615,6 +623,15 @@ const hostOf = (u) => {
     .bg-bid-form input {
       font-size: 16px;
     }
+  }
+
+  .bg-bid-optin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
   }
 
   .bg-bid-actions {

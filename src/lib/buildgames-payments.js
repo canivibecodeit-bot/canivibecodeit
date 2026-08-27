@@ -14,6 +14,7 @@
    single atomic UPDATEs, so concurrent clears can't race the identity or
    double-fire (audit A1, H4.3). */
 import {
+  bgLeaderboard,
   bgPaymentById,
   bgSponsorByLink,
   bgSponsorById,
@@ -24,7 +25,8 @@ import {
   reverseBgPaymentAtomic,
   updateBgSponsor,
 } from './db.js';
-import { newPaymentId, newSponsorId, registrableHost, sponsorIdentity } from './buildgames.js';
+import { sendMail, esc } from './mail.js';
+import { displayName, newPaymentId, newSponsorId, rankSponsors, registrableHost, sponsorIdentity, usd } from './buildgames.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
 /* Create (or find) the sponsor for a screened submission and append a pending
@@ -34,7 +36,7 @@ import { selfHostSponsorIcon } from './challenge-image.js';
    clearing payer's verdict wins, not the row creator's. `screen` is
    screenSubmission()'s result; `tagline` is already cleaned. Returns
    { sponsorId, paymentId } or { error }. */
-export async function submitBid({ screen, tagline, amountCents }) {
+export async function submitBid({ screen, tagline, amountCents, contactEmail }) {
   const link = sponsorIdentity(screen.finalUrl);
   const host = registrableHost(screen.finalUrl.hostname);
 
@@ -73,6 +75,7 @@ export async function submitBid({ screen, tagline, amountCents }) {
     // first-clear claim: clean → active, anything else → held.
     proposed_status: screen.verdict === 'ok' ? 'active' : 'held',
     proposed_reason: screen.verdict === 'ok' ? null : (screen.reason ?? 'held'),
+    contact_email: contactEmail ?? null,
     created_at: Date.now(),
   });
   return { sponsorId: sponsor.id, paymentId };
@@ -86,6 +89,10 @@ export async function submitBid({ screen, tagline, amountCents }) {
       but only if not already frozen. Exactly one concurrent clear wins the
       claim; the icon is self-hosted only after winning it. */
 export async function clearPayment(paymentId) {
+  // Who leads before this clear counts — for the outbid nudge below.
+  let prevLeader = null;
+  try { prevLeader = rankSponsors(await bgLeaderboard())[0] ?? null; } catch { /* best-effort */ }
+
   if (!(await clearBgPaymentAtomic(paymentId))) return false; // already cleared / not pending
   const p = await bgPaymentById(paymentId);
 
@@ -94,6 +101,7 @@ export async function clearPayment(paymentId) {
     p.proposed_tagline ?? null,
     p.proposed_status || 'held',
     p.proposed_reason ?? null,
+    p.contact_email ?? null, // the owner email for held/outbid notifications
     Date.now()
   );
   if (won && p.proposed_icon_src) {
@@ -101,6 +109,30 @@ export async function clearPayment(paymentId) {
     // for bids that never clear, and never racing a competing clear's icon.
     const iconUrl = await selfHostSponsorIcon(p.proposed_icon_src, p.sponsor_id);
     if (iconUrl) await updateBgSponsor(p.sponsor_id, { icon_url: iconUrl });
+  }
+
+  // Outbid nudge (best-effort, never blocks the clear): if this clear changed
+  // the #1 spot, email the displaced leader "you've been outbid, top up to
+  // reclaim it" — a revenue prompt. Only when they left a contact email.
+  try {
+    const newLeader = rankSponsors(await bgLeaderboard())[0] ?? null;
+    if (
+      prevLeader && newLeader &&
+      prevLeader.id !== newLeader.id &&
+      prevLeader.id !== p.sponsor_id &&
+      prevLeader.contact_email
+    ) {
+      sendMail({
+        to: prevLeader.contact_email,
+        subject: 'You’ve been outbid — The Build Games',
+        html: `<p>Someone just took the #1 spot on The Build Games with ${esc(usd(newLeader.cleared_total))}.</p>
+               <p>Your placement (<b>${esc(displayName(prevLeader))}</b>, ${esc(usd(prevLeader.cleared_total))}) is now #2.</p>
+               <p>Top up to reclaim the top spot — you keep it until someone bids more.</p>
+               <p><a href="https://canivibecodeit.com/thebuildgames">the board →</a></p>`,
+      }).catch((err) => console.error(`outbid mail failed: ${err.message}`));
+    }
+  } catch (err) {
+    console.error(`outbid check failed: ${err.message}`);
   }
   return true;
 }
