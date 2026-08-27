@@ -40,6 +40,27 @@ export const biddingOpen = () => ['1', 'true'].includes(process.env.BUILDGAMES_B
 export const MIN_BID_CENTS = 500;
 export const MAX_BID_CENTS = 1_500_000; // $15k ceiling per single payment
 
+// Identity TTL: a sponsor row created by a submission whose payment NEVER
+// clears must not squat the link + tagline forever (the one edge where
+// first-submission is weaker than first-cleared). If no payment has cleared
+// within this window, the unfunded identity is released so a real payer can
+// take the link. Enforced lazily at submit-time AND by a sweep job.
+export const IDENTITY_TTL_MS = (() => {
+  const v = Number(process.env.BUILDGAMES_IDENTITY_TTL_MS);
+  return Number.isFinite(v) && v > 0 ? v : 48 * 60 * 60 * 1000; // 48h default
+})();
+
+// A sponsor row is releasable when nothing has ever cleared for it
+// (first_cleared_at null) and it is older than the TTL. Never release a
+// 'removed' row — that identity is intentionally blocked.
+export function isExpiredUnfunded(sponsor, now = Date.now()) {
+  return (
+    sponsor.status !== 'removed' &&
+    sponsor.first_cleared_at == null &&
+    now - sponsor.created_at > IDENTITY_TTL_MS
+  );
+}
+
 /* ---------- uncapped asymptotic fill (never 100%) ---------- */
 
 const FILL_SCALE_CENTS = () => envTime('BUILDGAMES_FILL_SCALE_CENTS') ?? 2_500_000; // $25k
