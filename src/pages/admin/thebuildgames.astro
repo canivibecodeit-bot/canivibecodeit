@@ -5,7 +5,7 @@
 // reachable with the flag off so the queue never goes dark.
 import Base from '../../layouts/Base.astro';
 import { bgPotCents, bgSponsorsForAdmin } from '../../lib/db.js';
-import { MAX_BID_CENTS, MIN_ENTRY_CENTS, MIN_TOPUP_CENTS, displayName, usd } from '../../lib/buildgames.js';
+import { MAX_BID_CENTS, MIN_ENTRY_CENTS, MIN_TOPUP_CENTS, TAGLINE_MAX, displayName, usd } from '../../lib/buildgames.js';
 import { isAdmin } from '../../lib/sponsors.js';
 
 // Token from an HttpOnly cookie (M3 — kept out of the URL/logs/history). A
@@ -56,7 +56,7 @@ const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
       <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-add">
         {Object.entries(hidden({ action: 'add' })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
         <input type="url" name="link" required placeholder="https://sponsor.com" />
-        <input type="text" name="tagline" maxlength="100" placeholder="tagline (optional)" />
+        <input type="text" name="tagline" maxlength={TAGLINE_MAX} placeholder="tagline (optional)" />
         <input type="number" name="amount_dollars" required min={minEntryUsd} max={maxUsd} step="1" placeholder="amount $" />
         <button class="btn primary" type="submit">add + fund</button>
       </form>
@@ -107,7 +107,7 @@ const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
             </form>
             <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-inline">
               {Object.entries(hidden({ action: 'edit-tagline', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
-              <input type="text" name="tagline" maxlength="100" placeholder="edit tagline" style="width:180px;" />
+              <input type="text" name="tagline" maxlength={TAGLINE_MAX} placeholder="edit tagline" style="width:180px;" />
               <button class="btn ghost" type="submit">save</button>
             </form>
             <form method="post" action="/api/thebuildgames/admin" data-astro-reload>

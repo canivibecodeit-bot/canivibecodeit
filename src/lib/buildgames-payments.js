@@ -30,6 +30,7 @@ import {
 import { alertRob, esc } from './mail.js';
 import { sendSponsorMail } from './buildgames-mail.js';
 import { displayName, newPaymentId, newSponsorId, rankSponsors, registrableHost, sponsorIdentity, usd } from './buildgames.js';
+import { newToken } from './sponsors.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
 /* Create (or find) the sponsor for a screened submission and append a pending
@@ -79,6 +80,11 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail, ic
   }
 
   const paymentId = newPaymentId();
+  // Post-checkout details access: the payer proves ownership of THIS payment
+  // by presenting this token (and nothing else) — same mechanic as sponsor
+  // slot purchases. Minted for every payment; only ever revealed to the payer
+  // via their success redirect.
+  const detailsToken = newToken();
   await insertBgPayment({
     id: paymentId,
     sponsor_id: sponsor.id,
@@ -94,9 +100,10 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail, ic
     proposed_status: screen.verdict === 'ok' ? 'active' : 'held',
     proposed_reason: screen.verdict === 'ok' ? null : (screen.reason ?? 'held'),
     contact_email: contactEmail ?? null,
+    details_token: detailsToken,
     created_at: Date.now(),
   });
-  return { sponsorId: sponsor.id, paymentId };
+  return { sponsorId: sponsor.id, paymentId, detailsToken };
 }
 
 /* Clear a pending payment. Two atomic steps:

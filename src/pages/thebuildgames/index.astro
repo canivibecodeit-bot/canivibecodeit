@@ -1320,8 +1320,17 @@ const hostOf = (u) => {
 
     .bg-row {
       grid-template-columns: 24px 34px minmax(0, 1fr) auto;
-      gap: 10px;
+      gap: 6px 10px;
       padding: 10px 12px;
+    }
+
+    /* On a phone the middle column squeezes the tagline to ~150px (~21
+       chars/line — half of a 100-char line was silently cut). Give the
+       name/tagline block the FULL row width on its own line beneath
+       rank/logo/amount; the amount stays the loudest thing in the row. */
+    .bg-name {
+      grid-column: 1 / -1;
+      grid-row: 2;
     }
 
     .bg-claim {

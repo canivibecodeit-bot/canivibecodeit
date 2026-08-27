@@ -283,6 +283,7 @@ const SCHEMA_SQLITE = `
     proposed_status TEXT,
     proposed_reason TEXT,
     contact_email TEXT,
+    details_token TEXT,
     created_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -551,6 +552,7 @@ const SCHEMA_PG = `
     proposed_status TEXT,
     proposed_reason TEXT,
     contact_email TEXT,
+    details_token TEXT,
     created_at BIGINT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS buildgames_payments_sponsor ON buildgames_payments (sponsor_id, status);
@@ -778,6 +780,7 @@ async function pgDriver() {
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_status TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_reason TEXT');
   await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS contact_email TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS details_token TEXT');
   // Public click counter for board rows (social proof for buyers).
   await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS click_count INTEGER NOT NULL DEFAULT 0');
   // H4.2: one processor capture clears exactly one payment — a replayed or
@@ -1224,13 +1227,27 @@ async function pgDriver() {
     },
     async insertBgPayment(p) {
       await pool.query(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at]
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, details_token, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+        [p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.details_token ?? null, p.created_at]
       );
     },
     async bgPaymentById(id) {
       const r = await pool.query('SELECT * FROM buildgames_payments WHERE id = $1', [id]);
+      return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
+    },
+    // Post-checkout details page: the payer is identified by TOKEN ONLY.
+    async bgPaymentByDetailsToken(token) {
+      const r = await pool.query('SELECT * FROM buildgames_payments WHERE details_token = $1', [token]);
+      return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
+    },
+    // The payment that won the identity claim: the earliest CLEARED payment
+    // that carried a screen. Deterministic proxy used by the details gate.
+    async bgFirstClearedScreenedPayment(sponsorId) {
+      const r = await pool.query(
+        "SELECT * FROM buildgames_payments WHERE sponsor_id = $1 AND status = 'cleared' AND proposed_status IS NOT NULL ORDER BY created_at ASC, id ASC LIMIT 1",
+        [sponsorId]
+      );
       return r.rows[0] ? { ...r.rows[0], amount_cents: Number(r.rows[0].amount_cents), created_at: Number(r.rows[0].created_at) } : null;
     },
     // Atomic pending→cleared: only the FIRST concurrent caller wins (returns 1);
@@ -1462,6 +1479,7 @@ async function sqliteDriver() {
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_status TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_reason TEXT');
   addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN contact_email TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN details_token TEXT');
   // Public click counter for board rows (social proof for buyers).
   addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN click_count INTEGER NOT NULL DEFAULT 0');
   // H4.2: one processor capture clears exactly one payment — a replayed or
@@ -1851,12 +1869,26 @@ async function sqliteDriver() {
     },
     async insertBgPayment(p) {
       db.prepare(
-        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, created_at)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?)`
-      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.created_at);
+        `INSERT INTO buildgames_payments (id, sponsor_id, amount_cents, status, processor_ref, proposed_tagline, proposed_icon_src, proposed_status, proposed_reason, contact_email, details_token, created_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+      ).run(p.id, p.sponsor_id, p.amount_cents, p.status, p.processor_ref, p.proposed_tagline ?? null, p.proposed_icon_src ?? null, p.proposed_status ?? null, p.proposed_reason ?? null, p.contact_email ?? null, p.details_token ?? null, p.created_at);
     },
     async bgPaymentById(id) {
       return db.prepare('SELECT * FROM buildgames_payments WHERE id = ?').get(id) ?? null;
+    },
+    // Post-checkout details page: the payer is identified by TOKEN ONLY.
+    async bgPaymentByDetailsToken(token) {
+      return db.prepare('SELECT * FROM buildgames_payments WHERE details_token = ?').get(token) ?? null;
+    },
+    // The payment that won the identity claim (earliest cleared + screened).
+    async bgFirstClearedScreenedPayment(sponsorId) {
+      return (
+        db
+          .prepare(
+            "SELECT * FROM buildgames_payments WHERE sponsor_id = ? AND status = 'cleared' AND proposed_status IS NOT NULL ORDER BY created_at ASC, id ASC LIMIT 1"
+          )
+          .get(sponsorId) ?? null
+      );
     },
     async clearBgPaymentAtomic(id) {
       return db.prepare("UPDATE buildgames_payments SET status = 'cleared' WHERE id = ? AND status = 'pending'").run(id).changes;
@@ -2211,6 +2243,8 @@ export async function bgSponsorById(id) { return (await getDriver()).bgSponsorBy
 export async function updateBgSponsor(id, fields) { return (await getDriver()).updateBgSponsor(id, fields); }
 export async function insertBgPayment(p) { return (await getDriver()).insertBgPayment(p); }
 export async function bgPaymentById(id) { return (await getDriver()).bgPaymentById(id); }
+export async function bgPaymentByDetailsToken(token) { return (await getDriver()).bgPaymentByDetailsToken(token); }
+export async function bgFirstClearedScreenedPayment(sponsorId) { return (await getDriver()).bgFirstClearedScreenedPayment(sponsorId); }
 export async function clearBgPaymentAtomic(id) { return (await getDriver()).clearBgPaymentAtomic(id); }
 export async function clearBgPaymentCaptured(id, capturedCents, processorRef) { return (await getDriver()).clearBgPaymentCaptured(id, capturedCents, processorRef); }
 export async function expireBgPaymentAtomic(id) { return (await getDriver()).expireBgPaymentAtomic(id); }

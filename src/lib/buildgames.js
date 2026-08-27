@@ -103,7 +103,9 @@ const UNSAFE_GLYPHS = /[​-‏‪-‮⁠-⁯﻿]/g;
 const URL_ISH = /(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,}(\/|\b))/i;
 
 // Board taglines get more room than sponsor cards (a row, not a chip).
-export const TAGLINE_MAX = 100;
+// 140 = the measured two-line capacity of the desktop tagline column
+// (553px at ~7.8px/char = 70 chars/line); past it the 2-line clamp cuts.
+export const TAGLINE_MAX = 140;
 
 /* Clean a public tagline: strip markup chars and bidi/zero-width glyphs,
    collapse whitespace, cap length. Returns null if it's empty or contains a
