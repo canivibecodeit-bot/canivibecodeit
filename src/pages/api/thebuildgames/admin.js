@@ -95,9 +95,16 @@ export async function POST({ request, clientAddress, cookies }) {
     const res = await submitBid({ screen, tagline, amountCents });
     if (res.error) return fail('that site is blocked', 403);
     await clearPayment(res.paymentId); // admin-entered = cleared now
-    // Admin-added sponsors bypass the held gate (Rob vetted them).
-    await updateBgSponsor(res.sponsorId, { status: 'active', held_reason: null });
-    return done(`added · $${amountCents / 100}`);
+    // HONOUR the Safe Browsing verdict — admin funding is the ONLY dark-ship
+    // path, so silently activating a flagged link here would make the H1 gate
+    // decorative on the exact surface we ship. Only force-active when the link
+    // screened clean; otherwise leave it HELD (submitBid already set that for a
+    // new row) with the reason surfaced, for the operator to review + release.
+    if (screen.verdict === 'ok') {
+      await updateBgSponsor(res.sponsorId, { status: 'active', held_reason: null });
+      return done(`added · $${amountCents / 100}`);
+    }
+    return done(`HELD · ${screen.reason || 'Safe Browsing flagged this link'} — review in the queue, it is not listed`);
   }
 
   // Top up an existing sponsor with a cleared payment.
