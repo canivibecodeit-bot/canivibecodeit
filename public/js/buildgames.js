@@ -73,15 +73,27 @@
         requestAnimationFrame(step);
       }
 
+      // Bills fall INSIDE the orb (SVG rects, clipped to the sphere) when the
+      // pool grows. Animated via the Web Animations API so it works on SVG.
       const rain = (n) => {
         if (!drops || reduced()) return;
         for (let i = 0; i < n; i += 1) {
-          const bill = document.createElement('span');
-          bill.className = 'bg-drop';
-          bill.style.left = 20 + Math.random() * 60 + '%';
-          bill.style.animationDelay = Math.random() * 200 + 'ms';
+          const bill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bill.setAttribute('class', 'bg-drop');
+          bill.setAttribute('x', String(120 + Math.random() * 60));
+          bill.setAttribute('y', '150');
+          bill.setAttribute('width', '24');
+          bill.setAttribute('height', '11');
+          bill.setAttribute('rx', '1.5');
           drops.appendChild(bill);
-          setTimeout(() => bill.remove(), 1000);
+          const spin = 180 + Math.random() * 180;
+          bill.animate(
+            [
+              { transform: 'translateY(0) rotate(0deg)', opacity: 0.95 },
+              { transform: `translateY(210px) rotate(${spin}deg)`, opacity: 0 },
+            ],
+            { duration: 750 + Math.random() * 250, delay: i * 60, easing: 'cubic-bezier(0.4,0,0.7,1)', fill: 'forwards' }
+          ).finished.then(() => bill.remove()).catch(() => bill.remove());
         }
       };
 

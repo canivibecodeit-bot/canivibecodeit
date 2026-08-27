@@ -3,6 +3,7 @@
 // BUILDGAMES_LIVE is set, so it merges dark and goes live the moment the
 // launch video posts. Phase A renders seed data; Phase B swaps in the DB.
 import Base from '../../layouts/Base.astro';
+import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import {
   countdownParts,
@@ -41,53 +42,62 @@ const hostOf = (u) => {
 <Base
   title="The Build Games · canivibecodeit"
   description="Sponsors bid for the top spot. 100% of every bid goes to the builders' prize pool. The games begin September 1."
+  hideSponsors={true}
 >
   <main class="wrap bg-wrap">
-    <!-- Title — clean slot for the final logo, strong text treatment until then -->
+    <!-- Logo lockup: the ○△□ mark above the wordmark (V5) -->
     <header class="bg-hero">
       <p class="bg-eyebrow">canivibecodeit presents</p>
-      <h1 class="bg-title">
-        <span class="bg-title-line">THE BUILD</span>
-        <span class="bg-title-line bg-title-accent">GAMES</span>
-      </h1>
+      <BuildGamesLogo class="bg-logo" />
       <p class="bg-tagline">
         Sponsors bid for the top spot. Every dollar goes to the builders.
       </p>
     </header>
 
-    <!-- THE POT: a suspended vault that fills as the pool grows -->
+    <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
     <section class="bg-pot" aria-label="Prize pool">
-      <div class="bg-pot-stage" data-pot data-fill={fill.toFixed(4)} data-goal={goalCents} data-pot-cents={potCents}>
-        <div class="bg-cord" aria-hidden="true"></div>
-        <svg class="bg-vessel" viewBox="0 0 300 320" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+      <div class="bg-orb-stage" data-pot data-fill={fill.toFixed(4)} data-goal={goalCents} data-pot-cents={potCents}>
+        <svg class="bg-orb" viewBox="0 0 300 400" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
           <defs>
-            <clipPath id="bg-vessel-clip">
-              <rect x="24" y="20" width="252" height="280" rx="20" />
+            <clipPath id="bg-orb-clip">
+              <circle cx="150" cy="270" r="118" />
             </clipPath>
             <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stop-color="var(--primary-dim)" />
+              <stop offset="60%" stop-color="var(--primary)" />
               <stop offset="100%" stop-color="var(--primary)" />
             </linearGradient>
-            <pattern id="bg-bills" width="252" height="16" patternUnits="userSpaceOnUse">
-              <rect width="252" height="16" fill="url(#bg-cash)" />
-              <rect x="0" y="15" width="252" height="1" fill="rgba(0,0,0,0.18)" />
+            <pattern id="bg-bills" width="240" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)">
+              <rect width="240" height="15" fill="url(#bg-cash)" />
+              <rect y="14" width="240" height="1" fill="rgba(0,0,0,0.2)" />
+              <rect x="60" y="4" width="30" height="7" rx="1" fill="rgba(255,255,255,0.08)" />
+              <rect x="150" y="4" width="30" height="7" rx="1" fill="rgba(255,255,255,0.08)" />
             </pattern>
+            <radialGradient id="bg-glass-grad" cx="0.38" cy="0.32" r="0.75">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.10)" />
+              <stop offset="55%" stop-color="rgba(255,255,255,0.02)" />
+              <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+            </radialGradient>
           </defs>
 
-          <!-- glass body -->
-          <rect x="24" y="20" width="252" height="280" rx="20" class="bg-glass" />
+          <!-- ceiling cable + hook (fixed) -->
+          <line x1="150" y1="0" x2="150" y2="120" class="bg-cable" />
+          <path d="M150 120 q -12 10 0 22 q 12 12 0 22" class="bg-hook" />
 
-          <!-- the fill: full-height rect scaled from the bottom by --fill -->
-          <g clip-path="url(#bg-vessel-clip)">
-            <rect class="bg-fill" x="24" y="20" width="252" height="280" fill="url(#bg-bills)" />
-            <rect class="bg-fill-top" x="24" width="252" height="4" fill="var(--primary)" />
+          <!-- the swinging orb: everything below the cable sways as one -->
+          <g class="bg-orb-swing">
+            <!-- money fill, clipped to the sphere, scaled from the bottom -->
+            <g clip-path="url(#bg-orb-clip)">
+              <rect class="bg-fill" x="32" y="152" width="236" height="236" fill="url(#bg-bills)" />
+              <rect class="bg-fill-top" x="32" width="236" height="3" fill="var(--primary)" />
+              <g class="bg-drops" aria-hidden="true"></g>
+            </g>
+            <!-- glass sphere: body tint, reflection, rim -->
+            <circle cx="150" cy="270" r="118" fill="url(#bg-glass-grad)" class="bg-glass" />
+            <ellipse cx="112" cy="222" rx="46" ry="30" class="bg-glass-shine" />
+            <circle cx="150" cy="270" r="118" class="bg-glass-rim" />
           </g>
-
-          <!-- glass rim + highlight over the fill -->
-          <rect x="24" y="20" width="252" height="280" rx="20" class="bg-glass-rim" />
-          <rect x="40" y="34" width="10" height="252" rx="5" class="bg-glass-shine" />
         </svg>
-        <div class="bg-drops" aria-hidden="true"></div>
       </div>
 
       <div class="bg-pot-readout">
@@ -171,7 +181,7 @@ const hostOf = (u) => {
     padding-bottom: 120px;
   }
 
-  /* ---------- title ---------- */
+  /* ---------- hero / logo ---------- */
   .bg-hero {
     text-align: center;
     padding-bottom: 8px;
@@ -182,27 +192,11 @@ const hostOf = (u) => {
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: var(--muted);
-  }
-
-  .bg-title {
-    margin-top: 10px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(48px, 12vw, 128px);
-    line-height: 0.92;
-    letter-spacing: -0.02em;
-  }
-
-  .bg-title-line {
-    display: block;
-  }
-
-  .bg-title-accent {
-    color: var(--primary);
+    padding-bottom: 22px;
   }
 
   .bg-tagline {
-    margin-top: 16px;
+    margin-top: 20px;
     font-size: 16px;
     color: var(--muted);
     max-width: 44ch;
@@ -210,87 +204,106 @@ const hostOf = (u) => {
     text-wrap: pretty;
   }
 
-  /* ---------- the pot ---------- */
+  /* ---------- the orb ---------- */
   .bg-pot {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 24px;
+    padding-top: 8px;
   }
 
-  .bg-pot-stage {
-    position: relative;
-    width: min(300px, 80vw);
+  .bg-orb-stage {
+    width: min(340px, 84vw);
   }
 
-  .bg-cord {
-    width: 2px;
-    height: 34px;
-    margin: 0 auto;
-    background: linear-gradient(var(--border), var(--muted));
-  }
-
-  .bg-vessel {
+  .bg-orb {
     width: 100%;
     height: auto;
     display: block;
-    filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.4));
+    overflow: visible;
+    /* the green glow that makes the orb the money shot on a dark page */
+    filter: drop-shadow(0 0 42px color-mix(in srgb, var(--primary) 35%, transparent))
+      drop-shadow(0 18px 34px rgba(0, 0, 0, 0.45));
   }
 
-  .bg-glass {
-    fill: rgba(255, 255, 255, 0.02);
-    stroke: var(--border);
-    stroke-width: 2;
+  .bg-cable {
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.7;
   }
 
-  /* the fill rect scales from its own bottom edge by --fill (0..1) */
+  .bg-hook {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+
+  /* everything below the cable sways gently, as if hanging */
+  .bg-orb-swing {
+    transform-box: fill-box;
+    transform-origin: 150px 120px;
+    animation: bg-sway 6s ease-in-out infinite;
+  }
+
+  @keyframes bg-sway {
+    0%, 100% { transform: rotate(-1.4deg); }
+    50% { transform: rotate(1.4deg); }
+  }
+
+  /* the money fill scales from its own bottom edge by --fill (0..1) */
   .bg-fill {
     transform-box: fill-box;
     transform-origin: bottom;
     transform: scaleY(var(--fill, 0));
-    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .bg-fill-top {
     transform-box: fill-box;
-    /* sits at the top of the fill: translate up by fill * interior height */
-    transform: translateY(calc((1 - var(--fill, 0)) * 280px));
-    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-    opacity: 0.9;
+    transform: translateY(calc((1 - var(--fill, 0)) * 236px));
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.85;
+  }
+
+  .bg-glass {
+    stroke: rgba(255, 255, 255, 0.14);
+    stroke-width: 1.5;
   }
 
   .bg-glass-rim {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.08);
-    stroke-width: 1;
+    stroke: color-mix(in srgb, var(--primary) 45%, transparent);
+    stroke-width: 2;
   }
 
   .bg-glass-shine {
-    fill: rgba(255, 255, 255, 0.06);
+    fill: rgba(255, 255, 255, 0.16);
   }
 
-  .bg-drops {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
+  :global([data-theme='light']) .bg-glass {
+    stroke: rgba(20, 24, 20, 0.16);
+  }
+  :global([data-theme='light']) .bg-glass-shine {
+    fill: rgba(255, 255, 255, 0.55);
+  }
+  :global([data-theme='light']) .bg-cable,
+  :global([data-theme='light']) .bg-hook {
+    stroke: var(--fg);
+    opacity: 0.4;
   }
 
   .bg-drop {
-    position: absolute;
-    top: -12px;
-    width: 22px;
-    height: 11px;
-    border-radius: 2px;
-    background: var(--primary);
+    /* a falling bill inside the orb; JS positions x and removes on end */
+    fill: var(--primary);
     opacity: 0.9;
-    animation: bg-drop-fall 700ms cubic-bezier(0.4, 0, 0.7, 1) forwards;
   }
 
-  @keyframes bg-drop-fall {
-    to {
-      transform: translateY(300px) rotate(180deg);
-      opacity: 0;
+  @media (prefers-reduced-motion: reduce) {
+    .bg-orb-swing {
+      animation: none;
     }
   }
 

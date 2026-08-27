@@ -27,6 +27,9 @@ const {
   ogImage = '/og/home.png',
   jsonld = [],
   socialTitle = Astro.props.title,
+  // Surfaces with their own sponsor system (The Build Games) suppress the
+  // sitewide sponsor rails/tape so the two don't clash.
+  hideSponsors = false,
 } = Astro.props;
 
 const user = Astro.locals.user ?? null;
@@ -113,7 +116,7 @@ const headerLinks = navSections.filter((s) => s.top);
     <ClientRouter />
   </head>
   <body data-user={user ? '1' : undefined}>
-    <SponsorTape side="left" />
+    {!hideSponsors && <SponsorTape side="left" />}
     <header class="site-header">
       <div class="inner">
         <a class="brand" href="/" aria-label="Can I Vibecode It? home">
@@ -153,7 +156,7 @@ const headerLinks = navSections.filter((s) => s.top);
 
     <slot />
 
-    <SponsorRails />
+    {!hideSponsors && <SponsorRails />}
 
     <footer class="site-footer">
       {/* Sitewide section links. The header hides most of these on narrow
@@ -176,8 +179,12 @@ const headerLinks = navSections.filter((s) => s.top);
       </div>
     </footer>
 
-    <div class="sp-tape-spacer"></div>
-    <SponsorTape side="right" />
+    {!hideSponsors && (
+      <>
+        <div class="sp-tape-spacer"></div>
+        <SponsorTape side="right" />
+      </>
+    )}
     <DigestBar />
 
     {!user && <SignupModal />}
