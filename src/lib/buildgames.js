@@ -36,9 +36,20 @@ export const gamesStartAt = () => envTime('BUILDGAMES_START_AT') ?? Date.UTC(202
 // submit endpoint 409s — the slip-protection state for launch morning.
 export const biddingOpen = () => ['1', 'true'].includes(process.env.BUILDGAMES_BIDDING_OPEN ?? '');
 
-// $5 floor, matching outbid: spam costs something, micro-disputes stay sane.
-export const MIN_BID_CENTS = 500;
-export const MAX_BID_CENTS = 1_500_000; // $15k ceiling per single payment
+/* Bid floors/ceiling are CONFIG, not constants — the operator sets them by env
+   the moment the pricing call lands (restart, no code change). ENTRY gates a
+   link's FIRST appearance on the board; TOPUP gates adding to a sponsor that
+   has already cleared. Raising ENTRY isn't just pricing: everything below
+   ~$1000 is also the report-bomb (H5) and small-payment (M4/chargeback)
+   surface, so a high entry floor deletes those classes outright. Defaults
+   preserve current behaviour: $5 entry, $5 top-up, $15k per payment. */
+const envCents = (name, fallback) => {
+  const v = Math.round(Number(process.env[name]));
+  return Number.isFinite(v) && v > 0 ? v : fallback;
+};
+export const MIN_ENTRY_CENTS = envCents('BUILDGAMES_MIN_ENTRY_CENTS', 500);
+export const MIN_TOPUP_CENTS = envCents('BUILDGAMES_MIN_TOPUP_CENTS', MIN_ENTRY_CENTS);
+export const MAX_BID_CENTS = envCents('BUILDGAMES_MAX_BID_CENTS', 1_500_000);
 
 /* ---------- uncapped asymptotic fill (never 100%) ---------- */
 

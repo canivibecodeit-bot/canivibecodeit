@@ -7,6 +7,9 @@ import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
+  MAX_BID_CENTS,
+  MIN_ENTRY_CENTS,
+  MIN_TOPUP_CENTS,
   biddingOpen,
   countdownParts,
   displayName,
@@ -30,6 +33,14 @@ const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
 const startAt = gamesStartAt();
 const cd = countdownParts(startAt);
+
+// Floors render from the same config the API enforces — an env change moves
+// the copy, the input bounds and the validation together. The form's min is
+// the LOWER floor (a top-up can be less than an entry); the API applies the
+// exact one once it knows which this is.
+const minEntryUsd = Math.ceil(MIN_ENTRY_CENTS / 100);
+const minFormUsd = Math.ceil(Math.min(MIN_ENTRY_CENTS, MIN_TOPUP_CENTS) / 100);
+const maxUsd = Math.floor(MAX_BID_CENTS / 100);
 
 const hostOf = (u) => {
   try {
@@ -162,7 +173,7 @@ const hostOf = (u) => {
         {bidsOpen ? (
           <>
             <button class="btn primary" type="button" data-bid-open>bid for a top spot</button>
-            <span class="bg-cta-note">any amount from $5 · you keep your spot until someone's total is higher</span>
+            <span class="bg-cta-note">enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
           <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
@@ -183,7 +194,7 @@ const hostOf = (u) => {
               </label>
               <label>
                 <span>amount (usd)</span>
-                <input type="number" name="amount_dollars" required min="5" max="15000" step="1" placeholder="50" />
+                <input type="number" name="amount_dollars" required min={minFormUsd} max={maxUsd} step="1" placeholder={String(minEntryUsd * 10)} />
               </label>
             </div>
             <label class="bg-bid-tag">

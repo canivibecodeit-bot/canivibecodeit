@@ -5,7 +5,7 @@
 // reachable with the flag off so the queue never goes dark.
 import Base from '../../layouts/Base.astro';
 import { bgPotCents, bgSponsorsForAdmin } from '../../lib/db.js';
-import { displayName, usd } from '../../lib/buildgames.js';
+import { MAX_BID_CENTS, MIN_ENTRY_CENTS, MIN_TOPUP_CENTS, displayName, usd } from '../../lib/buildgames.js';
 import { isAdmin } from '../../lib/sponsors.js';
 
 // Token from an HttpOnly cookie (M3 — kept out of the URL/logs/history). A
@@ -25,6 +25,11 @@ if (urlToken && isAdmin(urlToken)) {
 }
 const token = Astro.cookies.get('bg_admin')?.value || '';
 if (!isAdmin(token)) return new Response(null, { status: 404 });
+
+// Same config the API enforces: env change moves the console's bounds too.
+const minEntryUsd = Math.ceil(MIN_ENTRY_CENTS / 100);
+const minTopupUsd = Math.ceil(MIN_TOPUP_CENTS / 100);
+const maxUsd = Math.floor(MAX_BID_CENTS / 100);
 
 const [potCents, sponsors] = await Promise.all([bgPotCents(), bgSponsorsForAdmin()]);
 const held = sponsors.filter((s) => s.status === 'held');
@@ -52,7 +57,7 @@ const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
         {Object.entries(hidden({ action: 'add' })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
         <input type="url" name="link" required placeholder="https://sponsor.com" />
         <input type="text" name="tagline" maxlength="80" placeholder="tagline (optional)" />
-        <input type="number" name="amount_dollars" required min="5" max="15000" step="1" placeholder="amount $" />
+        <input type="number" name="amount_dollars" required min={minEntryUsd} max={maxUsd} step="1" placeholder="amount $" />
         <button class="btn primary" type="submit">add + fund</button>
       </form>
       <p class="note" style="padding-top:8px;">the link is screened (SSRF-safe + Safe Browsing) and the favicon self-hosted, same as a public bid.</p>
@@ -97,7 +102,7 @@ const hidden = (extra = {}) => ({ return_to: returnTo, ...extra });
           <div class="admin-actions">
             <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-inline">
               {Object.entries(hidden({ action: 'topup', id: s.id })).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
-              <input type="number" name="amount_dollars" min="5" max="15000" step="1" placeholder="$" style="width:90px;" />
+              <input type="number" name="amount_dollars" min={minTopupUsd} max={maxUsd} step="1" placeholder="$" style="width:90px;" />
               <button class="btn ghost" type="submit">top up</button>
             </form>
             <form method="post" action="/api/thebuildgames/admin" data-astro-reload class="bga-inline">

@@ -7,16 +7,18 @@
 // pipeline the admin drives; when a processor lands, the public checkout calls
 // it and the webhook clears. It stays gated behind BUILDGAMES_BIDDING_OPEN.
 import { createHash } from 'node:crypto';
-import { addToWaitlist, bgIsHostBlocked, rateLimit } from '../../../lib/db.js';
+import { addToWaitlist, bgIsHostBlocked, bgSponsorByLink, rateLimit } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
 import { alertRob, mirrorToResend } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody, validEmail } from '../../../lib/request.js';
 import {
   MAX_BID_CENTS,
-  MIN_BID_CENTS,
+  MIN_ENTRY_CENTS,
+  MIN_TOPUP_CENTS,
   biddingOpen,
   cleanTagline,
   registrableHost,
+  sponsorIdentity,
 } from '../../../lib/buildgames.js';
 import { assertSafeBrowsingReady } from '../../../lib/safe-browsing.js';
 import { screenSubmission } from '../../../lib/buildgames-screen.js';
@@ -46,10 +48,12 @@ export async function POST({ request, clientAddress }) {
     return json({ ok: true }, 202); // honeypot
   }
 
-  // Amount: integer cents, $5..$15k.
+  // Amount: integer cents. Cheap pre-screen check against the LOWER of the two
+  // floors (the exact entry-vs-topup floor needs the screened identity, below).
+  const floorCents = Math.min(MIN_ENTRY_CENTS, MIN_TOPUP_CENTS);
   const amountCents = Math.round(Number(body.amount_cents ?? body.amount));
-  if (!Number.isInteger(amountCents) || amountCents < MIN_BID_CENTS || amountCents > MAX_BID_CENTS) {
-    return json({ error: `amount must be between $${MIN_BID_CENTS / 100} and $${MAX_BID_CENTS / 100}` }, 400);
+  if (!Number.isInteger(amountCents) || amountCents < floorCents || amountCents > MAX_BID_CENTS) {
+    return json({ error: `amount must be between $${floorCents / 100} and $${MAX_BID_CENTS / 100}` }, 400);
   }
 
   const tagline = cleanTagline(body.tagline);
@@ -72,6 +76,16 @@ export async function POST({ request, clientAddress }) {
   // Host blocklist on the FINAL host (a removed/abusive host stays out).
   if (await bgIsHostBlocked(registrableHost(screen.finalUrl.hostname))) {
     return json({ error: "that site can't be entered" }, 403);
+  }
+
+  // Exact floor, now that screening resolved the identity: a bid on a sponsor
+  // that has already CLEARED is a top-up; everything else (new link, or a link
+  // whose bids never cleared) is an entry and pays the entry floor.
+  const existing = await bgSponsorByLink(sponsorIdentity(screen.finalUrl));
+  const isTopup = existing?.first_cleared_at != null;
+  const minCents = isTopup ? MIN_TOPUP_CENTS : MIN_ENTRY_CENTS;
+  if (amountCents < minCents) {
+    return json({ error: `minimum ${isTopup ? 'top-up' : 'entry'} is $${minCents / 100}` }, 400);
   }
 
   const result = await submitBid({ screen, tagline, amountCents, contactEmail: contactEmail || null });

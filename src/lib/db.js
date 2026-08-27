@@ -768,6 +768,16 @@ async function pgDriver() {
   // Moderation: a pinned row's count is frozen. Votes still get a normal 200
   // so vote-stuffers see nothing, but nothing is written.
   await pool.query('ALTER TABLE votes ADD COLUMN IF NOT EXISTS pinned INTEGER NOT NULL DEFAULT 0');
+  // Build Games columns added after the tables first shipped (N1): a table
+  // created by an earlier schema is missing them and every bid would 500.
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS last_checked_at BIGINT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS check_result TEXT');
+  await pool.query('ALTER TABLE buildgames_sponsors ADD COLUMN IF NOT EXISTS contact_email TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_tagline TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_icon_src TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_status TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS proposed_reason TEXT');
+  await pool.query('ALTER TABLE buildgames_payments ADD COLUMN IF NOT EXISTS contact_email TEXT');
   await pool.query("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   for (const [id, cents] of SLOT_SEED) {
     await pool.query(
@@ -1386,6 +1396,23 @@ async function sqliteDriver() {
   } catch (err) {
     if (!/duplicate column/i.test(err.message)) throw err;
   }
+  // Build Games columns added after the tables first shipped (N1): a table
+  // created by an earlier schema is missing them and every bid would 500.
+  const addBgColumn = (sql) => {
+    try {
+      db.exec(sql);
+    } catch (err) {
+      if (!/duplicate column/i.test(err.message)) throw err;
+    }
+  };
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN last_checked_at INTEGER');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN check_result TEXT');
+  addBgColumn('ALTER TABLE buildgames_sponsors ADD COLUMN contact_email TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_tagline TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_icon_src TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_status TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN proposed_reason TEXT');
+  addBgColumn('ALTER TABLE buildgames_payments ADD COLUMN contact_email TEXT');
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);

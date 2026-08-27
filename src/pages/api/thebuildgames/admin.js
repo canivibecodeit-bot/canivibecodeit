@@ -16,7 +16,8 @@ import { isAdmin } from '../../../lib/sponsors.js';
 import { assertSafeBrowsingReady } from '../../../lib/safe-browsing.js';
 import {
   MAX_BID_CENTS,
-  MIN_BID_CENTS,
+  MIN_ENTRY_CENTS,
+  MIN_TOPUP_CENTS,
   PAYMENT_ID_RE,
   SPONSOR_ID_RE,
   cleanTagline,
@@ -86,8 +87,8 @@ export async function POST({ request, clientAddress, cookies }) {
   // link exactly like the public path, then clears immediately.
   if (action === 'add') {
     const amountCents = centsFromBody();
-    if (!Number.isInteger(amountCents) || amountCents < MIN_BID_CENTS || amountCents > MAX_BID_CENTS) {
-      return fail(`amount $${MIN_BID_CENTS / 100}–$${MAX_BID_CENTS / 100}`, 400);
+    if (!Number.isInteger(amountCents) || amountCents < MIN_ENTRY_CENTS || amountCents > MAX_BID_CENTS) {
+      return fail(`amount $${MIN_ENTRY_CENTS / 100}–$${MAX_BID_CENTS / 100}`, 400);
     }
     const tagline = cleanTagline(body.tagline);
     const screen = await screenSubmission(body.link);
@@ -110,8 +111,18 @@ export async function POST({ request, clientAddress, cookies }) {
     if (!SPONSOR_ID_RE.test(id)) return fail('bad id', 400);
     const sponsor = await bgSponsorById(id);
     if (!sponsor) return fail('unknown sponsor', 404);
+    // N2: a top-up payment carries NO screening result. If it were this
+    // sponsor's FIRST clear it would win the one-shot identity claim with a
+    // blank tagline and 'held' status — permanently, with the money counted
+    // and the placement unrecoverable. Refuse: fund an unclaimed sponsor by
+    // clearing its pending bid (`clear`), or via `add`, both of which carry a
+    // screen. This button sits next to those in the console; make the wrong
+    // one impossible, not discouraged.
+    if (sponsor.first_cleared_at == null) {
+      return fail('this sponsor has no cleared payment yet — clear its pending bid (or use add); a top-up here would spend the identity claim blank', 409);
+    }
     const amountCents = centsFromBody();
-    if (!Number.isInteger(amountCents) || amountCents < MIN_BID_CENTS || amountCents > MAX_BID_CENTS) {
+    if (!Number.isInteger(amountCents) || amountCents < MIN_TOPUP_CENTS || amountCents > MAX_BID_CENTS) {
       return fail('bad amount', 400);
     }
     const pid = newPaymentId();
