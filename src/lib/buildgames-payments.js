@@ -16,47 +16,36 @@ import {
   bgSponsorById,
   insertBgPayment,
   insertBgSponsor,
-  releaseBgSponsor,
   setBgPaymentStatus,
-  stampFirstCleared,
+  updateBgSponsor,
 } from './db.js';
-import { isExpiredUnfunded, newPaymentId, newSponsorId, registrableHost, sponsorIdentity } from './buildgames.js';
+import { newPaymentId, newSponsorId, registrableHost, sponsorIdentity } from './buildgames.js';
 import { selfHostSponsorIcon } from './challenge-image.js';
 
 /* Create (or find) the sponsor for a screened submission and append a pending
-   payment. `screen` is the result of screenSubmission(); `tagline` is already
-   cleaned by the caller. Returns { sponsorId, paymentId } or { error }.
-
-   Identity is first-submission (immutable), but an UNFUNDED row whose payment
-   never cleared is released after IDENTITY_TTL_MS so an abandoned checkout
-   can't squat a brand's link forever — checked lazily here (belt) and by the
-   expiry sweep (braces). */
+   payment. The tagline + screened favicon are recorded ON THE PAYMENT, not the
+   sponsor — they only take effect if/when this payment is the FIRST to clear
+   (first-cleared-payer sets identity). `screen` is screenSubmission()'s result;
+   `tagline` is already cleaned. Returns { sponsorId, paymentId } or { error }. */
 export async function submitBid({ screen, tagline, amountCents }) {
   const link = sponsorIdentity(screen.finalUrl);
   const host = registrableHost(screen.finalUrl.hostname);
 
   let sponsor = await bgSponsorByLink(link);
-  if (sponsor && isExpiredUnfunded(sponsor)) {
-    // Abandoned squat past its TTL — free the link for this real submission.
-    await releaseBgSponsor(sponsor.id);
-    sponsor = null;
-  }
   if (sponsor) {
     // A removed sponsor can't be topped back into visibility.
     if (sponsor.status === 'removed') return { error: 'blocked' };
-    // Top-up: money only. tagline/icon stay as first set.
   } else {
-    // First submission for this link creates the identity. Self-host the icon
-    // now (R2 on prod; null → monogram on mirror). Held submissions still get
-    // a row so the pending money is tracked; they just don't display.
+    // First submission for this link creates the identity row — but WITHOUT a
+    // tagline/icon; those are frozen at first clear. status comes from the
+    // screening verdict (held submissions still get a row to track the money).
     const id = newSponsorId();
-    const iconUrl = screen.faviconUrl ? await selfHostSponsorIcon(screen.faviconUrl, id) : null;
     await insertBgSponsor({
       id,
       link,
       host,
-      tagline: tagline ?? null,
-      icon_url: iconUrl,
+      tagline: null,
+      icon_url: null,
       status: screen.verdict === 'ok' ? 'active' : 'held',
       held_reason: screen.reason ?? null,
       created_at: Date.now(),
@@ -71,19 +60,32 @@ export async function submitBid({ screen, tagline, amountCents }) {
     amount_cents: amountCents,
     status: 'pending',
     processor_ref: null,
+    proposed_tagline: tagline ?? null,
+    proposed_icon_src: screen.faviconUrl ?? null,
     created_at: Date.now(),
   });
   return { sponsorId: sponsor.id, paymentId };
 }
 
-/* Mark a pending payment cleared (money is now in the pool). Stamps the
-   sponsor's first_cleared_at once, for rank tie-breaking. Idempotent-ish: a
-   non-pending payment is left alone. */
+/* Mark a pending payment cleared (money is now in the pool). If it is the
+   FIRST payment to clear for its sponsor, that payment's proposed tagline +
+   icon freeze onto the sponsor (self-hosting the icon then, so we never fetch
+   media for bids that never clear) and first_cleared_at is stamped. Later
+   clears add money only. */
 export async function clearPayment(paymentId) {
   const p = await bgPaymentById(paymentId);
   if (!p || p.status !== 'pending') return false;
   await setBgPaymentStatus(paymentId, 'cleared');
-  await stampFirstCleared(p.sponsor_id, Date.now());
+
+  const sponsor = await bgSponsorById(p.sponsor_id);
+  if (sponsor && sponsor.first_cleared_at == null) {
+    const iconUrl = p.proposed_icon_src ? await selfHostSponsorIcon(p.proposed_icon_src, sponsor.id) : null;
+    await updateBgSponsor(sponsor.id, {
+      tagline: p.proposed_tagline ?? null,
+      icon_url: iconUrl,
+      first_cleared_at: Date.now(),
+    });
+  }
   return true;
 }
 
