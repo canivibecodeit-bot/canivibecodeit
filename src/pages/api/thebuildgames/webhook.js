@@ -115,8 +115,21 @@ export async function POST({ request }) {
     }
   } catch (err) {
     // A verified event we mishandled is our bug — log + acknowledge, or
-    // Stripe retries the same failure for days.
+    // Stripe retries the same failure for days. But we still acknowledge with
+    // a 200, so this is the one path where money can move while the board does
+    // not: a captured payment whose sponsor never gets listed, with nobody
+    // told. Always raise it — a silent loss becomes a message we can act on.
     console.error(`buildgames webhook ${event.type} failed: ${err?.message || err}`);
+    await alertRob(
+      'Build Games: webhook event failed',
+      `<p>A signature-verified Stripe event was accepted but could not be processed.
+         Money may have been captured without a placement appearing.</p>
+       <p><b>event:</b> ${esc(event.type)}<br>
+          <b>event id:</b> ${esc(event.id || 'unknown')}<br>
+          <b>error:</b> ${esc(err?.message || String(err))}</p>
+       <p>Stripe will NOT retry (we return 200). Reconcile by hand:
+          <a href="https://canivibecodeit.com/admin/thebuildgames">the queue</a></p>`
+    ).catch((mailErr) => console.error(`bg webhook alert failed: ${mailErr.message}`));
   }
 
   return json({ ok: true });

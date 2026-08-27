@@ -45,7 +45,16 @@ export async function submitBid({ screen, tagline, amountCents, contactEmail, ic
 
   let sponsor = await bgSponsorByLink(link);
   if (sponsor) {
-    // A removed sponsor can't be topped back into visibility.
+    // A sponsor that has ALREADY cleared a payment and is no longer active
+    // (removed, or report/recheck-held) must not be able to sell another
+    // placement: the money would clear into the pool while the buyer got no
+    // listing, no refund and no warning — and it is the finisher move for a
+    // report-bombing attacker. Note the deliberate first_cleared_at test: a
+    // brand-new row is legitimately 'held' ("awaiting first cleared payment"),
+    // and blocking that would refuse every first-time sponsor.
+    if (sponsor.first_cleared_at != null && sponsor.status !== 'active') {
+      return { error: 'blocked' };
+    }
     if (sponsor.status === 'removed') return { error: 'blocked' };
   } else {
     // First submission for this link creates the identity row — 'held' and

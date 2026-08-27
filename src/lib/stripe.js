@@ -59,6 +59,9 @@ export async function createCheckoutSession({
     client_reference_id: purchaseId,
     metadata: { purchase_id: purchaseId, slot_id: slotId, months },
     payment_intent_data: { metadata: { purchase_id: purchaseId, slot_id: slotId, months } },
+    // Same reason as the Build Games checkout: Adaptive Pricing would settle a
+    // non-US buyer in their own currency, which our handlers do not accept.
+    adaptive_pricing: { enabled: false },
     // Sponsors buy as businesses: let them enter a VAT/tax ID and company name,
     // and have Stripe email a proper invoice PDF after payment (0.4% capped at
     // $2 per invoice). The tax ID needs a Customer to live on.
@@ -109,6 +112,11 @@ export async function createBidCheckoutSession({
       metadata,
       payment_intent_data: { metadata },
       ...(customerEmail ? { customer_email: customerEmail } : {}),
+      // Adaptive Pricing is ON by default and would charge non-US buyers in
+      // their local currency. The webhook only accepts a usd capture, so an
+      // international sponsor would be charged and get NO placement and no
+      // message. Force usd for everyone: one currency in, one currency out.
+      adaptive_pricing: { enabled: false },
       // Same business-buyer posture as the sponsor checkout: tax id field and
       // a proper invoice PDF after payment.
       tax_id_collection: { enabled: true },
