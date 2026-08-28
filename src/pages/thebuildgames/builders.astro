@@ -1,0 +1,190 @@
+---
+// The plain-english "how it works" page for builders. Every claim here is a
+// simplified restatement of the terms, checked line by line against them; the
+// terms stay the contract and this page says so. Flag-gated like the rest of
+// the surface. Approved in Paper 2026-08-28.
+import Base from '../../layouts/Base.astro';
+import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
+import { buildGamesLive } from '../../lib/flags.js';
+
+if (!buildGamesLive()) return new Response(null, { status: 404 });
+
+const title = 'The Build Games · for the builders';
+const description =
+  'How The Build Games works if you build: free entry, the brief drops September 1, an independent panel ranks the entries, and winners share the sponsor-funded pool.';
+
+const faq = [
+  {
+    q: 'how do i register?',
+    a: "you don't, yet. join the newsletter and you'll get one email when entries open with the first game on september 1. the entry form will be right here.",
+  },
+  {
+    q: 'is it really free to enter?',
+    a: 'yes, always. paying never improves anyone’s chances. sponsors buy visibility on the board, not outcomes.',
+  },
+  {
+    q: 'is there only one winner?',
+    a: 'no. each game publishes its prize split before it starts, and multiple ranked winners share the pool.',
+  },
+  {
+    q: 'can i use AI to build?',
+    a: 'expected, even. use whatever tools you want. the work has to happen inside the build window and you submit it as your own.',
+  },
+  {
+    q: 'who judges?',
+    a: "an independent panel, named before the game starts, scoring against criteria published up front. sponsors never judge. we don't score either.",
+  },
+  {
+    q: 'do you keep any of the money?',
+    a: 'no. pool money is either paid to winners or returned to sponsors. it never comes to us.',
+  },
+  {
+    q: 'who owns what i build?',
+    a: 'you do. entering gives us and the sponsors no rights over your code or your product.',
+  },
+  {
+    q: 'solo or team?',
+    a: 'either. one entry per person or team per game.',
+  },
+];
+---
+
+<Base {title} {description} hideSponsors={true} hideDigest={true}>
+  <main class="wrap bgb">
+    <h1>for the builders</h1>
+    <p class="bgb-sub">the short version, in three steps.</p>
+
+    <div class="bgb-steps">
+      <div class="bgb-step">
+        <span class="bgb-when">1 · now</span>
+        <b>sponsors fill the pool</b>
+        <p>every spot on the board is a sponsor's bid. that's the prize money.</p>
+      </div>
+      <div class="bgb-step">
+        <span class="bgb-when">2 · september 1</span>
+        <b>the brief drops</b>
+        <p>
+          what to build, the deadline, the judges and the prize split, all published before
+          the clock starts. build with any tools you like. AI is expected.
+        </p>
+      </div>
+      <div class="bgb-step">
+        <span class="bgb-when">3 · after the window</span>
+        <b>judges rank, winners split</b>
+        <p>
+          an independent panel scores every entry against the published criteria. winners
+          share the pool on the split published with the brief.
+        </p>
+      </div>
+    </div>
+
+    <BuildGamesNewsletter variant="section" />
+
+    <h2>quick answers</h2>
+    <dl class="bgb-faq">
+      {
+        faq.map((f) => (
+          <div class="bgb-qa">
+            <dt>{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="bgb-fine">
+      this is the plain english version · <a href="/thebuildgames/terms">the Build Games terms</a>
+      are the contract · 18+, void where prohibited ·
+      <a href="/thebuildgames">back to the board</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .bgb {
+    max-width: 880px;
+    padding-top: 40px;
+    padding-bottom: 60px;
+  }
+  .bgb h1 {
+    font-size: 40px;
+    letter-spacing: -1px;
+    margin: 0 0 2px;
+  }
+  .bgb-sub {
+    color: var(--muted);
+    margin: 0 0 30px;
+  }
+  .bgb-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 34px;
+  }
+  .bgb-step {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: var(--card, transparent);
+  }
+  .bgb-when {
+    display: block;
+    color: var(--green, #0d7a3f);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .bgb-step b {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  .bgb-step p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .bgb h2 {
+    font-size: 22px;
+    margin: 34px 0 4px;
+  }
+  .bgb-faq {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 48px;
+    margin: 0;
+  }
+  .bgb-qa {
+    border-top: 1px solid var(--border);
+    padding: 13px 0;
+  }
+  .bgb-qa dt {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .bgb-qa dd {
+    margin: 3px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .bgb-fine {
+    margin-top: 30px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  @media (max-width: 760px) {
+    .bgb-steps {
+      grid-template-columns: 1fr;
+    }
+    .bgb-faq {
+      grid-template-columns: 1fr;
+    }
+    .bgb h1 {
+      font-size: 30px;
+    }
+  }
+</style>
