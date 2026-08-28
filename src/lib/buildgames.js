@@ -99,6 +99,29 @@ export function sponsorIdentity(url) {
 
 export { registrableHost };
 
+/* Platforms where identity lives in the PATH, not the host: two different
+   profiles on x.com are two different sponsors. The one-placement-per-host
+   rule (M4) exists so one brand can't split into N board rows; on these hosts
+   the brand IS the profile, so the host guard would block unrelated sponsors
+   instead. Identity stays the full profile URL (sponsorIdentity keeps the
+   path), so the SAME profile submitted again still merges as a top-up. */
+const PATH_IDENTITY_HOSTS = new Set([
+  'x.com',
+  'twitter.com',
+  'github.com',
+  'instagram.com',
+  'facebook.com',
+  'youtube.com',
+  'tiktok.com',
+  'linkedin.com',
+  'twitch.tv',
+  'bsky.app',
+  'threads.net',
+]);
+export function pathIdentityHost(hostname) {
+  return PATH_IDENTITY_HOSTS.has(String(hostname || '').replace(/^www\./i, '').toLowerCase());
+}
+
 const UNSAFE_GLYPHS = /[​-‏‪-‮⁠-⁯﻿]/g;
 const URL_ISH = /(https?:\/\/|www\.|[a-z0-9-]+\.[a-z]{2,}(\/|\b))/i;
 

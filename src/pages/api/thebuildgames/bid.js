@@ -21,6 +21,7 @@ import {
   TAGLINE_MAX,
   biddingOpen,
   cleanTagline,
+  pathIdentityHost,
   registrableHost,
   sponsorIdentity,
 } from '../../../lib/buildgames.js';
@@ -98,7 +99,15 @@ export async function POST({ request, clientAddress }) {
   // extra board slots (N slots for N payments). Unpaid rows never block, so a
   // free squat submission can't lock a brand out. Admin add stays free of this
   // check — exceptions are human judgment.
-  if (!isTopup && (await bgClearedSponsorByHost(registrableHost(screen.finalUrl.hostname), identityLink))) {
+  // On path-identity hosts (x.com profiles and the like) the per-host guard
+  // would block unrelated sponsors who happen to share the platform, so it
+  // only applies to ordinary domains. Same-profile duplicates still merge
+  // into a top-up above either way.
+  if (
+    !isTopup &&
+    !pathIdentityHost(screen.finalUrl.hostname) &&
+    (await bgClearedSponsorByHost(registrableHost(screen.finalUrl.hostname), identityLink))
+  ) {
     return json({ error: 'that site already has a placement — top it up instead' }, 409);
   }
 
