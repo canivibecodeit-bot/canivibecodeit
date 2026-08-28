@@ -125,6 +125,11 @@ const hostOf = (u) => {
       <p class="bg-tagline">
         Sponsors bid for the top spot. Every dollar goes to the builders.
       </p>
+      {/* The builder path, front and centre: sponsors get the claim bar below,
+          builders get an unmissable button here instead of a footer link. */}
+      <a class="bg-builders-cta" href="/thebuildgames/builders">
+        building? how it works <span aria-hidden="true">→</span>
+      </a>
     </header>
 
     <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
@@ -442,6 +447,25 @@ const hostOf = (u) => {
     max-width: 44ch;
     margin-inline: auto;
     text-wrap: pretty;
+  }
+
+  /* The builder CTA: unmistakably a button, quieter than the money green so
+     the claim bar keeps the loudest voice on the page. */
+  .bg-builders-cta {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 8px 18px;
+    border: 1.5px solid var(--primary);
+    border-radius: 999px;
+    color: var(--primary);
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .bg-builders-cta:hover {
+    background: var(--primary);
+    color: var(--bg, #fff);
   }
 
   /* ---------- the orb ---------- */
