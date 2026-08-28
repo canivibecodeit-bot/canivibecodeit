@@ -12,7 +12,7 @@ import { selfHostUploadedIcon } from '../../../lib/challenge-image.js';
 import { siteUrl } from '../../../lib/sponsors.js';
 import { createBidCheckoutSession } from '../../../lib/stripe.js';
 import { buildGamesLive } from '../../../lib/flags.js';
-import { alertRob, esc, mirrorToResend } from '../../../lib/mail.js';
+import { mirrorToResend } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody, unreachableEmail, validEmail } from '../../../lib/request.js';
 import {
   MAX_BID_CENTS,
@@ -107,12 +107,10 @@ export async function POST({ request, clientAddress }) {
   // take a payment we'd have to hold or refund while Rob sleeps. Admin `add`
   // remains the exception path for judgment calls.
   if (screen.verdict !== 'ok') {
-    if (await rateLimit('bg:held-alert', 6, 60 * 60 * 1000)) {
-      alertRob(
-        '[cvci] build games bid refused at screening',
-        `<p>A Build Games submission was refused before checkout: ${esc(screen.reason || 'flagged')}</p>`
-      ).catch((err) => console.error(`bg held alert failed: ${err.message}`));
-    }
+    // Refusals are logged, not emailed — operator's call (Aug 28): refusal
+    // mail was noise next to the money alerts. The log line keeps the link
+    // visible for diagnosing false refusals (bot-walled legit sites).
+    console.log(`bg bid refused at screening: ${screen.reason || 'flagged'} · ${String(body.link).slice(0, 200)}`);
     return json({ error: "that link can't be listed automatically — nothing was charged" }, 403);
   }
 
