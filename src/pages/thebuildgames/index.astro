@@ -170,23 +170,12 @@ const hostOf = (u) => {
       <BuildGamesLogo class="bg-logo" />
       {started ? (
         <>
-          {/* With the orb gone the THEME takes the stage: display treatment,
-              straight under the lockup. The clarity block follows — the
-              money flow uses the CANONICAL sentence verbatim. The strip's
-              number is the gross SPONSORSHIP POOL; the sentence defines the
-              PRIZE FUND — nothing here may imply the number is net, and no
-              computed fund÷3 dollar figure renders anywhere. */}
+          {/* Tight hero (design round 3): lockup → theme → idea pill, no
+              prose. The money story lives in the framed card below the
+              entry form; the caption under the stat strip carries the three
+              trust facts. */}
           <p class="bg-theme">{THEME_ONE_LINER}</p>
           <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
-          <p class="bg-clarity">
-            The Build Games is a month-long vibecoding hackathon. Entering is free.
-            {' '}{MONEY_SENTENCE}
-          </p>
-          <p class="bg-clarity">
-            Sponsors buy visibility, not victory: a sponsorship can never win a prize.
-            The prize fund splits evenly across 3 categories, 3 winners, one each,
-            picked by a panel of 3 judges. Winners are announced on this page.
-          </p>
         </>
       ) : (
         <>
@@ -290,6 +279,9 @@ const hostOf = (u) => {
           <span class="bg-sg-num">{entryCount}</span>
           <span class="bg-sg-sub">free · one per person or team</span>
         </div>
+        {/* one caption row under the strip: the three trust facts, in the
+            strip's own small-caps mono voice (operator wording) */}
+        <p class="bg-strip-caption">free entry · judged by a panel · sponsors can’t win prizes</p>
       </section>
     ) : (
       <section class="bg-countdown" data-countdown data-target={String(cdTarget)} aria-label="Countdown to the first game">
@@ -371,6 +363,14 @@ const hostOf = (u) => {
         )}
       </section>
 
+      {/* THE MONEY, PLAINLY (design round 3): the canonical sentence gets a
+          framed moment of its own — two sentences, green accent, nothing
+          else. The single most deliberate block on the page. */}
+      <section class="bg-money" aria-label="How the money works">
+        <p class="bg-money-line">{MONEY_SENTENCE}</p>
+        <p class="bg-money-line">Sponsors buy visibility, not victory: a sponsorship can never win a prize.</p>
+      </section>
+
       <section class="bg-cats" aria-label="Prize categories">
         <div class="list-head bg-list-head">
           <h2>three categories</h2>
@@ -437,8 +437,9 @@ const hostOf = (u) => {
           <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
         </ol>
         <p class="bg-rules-fine">
-          judges may name runners-up, no money attached · plain-english version for
-          builders: <a href="/thebuildgames/builders">how it works</a>
+          winners are announced on this page · judges may name runners-up, no money
+          attached · plain-english version for builders:{' '}
+          <a href="/thebuildgames/builders">how it works</a>
         </p>
       </section>
 
@@ -1797,17 +1798,6 @@ const hostOf = (u) => {
 
   /* ═══════════ GAME PHASE (post-midnight layout) ═══════════ */
 
-  /* ---------- hero clarity block ---------- */
-  .bg-clarity {
-    margin-top: 12px;
-    margin-inline: auto;
-    max-width: 56ch;
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: var(--fg);
-    text-wrap: pretty;
-  }
-
   /* The theme takes the stage (orb gone): display treatment under the
      lockup, then the quiet idea pill, then the clarity paragraphs. */
   .bg-theme {
@@ -1916,6 +1906,38 @@ const hostOf = (u) => {
 
   .bg-sg-sec[hidden] {
     display: none;
+  }
+
+  /* the caption row under the strip: full grid row, the strip's own voice */
+  .bg-strip-caption {
+    grid-column: 1 / -1;
+    padding-top: 18px;
+    text-align: center;
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  /* ---------- the money, plainly (the one framed block) ---------- */
+  .bg-money {
+    max-width: 640px;
+    margin: 44px auto 0;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .bg-money-line {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--fg);
+    text-wrap: pretty;
   }
 
   .bg-sg-sub {
@@ -2335,8 +2357,10 @@ const hostOf = (u) => {
     padding-top: 44px;
   }
 
-  /* centred header over the section (design round 2) */
-  .bg-rules-head {
+  /* centred headers over the narrow centred columns (rules, entry form) —
+     a heading hard-left of a centred card reads broken (round 2 + 3). */
+  .bg-rules-head,
+  .bg-enter .bg-list-head {
     justify-content: center;
     text-align: center;
   }
@@ -2465,7 +2489,7 @@ const hostOf = (u) => {
 
     /* The load-bearing copy reads at 16px on a phone (typography rule:
        body text is never smaller on mobile than desktop). */
-    .bg-clarity {
+    .bg-money-line {
       font-size: 16px;
     }
 
