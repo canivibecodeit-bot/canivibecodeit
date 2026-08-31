@@ -364,10 +364,33 @@ const hostOf = (u) => {
         )}
       </section>
 
-      {/* THE MONEY, PLAINLY (design round 3): the canonical sentence gets a
-          framed moment of its own — two sentences, green accent, nothing
-          else. The single most deliberate block on the page. */}
+      {/* THE MONEY, PLAINLY — set as a RECEIPT (operator direction): dashed
+          till-rules top and bottom, a four-line dot-leader ledger, then the
+          canonical sentence verbatim. No card chrome; the ledger IS the
+          design. The only dollar figure is the $0, and it's green. */}
       <section class="bg-money" aria-label="How the money works">
+        <dl class="bg-money-ledger">
+          <div class="bg-ml-row">
+            <dt>sponsorship pool</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>100%</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>payment processing</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>-fees</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>our cut</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd class="bg-ml-zero">$0</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>to builders</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>the rest</dd>
+          </div>
+        </dl>
         <p class="bg-money-line">{MONEY_SENTENCE}</p>
         <p class="bg-money-line">Sponsors buy visibility, not victory: a sponsorship can never win a prize.</p>
       </section>
@@ -1920,23 +1943,61 @@ const hostOf = (u) => {
     color: var(--muted);
   }
 
-  /* ---------- the money, plainly (the one framed block) ---------- */
+  /* ---------- the money, plainly: a RECEIPT ----------
+     Dashed till-rules top and bottom, a dot-leader ledger, the canonical
+     sentence, nothing else. No card chrome — the form is the design. */
   .bg-money {
-    max-width: 640px;
+    max-width: 480px;
     margin: 44px auto 0;
-    padding: 20px 22px;
+    padding: 20px 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--primary);
-    border-radius: 12px;
-    background: var(--surface);
+    gap: 14px;
+    border-top: 1px dashed color-mix(in srgb, var(--muted) 65%, transparent);
+    border-bottom: 1px dashed color-mix(in srgb, var(--muted) 65%, transparent);
+  }
+
+  .bg-money-ledger {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
+  }
+
+  .bg-ml-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font: 13px var(--font-mono);
+  }
+
+  .bg-ml-row dt {
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .bg-ml-leader {
+    flex: 1;
+    min-width: 24px;
+    border-bottom: 1px dotted color-mix(in srgb, var(--muted) 55%, transparent);
+    transform: translateY(-3px);
+  }
+
+  .bg-ml-row dd {
+    margin: 0;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bg-ml-zero {
+    color: var(--primary);
+    font-weight: 700;
   }
 
   .bg-money-line {
-    font-size: 15px;
-    line-height: 1.65;
+    font: 13.5px/1.7 var(--font-mono);
     color: var(--fg);
     text-wrap: pretty;
   }
