@@ -89,12 +89,17 @@ export const CATEGORIES = [
 export const JUDGES = [
   { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'maker of TypingMind and DevUtils' },
   { name: 'dudufolio', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'designer and maker of Toolfolio and Shotbase' },
-  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'maker of TranscriptAPI and CRHQ' },
+  // BIO_3 pending fresh verification (parent research task) — the final line
+  // arrives shaped like 'founder of CRHQ' + verified products. Placeholder
+  // until then; do not guess products.
+  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'BIO_3' },
 ];
 
-// The note beside the judges heading. The heading itself stays 'the judges'
-// (never 'independent' in the heading — final wording lands with the theme).
-export const JUDGES_NOTE = 'scoring on published criteria · sponsors never judge';
+// The note beside the judges heading. Heading stays 'the judges'; describing
+// the panel as judging independently is operator-cleared (Aug 31 — the judge
+// @scheemunai and the board sponsor AndreBaltazar are different people, no
+// sponsor-judge conflict exists).
+export const JUDGES_NOTE = 'judging independently on published criteria · sponsors never judge';
 
 // Post-entry recommendation card (cross-promo). One card, one outbound link,
 // server-counted via /api/thebuildgames/rec. Operator: confirm the URL.
