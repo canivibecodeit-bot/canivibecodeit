@@ -92,7 +92,7 @@ export async function POST({ request, clientAddress }) {
           to: s.contact_email,
           subject: 'Your Build Games placement is under review',
           html: `<p>Your placement (<b>${esc(displayName(s))}</b>) has been temporarily held after community reports and is being reviewed.</p>
-                 <p>Your contribution stays in the prize pool. We'll be in touch if anything's needed.</p>`,
+                 <p>Your contribution stays in the sponsorship pool. We'll be in touch if anything's needed.</p>`,
         }).catch((err) => console.error(`held mail failed: ${err.message}`));
       }
     } else if (distinct === need) {

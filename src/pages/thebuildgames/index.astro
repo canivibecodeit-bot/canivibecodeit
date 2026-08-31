@@ -6,17 +6,29 @@ import Base from '../../layouts/Base.astro';
 import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
+import { bgEntryCount, bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
+  ANNOUNCE_BY,
+  BLURB_MAX,
+  CATEGORIES,
+  JUDGES,
+  JUDGES_NOTE,
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
+  MONEY_SENTENCE,
+  NAME_MAX,
   TAGLINE_MAX,
+  THEME_ONE_LINER,
+  THEME_SUB,
   biddingOpen,
   countdownParts,
   displayName,
+  entriesOpen,
   fillLevel,
+  gamesEndAt,
   gamesStartAt,
+  gamesStarted,
   monogram,
   rankSponsors,
   timeAgo,
@@ -28,19 +40,39 @@ import { onlineCount } from '../../lib/presence.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
-// Live board + pot from the DB.
-const [potCents, board] = await Promise.all([bgPotCents(), bgLeaderboard()]);
+/* THE MIDNIGHT FLIP. Before the start moment this page is the sponsor hype
+   surface (countdown, claim bar first). From the moment BUILDGAMES_START_AT
+   passes it becomes the game surface: hackathon clarity block, the entry
+   form front and centre, categories, judges, then sponsors as a podium with
+   bidding demoted to secondary. Server-side time check per request — no
+   cron, no manual flip; the client countdown reloads open tabs at zero. */
+const started = gamesStarted();
+const canEnter = entriesOpen();
+
+// Live board + pot from the DB (+ the entry counter once the games run).
+const [potCents, board, entryCount] = await Promise.all([
+  bgPotCents(),
+  bgLeaderboard(),
+  started ? bgEntryCount().catch(() => 0) : 0,
+]);
 const ranked = rankSponsors(board);
 const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
 const bidsOpen = biddingOpen();
 
-// Proper pagination past 50 sponsors (?page=N), rank numbering continuous
-// across pages so #51 is #51, not a fresh #1.
+// In game phase the top 3 sponsors render as a podium; the list starts at #4.
+const podium = started ? ranked.slice(0, 3) : [];
+const listBase = started ? Math.min(3, ranked.length) : 0;
+const listRanked = ranked.slice(listBase);
+
+// Pre-game: proper pagination past 50 sponsors (?page=N), rank numbering
+// continuous across pages so #51 is #51, not a fresh #1. Game phase: simple
+// continuous rows below the podium (operator punch list — volume is modest,
+// pagination is a pre-game concern).
 const PAGE_SIZE = 50;
-const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+const totalPages = started ? 1 : Math.max(1, Math.ceil(listRanked.length / PAGE_SIZE));
 const page = Math.min(totalPages, Math.max(1, Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10) || 1));
-const pageRows = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-const rankOf = (i) => (page - 1) * PAGE_SIZE + i + 1;
+const pageRows = started ? listRanked : listRanked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const rankOf = (i) => listBase + (page - 1) * PAGE_SIZE + i + 1;
 
 // Newsletter placement (Rob's rule): 6+ rows on page 1 -> inline between row
 // #5 and #6; otherwise directly below the sponsors section. Repeated at the
@@ -50,8 +82,18 @@ const nlInline = page === 1 && pageRows.length >= 6;
 // Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
+// The clock counts to the start until the flip, then to the window close.
 const startAt = gamesStartAt();
-const cd = countdownParts(startAt);
+const endAt = gamesEndAt();
+const cdTarget = started ? endAt : startAt;
+const cd = countdownParts(cdTarget);
+
+/* The game-ends clock: zero-padded two-digit segments in fixed-width cells
+   so a tick never reflows anything, and no seconds until the final 24 hours
+   (a month-long clock ticking seconds reads anxious; the endgame earns it).
+   The client tick mirrors both rules via data-cd-pad / [data-cd-sec-cell]. */
+const pad2 = (n) => String(n).padStart(2, '0');
+const showSeconds = cdTarget - Date.now() < 24 * 60 * 60 * 1000;
 
 // Social proof for buyers: live presence (own in-process counter) + the real
 // all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
@@ -106,11 +148,16 @@ const hostOf = (u) => {
 
 <Base
   title="The Build Games · canivibecodeit"
-  description="Sponsors bid for the top spot. 100% of every bid goes to the builders' prize pool. The games begin September 1."
+  description={
+    started
+      ? `A month-long vibecoding hackathon. Free to enter. ${MONEY_SENTENCE}`
+      : `Sponsors bid for the top spot. ${MONEY_SENTENCE} The games begin September 1.`
+  }
+  ogImage="/og-buildgames.png"
   hideSponsors={true}
   hideDigest={true}
 >
-  <main class="wrap bg-wrap">
+  <main class:list={['wrap', 'bg-wrap', { 'bg-game': started }]}>
     <!-- Logo lockup: the ○△□ mark above the wordmark (V5) -->
     <header class="bg-hero">
       <!-- The proof a placement is worth $500 — above everything else -->
@@ -122,31 +169,47 @@ const hostOf = (u) => {
       </p>
       <p class="bg-eyebrow">canivibecodeit presents</p>
       <BuildGamesLogo class="bg-logo" />
-      <p class="bg-tagline">
-        Sponsors bid for the top spot. Every dollar goes to the builders.
-      </p>
-      {/* The builder path, front and centre: sponsors get the claim bar below,
-          builders get an unmissable button here instead of a footer link. */}
-      <a class="bg-builders-cta" href="/thebuildgames/builders">
-        building? how it works <span aria-hidden="true">→</span>
-      </a>
+      {started ? (
+        <>
+          {/* Tight hero (design round 3): lockup → theme → idea pill, no
+              prose. The money story lives in the framed card below the
+              entry form; the caption under the stat strip carries the three
+              trust facts. */}
+          <p class="bg-theme">{THEME_ONE_LINER}</p>
+          <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
+        </>
+      ) : (
+        <>
+          <p class="bg-tagline">
+            Sponsors bid for the top spot. {MONEY_SENTENCE}
+          </p>
+          {/* The builder path, front and centre: sponsors get the claim bar
+              below, builders get an unmissable button here instead of a
+              footer link. */}
+          <a class="bg-builders-cta" href="/thebuildgames/builders">
+            building? how it works <span aria-hidden="true">→</span>
+          </a>
+        </>
+      )}
     </header>
 
-    <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
-    <section class="bg-pot" aria-label="Prize pool">
+    {/* THE ORB: pre-game only (operator, design round 2) — in game phase
+        the stat strip carries the pool number and the orb is gone. */}
+    {!started && (
+    <section class="bg-pot" aria-label="Sponsorship pool">
       <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
-        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Sponsorship pool ${usd(potCents)}`}>
           <defs>
             <clipPath id="bg-orb-clip">
               <circle cx="150" cy="270" r="118" />
             </clipPath>
-            <!-- Subtle cash gradient: premium, not photorealistic bills. -->
+            {/* Subtle cash gradient: premium, not photorealistic bills. */}
             <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stop-color="var(--primary-dim)" />
               <stop offset="55%" stop-color="var(--primary)" />
               <stop offset="100%" stop-color="var(--primary)" />
             </linearGradient>
-            <!-- a faint stacked-note hint: one soft line every 22px, low contrast -->
+            {/* a faint stacked-note hint: one soft line every 22px, low contrast */}
             <pattern id="bg-bills" width="300" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
               <rect width="300" height="22" fill="url(#bg-cash)" />
               <rect y="21" width="300" height="1" fill="rgba(0,0,0,0.10)" />
@@ -158,7 +221,7 @@ const hostOf = (u) => {
             </radialGradient>
           </defs>
 
-          <!-- ceiling cable + hook (fixed) — toggled off via ?cable=off -->
+          {/* ceiling cable + hook (fixed) — toggled off via ?cable=off */}
           {cableOn && (
             <g class="bg-cable-group">
               <line x1="150" y1="108" x2="150" y2="120" class="bg-cable" />
@@ -166,15 +229,15 @@ const hostOf = (u) => {
             </g>
           )}
 
-          <!-- the swinging orb: everything below the cable sways as one -->
+          {/* the swinging orb: everything below the cable sways as one */}
           <g class="bg-orb-swing">
-            <!-- money fill, clipped to the sphere, scaled from the bottom -->
+            {/* money fill, clipped to the sphere, scaled from the bottom */}
             <g clip-path="url(#bg-orb-clip)">
               <rect class="bg-fill" x="32" y="152" width="236" height="236" fill="url(#bg-bills)" />
               <rect class="bg-fill-top" x="32" width="236" height="2" fill="var(--primary)" />
               <g class="bg-drops" aria-hidden="true"></g>
             </g>
-            <!-- glass sphere: body tint, reflection, rim -->
+            {/* glass sphere: body tint, reflection, rim */}
             <circle cx="150" cy="270" r="118" fill="url(#bg-glass-grad)" class="bg-glass" />
             <ellipse cx="112" cy="222" rx="44" ry="28" class="bg-glass-shine" />
             <circle cx="150" cy="270" r="118" class="bg-glass-rim" />
@@ -182,23 +245,256 @@ const hostOf = (u) => {
         </svg>
       </div>
 
+      {/* RULE 2 naming: this gross number is the SPONSORSHIP POOL; the prize
+          fund (what winners split) is defined by the canonical sentence. */}
       <div class="bg-pot-readout">
-        <span class="bg-pot-label">prize pool</span>
+        <span class="bg-pot-label">sponsorship pool · funded by sponsor bids</span>
         <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
       </div>
     </section>
+    )}
 
-    <!-- Countdown — below the pot so it doesn't fight the visual -->
-    <section class="bg-countdown" data-countdown data-target={String(startAt)} aria-label="Countdown to the first game">
-      <span class="bg-cd-lead">the first game opens</span>
-      <span class="bg-cd-row">
-        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-days>{cd.days}</b><span class="bg-cd-unit">d</span></span>
-        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-hours>{cd.hours}</b><span class="bg-cd-unit">h</span></span>
-        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-mins>{cd.minutes}</b><span class="bg-cd-unit">m</span></span>
-        <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-secs>{cd.seconds}</b><span class="bg-cd-unit">s</span></span>
-      </span>
-      <span class="bg-cd-when">september 1 · midnight new york</span>
-    </section>
+    {/* Game phase: the headline stat strip — pool, clock, entries as one row
+        of big numerals styled on the pot treatment. It carries the countdown
+        data attrs (client tick + reload-at-zero work unchanged) and the pot
+        poll updates [data-pot-amount] here. Pre-game keeps the countdown. */}
+    {started ? (
+      <section class="bg-statgrid" data-countdown data-cd-pad data-target={String(cdTarget)} aria-label="Sponsorship pool, time remaining and entries">
+        <div class="bg-sg-cell">
+          <span class="bg-sg-label">sponsorship pool</span>
+          <span class="bg-sg-num bg-sg-money" data-pot-amount data-pot-cents={potCents}>{usd(potCents)}</span>
+          <span class="bg-sg-sub">funded by sponsor bids</span>
+        </div>
+        <div class="bg-sg-cell">
+          <span class="bg-sg-label">the game ends in</span>
+          <span class="bg-sg-num bg-sg-cd">
+            <b data-cd-days>{pad2(cd.days)}</b><i>d</i>
+            <b data-cd-hours>{pad2(cd.hours)}</b><i>h</i>
+            <b data-cd-mins>{pad2(cd.minutes)}</b><i>m</i>
+            <span class="bg-sg-sec" data-cd-sec-cell hidden={!showSeconds}><b data-cd-secs>{pad2(cd.seconds)}</b><i>s</i></span>
+          </span>
+          <span class="bg-sg-sub">september 30 · midnight new york</span>
+        </div>
+        <div class="bg-sg-cell">
+          <span class="bg-sg-label">entries</span>
+          <span class="bg-sg-num">{entryCount}</span>
+          <span class="bg-sg-sub">free · one per person or team</span>
+        </div>
+        {/* one caption row under the strip: the three trust facts, in the
+            strip's own small-caps mono voice (operator wording) */}
+        <p class="bg-strip-caption">free entry · judged by a panel · sponsors can’t win prizes</p>
+      </section>
+    ) : (
+      <section class="bg-countdown" data-countdown data-target={String(cdTarget)} aria-label="Countdown to the first game">
+        <span class="bg-cd-lead">the first game opens</span>
+        <span class="bg-cd-row">
+          <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-days>{cd.days}</b><span class="bg-cd-unit">d</span></span>
+          <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-hours>{cd.hours}</b><span class="bg-cd-unit">h</span></span>
+          <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-mins>{cd.minutes}</b><span class="bg-cd-unit">m</span></span>
+          <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-secs>{cd.seconds}</b><span class="bg-cd-unit">s</span></span>
+        </span>
+        <span class="bg-cd-when">september 1 · midnight new york</span>
+      </section>
+    )}
+
+    {/* ---------- GAME PHASE: the entry form, front and centre ---------- */}
+    {started && (<>
+      <section class="bg-enter" id="enter" aria-label="Enter the games">
+        {/* The entry count lives in the stat strip above — one number, one place. */}
+        <div class="list-head bg-list-head">
+          <h2>enter the games</h2>
+        </div>
+        {canEnter ? (
+          <form class="bg-enter-form" method="post" action="/api/thebuildgames/enter" data-entry-form>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            <div class="bg-enter-row">
+              <label>
+                <span>your name</span>
+                <input type="text" name="name" required maxlength={NAME_MAX} placeholder="ada lovelace" />
+              </label>
+              <label>
+                <span>handle · optional</span>
+                {/* fixed @ adornment: always visible, never typed — the
+                    server strips a pasted leading @ anyway (cleanHandle) */}
+                <span class="bg-handle-wrap">
+                  <span class="bg-handle-at" aria-hidden="true">@</span>
+                  <input type="text" name="handle" maxlength="41" placeholder="you" />
+                </span>
+              </label>
+            </div>
+            <label>
+              <span>demo url</span>
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="demo_url" required maxlength="300" placeholder="your-build.app" />
+              <span class="bg-enter-hint">a public URL anyone can open</span>
+            </label>
+            <label>
+              <span>github repo</span>
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="repo_url" required maxlength="300" placeholder="github.com/you/your-build" />
+              <span class="bg-enter-hint">public repo · the commit history has to show the work happened inside the window</span>
+            </label>
+            <label>
+              <span>what you built · optional, up to {BLURB_MAX} characters</span>
+              <textarea name="blurb" maxlength={BLURB_MAX} rows="2" placeholder="one or two lines"></textarea>
+            </label>
+            <label>
+              <span>email</span>
+              <input type="email" name="email" required maxlength="254" placeholder="you@wherever.dev" />
+            </label>
+            <label class="bg-enter-optin">
+              <input type="checkbox" name="newsletter_optin" value="1" />
+              <span>email me the results and winners</span>
+            </label>
+            {/* REQUIRED acceptance (operator rule 3): unchecked by default,
+                must tick to submit, enforced server-side too. Separate from
+                the optional newsletter box above. */}
+            <label class="bg-enter-optin bg-enter-accept">
+              <input type="checkbox" name="accept_terms" value="1" required />
+              <span>
+                {/* _blank: a same-tab hop to the terms ate a half-filled
+                    entry (operator report) — reference links inside the
+                    form never navigate this tab */}
+                I accept <a href="/thebuildgames/terms" target="_blank" rel="noopener">the Build Games terms</a>, including how
+                the prize fund works: 100% of the sponsorship money, less third-party payment
+                processing fees, and none of it goes to the operator.
+              </span>
+            </label>
+            <div class="bg-enter-actions">
+              <button class="btn primary" type="submit">submit your entry</button>
+              <span class="bg-enter-note">free · no account · one entry per person or team</span>
+            </div>
+            <p class="bg-bid-err" data-entry-err hidden></p>
+          </form>
+        ) : (
+          <p class="bg-enter-closed">the build window has closed · entries are locked for judging.</p>
+        )}
+      </section>
+
+      {/* THE MONEY, PLAINLY — set as a RECEIPT (operator direction): dashed
+          till-rules top and bottom, a four-line dot-leader ledger, then the
+          canonical sentence verbatim. No card chrome; the ledger IS the
+          design. The only dollar figure is the $0, and it's green. */}
+      <section class="bg-money" aria-label="How the money works">
+        <dl class="bg-money-ledger">
+          <div class="bg-ml-row">
+            <dt>sponsorship pool</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>100%</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>payment processing</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>-fees</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>our cut</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd class="bg-ml-zero">$0</dd>
+          </div>
+          <div class="bg-ml-row">
+            <dt>to builders</dt>
+            <span class="bg-ml-leader" aria-hidden="true"></span>
+            <dd>the rest</dd>
+          </div>
+        </dl>
+        <p class="bg-money-line">{MONEY_SENTENCE}</p>
+        <p class="bg-money-line">Sponsors buy visibility, not victory: a sponsorship can never win a prize.</p>
+      </section>
+
+      <section class="bg-cats" aria-label="Prize categories">
+        <div class="list-head bg-list-head">
+          <h2>three categories</h2>
+          <span class="note">each takes a third of the prize fund · one winner each</span>
+        </div>
+        {/* A dl, not a ul: this is a feature list (titles + descriptions).
+            The share is stated in WORDS, never as fund÷3 dollars: the big
+            number is the gross sponsorship pool, so a computed per-category
+            figure would overstate what a winner receives. Each tile carries
+            its published judging basis (operator directive). */}
+        <dl class="bg-cat-tiles">
+          {CATEGORIES.map((c, i) => (
+            <div class="bg-cat">
+              <dt class="bg-cat-head">
+                <span class="bg-cat-n">{i + 1}</span>
+                <b class="bg-cat-name">{c.name}</b>
+              </dt>
+              <dd class="bg-cat-line">{c.line}</dd>
+              <dd class="bg-cat-judged"><b>judged on:</b> {c.judged}</dd>
+              <dd class="bg-cat-share">a third of the prize fund</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="bg-cats-note">Judges score every category against these criteria. Their decision is final.</p>
+      </section>
+
+      <section class="bg-judges" aria-label="The judges">
+        <div class="list-head bg-list-head">
+          <h2>the judges</h2>
+          <span class="note">{JUDGES_NOTE}</span>
+        </div>
+        <ul class="bg-judge-row" role="list">
+          {/* Name first, @handle secondary beneath in muted small type
+              (operator punch list, Aug 31). The name carries the link. */}
+          {JUDGES.map((j) => (
+            <li class="bg-judge">
+              <img class="bg-judge-img" src={j.img} alt="" width="96" height="96" loading="lazy" />
+              <a class="bg-judge-name" href={j.url} target="_blank" rel="noopener">{j.name}</a>
+              <span class="bg-judge-handle">@{j.handle}</span>
+              <p class="bg-judge-bio">{j.bio}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* The rules join the comprehension cluster (design round 2): hero →
+          form → categories → judges → rules → who-gets-what, then the
+          sponsor surfaces. Ten numbered single-sentence lines, each
+          answering a real confusion (operator's wording). */}
+      <section class="bg-rules" aria-label="The rules">
+        <div class="list-head bg-list-head bg-rules-head">
+          <h2>the rules</h2>
+        </div>
+        <ol class="bg-rules-list">
+          <li>Sponsors cannot win prizes.</li>
+          <li>Winners are picked by judges, not by sponsor rank.</li>
+          <li>3 winners, one per category.</li>
+          <li>Entry is free. This is a judged competition, not a raffle.</li>
+          <li>Build within the window; AI tools expected.</li>
+          <li>Public demo + public repo required.</li>
+          <li>One entry per person or team.</li>
+          <li>You keep full ownership of what you build.</li>
+          <li>Winners are verified before payout.</li>
+          <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
+        </ol>
+        <p class="bg-rules-fine">
+          winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,
+          no money attached · plain-english version for builders:{' '}
+          <a href="/thebuildgames/builders">how it works</a>
+        </p>
+      </section>
+
+      {/* Who gets what — the two sides of the money, side by side. The fee
+          line is phrased as TIMING (fees come off at payout): the pot number
+          on this page is gross and must never read as already-net. */}
+      <section class="bg-split" aria-label="What sponsors get and what builders get">
+        <div class="bg-split-col">
+          <h3>what builders get</h3>
+          <p>
+            the prize fund: the sponsorship pool less payment processing fees, split
+            evenly across the three categories, one winner each.
+          </p>
+        </div>
+        <div class="bg-split-col">
+          <h3>what sponsors get</h3>
+          <p>
+            visibility. a row on the board, the podium for the top three, and the
+            link. sponsors never judge and can never win a prize.
+          </p>
+        </div>
+      </section>
+    </>)}
 
     <!-- The buy button, where a buyer actually is: straight under the clock,
          above the board. Scrolling to the bottom to find out how to sponsor
@@ -215,6 +511,7 @@ const hostOf = (u) => {
           data-open-rank={String(openRank)}
           aria-label="Take a spot on the board"
         >
+          {started && <p class="bg-claim-eyebrow">sponsors · you buy visibility, not victory</p>}
           <p class="bg-claim-head">
             <span class="bg-claim-word">take spot</span>
             <span class="bg-stepper">
@@ -259,14 +556,42 @@ const hostOf = (u) => {
       )
     }
 
-    <!-- Leaderboard -->
+    <!-- Leaderboard: in game phase the top 3 stand on a podium and the list
+         continues from #4; before the flip it's the flat ranked list. -->
     <section class="bg-board">
       <div class="list-head bg-list-head">
         <h2>the sponsors</h2>
+        {started && <span class="note">they fund the pool · they don't judge</span>}
       </div>
 
+      {started && podium.length > 0 && (
+        <ol class="bg-podium" role="list">
+          {podium.map((s, i) => (
+            <li class:list={['bg-pod', `bg-pod-${i + 1}`]}>
+              <span class="bg-pod-rank">{i + 1}</span>
+              <span class="bg-pod-logo">
+                {s.icon_url ? (
+                  <img src={s.icon_url} alt="" width="56" height="56" loading="lazy" referrerpolicy="no-referrer" />
+                ) : faviconUrl(s.link) ? (
+                  <img src={faviconUrl(s.link)} alt="" width="56" height="56" loading="lazy" referrerpolicy="no-referrer" />
+                ) : (
+                  <span class="bg-monogram">{monogram(s.name ?? hostOf(s.link) ?? displayName(s))}</span>
+                )}
+              </span>
+              <span class="bg-pod-name">
+                <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>
+                  {s.name ?? hostOf(s.link) ?? displayName(s)}
+                </a>
+              </span>
+              {s.tagline && <span class="bg-pod-tagline">{s.tagline}</span>}
+              <span class="bg-pod-amount">{usd(s.cleared_total)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
       {
-        ranked.length > 0 ? (
+        pageRows.length > 0 ? (
           <ol class="bg-rows">
             {pageRows.map((s, i) => (<>
               <li class:list={['bg-row', { lead: rankOf(i) === 1, p2: rankOf(i) === 2, p3: rankOf(i) === 3 }]}>
@@ -298,9 +623,9 @@ const hostOf = (u) => {
               )}
             </>))}
           </ol>
-        ) : (
+        ) : ranked.length === 0 ? (
           <p class="bg-empty">no sponsors yet · the first bid starts the pool.</p>
-        )
+        ) : null
       }
 
       {totalPages > 1 && (
@@ -393,7 +718,7 @@ const hostOf = (u) => {
             <div class="bg-bid-actions">
               <button class="btn primary" type="submit">place bid</button>
               <span class="bg-bid-note">
-                it lists once payment clears · by bidding you agree to the
+                it lists once payment clears · by bidding you agree to the{' '}
                 <a href="/thebuildgames/terms">terms</a>
               </span>
             </div>
@@ -410,9 +735,11 @@ const hostOf = (u) => {
          placement can still point somewhere it shouldn't, and "no route to
          tell us" is not a defensible position. One quiet line, out of the
          way of the board. -->
+    {/* Astro collapses the whitespace between a text line and an <a> on the
+        next line — the explicit {' '} separators are load-bearing. */}
     <p class="bg-terms-foot">
-      <a href="/thebuildgames/builders">for the builders</a> · free skill-judged entry · independent judging ·
-      <a href="/thebuildgames/terms">the Build Games terms</a> ·
+      <a href="/thebuildgames/builders">for the builders</a> · free skill-judged entry · independent judging ·{' '}
+      <a href="/thebuildgames/terms">the Build Games terms</a> ·{' '}
       <a href="mailto:digest@canivibecodeit.com?subject=Build%20Games%20listing%20report">report a listing</a>
     </p>
   </main>
@@ -1498,6 +1825,823 @@ const hostOf = (u) => {
       overflow: hidden;
       font-size: 14px;
       line-height: 1.25;
+    }
+  }
+
+  /* ═══════════ GAME PHASE (post-midnight layout) ═══════════ */
+
+  /* The theme takes the stage (orb gone): display treatment under the
+     lockup, then the quiet idea pill, then the clarity paragraphs. */
+  .bg-theme {
+    margin-top: 16px;
+    margin-inline: auto;
+    max-width: 30ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--primary);
+    text-wrap: balance;
+  }
+
+  .bg-theme-pill {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font: 12px var(--font-mono);
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .bg-theme-pill:hover {
+    color: var(--fg);
+    border-color: var(--muted);
+  }
+
+  /* ---------- headline stat strip (pool · clock · entries) ---------- */
+  .bg-statgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 900px;
+    margin-inline: auto;
+    padding-top: 20px;
+    text-align: center;
+  }
+
+  .bg-sg-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 18px;
+  }
+
+  .bg-sg-cell + .bg-sg-cell {
+    border-left: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bg-sg-label {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bg-sg-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-sg-money {
+    color: var(--primary);
+  }
+
+  /* countdown numerals: tabular + reserved width so the tick never jitters */
+  .bg-sg-cd {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .bg-sg-cd b {
+    font-weight: 700;
+    min-width: 2ch;
+    text-align: right;
+  }
+
+  .bg-sg-cd i {
+    font: 400 12px var(--font-mono);
+    font-style: normal;
+    color: var(--muted);
+    padding-right: 6px;
+  }
+
+  .bg-sg-cd i:last-child {
+    padding-right: 0;
+  }
+
+  /* the seconds segment appears only inside the final 24 hours */
+  .bg-sg-sec {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .bg-sg-sec[hidden] {
+    display: none;
+  }
+
+  /* the caption row under the strip: full grid row, the strip's own voice */
+  .bg-strip-caption {
+    grid-column: 1 / -1;
+    padding-top: 18px;
+    text-align: center;
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  /* ---------- the money, plainly: a RECEIPT ----------
+     Dashed till-rules top and bottom, a dot-leader ledger, the canonical
+     sentence, nothing else. No card chrome — the form is the design. */
+  .bg-money {
+    max-width: 480px;
+    margin: 44px auto 0;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 1px dashed color-mix(in srgb, var(--muted) 65%, transparent);
+    border-bottom: 1px dashed color-mix(in srgb, var(--muted) 65%, transparent);
+  }
+
+  .bg-money-ledger {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
+  }
+
+  .bg-ml-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font: 13px var(--font-mono);
+  }
+
+  .bg-ml-row dt {
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .bg-ml-leader {
+    flex: 1;
+    min-width: 24px;
+    border-bottom: 1px dotted color-mix(in srgb, var(--muted) 55%, transparent);
+    transform: translateY(-3px);
+  }
+
+  .bg-ml-row dd {
+    margin: 0;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bg-ml-zero {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .bg-money-line {
+    font: 13.5px/1.7 var(--font-mono);
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  .bg-sg-sub {
+    font: 11px var(--font-mono);
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .bg-statgrid {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .bg-sg-cell {
+      padding: 14px 0;
+    }
+
+    .bg-sg-cell + .bg-sg-cell {
+      border-left: 0;
+      border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    }
+  }
+
+  /* ---------- entry form (front and centre) ---------- */
+  .bg-enter {
+    padding-top: 44px;
+  }
+
+  .bg-enter-form {
+    max-width: 640px;
+    margin: 12px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 8px 30px -18px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
+  .bg-enter-row {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 520px) {
+    .bg-enter-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .bg-enter-form label > span:first-child {
+    display: block;
+    padding-bottom: 6px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-enter-form input:not([type='checkbox']),
+  .bg-enter-form textarea {
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+    resize: vertical;
+    /* JetBrains Mono's :// ligature visually fuses the slashes while typing
+       a URL — the value is intact but reads like a slash was eaten. Inputs
+       render glyph-per-character, always. */
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
+  }
+
+  @media (max-width: 640px) {
+    .bg-enter-form input:not([type='checkbox']),
+    .bg-enter-form textarea {
+      font-size: 16px;
+    }
+  }
+
+  .bg-enter-hint {
+    display: block;
+    padding-top: 6px;
+    font: 11px var(--font-mono);
+    color: var(--muted);
+  }
+
+  /* the handle field's fixed @ prefix: pinned, muted, never interactive */
+  .bg-handle-wrap {
+    position: relative;
+    display: block;
+  }
+
+  .bg-handle-at {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font: 14px var(--font-mono);
+    color: var(--muted);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* outranks the form's own input padding rule */
+  .bg-enter-form .bg-handle-wrap input:not([type='checkbox']) {
+    padding-left: 27px;
+  }
+
+  @media (max-width: 640px) {
+    .bg-handle-at {
+      font-size: 16px;
+    }
+
+    .bg-enter-form .bg-handle-wrap input:not([type='checkbox']) {
+      padding-left: 30px;
+    }
+  }
+
+  .bg-enter-optin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  /* the required acceptance box: multi-line label, checkbox pinned to top */
+  .bg-enter-accept {
+    align-items: flex-start;
+    line-height: 1.55;
+  }
+
+  .bg-enter-accept input {
+    margin-top: 3px;
+    flex: none;
+  }
+
+  .bg-enter-accept a {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
+  .bg-enter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bg-enter-note {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-enter-closed {
+    padding: 24px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ---------- categories ---------- */
+  .bg-cats {
+    padding-top: 44px;
+  }
+
+  .bg-cat-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+    margin: 0;
+  }
+
+  .bg-cat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .bg-cat dd {
+    margin: 0;
+  }
+
+  .bg-cat-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bg-cat-n {
+    font: 800 13px var(--font-mono);
+    color: var(--primary);
+  }
+
+  .bg-cat-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .bg-cat-line {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .bg-cat-judged {
+    padding-top: 2px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* Brand kit: uppercase micro-labels carry WIDE tracking — same band as
+     the other labels on this page (0.1–0.14em). */
+  .bg-cat-judged b {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+
+  .bg-cat-share {
+    margin-top: auto;
+    padding-top: 8px;
+    font: 12px var(--font-mono);
+    color: var(--primary);
+  }
+
+  .bg-cats-note {
+    padding-top: 10px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ---------- judges ---------- */
+  .bg-judges {
+    padding-top: 44px;
+  }
+
+  .bg-judge-row {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .bg-judge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .bg-judge-img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    outline: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+    outline-offset: -1px;
+    margin-bottom: 6px;
+  }
+
+  .bg-judge-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .bg-judge-name:hover {
+    color: var(--primary);
+  }
+
+  .bg-judge-handle {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-judge-bio {
+    padding-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* ---------- claim bar demotion label ---------- */
+  .bg-claim-eyebrow {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  /* game phase: the claim bar is secondary furniture, give it its own air */
+  .bg-judges ~ .bg-claim,
+  .bg-enter ~ .bg-claim {
+    padding-top: 44px;
+  }
+
+  /* ---------- sponsor podium (#1 centre and big, #2 left, #3 right lower) ---------- */
+  .bg-podium {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    gap: 12px;
+    align-items: end;
+    padding-top: 14px;
+  }
+
+  .bg-pod {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 18px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .bg-pod:hover,
+  .bg-pod:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  .bg-pod-1 {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 26px 18px;
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary), 0 10px 34px -16px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
+  .bg-pod-2 {
+    grid-column: 1;
+    grid-row: 1;
+    transform: translateY(10px);
+  }
+
+  .bg-pod-3 {
+    grid-column: 3;
+    grid-row: 1;
+    transform: translateY(18px);
+  }
+
+  .bg-pod-rank {
+    font: 800 18px var(--font-display);
+    color: var(--muted);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-pod-1 .bg-pod-rank {
+    font-size: 28px;
+    background: linear-gradient(135deg, #ff7a68, #35d0a5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-pod-logo img,
+  .bg-pod-logo .bg-monogram {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bg-pod-1 .bg-pod-logo img,
+  .bg-pod-1 .bg-pod-logo .bg-monogram {
+    width: 60px;
+    height: 60px;
+  }
+
+  .bg-pod-name a {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--fg);
+  }
+
+  .bg-pod-1 .bg-pod-name a {
+    font-size: 18px;
+  }
+
+  /* whole card navigates, same stretched-link mechanic as the rows */
+  .bg-pod-name a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+  }
+
+  .bg-pod-name a:hover {
+    color: var(--primary);
+  }
+
+  .bg-pod-tagline {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--fg) 78%, var(--muted));
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bg-pod-amount {
+    padding-top: 4px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-pod-1 .bg-pod-amount {
+    font-size: 30px;
+  }
+
+  .bg-podium + .bg-rows {
+    padding-top: 22px;
+  }
+
+  /* ---------- rules ---------- */
+  .bg-rules {
+    padding-top: 44px;
+  }
+
+  /* centred headers over the narrow centred columns (rules, entry form) —
+     a heading hard-left of a centred card reads broken (round 2 + 3). */
+  .bg-rules-head,
+  .bg-enter .bg-list-head {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .bg-rules-list {
+    list-style: none;
+    counter-reset: bg-rule;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 8px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .bg-rules-list li {
+    position: relative;
+    padding: 10px 0 10px 34px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--fg) 88%, var(--muted));
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  }
+
+  .bg-rules-list li:last-child {
+    border-bottom: 0;
+  }
+
+  .bg-rules-list li::before {
+    counter-increment: bg-rule;
+    content: counter(bg-rule);
+    position: absolute;
+    left: 4px;
+    top: 10px;
+    font: 700 12px var(--font-mono);
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-rules-list li a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .bg-rules-list li a:hover {
+    color: var(--primary);
+  }
+
+  /* ---------- who gets what (two columns) ---------- */
+  .bg-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 44px;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .bg-split-col {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: var(--surface);
+  }
+
+  .bg-split-col h3 {
+    font: 700 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    padding-bottom: 7px;
+  }
+
+  .bg-split-col p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--fg) 82%, var(--muted));
+  }
+
+  .bg-rules-fine {
+    padding-top: 12px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-rules-fine a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bg-rules-fine a:hover {
+    color: var(--fg);
+  }
+
+  /* Game phase: ONE primary action on the page — the entry submit. Every
+     other CTA (claim bar, top-spot, full bid form, newsletter) steps down to
+     the outline style so the hierarchy is unambiguous. Pre-midnight styling
+     is untouched (the class only exists once the games run). */
+  .bg-game .bg-claim-go,
+  .bg-game .bg-cta :global(.btn.primary),
+  .bg-game .bg-top-form :global(.btn.primary),
+  .bg-game .bg-bid-form :global(.btn.primary),
+  .bg-game :global(.bgn .btn.primary) {
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    padding: 11.5px 20.5px;
+  }
+
+  .bg-game .bg-claim-go:hover,
+  .bg-game .bg-cta :global(.btn.primary:hover),
+  .bg-game .bg-top-form :global(.btn.primary:hover),
+  .bg-game .bg-bid-form :global(.btn.primary:hover),
+  .bg-game :global(.bgn .btn.primary:hover) {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
+  /* ---------- game phase, small screens ---------- */
+  @media (max-width: 640px) {
+    .bg-cat-tiles,
+    .bg-judge-row {
+      grid-template-columns: 1fr;
+    }
+
+    /* The load-bearing copy reads at 16px on a phone (typography rule:
+       body text is never smaller on mobile than desktop). */
+    .bg-money-line {
+      font-size: 16px;
+    }
+
+    .bg-rules-list li,
+    .bg-split-col p {
+      font-size: 15px;
+    }
+
+    /* podium stacks: #1 first (DOM order), full width, no stagger */
+    .bg-podium {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .bg-pod-1 {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .bg-pod-2 {
+      grid-column: 1;
+      grid-row: 2;
+      transform: none;
+    }
+
+    .bg-pod-3 {
+      grid-column: 1;
+      grid-row: 3;
+      transform: none;
+    }
+
+    .bg-enter,
+    .bg-cats,
+    .bg-judges,
+    .bg-split,
+    .bg-rules {
+      padding-top: 36px;
+    }
+
+    .bg-split {
+      grid-template-columns: 1fr;
+    }
+
+    .bg-enter-form {
+      padding: 16px;
     }
   }
 </style>

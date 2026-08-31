@@ -57,6 +57,29 @@ export function sendBgReceipt({ to, capturedCents, ref }) {
   }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
 }
 
+/* The entrant's edit link — TRANSACTIONAL, so it goes through plain
+   sendMail like the payer's receipt, never the E1 marketing caps or the
+   suppression list (an entrant who unsubscribed from the newsletter still
+   owns their entry). Abuse is bounded without caps: the duplicate-email 409
+   means at most ONE of these can ever be triggered per address, behind the
+   5/hr/IP entry rate limit. Fire-and-forget: a mail outage must not fail
+   the entry. */
+export function sendEntryEditLink({ to, editUrl }) {
+  const addr = String(to || '').trim().toLowerCase();
+  if (!addr || unmailable(addr)) return;
+  sendMail({
+    to: addr,
+    subject: 'your Build Games entry — the edit link',
+    html: brandShell(
+      `<p>You're in. Your Build Games entry is submitted.</p>`
+      + `<p>Edit your entry any time before the window closes:</p>`
+      + `<p><a href="${esc(editUrl)}">${esc(editUrl)}</a></p>`
+      + `<p style="color:#6e6e67; font-size:12px;">Keep this link private — anyone with it can edit your entry.`
+      + ` Winners are announced after judging. Questions? Reply to this email.</p>`
+    ),
+  }).catch((err) => console.error(`bg entry mail failed: ${err.message}`));
+}
+
 /* Returns true if the mail was actually handed to sendMail. */
 export async function sendSponsorMail({ to, subject, html }) {
   const addr = String(to || '').trim().toLowerCase();

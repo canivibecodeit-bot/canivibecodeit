@@ -107,7 +107,7 @@ const description = 'Finish setting up your Build Games placement.';
       <>
         <h1>payment processing</h1>
         <p class="bgd-sub">
-          Your payment is being confirmed. This usually takes a few seconds ·
+          Your payment is being confirmed. This usually takes a few seconds ·{' '}
           <a href={`/thebuildgames/details?token=${token}${sessionId ? `&session_id=${sessionId}` : ''}`}>refresh</a>.
         </p>
       </>
@@ -117,8 +117,8 @@ const description = 'Finish setting up your Build Games placement.';
       <>
         <h1>placement under review</h1>
         <p class="bgd-sub">
-          Your payment cleared and your money is in the prize pool, but the placement is
-          being reviewed before it lists. We'll be in touch if anything's needed ·
+          Your payment cleared and your money is in the sponsorship pool, but the placement is
+          being reviewed before it lists. We'll be in touch if anything's needed ·{' '}
           <a href="mailto:digest@canivibecodeit.com">digest@canivibecodeit.com</a>.
         </p>
       </>
@@ -129,7 +129,7 @@ const description = 'Finish setting up your Build Games placement.';
         <h1>top-up received</h1>
         <p class="bgd-sub">
           This payment added {usd(payment.amount_cents)} to an existing placement — its
-          name and tagline are managed by the placement's first payment.
+          name and tagline are managed by the placement's first payment.{' '}
           <a href="/thebuildgames">see the board →</a>
         </p>
       </>

@@ -5,8 +5,20 @@ import AppRow from '../components/AppRow.astro';
 import VisitorGlobe from '../components/VisitorGlobe.astro';
 import DigestCard from '../components/DigestCard.astro';
 import { allApps, appsWithAlternativesPage, topCategories, categoriesInUse } from '../lib/apps.js';
-import { voteCounts } from '../lib/db.js';
-import { buildsLive } from '../lib/flags.js';
+import { bgPotCents, voteCounts } from '../lib/db.js';
+import { buildGamesLive, buildsLive } from '../lib/flags.js';
+import { usd } from '../lib/buildgames.js';
+
+// The Build Games strip carries the LIVE pool number (0 hides the figure,
+// the link still stands). Never let a DB hiccup take the homepage down.
+let gamesPotCents = 0;
+if (buildGamesLive()) {
+  try {
+    gamesPotCents = await bgPotCents();
+  } catch {
+    gamesPotCents = 0;
+  }
+}
 
 const votes = await voteCounts();
 const apps = allApps().sort(
@@ -122,7 +134,15 @@ const jsonld = [
       <a class="chip" href="/categories">all categories →</a>
     </nav>
     {
-      buildsLive() ? (
+      buildGamesLive() ? (
+        <a class="hatch-strip games-strip" href="/thebuildgames">
+          <span class="hs-copy">
+            the build games · a month-long vibecoding hackathon, free to enter
+            {gamesPotCents > 0 ? ` · ${usd(gamesPotCents)} sponsorship pool` : ''}
+          </span>
+          <span class="hs-cta">enter the games →</span>
+        </a>
+      ) : buildsLive() ? (
         <a class="hatch-strip" href="/builds">
           <span class="hs-copy">
             new: builds · what people actually vibe coded, with the exact prompts that made it

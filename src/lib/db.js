@@ -300,6 +300,31 @@ const SCHEMA_SQLITE = `
     reason TEXT,
     created_at INTEGER NOT NULL
   );
+  /* Build Games ENTRIES (the builders, not the sponsors). Not publicly
+     listed yet — judging renders them later. edit_token authorises edits
+     token-only (same mechanic as the payment details token), UNIQUE so the
+     lookup is indexed and two entries can never share a token. */
+  CREATE TABLE IF NOT EXISTS buildgames_entries (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    handle TEXT,
+    demo_url TEXT NOT NULL,
+    repo_url TEXT NOT NULL,
+    blurb TEXT,
+    contact_email TEXT NOT NULL,
+    edit_token TEXT NOT NULL UNIQUE,
+    newsletter_optin INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'submitted',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_entries_email ON buildgames_entries (contact_email);
+  /* One counter per recommendation card (the post-entry cross-promo):
+     the outbound click is server-counted through /api/thebuildgames/rec. */
+  CREATE TABLE IF NOT EXISTS buildgames_rec_clicks (
+    rec TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 0
+  );
 `;
 
 const SCHEMA_PG = `
@@ -571,6 +596,26 @@ const SCHEMA_PG = `
     reason TEXT,
     created_at BIGINT NOT NULL
   );
+  /* Build Games ENTRIES — see the sqlite schema comment. */
+  CREATE TABLE IF NOT EXISTS buildgames_entries (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    handle TEXT,
+    demo_url TEXT NOT NULL,
+    repo_url TEXT NOT NULL,
+    blurb TEXT,
+    contact_email TEXT NOT NULL,
+    edit_token TEXT NOT NULL UNIQUE,
+    newsletter_optin INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'submitted',
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS buildgames_entries_email ON buildgames_entries (contact_email);
+  CREATE TABLE IF NOT EXISTS buildgames_rec_clicks (
+    rec TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 0
+  );
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -713,6 +758,19 @@ function bgSponsorRow(row) {
   }
   return out;
 }
+
+/* Build Games entries: writable fields for the token-authorised edit path,
+   and the BIGINT columns for the PG string→number fix. Same rule as
+   PURCHASE_FIELDS: names reach SQL as identifiers, never from a request. */
+const BG_ENTRY_FIELDS = ['name', 'handle', 'demo_url', 'repo_url', 'blurb', 'newsletter_optin', 'status', 'updated_at'];
+
+function bgEntryParts(fields) {
+  const keys = Object.keys(fields).filter((k) => BG_ENTRY_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateBgEntry: no writable fields');
+  return keys;
+}
+
+const bgEntryRow = numericRow(['created_at', 'updated_at', 'newsletter_optin']);
 
 let driver;
 
@@ -1376,6 +1434,45 @@ async function pgDriver() {
       const r = await pool.query("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')");
       return r.rows.map(bgSponsorRow);
     },
+    /* ---- Build Games entries ---- */
+    async insertBgEntry(e) {
+      await pool.query(
+        `INSERT INTO buildgames_entries (id, name, handle, demo_url, repo_url, blurb, contact_email, edit_token, newsletter_optin, status, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+        [e.id, e.name, e.handle ?? null, e.demo_url, e.repo_url, e.blurb ?? null, e.contact_email, e.edit_token, e.newsletter_optin ? 1 : 0, e.status, e.created_at, e.updated_at]
+      );
+    },
+    // Edit page: the entrant is identified by TOKEN ONLY (unique index).
+    async bgEntryByEditToken(token) {
+      const r = await pool.query('SELECT * FROM buildgames_entries WHERE edit_token = $1', [token]);
+      return bgEntryRow(r.rows[0]);
+    },
+    async bgEntryByEmail(email) {
+      const r = await pool.query('SELECT * FROM buildgames_entries WHERE contact_email = $1 LIMIT 1', [email]);
+      return bgEntryRow(r.rows[0]);
+    },
+    async bgEntryByRepo(repoUrl) {
+      const r = await pool.query('SELECT * FROM buildgames_entries WHERE repo_url = $1 LIMIT 1', [repoUrl]);
+      return bgEntryRow(r.rows[0]);
+    },
+    async updateBgEntry(id, fields) {
+      const keys = bgEntryParts(fields);
+      const r = await pool.query(
+        `UPDATE buildgames_entries SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        [id, ...keys.map((k) => fields[k])]
+      );
+      return r.rowCount;
+    },
+    async bgEntryCount() {
+      const r = await pool.query("SELECT COUNT(*) AS n FROM buildgames_entries WHERE status = 'submitted'");
+      return Number(r.rows[0].n);
+    },
+    async bgRecClick(rec) {
+      await pool.query(
+        'INSERT INTO buildgames_rec_clicks (rec, count) VALUES ($1, 1) ON CONFLICT (rec) DO UPDATE SET count = buildgames_rec_clicks.count + 1',
+        [rec]
+      );
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -1989,6 +2086,37 @@ async function sqliteDriver() {
     async bgSponsorsForRecheck() {
       return db.prepare("SELECT * FROM buildgames_sponsors WHERE status IN ('active','held')").all().map(bgSponsorRow);
     },
+    /* ---- Build Games entries ---- */
+    async insertBgEntry(e) {
+      db.prepare(
+        `INSERT INTO buildgames_entries (id, name, handle, demo_url, repo_url, blurb, contact_email, edit_token, newsletter_optin, status, created_at, updated_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+      ).run(e.id, e.name, e.handle ?? null, e.demo_url, e.repo_url, e.blurb ?? null, e.contact_email, e.edit_token, e.newsletter_optin ? 1 : 0, e.status, e.created_at, e.updated_at);
+    },
+    // Edit page: the entrant is identified by TOKEN ONLY (unique index).
+    async bgEntryByEditToken(token) {
+      return bgEntryRow(db.prepare('SELECT * FROM buildgames_entries WHERE edit_token = ?').get(token));
+    },
+    async bgEntryByEmail(email) {
+      return bgEntryRow(db.prepare('SELECT * FROM buildgames_entries WHERE contact_email = ? LIMIT 1').get(email));
+    },
+    async bgEntryByRepo(repoUrl) {
+      return bgEntryRow(db.prepare('SELECT * FROM buildgames_entries WHERE repo_url = ? LIMIT 1').get(repoUrl));
+    },
+    async updateBgEntry(id, fields) {
+      const keys = bgEntryParts(fields);
+      return db
+        .prepare(`UPDATE buildgames_entries SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async bgEntryCount() {
+      return db.prepare("SELECT COUNT(*) AS n FROM buildgames_entries WHERE status = 'submitted'").get().n;
+    },
+    async bgRecClick(rec) {
+      db.prepare(
+        'INSERT INTO buildgames_rec_clicks (rec, count) VALUES (?, 1) ON CONFLICT(rec) DO UPDATE SET count = count + 1'
+      ).run(rec);
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -2276,6 +2404,15 @@ export async function bgBlockHost(host, reason, ts = Date.now()) { return (await
 export async function bgUnblockHost(host) { return (await getDriver()).bgUnblockHost(host); }
 export async function bgIsHostBlocked(host) { return (await getDriver()).bgIsHostBlocked(host); }
 export async function bgSponsorsForRecheck() { return (await getDriver()).bgSponsorsForRecheck(); }
+
+/* ---- Build Games entries ---- */
+export async function insertBgEntry(e) { return (await getDriver()).insertBgEntry(e); }
+export async function bgEntryByEditToken(token) { return (await getDriver()).bgEntryByEditToken(token); }
+export async function bgEntryByEmail(email) { return (await getDriver()).bgEntryByEmail(email); }
+export async function bgEntryByRepo(repoUrl) { return (await getDriver()).bgEntryByRepo(repoUrl); }
+export async function updateBgEntry(id, fields) { return (await getDriver()).updateBgEntry(id, { ...fields, updated_at: Date.now() }); }
+export async function bgEntryCount() { return (await getDriver()).bgEntryCount(); }
+export async function bgRecClick(rec) { return (await getDriver()).bgRecClick(rec); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });

@@ -31,6 +31,90 @@ const envTime = (name) => {
 // Countdown target: New York local midnight, Sept 1 (EDT = 04:00 UTC).
 export const gamesStartAt = () => envTime('BUILDGAMES_START_AT') ?? Date.UTC(2026, 8, 1, 4, 0, 0);
 
+// Build window close: New York local midnight, Oct 1 (EDT = 04:00 UTC).
+export const gamesEndAt = () => envTime('BUILDGAMES_END_AT') ?? Date.UTC(2026, 9, 1, 4, 0, 0);
+
+/* The midnight flip. The page renders the pre-game (sponsor hype) layout
+   until the start moment PASSES, then the game layout — a server-side time
+   check per request, no cron, no manual flip. The client countdown reloads
+   the page at zero, so open tabs flip themselves too. */
+export const gamesStarted = (now = Date.now()) => now >= gamesStartAt();
+
+// Entries are accepted only inside the build window.
+export const entriesOpen = (now = Date.now()) => now >= gamesStartAt() && now < gamesEndAt();
+
+/* ---------- game copy — THE editable block ----------
+   Operator: final wording lands here and nowhere else. Every string below is
+   a placeholder until the theme/category/judging copy is decided; the page
+   renders whatever these say. Judge bios arrive from research — swap the
+   BIO_1/2/3 placeholders for one-liners. */
+
+// Winners announcement date (operator decision, changeable) — ONE string.
+// Announcement only: no payout-date promise anywhere, verification timing
+// lives in the terms.
+export const ANNOUNCE_BY = 'October 15';
+
+export const THEME_ONE_LINER = 'Build a working replacement for something people pay for.';
+
+// Sub-line under the theme; the whole line links to / (the death list).
+export const THEME_SUB = 'Need an idea? The death list is 1,100 of them.';
+
+/* THE CANONICAL MONEY SENTENCE (operator's exact wording, Aug 31). Used
+   VERBATIM wherever the money is explained — hero, builders page, submission
+   form, meta descriptions. Naming scheme it anchors: the big on-screen gross
+   number is the SPONSORSHIP POOL; the PRIZE FUND is what this sentence
+   defines. ⛔ The words 'admin fees'/'administration costs' are BANNED on
+   every public surface. */
+export const MONEY_SENTENCE =
+  'The prize fund is 100% of the sponsorship money, less any third-party payment processing fees (such as Stripe), and none of the sponsorship money goes to us.';
+
+// Three prize categories — the fund splits evenly, one winner each. Each
+// carries its published judging basis (rendered on the tile).
+export const CATEGORIES = [
+  {
+    name: 'Best Replacement',
+    line: 'the build most likely to make someone cancel a real subscription',
+    judged: "does it actually replace the paid product's core job, and would a real user switch?",
+  },
+  {
+    name: 'Most Creative',
+    line: 'the build nobody saw coming',
+    judged: 'originality of the idea and of how it was built.',
+  },
+  {
+    name: 'Most Polished',
+    line: 'the one that feels like a finished product, not a demo',
+    judged: 'design, reliability, and completeness of the shipped thing.',
+  },
+];
+
+// The judges' panel — FINAL copy (operator punch list, Aug 31): NAME first
+// (first names only where that is all the persona uses), @handle secondary
+// in muted small type beneath, bios as sent, and NO disclosure line under
+// any judge (operator's standing decision). Portraits are self-hosted under
+// public/thebuildgames/judges/ (never hotlinked).
+export const JUDGES = [
+  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'founder of TypingMind and DevUtils' },
+  { name: 'Dudu', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'founder of Toolfolio and Shotbase' },
+  { name: 'Andrej', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'founder of CRHQ and TranscriptAPI' },
+];
+
+// The note beside the judges heading. Heading stays 'the judges'; describing
+// the panel as judging independently is operator-cleared (Aug 31 — the judge
+// @scheemunai and the board sponsor AndreBaltazar are different people, no
+// sponsor-judge conflict exists).
+export const JUDGES_NOTE = 'judging independently on published criteria · sponsors never judge';
+
+// Post-entry recommendation card (cross-promo). One card, one outbound link,
+// server-counted via /api/thebuildgames/rec. URL VERIFIED (parent, Aug 31):
+// Ruben's actual 'How to AI' Substack — howtoai.com is a stranger's site and
+// must never come back.
+export const HOWTOAI_REC = {
+  name: 'How to AI',
+  url: 'https://rubenhassid.substack.com',
+  line: 'The newsletter we actually read to get better at building with AI.',
+};
+
 // Public bidding accepts submissions only when this is on. Off = the board
 // still renders (admin can seed) but the CTA reads "opening soon" and the
 // submit endpoint 409s — the slip-protection state for launch morning.
@@ -70,6 +154,7 @@ const ID_ALPHABET = 'abcdefghjkmnpqrstvwxyz23456789';
 const mkId = (prefix) => `${prefix}_${[...randomBytes(10)].map((b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('')}`;
 export const newSponsorId = () => mkId('bgs');
 export const newPaymentId = () => mkId('bgp');
+export const newEntryId = () => mkId('bge');
 export const SPONSOR_ID_RE = /^bgs_[a-z2-9]{10}$/;
 export const PAYMENT_ID_RE = /^bgp_[a-z2-9]{10}$/;
 
@@ -162,6 +247,45 @@ export function cleanTagline(raw) {
   if (t.length < 2) return null;
   if (URL_ISH.test(t)) return null;
   return t;
+}
+
+/* ---------- entry input hygiene ---------- */
+
+// Entry blurb: same hygiene as taglines (markup chars, bidi/zero-width glyphs,
+// whitespace collapse, length cap) with its own cap. URLs are allowed — the
+// blurb renders only as escaped TEXT, and the entry's links live in their own
+// screened fields.
+export const BLURB_MAX = 200;
+
+export function cleanBlurb(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw
+    .replace(/[<>]/g, '')
+    .replace(UNSAFE_GLYPHS, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, BLURB_MAX);
+  return t.length >= 2 ? t : null;
+}
+
+// Builder handle (optional): an @-handle-ish string, leading @ folded off.
+export function cleanHandle(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw.trim().replace(/^@/, '');
+  return /^[a-zA-Z0-9_.-]{2,40}$/.test(t) ? t : null;
+}
+
+/* Entry repo URL: exactly https://github.com/<owner>/<repo>. Takes the URL
+   object parsePublicUrl produced; returns the canonical string or null.
+   The commit history is the build-window evidence, so only real GitHub repos
+   qualify — no pages sites, no gists, no deeper paths. */
+export function parseGithubRepo(u) {
+  if (!u) return null;
+  const host = u.hostname.toLowerCase().replace(/^www\./, '');
+  if (host !== 'github.com') return null;
+  const m = u.pathname.match(/^\/([A-Za-z0-9][A-Za-z0-9-]{0,38})\/([A-Za-z0-9._-]{1,100}?)(?:\.git)?\/?$/);
+  if (!m || m[2] === '.' || m[2] === '..') return null;
+  return `https://github.com/${m[1]}/${m[2]}`;
 }
 
 /* ---------- ranking (rows carry cleared_total + first_cleared_at from SQL) ---------- */

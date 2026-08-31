@@ -26,20 +26,25 @@
   const fmtUsd = (cents) => '$' + Math.round(cents / 100).toLocaleString('en-US');
 
   const init = () => {
-    /* ---------- countdown (seconds, tabular, no jitter) ---------- */
+    /* ---------- countdown (tabular, no jitter) ----------
+       data-cd-pad = zero-padded two-digit segments (the game-ends clock);
+       [data-cd-sec-cell] = seconds hidden until the final 24 hours. */
     const cd = claim($('[data-countdown]'));
     if (cd) {
       const target = Number(cd.dataset.target);
+      const fmt = 'cdPad' in cd.dataset ? (n) => String(n).padStart(2, '0') : (n) => n;
       const d = $('[data-cd-days]', cd);
       const h = $('[data-cd-hours]', cd);
       const m = $('[data-cd-mins]', cd);
       const sec = $('[data-cd-secs]', cd);
+      const secCell = $('[data-cd-sec-cell]', cd);
       const tick = () => {
         const s = Math.max(0, Math.floor((target - Date.now()) / 1000));
-        if (d) d.textContent = Math.floor(s / 86400);
-        if (h) h.textContent = Math.floor((s % 86400) / 3600);
-        if (m) m.textContent = Math.floor((s % 3600) / 60);
-        if (sec) sec.textContent = s % 60;
+        if (d) d.textContent = fmt(Math.floor(s / 86400));
+        if (h) h.textContent = fmt(Math.floor((s % 86400) / 3600));
+        if (m) m.textContent = fmt(Math.floor((s % 3600) / 60));
+        if (sec) sec.textContent = fmt(s % 60);
+        if (secCell) secCell.hidden = s >= 86400;
         if (s === 0 && !cd.dataset.done) {
           cd.dataset.done = '1';
           setTimeout(() => location.reload(), 1500);
@@ -49,18 +54,22 @@
       setInterval(tick, 1000);
     }
 
-    /* ---------- the pot: count-up on load, fill + drops on increase ---------- */
-    const stage = claim($('[data-pot]'));
-    if (stage) {
-      const amountEl = $('[data-pot-amount]');
+    /* ---------- the pool number: count-up on load + live poll ----------
+       The number ([data-pot-amount]) exists in BOTH phases (pre-game orb
+       readout, game-phase stat strip); the orb ([data-pot]) is pre-game
+       only, so every orb behaviour is guarded and the poll runs without it. */
+    const amountEl = claim($('[data-pot-amount]'));
+    if (amountEl) {
+      const stage = $('[data-pot]');
       const fillEls = [$('.bg-fill'), $('.bg-fill-top')].filter(Boolean);
-      const drops = $('.bg-drops', stage);
+      const drops = stage ? $('.bg-drops', stage) : null;
       // The server computes the asymptotic fill level (uncapped, never 100%);
       // the JS just applies it and re-applies on poll. No goal math here.
-      let potCents = Number(stage.dataset.potCents) || 0;
-      let fillTarget = Number(stage.dataset.fill) || 0;
+      let potCents = Number(stage?.dataset.potCents ?? amountEl.dataset.potCents) || 0;
+      let fillTarget = Number(stage?.dataset.fill) || 0;
 
       const setFill = (frac) => {
+        if (!stage) return;
         const f = Math.max(0, Math.min(1, frac));
         stage.style.setProperty('--fill', f.toFixed(4));
         fillEls.forEach((el) => el.style.setProperty('--fill', f.toFixed(4)));
@@ -109,11 +118,12 @@
 
       // A poke rains a few bills — satisfying, free, and honest (the total
       // never changes). Reduced-motion users get stillness via rain()'s gate.
-      stage.addEventListener('click', () => rain(4));
+      if (stage) stage.addEventListener('click', () => rain(4));
 
-      // Poll: when the pot grows, raise the fill, count the figure up, rain bills.
+      // Poll: when the pot grows, count the figure up (and, orb present,
+      // raise the fill and rain bills).
       setInterval(async () => {
-        if (document.hidden || !document.contains(stage)) return;
+        if (document.hidden || !document.contains(amountEl)) return;
         try {
           const res = await fetch('/api/thebuildgames/stats');
           if (!res.ok) return;
@@ -240,6 +250,81 @@
         }
       });
     });
+
+    /* ---------- entry form (game phase): submit, then to the edit page ---------- */
+    const entryForm = claim($('[data-entry-form]'));
+    if (entryForm) {
+      /* Draft persistence: a mid-fill navigation (terms link, back button,
+         mobile tab discard) must never eat a half-filled entry. Text fields
+         only, sessionStorage only (per-tab, dies with the session), cleared
+         on successful submit. */
+      const DRAFT_KEY = 'bg-entry-draft';
+      const DRAFT_FIELDS = ['name', 'handle', 'demo_url', 'repo_url', 'blurb', 'email'];
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
+        DRAFT_FIELDS.forEach((f) => {
+          const el = entryForm.elements[f];
+          if (el && !el.value && typeof saved[f] === 'string') el.value = saved[f];
+        });
+      } catch {
+        /* a broken draft never blocks the form */
+      }
+      entryForm.addEventListener('input', (e) => {
+        if (!DRAFT_FIELDS.includes(e.target?.name)) return;
+        const draft = {};
+        DRAFT_FIELDS.forEach((f) => {
+          const el = entryForm.elements[f];
+          if (el) draft[f] = el.value;
+        });
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {
+          /* storage full/blocked: the form still works, just no belt */
+        }
+      });
+
+      entryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = $('button[type="submit"]', entryForm);
+        const label = btn.textContent;
+        const err = $('[data-entry-err]', entryForm);
+        err.hidden = true;
+        btn.disabled = true;
+        btn.textContent = 'submitting…';
+        try {
+          const data = Object.fromEntries(new FormData(entryForm).entries());
+          const res = await fetch(entryForm.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            err.textContent = out.error || 'something broke — try again';
+            err.hidden = false;
+            return;
+          }
+          if (out.token) {
+            try {
+              sessionStorage.removeItem(DRAFT_KEY);
+            } catch {
+              /* draft cleanup is best-effort */
+            }
+            // The success screen IS the edit page (private, noindex).
+            window.location.href = '/thebuildgames/entry?token=' + encodeURIComponent(out.token) + '&submitted=1';
+            return;
+          }
+          toast('entry received');
+          entryForm.reset();
+        } catch {
+          err.textContent = 'network hiccup — try again';
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
+      });
+    }
 
     /* ---------- the claim bar: pick a spot, see its price ---------- */
     // Two controls over one number. `cents` is the state; the spot label is
