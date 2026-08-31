@@ -89,9 +89,9 @@ export const CATEGORIES = [
 // any judge (operator's standing decision). Portraits are self-hosted under
 // public/thebuildgames/judges/ (never hotlinked).
 export const JUDGES = [
-  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'maker of TypingMind and DevUtils' },
-  { name: 'Dudu', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'designer and maker of Toolfolio and Shotbase' },
-  { name: 'Andrej', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'founder of CRHQ and maker of TranscriptAPI' },
+  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'founder of TypingMind and DevUtils' },
+  { name: 'Dudu', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'founder of Toolfolio and Shotbase' },
+  { name: 'Andrej', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'founder of CRHQ and TranscriptAPI' },
 ];
 
 // The note beside the judges heading. Heading stays 'the judges'; describing
