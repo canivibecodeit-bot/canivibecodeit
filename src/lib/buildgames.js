@@ -101,10 +101,12 @@ export const JUDGES = [
 export const JUDGES_NOTE = 'judging independently on published criteria · sponsors never judge';
 
 // Post-entry recommendation card (cross-promo). One card, one outbound link,
-// server-counted via /api/thebuildgames/rec. Operator: confirm the URL.
+// server-counted via /api/thebuildgames/rec. URL VERIFIED (parent, Aug 31):
+// Ruben's actual 'How to AI' Substack — howtoai.com is a stranger's site and
+// must never come back.
 export const HOWTOAI_REC = {
   name: 'How to AI',
-  url: 'https://howtoai.com',
+  url: 'https://rubenhassid.substack.com',
   line: 'The newsletter we actually read to get better at building with AI.',
 };
 
