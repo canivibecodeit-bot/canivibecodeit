@@ -262,16 +262,17 @@ async function refreshGlobe() {
 
   try {
     const [pinRows, feed] = await Promise.all([
-      // One query carries both the pins (60-minute window) and the live count
-      // (5-minute sub-window). Summing per-country distincts can double-count
-      // a person who hops countries, and geo-less events drop out entirely;
-      // both effects are negligible and the pins need the geo split anyway.
+      // One query carries both the pins and the live count, both on the same
+      // sliding 60-minute window (the count matches the presence pill's hour
+      // window). Summing per-country distincts can double-count a person who
+      // hops countries, and geo-less events drop out entirely; both effects
+      // are negligible and the pins need the geo split anyway.
       hogql(
         `
         SELECT properties.$geoip_country_code AS c,
                countDistinct(distinct_id) AS n,
                countDistinctIf(distinct_id,
-                 timestamp > now() - INTERVAL 5 MINUTE) AS live,
+                 timestamp > now() - INTERVAL 60 MINUTE) AS live,
                toUnixTimestamp(max(timestamp)) AS latest
         FROM events
         WHERE ${SITE} AND event = '$pageview'
