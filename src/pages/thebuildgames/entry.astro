@@ -99,11 +99,15 @@ const description = 'Your Build Games entry.';
           <aside class="bge-rec">
             <span class="bge-rec-label">while you build · a recommendation</span>
             {/* Reciprocal partner arrangement: sponsored+nofollow so no link
-                equity passes through the 302. */}
+                equity passes through the 302. The whole card is the one
+                click target; the grid preview is the newsletter itself. */}
             <a class="bge-rec-card" href={`/api/thebuildgames/rec?to=howtoai`} target="_blank" rel="sponsored nofollow noopener">
-              <span class="bge-rec-name">{HOWTOAI_REC.name}</span>
-              <span class="bge-rec-line">{HOWTOAI_REC.line}</span>
-              <span class="bge-rec-go">take a look →</span>
+              <img class="bge-rec-img" src="/thebuildgames/howtoai-grid.webp" alt="How to AI post grid" width="640" height="490" loading="lazy" />
+              <span class="bge-rec-body">
+                <span class="bge-rec-name">{HOWTOAI_REC.name}</span>
+                <span class="bge-rec-line">{HOWTOAI_REC.line}</span>
+                <span class="bge-rec-go">take a look →</span>
+              </span>
             </a>
           </aside>
         )}
@@ -312,19 +316,34 @@ const description = 'Your Build Games entry.';
   .bge-rec-card {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 16px 18px;
+    padding: 0;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
     text-decoration: none;
     color: var(--fg);
+    overflow: hidden;
     transition: border-color 0.18s ease, background 0.18s ease;
   }
 
   .bge-rec-card:hover {
     border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
     background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  /* the newsletter's own post grid, full-bleed on top of the card */
+  .bge-rec-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bge-rec-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px 16px;
   }
 
   .bge-rec-name {

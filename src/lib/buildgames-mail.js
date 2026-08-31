@@ -57,12 +57,18 @@ export function sendBgReceipt({ to, capturedCents, ref }) {
   }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
 }
 
-/* The entrant's edit link. Rides the same E1 caps + suppression as sponsor
-   mail (the address is typed, unverified — whoever owns it owns the entry).
-   Fire-and-forget from the endpoint: a mail outage must not fail the entry. */
+/* The entrant's edit link — TRANSACTIONAL, so it goes through plain
+   sendMail like the payer's receipt, never the E1 marketing caps or the
+   suppression list (an entrant who unsubscribed from the newsletter still
+   owns their entry). Abuse is bounded without caps: the duplicate-email 409
+   means at most ONE of these can ever be triggered per address, behind the
+   5/hr/IP entry rate limit. Fire-and-forget: a mail outage must not fail
+   the entry. */
 export function sendEntryEditLink({ to, editUrl }) {
-  sendSponsorMail({
-    to,
+  const addr = String(to || '').trim().toLowerCase();
+  if (!addr || unmailable(addr)) return;
+  sendMail({
+    to: addr,
     subject: 'your Build Games entry — the edit link',
     html: brandShell(
       `<p>You're in. Your Build Games entry is submitted.</p>`
