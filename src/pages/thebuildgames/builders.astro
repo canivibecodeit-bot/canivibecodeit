@@ -6,15 +6,14 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { gamesStarted } from '../../lib/buildgames.js';
+import { MONEY_SENTENCE, gamesStarted } from '../../lib/buildgames.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
 const started = gamesStarted();
 
 const title = 'The Build Games · for the builders';
-const description =
-  'How The Build Games works if you build: free entry, three categories, three independent judges, and 100% of the sponsorship money, less payment processing fees, paid out to builders.';
+const description = `How The Build Games works if you build: free entry, three categories, three judges. ${MONEY_SENTENCE}`;
 
 const faq = [
   {
@@ -29,7 +28,7 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
-    a: 'there are three prize categories and the pool splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached.',
+    a: 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached.',
   },
   {
     q: 'can i use AI to build?',
@@ -41,7 +40,7 @@ const faq = [
   },
   {
     q: 'do you keep any of the money?',
-    a: 'no. 100% of the sponsorship money, less third-party payment processing fees (Stripe), is paid out to builders. none of it goes to us.',
+    a: `no. ${MONEY_SENTENCE}`,
   },
   {
     q: 'who owns what i build?',
@@ -63,7 +62,7 @@ const faq = [
       <div class="bgb-step">
         <span class="bgb-when">1 · now</span>
         <b>sponsors fill the pool</b>
-        <p>every spot on the board is a sponsor's bid. that's the prize money.</p>
+        <p>every spot on the board is a sponsor's bid. that's the sponsorship pool.</p>
       </div>
       <div class="bgb-step">
         <span class="bgb-when">2 · september 1</span>
@@ -77,8 +76,8 @@ const faq = [
         <span class="bgb-when">3 · after the window</span>
         <b>judges rank, winners split</b>
         <p>
-          three independent judges score every entry against the published criteria. the
-          pool splits evenly across the three categories, one winner each.
+          three judges score every entry against the published criteria. the prize fund
+          splits evenly across the three categories, one winner each.
         </p>
       </div>
     </div>

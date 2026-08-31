@@ -49,6 +49,12 @@ export async function POST({ request, clientAddress }) {
     return json({ ok: true }, 202); // honeypot
   }
 
+  // Required acceptance (operator rule): no ticked box, no entry — the
+  // client checkbox is convenience, THIS is the gate.
+  if (!['1', 'true', 'on', 'yes'].includes(String(body.accept_terms ?? '').toLowerCase())) {
+    return json({ error: 'you have to accept the Build Games terms to enter — tick the box above the button' }, 400);
+  }
+
   const name = cleanName(body.name);
   if (!name) return json({ error: `name: 2 to ${NAME_MAX} characters` }, 400);
 

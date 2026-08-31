@@ -15,9 +15,11 @@ import {
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
+  MONEY_SENTENCE,
   NAME_MAX,
   TAGLINE_MAX,
   THEME_ONE_LINER,
+  THEME_SUB,
   biddingOpen,
   countdownParts,
   displayName,
@@ -138,8 +140,8 @@ const hostOf = (u) => {
   title="The Build Games · canivibecodeit"
   description={
     started
-      ? 'A month-long vibecoding hackathon. Free to enter. 100% of the sponsorship money, less payment processing fees, is paid out to builders. None of it goes to us.'
-      : 'Sponsors bid for the top spot. 100% of the sponsorship money, less payment processing fees, is paid out to builders. The games begin September 1.'
+      ? `A month-long vibecoding hackathon. Free to enter. ${MONEY_SENTENCE}`
+      : `Sponsors bid for the top spot. ${MONEY_SENTENCE} The games begin September 1.`
   }
   ogImage="/og-buildgames.png"
   hideSponsors={true}
@@ -159,26 +161,27 @@ const hostOf = (u) => {
       <BuildGamesLogo class="bg-logo" />
       {started ? (
         <>
-          {/* The one-screen clarity block (operator's wording, Aug 31): the
-              money flow leads, then who decides and who can win. The pool
-              number below is GROSS — nothing here may imply it is net, and
-              no computed pool÷3 dollar figure renders anywhere. */}
+          {/* The one-screen clarity block: the money flow leads, using the
+              CANONICAL money sentence verbatim. The number below is the
+              gross SPONSORSHIP POOL; the sentence defines the PRIZE FUND —
+              nothing here may imply the on-screen number is net, and no
+              computed fund÷3 dollar figure renders anywhere. */}
           <p class="bg-clarity">
             The Build Games is a month-long vibecoding hackathon. Entering is free.
-            The prize pool is funded by sponsor bids, and 100% of that money, minus
-            third-party payment fees, goes to builders. We keep $0.
+            {' '}{MONEY_SENTENCE}
           </p>
           <p class="bg-clarity">
             Sponsors buy visibility, not victory: a sponsorship can never win a prize.
-            The pool splits evenly across 3 categories, 3 winners, one each, picked by
-            a panel of 3 judges. Winners are announced on this page.
+            The prize fund splits evenly across 3 categories, 3 winners, one each,
+            picked by a panel of 3 judges. Winners are announced on this page.
           </p>
           <p class="bg-theme">{THEME_ONE_LINER}</p>
+          <p class="bg-theme-sub"><a href="/">{THEME_SUB}</a></p>
         </>
       ) : (
         <>
           <p class="bg-tagline">
-            Sponsors bid for the top spot. 100% of it, less payment processing fees, goes to the builders.
+            Sponsors bid for the top spot. {MONEY_SENTENCE}
           </p>
           {/* The builder path, front and centre: sponsors get the claim bar
               below, builders get an unmissable button here instead of a
@@ -193,7 +196,7 @@ const hostOf = (u) => {
     <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
     <section class="bg-pot" aria-label="Prize pool">
       <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
-        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Prize pool ${usd(potCents)}`}>
+        <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Sponsorship pool ${usd(potCents)}`}>
           <defs>
             <clipPath id="bg-orb-clip">
               <circle cx="150" cy="270" r="118" />
@@ -240,8 +243,10 @@ const hostOf = (u) => {
         </svg>
       </div>
 
+      {/* RULE 2 naming: this gross number is the SPONSORSHIP POOL; the prize
+          fund (what winners split) is defined by the canonical sentence. */}
       <div class="bg-pot-readout">
-        <span class="bg-pot-label">prize pool</span>
+        <span class="bg-pot-label">sponsorship pool · funded by sponsor bids</span>
         <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
       </div>
     </section>
@@ -306,6 +311,17 @@ const hostOf = (u) => {
               <input type="checkbox" name="newsletter_optin" value="1" />
               <span>email me the results and winners</span>
             </label>
+            {/* REQUIRED acceptance (operator rule 3): unchecked by default,
+                must tick to submit, enforced server-side too. Separate from
+                the optional newsletter box above. */}
+            <label class="bg-enter-optin bg-enter-accept">
+              <input type="checkbox" name="accept_terms" value="1" required />
+              <span>
+                I accept <a href="/thebuildgames/terms">the Build Games terms</a>, including how
+                the prize fund works: 100% of the sponsorship money, less third-party payment
+                processing fees, and none of it goes to the operator.
+              </span>
+            </label>
             <div class="bg-enter-actions">
               <button class="btn primary" type="submit">submit your entry</button>
               <span class="bg-enter-note">free · no account · one entry per person or team</span>
@@ -320,22 +336,24 @@ const hostOf = (u) => {
       <section class="bg-cats" aria-label="Prize categories">
         <div class="list-head bg-list-head">
           <h2>three categories</h2>
-          <span class="note">each takes a third of the pool · one winner each</span>
+          <span class="note">each takes a third of the prize fund · one winner each</span>
         </div>
         <ul class="bg-cat-tiles" role="list">
-          {/* The share is stated in WORDS, never as pool÷3 dollars: the pot
-              number is gross and fees come off at payout, so a computed
-              per-category figure would overstate what a winner receives. */}
+          {/* The share is stated in WORDS, never as fund÷3 dollars: the big
+              number is the gross sponsorship pool, so a computed per-category
+              figure would overstate what a winner receives. Each tile carries
+              its published judging basis (operator directive). */}
           {CATEGORIES.map((c, i) => (
             <li class="bg-cat">
               <span class="bg-cat-n">{i + 1}</span>
               <b class="bg-cat-name">{c.name}</b>
               <p class="bg-cat-line">{c.line}</p>
-              <span class="bg-cat-share">a third of the pool</span>
+              <p class="bg-cat-judged"><b>judged on:</b> {c.judged}</p>
+              <span class="bg-cat-share">a third of the prize fund</span>
             </li>
           ))}
         </ul>
-        <p class="bg-cats-note">judges may name runners-up in each category · recognition, no money attached.</p>
+        <p class="bg-cats-note">Judges score every category against these criteria. Their decision is final.</p>
       </section>
 
       <section class="bg-judges" aria-label="The judges">
@@ -362,8 +380,8 @@ const hostOf = (u) => {
         <div class="bg-split-col">
           <h3>what builders get</h3>
           <p>
-            the prize pool. it splits evenly across the three categories, one winner
-            each. card processing fees come off at payout.
+            the prize fund: the sponsorship pool less card processing fees, split
+            evenly across the three categories, one winner each.
           </p>
         </div>
         <div class="bg-split-col">
@@ -1758,6 +1776,21 @@ const hostOf = (u) => {
     text-wrap: balance;
   }
 
+  .bg-theme-sub {
+    margin-top: 6px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-theme-sub a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bg-theme-sub a:hover {
+    color: var(--fg);
+  }
+
   /* ---------- entry form (front and centre) ---------- */
   .bg-enter {
     padding-top: 44px;
@@ -1830,6 +1863,22 @@ const hostOf = (u) => {
     cursor: pointer;
   }
 
+  /* the required acceptance box: multi-line label, checkbox pinned to top */
+  .bg-enter-accept {
+    align-items: flex-start;
+    line-height: 1.55;
+  }
+
+  .bg-enter-accept input {
+    margin-top: 3px;
+    flex: none;
+  }
+
+  .bg-enter-accept a {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
   .bg-enter-actions {
     display: flex;
     align-items: center;
@@ -1889,13 +1938,25 @@ const hostOf = (u) => {
     color: var(--muted);
   }
 
+  .bg-cat-judged {
+    padding-top: 2px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .bg-cat-judged b {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+
   .bg-cat-share {
     margin-top: auto;
     padding-top: 8px;
     font: 12px var(--font-mono);
     color: var(--primary);
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1;
   }
 
   .bg-cats-note {

@@ -49,13 +49,38 @@ export const entriesOpen = (now = Date.now()) => now >= gamesStartAt() && now < 
    renders whatever these say. Judge bios arrive from research — swap the
    BIO_1/2/3 placeholders for one-liners. */
 
-export const THEME_ONE_LINER = 'THEME_ONE_LINER';
+export const THEME_ONE_LINER = 'Build a working replacement for something people pay for.';
 
-// Three prize categories — each takes a third of the pool, one winner each.
+// Sub-line under the theme; the whole line links to / (the death list).
+export const THEME_SUB = 'Need an idea? The death list is 1,100 of them.';
+
+/* THE CANONICAL MONEY SENTENCE (operator's exact wording, Aug 31). Used
+   VERBATIM wherever the money is explained — hero, builders page, submission
+   form, meta descriptions. Naming scheme it anchors: the big on-screen gross
+   number is the SPONSORSHIP POOL; the PRIZE FUND is what this sentence
+   defines. ⛔ The words 'admin fees'/'administration costs' are BANNED on
+   every public surface. */
+export const MONEY_SENTENCE =
+  'The prize fund is 100% of the sponsorship money, less any third-party payment processing fees (such as Stripe), and none of the sponsorship money goes to us.';
+
+// Three prize categories — the fund splits evenly, one winner each. Each
+// carries its published judging basis (rendered on the tile).
 export const CATEGORIES = [
-  { name: 'CATEGORY_1', line: 'CATEGORY_1 one-line description.' },
-  { name: 'CATEGORY_2', line: 'CATEGORY_2 one-line description.' },
-  { name: 'CATEGORY_3', line: 'CATEGORY_3 one-line description.' },
+  {
+    name: 'Best Replacement',
+    line: 'the build most likely to make someone cancel a real subscription',
+    judged: "does it actually replace the paid product's core job, and would a real user switch?",
+  },
+  {
+    name: 'Most Creative',
+    line: 'the build nobody saw coming',
+    judged: 'originality of the idea and of how it was built.',
+  },
+  {
+    name: 'Most Polished',
+    line: 'the one that feels like a finished product, not a demo',
+    judged: 'design, reliability, and completeness of the shipped thing.',
+  },
 ];
 
 // The judges' panel. Portraits are self-hosted under
