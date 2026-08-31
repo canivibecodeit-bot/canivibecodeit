@@ -65,7 +65,11 @@ const description = 'Your Build Games entry.';
             </label>
             <label>
               <span>handle · optional</span>
-              <input type="text" name="handle" maxlength="41" value={entry.handle ?? ''} placeholder="@you" disabled={state === 'locked'} />
+              {/* fixed @ adornment — same treatment as the entry form */}
+              <span class="bg-handle-wrap">
+                <span class="bg-handle-at" aria-hidden="true">@</span>
+                <input type="text" name="handle" maxlength="41" value={entry.handle ?? ''} placeholder="you" disabled={state === 'locked'} />
+              </span>
             </label>
           </div>
           <label>
@@ -232,6 +236,37 @@ const description = 'Your Build Games entry.';
     padding-top: 6px;
     font: 11px var(--font-mono);
     color: var(--muted);
+  }
+
+  /* the handle field's fixed @ prefix — same treatment as the entry form */
+  .bg-handle-wrap {
+    position: relative;
+    display: block;
+  }
+
+  .bg-handle-at {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font: 14px var(--font-mono);
+    color: var(--muted);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .bg-handle-wrap input {
+    padding-left: 27px;
+  }
+
+  @media (max-width: 640px) {
+    .bg-handle-at {
+      font-size: 16px;
+    }
+
+    .bg-handle-wrap input {
+      padding-left: 30px;
+    }
   }
 
   .bge-actions {

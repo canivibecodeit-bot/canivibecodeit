@@ -317,7 +317,12 @@ const hostOf = (u) => {
               </label>
               <label>
                 <span>handle · optional</span>
-                <input type="text" name="handle" maxlength="41" placeholder="@you" />
+                {/* fixed @ adornment: always visible, never typed — the
+                    server strips a pasted leading @ anyway (cleanHandle) */}
+                <span class="bg-handle-wrap">
+                  <span class="bg-handle-at" aria-hidden="true">@</span>
+                  <input type="text" name="handle" maxlength="41" placeholder="you" />
+                </span>
               </label>
             </div>
             <label>
@@ -2084,6 +2089,38 @@ const hostOf = (u) => {
     padding-top: 6px;
     font: 11px var(--font-mono);
     color: var(--muted);
+  }
+
+  /* the handle field's fixed @ prefix: pinned, muted, never interactive */
+  .bg-handle-wrap {
+    position: relative;
+    display: block;
+  }
+
+  .bg-handle-at {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font: 14px var(--font-mono);
+    color: var(--muted);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* outranks the form's own input padding rule */
+  .bg-enter-form .bg-handle-wrap input:not([type='checkbox']) {
+    padding-left: 27px;
+  }
+
+  @media (max-width: 640px) {
+    .bg-handle-at {
+      font-size: 16px;
+    }
+
+    .bg-enter-form .bg-handle-wrap input:not([type='checkbox']) {
+      padding-left: 30px;
+    }
   }
 
   .bg-enter-optin {
