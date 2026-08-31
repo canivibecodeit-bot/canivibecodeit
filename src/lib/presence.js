@@ -1,12 +1,14 @@
 /* "N people here right now" — in-process presence, no third party. Each HTML
-   page render touches a hashed-IP key; the count is distinct keys seen in the
-   last few minutes. Honest by construction (real visitors, short window) and
-   deliberately cheap: one Map, pruned inline, resets on restart. The site
-   runs as a single process, so this is exact — if that ever changes it
-   degrades to per-instance counts, which is still honest per instance. */
+   page render touches a hashed-IP key; the count is distinct keys seen inside
+   a sliding one-hour window, recomputed on every read (so it moves
+   continuously, not on some refresh tick). Deliberately cheap: one Map,
+   pruned inline, resets on restart — after a deploy the number rebuilds over
+   the following hour. The site runs as a single process, so this is exact —
+   if that ever changes it degrades to per-instance counts, which is still
+   honest per instance. */
 import { createHash } from 'node:crypto';
 
-const WINDOW_MS = 5 * 60 * 1000;
+const WINDOW_MS = 60 * 60 * 1000;
 const seen = new Map(); // hash → last-seen ms
 
 export function touchPresence(ip) {
