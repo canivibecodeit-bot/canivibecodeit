@@ -11,6 +11,7 @@ import {
   BLURB_MAX,
   CATEGORIES,
   JUDGES,
+  JUDGES_NOTE,
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
@@ -158,15 +159,20 @@ const hostOf = (u) => {
       <BuildGamesLogo class="bg-logo" />
       {started ? (
         <>
-          {/* The one-screen clarity block: what this is, whose money, who
-              decides, who wins — before anything else on the page. */}
+          {/* The one-screen clarity block (operator's wording, Aug 31): the
+              money flow leads, then who decides and who can win. The pool
+              number below is GROSS — nothing here may imply it is net, and
+              no computed pool÷3 dollar figure renders anywhere. */}
           <p class="bg-clarity">
-            A month-long vibecoding hackathon. Free to enter.
-            The {usd(potCents)} prize pool is funded by sponsor bids: 100% of the
-            sponsorship money, less payment processing fees, is paid out to builders.
-            None of it goes to us.
+            The Build Games is a month-long vibecoding hackathon. Entering is free.
+            The prize pool is funded by sponsor bids, and 100% of that money, minus
+            third-party payment fees, goes to builders. We keep $0.
           </p>
-          <p class="bg-clarity-meta">3 categories · 3 independent judges · winners split the pool</p>
+          <p class="bg-clarity">
+            Sponsors buy visibility, not victory: a sponsorship can never win a prize.
+            The pool splits evenly across 3 categories, 3 winners, one each, picked by
+            a panel of 3 judges. Winners are announced on this page.
+          </p>
           <p class="bg-theme">{THEME_ONE_LINER}</p>
         </>
       ) : (
@@ -317,12 +323,15 @@ const hostOf = (u) => {
           <span class="note">each takes a third of the pool · one winner each</span>
         </div>
         <ul class="bg-cat-tiles" role="list">
+          {/* The share is stated in WORDS, never as pool÷3 dollars: the pot
+              number is gross and fees come off at payout, so a computed
+              per-category figure would overstate what a winner receives. */}
           {CATEGORIES.map((c, i) => (
             <li class="bg-cat">
               <span class="bg-cat-n">{i + 1}</span>
               <b class="bg-cat-name">{c.name}</b>
               <p class="bg-cat-line">{c.line}</p>
-              <span class="bg-cat-share">{usd(Math.floor(potCents / 3))} today</span>
+              <span class="bg-cat-share">a third of the pool</span>
             </li>
           ))}
         </ul>
@@ -332,7 +341,7 @@ const hostOf = (u) => {
       <section class="bg-judges" aria-label="The judges">
         <div class="list-head bg-list-head">
           <h2>the judges</h2>
-          <span class="note">independent · scoring on published criteria · sponsors never judge</span>
+          <span class="note">{JUDGES_NOTE}</span>
         </div>
         <ul class="bg-judge-row" role="list">
           {JUDGES.map((j) => (
@@ -344,6 +353,26 @@ const hostOf = (u) => {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Who gets what — the two sides of the money, side by side. The fee
+          line is phrased as TIMING (fees come off at payout): the pot number
+          on this page is gross and must never read as already-net. */}
+      <section class="bg-split" aria-label="What sponsors get and what builders get">
+        <div class="bg-split-col">
+          <h3>what builders get</h3>
+          <p>
+            the prize pool. it splits evenly across the three categories, one winner
+            each. card processing fees come off at payout.
+          </p>
+        </div>
+        <div class="bg-split-col">
+          <h3>what sponsors get</h3>
+          <p>
+            visibility. a row on the board, the podium for the top three, and the
+            link. sponsors never judge and can never win a prize.
+          </p>
+        </div>
       </section>
     </>)}
 
@@ -362,7 +391,7 @@ const hostOf = (u) => {
           data-open-rank={String(openRank)}
           aria-label="Take a spot on the board"
         >
-          {started && <p class="bg-claim-eyebrow">sponsors · you buy visibility, never influence</p>}
+          {started && <p class="bg-claim-eyebrow">sponsors · you buy visibility, not victory</p>}
           <p class="bg-claim-head">
             <span class="bg-claim-word">take spot</span>
             <span class="bg-stepper">
@@ -585,19 +614,21 @@ const hostOf = (u) => {
         <div class="list-head bg-list-head">
           <h2>the rules</h2>
         </div>
-        <ul class="bg-rules-list" role="list">
-          <li>free entry, always · paying never improves anyone's chances</li>
-          <li>build inside the window · your repo's commit history is the evidence</li>
-          <li>AI tools expected · use whatever you like</li>
-          <li>a public demo URL and a public GitHub repo are required</li>
-          <li>one entry per person or team</li>
-          <li>the pool splits evenly across the 3 categories · one winner each · judges may name runners-up with no money attached</li>
-          <li>3 independent judges decide against the published criteria · their decision is final · sponsors never judge</li>
-          <li>100% of the sponsorship money, less payment processing fees, is paid out to builders · none of it goes to us</li>
-        </ul>
+        {/* Eight numbered single-sentence lines, each answering a real
+            confusion from user feedback (operator's wording, Aug 31). */}
+        <ol class="bg-rules-list">
+          <li>Sponsors cannot win prizes.</li>
+          <li>Winners are picked by judges, not by sponsor rank.</li>
+          <li>3 winners, one per category.</li>
+          <li>Entry is free. This is a judged competition, not a raffle.</li>
+          <li>Build within the window; AI tools expected.</li>
+          <li>Public demo + public repo required.</li>
+          <li>One entry per person or team.</li>
+          <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
+        </ol>
         <p class="bg-rules-fine">
-          the contract is <a href="/thebuildgames/terms">the Build Games terms</a> · plain-english
-          version for builders: <a href="/thebuildgames/builders">how it works</a>
+          judges may name runners-up, no money attached · plain-english version for
+          builders: <a href="/thebuildgames/builders">how it works</a>
         </p>
       </section>
     )}
@@ -1715,14 +1746,6 @@ const hostOf = (u) => {
     text-wrap: pretty;
   }
 
-  .bg-clarity-meta {
-    margin-top: 10px;
-    font: 12px var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-  }
-
   .bg-theme {
     margin-top: 14px;
     margin-inline: auto;
@@ -2092,6 +2115,7 @@ const hostOf = (u) => {
 
   .bg-rules-list {
     list-style: none;
+    counter-reset: bg-rule;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -2102,10 +2126,10 @@ const hostOf = (u) => {
 
   .bg-rules-list li {
     position: relative;
-    padding: 9px 0 9px 22px;
+    padding: 10px 0 10px 34px;
     font-size: 13.5px;
     line-height: 1.55;
-    color: color-mix(in srgb, var(--fg) 85%, var(--muted));
+    color: color-mix(in srgb, var(--fg) 88%, var(--muted));
     border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   }
 
@@ -2114,11 +2138,54 @@ const hostOf = (u) => {
   }
 
   .bg-rules-list li::before {
-    content: '·';
+    counter-increment: bg-rule;
+    content: counter(bg-rule);
     position: absolute;
-    left: 6px;
+    left: 4px;
+    top: 10px;
+    font: 700 12px var(--font-mono);
     color: var(--primary);
-    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-rules-list li a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .bg-rules-list li a:hover {
+    color: var(--primary);
+  }
+
+  /* ---------- who gets what (two columns) ---------- */
+  .bg-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 44px;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .bg-split-col {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: var(--surface);
+  }
+
+  .bg-split-col h3 {
+    font: 700 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    padding-bottom: 7px;
+  }
+
+  .bg-split-col p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--fg) 82%, var(--muted));
   }
 
   .bg-rules-fine {
@@ -2170,8 +2237,13 @@ const hostOf = (u) => {
     .bg-enter,
     .bg-cats,
     .bg-judges,
+    .bg-split,
     .bg-rules {
       padding-top: 36px;
+    }
+
+    .bg-split {
+      grid-template-columns: 1fr;
     }
 
     .bg-enter-form {

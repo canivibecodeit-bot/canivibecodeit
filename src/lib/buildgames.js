@@ -58,13 +58,18 @@ export const CATEGORIES = [
   { name: 'CATEGORY_3', line: 'CATEGORY_3 one-line description.' },
 ];
 
-// The independent panel. Portraits are self-hosted under
-// public/thebuildgames/judges/ (never hotlinked).
+// The judges' panel. Portraits are self-hosted under
+// public/thebuildgames/judges/ (never hotlinked). dudufolio is pseudonymous:
+// the handle IS the display name, never a real name (operator directive).
 export const JUDGES = [
-  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'BIO_1' },
-  { name: 'Dudu', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'BIO_2' },
-  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'BIO_3' },
+  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'maker of TypingMind and DevUtils' },
+  { name: 'dudufolio', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'designer and maker of Toolfolio and Shotbase' },
+  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'maker of TranscriptAPI and CRHQ' },
 ];
+
+// The note beside the judges heading. The heading itself stays 'the judges'
+// (never 'independent' in the heading — final wording lands with the theme).
+export const JUDGES_NOTE = 'scoring on published criteria · sponsors never judge';
 
 // Post-entry recommendation card (cross-promo). One card, one outbound link,
 // server-counted via /api/thebuildgames/rec. Operator: confirm the URL.
