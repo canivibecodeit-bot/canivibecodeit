@@ -147,7 +147,7 @@ const hostOf = (u) => {
   hideSponsors={true}
   hideDigest={true}
 >
-  <main class="wrap bg-wrap">
+  <main class:list={['wrap', 'bg-wrap', { 'bg-game': started }]}>
     <!-- Logo lockup: the ○△□ mark above the wordmark (V5) -->
     <header class="bg-hero">
       <!-- The proof a placement is worth $500 — above everything else -->
@@ -338,21 +338,24 @@ const hostOf = (u) => {
           <h2>three categories</h2>
           <span class="note">each takes a third of the prize fund · one winner each</span>
         </div>
-        <ul class="bg-cat-tiles" role="list">
-          {/* The share is stated in WORDS, never as fund÷3 dollars: the big
-              number is the gross sponsorship pool, so a computed per-category
-              figure would overstate what a winner receives. Each tile carries
-              its published judging basis (operator directive). */}
+        {/* A dl, not a ul: this is a feature list (titles + descriptions).
+            The share is stated in WORDS, never as fund÷3 dollars: the big
+            number is the gross sponsorship pool, so a computed per-category
+            figure would overstate what a winner receives. Each tile carries
+            its published judging basis (operator directive). */}
+        <dl class="bg-cat-tiles">
           {CATEGORIES.map((c, i) => (
-            <li class="bg-cat">
-              <span class="bg-cat-n">{i + 1}</span>
-              <b class="bg-cat-name">{c.name}</b>
-              <p class="bg-cat-line">{c.line}</p>
-              <p class="bg-cat-judged"><b>judged on:</b> {c.judged}</p>
-              <span class="bg-cat-share">a third of the prize fund</span>
-            </li>
+            <div class="bg-cat">
+              <dt class="bg-cat-head">
+                <span class="bg-cat-n">{i + 1}</span>
+                <b class="bg-cat-name">{c.name}</b>
+              </dt>
+              <dd class="bg-cat-line">{c.line}</dd>
+              <dd class="bg-cat-judged"><b>judged on:</b> {c.judged}</dd>
+              <dd class="bg-cat-share">a third of the prize fund</dd>
+            </div>
           ))}
-        </ul>
+        </dl>
         <p class="bg-cats-note">Judges score every category against these criteria. Their decision is final.</p>
       </section>
 
@@ -1904,11 +1907,11 @@ const hostOf = (u) => {
   }
 
   .bg-cat-tiles {
-    list-style: none;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     padding-top: 12px;
+    margin: 0;
   }
 
   .bg-cat {
@@ -1919,6 +1922,16 @@ const hostOf = (u) => {
     border: 1px solid var(--border);
     border-radius: 12px;
     background: var(--surface);
+  }
+
+  .bg-cat dd {
+    margin: 0;
+  }
+
+  .bg-cat-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .bg-cat-n {
@@ -2265,11 +2278,46 @@ const hostOf = (u) => {
     color: var(--fg);
   }
 
+  /* Game phase: ONE primary action on the page — the entry submit. Every
+     other CTA (claim bar, top-spot, full bid form, newsletter) steps down to
+     the outline style so the hierarchy is unambiguous. Pre-midnight styling
+     is untouched (the class only exists once the games run). */
+  .bg-game .bg-claim-go,
+  .bg-game .bg-cta :global(.btn.primary),
+  .bg-game .bg-top-form :global(.btn.primary),
+  .bg-game .bg-bid-form :global(.btn.primary),
+  .bg-game :global(.bgn .btn.primary) {
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    padding: 11.5px 20.5px;
+  }
+
+  .bg-game .bg-claim-go:hover,
+  .bg-game .bg-cta :global(.btn.primary:hover),
+  .bg-game .bg-top-form :global(.btn.primary:hover),
+  .bg-game .bg-bid-form :global(.btn.primary:hover),
+  .bg-game :global(.bgn .btn.primary:hover) {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+
   /* ---------- game phase, small screens ---------- */
   @media (max-width: 640px) {
     .bg-cat-tiles,
     .bg-judge-row {
       grid-template-columns: 1fr;
+    }
+
+    /* The load-bearing copy reads at 16px on a phone (typography rule:
+       body text is never smaller on mobile than desktop). */
+    .bg-clarity {
+      font-size: 16px;
+    }
+
+    .bg-rules-list li,
+    .bg-split-col p {
+      font-size: 15px;
     }
 
     /* podium stacks: #1 first (DOM order), full width, no stagger */
