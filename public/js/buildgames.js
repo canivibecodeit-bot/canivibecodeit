@@ -254,6 +254,35 @@
     /* ---------- entry form (game phase): submit, then to the edit page ---------- */
     const entryForm = claim($('[data-entry-form]'));
     if (entryForm) {
+      /* Draft persistence: a mid-fill navigation (terms link, back button,
+         mobile tab discard) must never eat a half-filled entry. Text fields
+         only, sessionStorage only (per-tab, dies with the session), cleared
+         on successful submit. */
+      const DRAFT_KEY = 'bg-entry-draft';
+      const DRAFT_FIELDS = ['name', 'handle', 'demo_url', 'repo_url', 'blurb', 'email'];
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
+        DRAFT_FIELDS.forEach((f) => {
+          const el = entryForm.elements[f];
+          if (el && !el.value && typeof saved[f] === 'string') el.value = saved[f];
+        });
+      } catch {
+        /* a broken draft never blocks the form */
+      }
+      entryForm.addEventListener('input', (e) => {
+        if (!DRAFT_FIELDS.includes(e.target?.name)) return;
+        const draft = {};
+        DRAFT_FIELDS.forEach((f) => {
+          const el = entryForm.elements[f];
+          if (el) draft[f] = el.value;
+        });
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {
+          /* storage full/blocked: the form still works, just no belt */
+        }
+      });
+
       entryForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = $('button[type="submit"]', entryForm);
@@ -276,6 +305,11 @@
             return;
           }
           if (out.token) {
+            try {
+              sessionStorage.removeItem(DRAFT_KEY);
+            } catch {
+              /* draft cleanup is best-effort */
+            }
             // The success screen IS the edit page (private, noindex).
             window.location.href = '/thebuildgames/entry?token=' + encodeURIComponent(out.token) + '&submitted=1';
             return;

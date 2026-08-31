@@ -353,7 +353,10 @@ const hostOf = (u) => {
             <label class="bg-enter-optin bg-enter-accept">
               <input type="checkbox" name="accept_terms" value="1" required />
               <span>
-                I accept <a href="/thebuildgames/terms">the Build Games terms</a>, including how
+                {/* _blank: a same-tab hop to the terms ate a half-filled
+                    entry (operator report) — reference links inside the
+                    form never navigate this tab */}
+                I accept <a href="/thebuildgames/terms" target="_blank" rel="noopener">the Build Games terms</a>, including how
                 the prize fund works: 100% of the sponsorship money, less third-party payment
                 processing fees, and none of it goes to the operator.
               </span>
