@@ -2080,10 +2080,12 @@ const hostOf = (u) => {
     color: var(--muted);
   }
 
+  /* Brand kit: uppercase micro-labels carry WIDE tracking — same band as
+     the other labels on this page (0.1–0.14em). */
   .bg-cat-judged b {
     font: 700 11px var(--font-mono);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     color: color-mix(in srgb, var(--fg) 75%, var(--muted));
   }
 
