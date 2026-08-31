@@ -327,12 +327,12 @@ const hostOf = (u) => {
             </div>
             <label>
               <span>demo url</span>
-              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="demo_url" required maxlength="300" placeholder="https://your-build.app" />
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="demo_url" required maxlength="300" placeholder="your-build.app" />
               <span class="bg-enter-hint">a public URL anyone can open</span>
             </label>
             <label>
               <span>github repo</span>
-              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="repo_url" required maxlength="300" placeholder="https://github.com/you/your-build" />
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="repo_url" required maxlength="300" placeholder="github.com/you/your-build" />
               <span class="bg-enter-hint">public repo · the commit history has to show the work happened inside the window</span>
             </label>
             <label>
@@ -2075,6 +2075,11 @@ const hostOf = (u) => {
     color: var(--fg);
     font: 14px var(--font-mono);
     resize: vertical;
+    /* JetBrains Mono's :// ligature visually fuses the slashes while typing
+       a URL — the value is intact but reads like a slash was eaten. Inputs
+       render glyph-per-character, always. */
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
   }
 
   @media (max-width: 640px) {

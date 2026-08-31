@@ -217,6 +217,10 @@ const description = 'Your Build Games entry.';
     color: var(--fg);
     font: 14px var(--font-mono);
     resize: vertical;
+    /* no ligatures in inputs — the mono :// ligature reads like an eaten
+       slash while typing a URL (see the entry form) */
+    font-variant-ligatures: none;
+    font-feature-settings: 'liga' 0, 'calt' 0;
   }
 
   .bge-form input:disabled,
