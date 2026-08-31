@@ -26,20 +26,25 @@
   const fmtUsd = (cents) => '$' + Math.round(cents / 100).toLocaleString('en-US');
 
   const init = () => {
-    /* ---------- countdown (seconds, tabular, no jitter) ---------- */
+    /* ---------- countdown (tabular, no jitter) ----------
+       data-cd-pad = zero-padded two-digit segments (the game-ends clock);
+       [data-cd-sec-cell] = seconds hidden until the final 24 hours. */
     const cd = claim($('[data-countdown]'));
     if (cd) {
       const target = Number(cd.dataset.target);
+      const fmt = 'cdPad' in cd.dataset ? (n) => String(n).padStart(2, '0') : (n) => n;
       const d = $('[data-cd-days]', cd);
       const h = $('[data-cd-hours]', cd);
       const m = $('[data-cd-mins]', cd);
       const sec = $('[data-cd-secs]', cd);
+      const secCell = $('[data-cd-sec-cell]', cd);
       const tick = () => {
         const s = Math.max(0, Math.floor((target - Date.now()) / 1000));
-        if (d) d.textContent = Math.floor(s / 86400);
-        if (h) h.textContent = Math.floor((s % 86400) / 3600);
-        if (m) m.textContent = Math.floor((s % 3600) / 60);
-        if (sec) sec.textContent = s % 60;
+        if (d) d.textContent = fmt(Math.floor(s / 86400));
+        if (h) h.textContent = fmt(Math.floor((s % 86400) / 3600));
+        if (m) m.textContent = fmt(Math.floor((s % 3600) / 60));
+        if (sec) sec.textContent = fmt(s % 60);
+        if (secCell) secCell.hidden = s >= 86400;
         if (s === 0 && !cd.dataset.done) {
           cd.dataset.done = '1';
           setTimeout(() => location.reload(), 1500);
@@ -49,18 +54,22 @@
       setInterval(tick, 1000);
     }
 
-    /* ---------- the pot: count-up on load, fill + drops on increase ---------- */
-    const stage = claim($('[data-pot]'));
-    if (stage) {
-      const amountEl = $('[data-pot-amount]');
+    /* ---------- the pool number: count-up on load + live poll ----------
+       The number ([data-pot-amount]) exists in BOTH phases (pre-game orb
+       readout, game-phase stat strip); the orb ([data-pot]) is pre-game
+       only, so every orb behaviour is guarded and the poll runs without it. */
+    const amountEl = claim($('[data-pot-amount]'));
+    if (amountEl) {
+      const stage = $('[data-pot]');
       const fillEls = [$('.bg-fill'), $('.bg-fill-top')].filter(Boolean);
-      const drops = $('.bg-drops', stage);
+      const drops = stage ? $('.bg-drops', stage) : null;
       // The server computes the asymptotic fill level (uncapped, never 100%);
       // the JS just applies it and re-applies on poll. No goal math here.
-      let potCents = Number(stage.dataset.potCents) || 0;
-      let fillTarget = Number(stage.dataset.fill) || 0;
+      let potCents = Number(stage?.dataset.potCents ?? amountEl.dataset.potCents) || 0;
+      let fillTarget = Number(stage?.dataset.fill) || 0;
 
       const setFill = (frac) => {
+        if (!stage) return;
         const f = Math.max(0, Math.min(1, frac));
         stage.style.setProperty('--fill', f.toFixed(4));
         fillEls.forEach((el) => el.style.setProperty('--fill', f.toFixed(4)));
@@ -109,11 +118,12 @@
 
       // A poke rains a few bills — satisfying, free, and honest (the total
       // never changes). Reduced-motion users get stillness via rain()'s gate.
-      stage.addEventListener('click', () => rain(4));
+      if (stage) stage.addEventListener('click', () => rain(4));
 
-      // Poll: when the pot grows, raise the fill, count the figure up, rain bills.
+      // Poll: when the pot grows, count the figure up (and, orb present,
+      // raise the fill and rain bills).
       setInterval(async () => {
-        if (document.hidden || !document.contains(stage)) return;
+        if (document.hidden || !document.contains(amountEl)) return;
         try {
           const res = await fetch('/api/thebuildgames/stats');
           if (!res.ok) return;

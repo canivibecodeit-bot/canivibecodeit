@@ -87,6 +87,13 @@ const endAt = gamesEndAt();
 const cdTarget = started ? endAt : startAt;
 const cd = countdownParts(cdTarget);
 
+/* The game-ends clock: zero-padded two-digit segments in fixed-width cells
+   so a tick never reflows anything, and no seconds until the final 24 hours
+   (a month-long clock ticking seconds reads anxious; the endgame earns it).
+   The client tick mirrors both rules via data-cd-pad / [data-cd-sec-cell]. */
+const pad2 = (n) => String(n).padStart(2, '0');
+const showSeconds = cdTarget - Date.now() < 24 * 60 * 60 * 1000;
+
 // Social proof for buyers: live presence (own in-process counter) + the real
 // all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
 // than showing a made-up number).
@@ -163,11 +170,14 @@ const hostOf = (u) => {
       <BuildGamesLogo class="bg-logo" />
       {started ? (
         <>
-          {/* The one-screen clarity block: the money flow leads, using the
-              CANONICAL money sentence verbatim. The number below is the
-              gross SPONSORSHIP POOL; the sentence defines the PRIZE FUND —
-              nothing here may imply the on-screen number is net, and no
+          {/* With the orb gone the THEME takes the stage: display treatment,
+              straight under the lockup. The clarity block follows — the
+              money flow uses the CANONICAL sentence verbatim. The strip's
+              number is the gross SPONSORSHIP POOL; the sentence defines the
+              PRIZE FUND — nothing here may imply the number is net, and no
               computed fund÷3 dollar figure renders anywhere. */}
+          <p class="bg-theme">{THEME_ONE_LINER}</p>
+          <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
           <p class="bg-clarity">
             The Build Games is a month-long vibecoding hackathon. Entering is free.
             {' '}{MONEY_SENTENCE}
@@ -177,8 +187,6 @@ const hostOf = (u) => {
             The prize fund splits evenly across 3 categories, 3 winners, one each,
             picked by a panel of 3 judges. Winners are announced on this page.
           </p>
-          <p class="bg-theme">{THEME_ONE_LINER}</p>
-          <p class="bg-theme-sub"><a href="/">{THEME_SUB}</a></p>
         </>
       ) : (
         <>
@@ -195,21 +203,23 @@ const hostOf = (u) => {
       )}
     </header>
 
-    <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
-    <section class="bg-pot" aria-label="Prize pool">
+    {/* THE ORB: pre-game only (operator, design round 2) — in game phase
+        the stat strip carries the pool number and the orb is gone. */}
+    {!started && (
+    <section class="bg-pot" aria-label="Sponsorship pool">
       <div class:list={['bg-orb-stage', { 'no-cable': !cableOn }]} data-pot data-fill={fill.toFixed(4)} data-pot-cents={potCents}>
         <svg class="bg-orb" viewBox="0 108 300 292" role="img" aria-label={`Sponsorship pool ${usd(potCents)}`}>
           <defs>
             <clipPath id="bg-orb-clip">
               <circle cx="150" cy="270" r="118" />
             </clipPath>
-            <!-- Subtle cash gradient: premium, not photorealistic bills. -->
+            {/* Subtle cash gradient: premium, not photorealistic bills. */}
             <linearGradient id="bg-cash" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stop-color="var(--primary-dim)" />
               <stop offset="55%" stop-color="var(--primary)" />
               <stop offset="100%" stop-color="var(--primary)" />
             </linearGradient>
-            <!-- a faint stacked-note hint: one soft line every 22px, low contrast -->
+            {/* a faint stacked-note hint: one soft line every 22px, low contrast */}
             <pattern id="bg-bills" width="300" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
               <rect width="300" height="22" fill="url(#bg-cash)" />
               <rect y="21" width="300" height="1" fill="rgba(0,0,0,0.10)" />
@@ -221,7 +231,7 @@ const hostOf = (u) => {
             </radialGradient>
           </defs>
 
-          <!-- ceiling cable + hook (fixed) — toggled off via ?cable=off -->
+          {/* ceiling cable + hook (fixed) — toggled off via ?cable=off */}
           {cableOn && (
             <g class="bg-cable-group">
               <line x1="150" y1="108" x2="150" y2="120" class="bg-cable" />
@@ -229,15 +239,15 @@ const hostOf = (u) => {
             </g>
           )}
 
-          <!-- the swinging orb: everything below the cable sways as one -->
+          {/* the swinging orb: everything below the cable sways as one */}
           <g class="bg-orb-swing">
-            <!-- money fill, clipped to the sphere, scaled from the bottom -->
+            {/* money fill, clipped to the sphere, scaled from the bottom */}
             <g clip-path="url(#bg-orb-clip)">
               <rect class="bg-fill" x="32" y="152" width="236" height="236" fill="url(#bg-bills)" />
               <rect class="bg-fill-top" x="32" width="236" height="2" fill="var(--primary)" />
               <g class="bg-drops" aria-hidden="true"></g>
             </g>
-            <!-- glass sphere: body tint, reflection, rim -->
+            {/* glass sphere: body tint, reflection, rim */}
             <circle cx="150" cy="270" r="118" fill="url(#bg-glass-grad)" class="bg-glass" />
             <ellipse cx="112" cy="222" rx="44" ry="28" class="bg-glass-shine" />
             <circle cx="150" cy="270" r="118" class="bg-glass-rim" />
@@ -246,34 +256,32 @@ const hostOf = (u) => {
       </div>
 
       {/* RULE 2 naming: this gross number is the SPONSORSHIP POOL; the prize
-          fund (what winners split) is defined by the canonical sentence.
-          In game phase the readout lives in the stat strip below instead. */}
-      {!started && (
-        <div class="bg-pot-readout">
-          <span class="bg-pot-label">sponsorship pool · funded by sponsor bids</span>
-          <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
-        </div>
-      )}
+          fund (what winners split) is defined by the canonical sentence. */}
+      <div class="bg-pot-readout">
+        <span class="bg-pot-label">sponsorship pool · funded by sponsor bids</span>
+        <span class="bg-pot-amount" data-pot-amount>{usd(potCents)}</span>
+      </div>
     </section>
+    )}
 
     {/* Game phase: the headline stat strip — pool, clock, entries as one row
         of big numerals styled on the pot treatment. It carries the countdown
         data attrs (client tick + reload-at-zero work unchanged) and the pot
         poll updates [data-pot-amount] here. Pre-game keeps the countdown. */}
     {started ? (
-      <section class="bg-statgrid" data-countdown data-target={String(cdTarget)} aria-label="Sponsorship pool, time remaining and entries">
+      <section class="bg-statgrid" data-countdown data-cd-pad data-target={String(cdTarget)} aria-label="Sponsorship pool, time remaining and entries">
         <div class="bg-sg-cell">
           <span class="bg-sg-label">sponsorship pool</span>
-          <span class="bg-sg-num bg-sg-money" data-pot-amount>{usd(potCents)}</span>
+          <span class="bg-sg-num bg-sg-money" data-pot-amount data-pot-cents={potCents}>{usd(potCents)}</span>
           <span class="bg-sg-sub">funded by sponsor bids</span>
         </div>
         <div class="bg-sg-cell">
           <span class="bg-sg-label">the game ends in</span>
           <span class="bg-sg-num bg-sg-cd">
-            <b data-cd-days>{cd.days}</b><i>d</i>
-            <b data-cd-hours>{cd.hours}</b><i>h</i>
-            <b data-cd-mins>{cd.minutes}</b><i>m</i>
-            <b data-cd-secs>{cd.seconds}</b><i>s</i>
+            <b data-cd-days>{pad2(cd.days)}</b><i>d</i>
+            <b data-cd-hours>{pad2(cd.hours)}</b><i>h</i>
+            <b data-cd-mins>{pad2(cd.minutes)}</b><i>m</i>
+            <span class="bg-sg-sec" data-cd-sec-cell hidden={!showSeconds}><b data-cd-secs>{pad2(cd.seconds)}</b><i>s</i></span>
           </span>
           <span class="bg-sg-sub">september 30 · midnight new york</span>
         </div>
@@ -406,6 +414,32 @@ const hostOf = (u) => {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* The rules join the comprehension cluster (design round 2): hero →
+          form → categories → judges → rules → who-gets-what, then the
+          sponsor surfaces. Ten numbered single-sentence lines, each
+          answering a real confusion (operator's wording). */}
+      <section class="bg-rules" aria-label="The rules">
+        <div class="list-head bg-list-head bg-rules-head">
+          <h2>the rules</h2>
+        </div>
+        <ol class="bg-rules-list">
+          <li>Sponsors cannot win prizes.</li>
+          <li>Winners are picked by judges, not by sponsor rank.</li>
+          <li>3 winners, one per category.</li>
+          <li>Entry is free. This is a judged competition, not a raffle.</li>
+          <li>Build within the window; AI tools expected.</li>
+          <li>Public demo + public repo required.</li>
+          <li>One entry per person or team.</li>
+          <li>You keep full ownership of what you build.</li>
+          <li>Winners are verified before payout.</li>
+          <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
+        </ol>
+        <p class="bg-rules-fine">
+          judges may name runners-up, no money attached · plain-english version for
+          builders: <a href="/thebuildgames/builders">how it works</a>
+        </p>
       </section>
 
       {/* Who gets what — the two sides of the money, side by side. The fee
@@ -660,33 +694,6 @@ const hostOf = (u) => {
         )
       }
     </section>
-
-    {/* ---------- GAME PHASE: the rules, all on this page ---------- */}
-    {started && (
-      <section class="bg-rules" aria-label="The rules">
-        <div class="list-head bg-list-head">
-          <h2>the rules</h2>
-        </div>
-        {/* Eight numbered single-sentence lines, each answering a real
-            confusion from user feedback (operator's wording, Aug 31). */}
-        <ol class="bg-rules-list">
-          <li>Sponsors cannot win prizes.</li>
-          <li>Winners are picked by judges, not by sponsor rank.</li>
-          <li>3 winners, one per category.</li>
-          <li>Entry is free. This is a judged competition, not a raffle.</li>
-          <li>Build within the window; AI tools expected.</li>
-          <li>Public demo + public repo required.</li>
-          <li>One entry per person or team.</li>
-          <li>You keep full ownership of what you build.</li>
-          <li>Winners are verified before payout.</li>
-          <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
-        </ol>
-        <p class="bg-rules-fine">
-          judges may name runners-up, no money attached · plain-english version for
-          builders: <a href="/thebuildgames/builders">how it works</a>
-        </p>
-      </section>
-    )}
 
     <BuildGamesNewsletter variant="section" />
 
@@ -1801,31 +1808,36 @@ const hostOf = (u) => {
     text-wrap: pretty;
   }
 
+  /* The theme takes the stage (orb gone): display treatment under the
+     lockup, then the quiet idea pill, then the clarity paragraphs. */
   .bg-theme {
-    margin-top: 14px;
+    margin-top: 16px;
     margin-inline: auto;
-    max-width: 40ch;
+    max-width: 30ch;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 19px;
-    line-height: 1.35;
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     color: var(--primary);
     text-wrap: balance;
   }
 
-  .bg-theme-sub {
-    margin-top: 6px;
+  .bg-theme-pill {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
     font: 12px var(--font-mono);
-    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
   }
 
-  .bg-theme-sub a {
-    color: var(--muted);
-    text-decoration: underline;
-  }
-
-  .bg-theme-sub a:hover {
+  .bg-theme-pill:hover {
     color: var(--fg);
+    border-color: var(--muted);
   }
 
   /* ---------- headline stat strip (pool · clock · entries) ---------- */
@@ -1893,6 +1905,17 @@ const hostOf = (u) => {
 
   .bg-sg-cd i:last-child {
     padding-right: 0;
+  }
+
+  /* the seconds segment appears only inside the final 24 hours */
+  .bg-sg-sec {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .bg-sg-sec[hidden] {
+    display: none;
   }
 
   .bg-sg-sub {
@@ -2310,6 +2333,12 @@ const hostOf = (u) => {
   /* ---------- rules ---------- */
   .bg-rules {
     padding-top: 44px;
+  }
+
+  /* centred header over the section (design round 2) */
+  .bg-rules-head {
+    justify-content: center;
+    text-align: center;
   }
 
   .bg-rules-list {

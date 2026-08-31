@@ -41,8 +41,7 @@ const description = 'Your Build Games entry.';
           <>
             <h1>you're in</h1>
             <p class="bge-sub">
-              Entry submitted. Your edit link is in your inbox. You can change anything here
-              until the window closes.
+              Entry submitted. We emailed this link to you · it works until the window closes.
               {entry.newsletter_optin ? ' The results and winners go to your inbox too.' : ''}
             </p>
           </>
@@ -51,7 +50,7 @@ const description = 'Your Build Games entry.';
             <h1>your entry</h1>
             <p class="bge-sub">
               {state === 'editable'
-                ? 'Edit anything below until the window closes.'
+                ? 'Edit anything below. We emailed this link to you · it works until the window closes.'
                 : 'The build window has closed. Entries are locked for judging.'}
             </p>
           </>
