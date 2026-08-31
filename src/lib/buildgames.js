@@ -49,6 +49,11 @@ export const entriesOpen = (now = Date.now()) => now >= gamesStartAt() && now < 
    renders whatever these say. Judge bios arrive from research — swap the
    BIO_1/2/3 placeholders for one-liners. */
 
+// Winners announcement date (operator decision, changeable) — ONE string.
+// Announcement only: no payout-date promise anywhere, verification timing
+// lives in the terms.
+export const ANNOUNCE_BY = 'October 15';
+
 export const THEME_ONE_LINER = 'Build a working replacement for something people pay for.';
 
 // Sub-line under the theme; the whole line links to / (the death list).

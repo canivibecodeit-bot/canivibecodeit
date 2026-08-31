@@ -6,7 +6,7 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { MONEY_SENTENCE, gamesStarted } from '../../lib/buildgames.js';
+import { ANNOUNCE_BY, MONEY_SENTENCE, gamesStarted } from '../../lib/buildgames.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -28,7 +28,7 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
-    a: 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached.',
+    a: `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
   },
   {
     q: 'can i use AI to build?',

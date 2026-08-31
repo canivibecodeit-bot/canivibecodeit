@@ -8,6 +8,7 @@ import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgEntryCount, bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
+  ANNOUNCE_BY,
   BLURB_MAX,
   CATEGORIES,
   JUDGES,
@@ -437,8 +438,8 @@ const hostOf = (u) => {
           <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
         </ol>
         <p class="bg-rules-fine">
-          winners are announced on this page · judges may name runners-up, no money
-          attached · plain-english version for builders:{' '}
+          winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,
+          no money attached · plain-english version for builders:{' '}
           <a href="/thebuildgames/builders">how it works</a>
         </p>
       </section>
