@@ -57,6 +57,23 @@ export function sendBgReceipt({ to, capturedCents, ref }) {
   }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
 }
 
+/* The entrant's edit link. Rides the same E1 caps + suppression as sponsor
+   mail (the address is typed, unverified — whoever owns it owns the entry).
+   Fire-and-forget from the endpoint: a mail outage must not fail the entry. */
+export function sendEntryEditLink({ to, editUrl }) {
+  sendSponsorMail({
+    to,
+    subject: 'your Build Games entry — the edit link',
+    html: brandShell(
+      `<p>You're in. Your Build Games entry is submitted.</p>`
+      + `<p>Edit your entry any time before the window closes:</p>`
+      + `<p><a href="${esc(editUrl)}">${esc(editUrl)}</a></p>`
+      + `<p style="color:#6e6e67; font-size:12px;">Keep this link private — anyone with it can edit your entry.`
+      + ` Winners are announced after judging. Questions? Reply to this email.</p>`
+    ),
+  }).catch((err) => console.error(`bg entry mail failed: ${err.message}`));
+}
+
 /* Returns true if the mail was actually handed to sendMail. */
 export async function sendSponsorMail({ to, subject, html }) {
   const addr = String(to || '').trim().toLowerCase();

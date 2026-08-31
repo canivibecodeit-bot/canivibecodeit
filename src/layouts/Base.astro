@@ -8,7 +8,7 @@ import Radio from '../components/Radio.astro';
 import SignupModal from '../components/SignupModal.astro';
 import SponsorRails from '../components/SponsorRails.astro';
 import SponsorTape from '../components/SponsorTape.astro';
-import { buildsLive } from '../lib/flags.js';
+import { buildGamesLive, buildsLive } from '../lib/flags.js';
 import { getBoard, nextRunMonthName } from '../lib/sponsors.js';
 import { scriptJson } from '../lib/request.js';
 import { THEME_SCRIPT } from '../lib/csp.js';
@@ -46,6 +46,7 @@ const isPrivate =
   Astro.url.pathname.startsWith('/admin') ||
   Astro.url.pathname.startsWith('/sponsor/details') ||
   Astro.url.pathname.startsWith('/thebuildgames/details') ||
+  Astro.url.pathname.startsWith('/thebuildgames/entry') ||
   Astro.url.pathname.startsWith('/sponsor/stats') ||
   Astro.url.pathname.startsWith('/account') ||
   Astro.url.search.includes('token=');
@@ -71,10 +72,11 @@ const blocks = [orgLd, ...jsonld];
    hides its links on narrow viewports. Edit THIS list, never the markup:
    the two navs must not drift apart again. */
 // The builder-game route (/challenge) is deliberately UNLINKED — it stays dark
-// until Sept 1 and is never in the nav (ruling G1). /thebuildgames (the public
-// bidding board) is the live surface and is reached directly, not via nav.
+// until Sept 1 and is never in the nav (ruling G1). /thebuildgames joined the
+// nav for the games launch (operator brief, Aug 31) — accent-highlighted.
 const SECTIONS = [
   { href: '/#death-list', label: 'the death list', top: true },
+  { href: '/thebuildgames', label: 'the build games', top: true, cls: 'nav-games', show: buildGamesLive() },
   { href: '/alternatives', label: 'alternatives', top: true },
   { href: '/builds', label: 'builds', top: false, show: buildsLive() },
   { href: '/stats', label: 'stats', top: false },

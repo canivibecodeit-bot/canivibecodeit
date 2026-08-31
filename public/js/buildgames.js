@@ -241,6 +241,47 @@
       });
     });
 
+    /* ---------- entry form (game phase): submit, then to the edit page ---------- */
+    const entryForm = claim($('[data-entry-form]'));
+    if (entryForm) {
+      entryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = $('button[type="submit"]', entryForm);
+        const label = btn.textContent;
+        const err = $('[data-entry-err]', entryForm);
+        err.hidden = true;
+        btn.disabled = true;
+        btn.textContent = 'submitting…';
+        try {
+          const data = Object.fromEntries(new FormData(entryForm).entries());
+          const res = await fetch(entryForm.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            err.textContent = out.error || 'something broke — try again';
+            err.hidden = false;
+            return;
+          }
+          if (out.token) {
+            // The success screen IS the edit page (private, noindex).
+            window.location.href = '/thebuildgames/entry?token=' + encodeURIComponent(out.token) + '&submitted=1';
+            return;
+          }
+          toast('entry received');
+          entryForm.reset();
+        } catch {
+          err.textContent = 'network hiccup — try again';
+          err.hidden = false;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
+      });
+    }
+
     /* ---------- the claim bar: pick a spot, see its price ---------- */
     // Two controls over one number. `cents` is the state; the spot label is
     // always DERIVED from it, never asserted, so the bar can't offer a spot

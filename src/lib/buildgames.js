@@ -31,6 +31,49 @@ const envTime = (name) => {
 // Countdown target: New York local midnight, Sept 1 (EDT = 04:00 UTC).
 export const gamesStartAt = () => envTime('BUILDGAMES_START_AT') ?? Date.UTC(2026, 8, 1, 4, 0, 0);
 
+// Build window close: New York local midnight, Oct 1 (EDT = 04:00 UTC).
+export const gamesEndAt = () => envTime('BUILDGAMES_END_AT') ?? Date.UTC(2026, 9, 1, 4, 0, 0);
+
+/* The midnight flip. The page renders the pre-game (sponsor hype) layout
+   until the start moment PASSES, then the game layout — a server-side time
+   check per request, no cron, no manual flip. The client countdown reloads
+   the page at zero, so open tabs flip themselves too. */
+export const gamesStarted = (now = Date.now()) => now >= gamesStartAt();
+
+// Entries are accepted only inside the build window.
+export const entriesOpen = (now = Date.now()) => now >= gamesStartAt() && now < gamesEndAt();
+
+/* ---------- game copy — THE editable block ----------
+   Operator: final wording lands here and nowhere else. Every string below is
+   a placeholder until the theme/category/judging copy is decided; the page
+   renders whatever these say. Judge bios arrive from research — swap the
+   BIO_1/2/3 placeholders for one-liners. */
+
+export const THEME_ONE_LINER = 'THEME_ONE_LINER';
+
+// Three prize categories — each takes a third of the pool, one winner each.
+export const CATEGORIES = [
+  { name: 'CATEGORY_1', line: 'CATEGORY_1 one-line description.' },
+  { name: 'CATEGORY_2', line: 'CATEGORY_2 one-line description.' },
+  { name: 'CATEGORY_3', line: 'CATEGORY_3 one-line description.' },
+];
+
+// The independent panel. Portraits are self-hosted under
+// public/thebuildgames/judges/ (never hotlinked).
+export const JUDGES = [
+  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'BIO_1' },
+  { name: 'Dudu', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'BIO_2' },
+  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'BIO_3' },
+];
+
+// Post-entry recommendation card (cross-promo). One card, one outbound link,
+// server-counted via /api/thebuildgames/rec. Operator: confirm the URL.
+export const HOWTOAI_REC = {
+  name: 'How to AI',
+  url: 'https://howtoai.com',
+  line: 'The newsletter we actually read to get better at building with AI.',
+};
+
 // Public bidding accepts submissions only when this is on. Off = the board
 // still renders (admin can seed) but the CTA reads "opening soon" and the
 // submit endpoint 409s — the slip-protection state for launch morning.
@@ -70,6 +113,7 @@ const ID_ALPHABET = 'abcdefghjkmnpqrstvwxyz23456789';
 const mkId = (prefix) => `${prefix}_${[...randomBytes(10)].map((b) => ID_ALPHABET[b % ID_ALPHABET.length]).join('')}`;
 export const newSponsorId = () => mkId('bgs');
 export const newPaymentId = () => mkId('bgp');
+export const newEntryId = () => mkId('bge');
 export const SPONSOR_ID_RE = /^bgs_[a-z2-9]{10}$/;
 export const PAYMENT_ID_RE = /^bgp_[a-z2-9]{10}$/;
 
@@ -162,6 +206,45 @@ export function cleanTagline(raw) {
   if (t.length < 2) return null;
   if (URL_ISH.test(t)) return null;
   return t;
+}
+
+/* ---------- entry input hygiene ---------- */
+
+// Entry blurb: same hygiene as taglines (markup chars, bidi/zero-width glyphs,
+// whitespace collapse, length cap) with its own cap. URLs are allowed — the
+// blurb renders only as escaped TEXT, and the entry's links live in their own
+// screened fields.
+export const BLURB_MAX = 200;
+
+export function cleanBlurb(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw
+    .replace(/[<>]/g, '')
+    .replace(UNSAFE_GLYPHS, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, BLURB_MAX);
+  return t.length >= 2 ? t : null;
+}
+
+// Builder handle (optional): an @-handle-ish string, leading @ folded off.
+export function cleanHandle(raw) {
+  if (typeof raw !== 'string') return null;
+  const t = raw.trim().replace(/^@/, '');
+  return /^[a-zA-Z0-9_.-]{2,40}$/.test(t) ? t : null;
+}
+
+/* Entry repo URL: exactly https://github.com/<owner>/<repo>. Takes the URL
+   object parsePublicUrl produced; returns the canonical string or null.
+   The commit history is the build-window evidence, so only real GitHub repos
+   qualify — no pages sites, no gists, no deeper paths. */
+export function parseGithubRepo(u) {
+  if (!u) return null;
+  const host = u.hostname.toLowerCase().replace(/^www\./, '');
+  if (host !== 'github.com') return null;
+  const m = u.pathname.match(/^\/([A-Za-z0-9][A-Za-z0-9-]{0,38})\/([A-Za-z0-9._-]{1,100}?)(?:\.git)?\/?$/);
+  if (!m || m[2] === '.' || m[2] === '..') return null;
+  return `https://github.com/${m[1]}/${m[2]}`;
 }
 
 /* ---------- ranking (rows carry cleared_total + first_cleared_at from SQL) ---------- */

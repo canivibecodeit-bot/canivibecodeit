@@ -6,17 +6,22 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
+import { gamesStarted } from '../../lib/buildgames.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
+const started = gamesStarted();
+
 const title = 'The Build Games · for the builders';
 const description =
-  'How The Build Games works if you build: free entry, the brief drops September 1, an independent panel ranks the entries, and winners share the sponsor-funded pool.';
+  'How The Build Games works if you build: free entry, three categories, three independent judges, and 100% of the sponsorship money, less payment processing fees, paid out to builders.';
 
 const faq = [
   {
     q: 'how do i register?',
-    a: "you don't, yet. join the newsletter and you'll get one email when entries open with the first game on september 1. the entry form will be right here.",
+    a: started
+      ? 'the entry form is on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
+      : "you don't, yet. join the newsletter and you'll get one email when entries open with the first game on september 1. the entry form will be on the main page.",
   },
   {
     q: 'is it really free to enter?',
@@ -24,7 +29,7 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
-    a: 'no. each game publishes its prize split before it starts, and multiple ranked winners share the pool.',
+    a: 'there are three prize categories and the pool splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached.',
   },
   {
     q: 'can i use AI to build?',
@@ -32,11 +37,11 @@ const faq = [
   },
   {
     q: 'who judges?',
-    a: "an independent panel, named before the game starts, scoring against criteria published up front. sponsors never judge. we don't score either.",
+    a: "three independent judges, announced on the page, scoring against criteria published up front. sponsors never judge and can't affect outcomes. we don't score either.",
   },
   {
     q: 'do you keep any of the money?',
-    a: 'no. pool money is either paid to winners or returned to sponsors. it never comes to us.',
+    a: 'no. 100% of the sponsorship money, less third-party payment processing fees (Stripe), is paid out to builders. none of it goes to us.',
   },
   {
     q: 'who owns what i build?',
@@ -49,7 +54,7 @@ const faq = [
 ];
 ---
 
-<Base {title} {description} hideSponsors={true} hideDigest={true}>
+<Base {title} {description} ogImage="/og-buildgames.png" hideSponsors={true} hideDigest={true}>
   <main class="wrap bgb">
     <h1>for the builders</h1>
     <p class="bgb-sub">the short version, in three steps.</p>
@@ -72,8 +77,8 @@ const faq = [
         <span class="bgb-when">3 · after the window</span>
         <b>judges rank, winners split</b>
         <p>
-          an independent panel scores every entry against the published criteria. winners
-          share the pool on the split published with the brief.
+          three independent judges score every entry against the published criteria. the
+          pool splits evenly across the three categories, one winner each.
         </p>
       </div>
     </div>
@@ -92,9 +97,11 @@ const faq = [
       }
     </dl>
 
+    {/* Astro collapses whitespace between a text line and an <a> on the next
+        line — the explicit {' '} separators are load-bearing. */}
     <p class="bgb-fine">
-      this is the plain english version · <a href="/thebuildgames/terms">the Build Games terms</a>
-      are the contract · 18+, void where prohibited ·
+      this is the plain english version · <a href="/thebuildgames/terms">the Build Games terms</a>{' '}
+      are the contract · 18+, void where prohibited ·{' '}
       <a href="/thebuildgames">back to the board</a>
     </p>
   </main>

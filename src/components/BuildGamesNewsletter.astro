@@ -6,12 +6,15 @@
    gate, caps all live there); source=buildgames. The inline variant is
    deliberately QUIETER than a sponsor row: no border glow, no bid affordance,
    plainly not a paid placement. */
+import { gamesStarted } from '../lib/buildgames.js';
+
 const { variant = 'section' } = Astro.props; // 'inline' | 'section'
+const started = gamesStarted();
 ---
 
 <div class:list={['bgn', `bgn-${variant}`]}>
   <p class="bgn-lead">
-    {variant === 'inline' ? 'building instead of sponsoring?' : 'be there when it starts'}
+    {variant === 'inline' ? 'building instead of sponsoring?' : started ? 'follow the games' : 'be there when it starts'}
   </p>
   <form class="bgn-form" method="post" action="/api/waitlist" data-digest>
     <label class="hp" aria-hidden="true">
@@ -22,7 +25,10 @@ const { variant = 'section' } = Astro.props; // 'inline' | 'section'
     <input type="email" name="email" required placeholder="you@wherever.dev" maxlength="254" aria-label="email address" />
     <button class="btn primary" type="submit">notify me</button>
   </form>
-  <p class="bgn-sub">join the newsletter · one email when the games open · <a href="/thebuildgames/builders">how it works</a></p>
+  <p class="bgn-sub">
+    {started ? 'join the newsletter · the results and winners, by email' : 'join the newsletter · one email when the games open'}
+    {' · '}<a href="/thebuildgames/builders">how it works</a>
+  </p>
 </div>
 
 <style>

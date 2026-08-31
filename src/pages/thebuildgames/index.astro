@@ -6,17 +6,25 @@ import Base from '../../layouts/Base.astro';
 import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { bgLeaderboard, bgPotCents } from '../../lib/db.js';
+import { bgEntryCount, bgLeaderboard, bgPotCents } from '../../lib/db.js';
 import {
+  BLURB_MAX,
+  CATEGORIES,
+  JUDGES,
   MAX_BID_CENTS,
   MIN_ENTRY_CENTS,
   MIN_TOPUP_CENTS,
+  NAME_MAX,
   TAGLINE_MAX,
+  THEME_ONE_LINER,
   biddingOpen,
   countdownParts,
   displayName,
+  entriesOpen,
   fillLevel,
+  gamesEndAt,
   gamesStartAt,
+  gamesStarted,
   monogram,
   rankSponsors,
   timeAgo,
@@ -28,19 +36,37 @@ import { onlineCount } from '../../lib/presence.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
-// Live board + pot from the DB.
-const [potCents, board] = await Promise.all([bgPotCents(), bgLeaderboard()]);
+/* THE MIDNIGHT FLIP. Before the start moment this page is the sponsor hype
+   surface (countdown, claim bar first). From the moment BUILDGAMES_START_AT
+   passes it becomes the game surface: hackathon clarity block, the entry
+   form front and centre, categories, judges, then sponsors as a podium with
+   bidding demoted to secondary. Server-side time check per request — no
+   cron, no manual flip; the client countdown reloads open tabs at zero. */
+const started = gamesStarted();
+const canEnter = entriesOpen();
+
+// Live board + pot from the DB (+ the entry counter once the games run).
+const [potCents, board, entryCount] = await Promise.all([
+  bgPotCents(),
+  bgLeaderboard(),
+  started ? bgEntryCount().catch(() => 0) : 0,
+]);
 const ranked = rankSponsors(board);
 const fill = fillLevel(potCents); // 0..MAX_FILL, uncapped/asymptotic
 const bidsOpen = biddingOpen();
 
+// In game phase the top 3 sponsors render as a podium; the list starts at #4.
+const podium = started ? ranked.slice(0, 3) : [];
+const listBase = started ? Math.min(3, ranked.length) : 0;
+const listRanked = ranked.slice(listBase);
+
 // Proper pagination past 50 sponsors (?page=N), rank numbering continuous
 // across pages so #51 is #51, not a fresh #1.
 const PAGE_SIZE = 50;
-const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE));
+const totalPages = Math.max(1, Math.ceil(listRanked.length / PAGE_SIZE));
 const page = Math.min(totalPages, Math.max(1, Number.parseInt(Astro.url.searchParams.get('page') ?? '1', 10) || 1));
-const pageRows = ranked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-const rankOf = (i) => (page - 1) * PAGE_SIZE + i + 1;
+const pageRows = listRanked.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+const rankOf = (i) => listBase + (page - 1) * PAGE_SIZE + i + 1;
 
 // Newsletter placement (Rob's rule): 6+ rows on page 1 -> inline between row
 // #5 and #6; otherwise directly below the sponsors section. Repeated at the
@@ -50,8 +76,11 @@ const nlInline = page === 1 && pageRows.length >= 6;
 // Cable is a live toggle so Rob can compare with/without: ?cable=off hides it.
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
+// The clock counts to the start until the flip, then to the window close.
 const startAt = gamesStartAt();
-const cd = countdownParts(startAt);
+const endAt = gamesEndAt();
+const cdTarget = started ? endAt : startAt;
+const cd = countdownParts(cdTarget);
 
 // Social proof for buyers: live presence (own in-process counter) + the real
 // all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
@@ -106,7 +135,12 @@ const hostOf = (u) => {
 
 <Base
   title="The Build Games · canivibecodeit"
-  description="Sponsors bid for the top spot. 100% of every bid goes to the builders' prize pool. The games begin September 1."
+  description={
+    started
+      ? 'A month-long vibecoding hackathon. Free to enter. 100% of the sponsorship money, less payment processing fees, is paid out to builders. None of it goes to us.'
+      : 'Sponsors bid for the top spot. 100% of the sponsorship money, less payment processing fees, is paid out to builders. The games begin September 1.'
+  }
+  ogImage="/og-buildgames.png"
   hideSponsors={true}
   hideDigest={true}
 >
@@ -122,14 +156,32 @@ const hostOf = (u) => {
       </p>
       <p class="bg-eyebrow">canivibecodeit presents</p>
       <BuildGamesLogo class="bg-logo" />
-      <p class="bg-tagline">
-        Sponsors bid for the top spot. Every dollar goes to the builders.
-      </p>
-      {/* The builder path, front and centre: sponsors get the claim bar below,
-          builders get an unmissable button here instead of a footer link. */}
-      <a class="bg-builders-cta" href="/thebuildgames/builders">
-        building? how it works <span aria-hidden="true">→</span>
-      </a>
+      {started ? (
+        <>
+          {/* The one-screen clarity block: what this is, whose money, who
+              decides, who wins — before anything else on the page. */}
+          <p class="bg-clarity">
+            A month-long vibecoding hackathon. Free to enter.
+            The {usd(potCents)} prize pool is funded by sponsor bids: 100% of the
+            sponsorship money, less payment processing fees, is paid out to builders.
+            None of it goes to us.
+          </p>
+          <p class="bg-clarity-meta">3 categories · 3 independent judges · winners split the pool</p>
+          <p class="bg-theme">{THEME_ONE_LINER}</p>
+        </>
+      ) : (
+        <>
+          <p class="bg-tagline">
+            Sponsors bid for the top spot. 100% of it, less payment processing fees, goes to the builders.
+          </p>
+          {/* The builder path, front and centre: sponsors get the claim bar
+              below, builders get an unmissable button here instead of a
+              footer link. */}
+          <a class="bg-builders-cta" href="/thebuildgames/builders">
+            building? how it works <span aria-hidden="true">→</span>
+          </a>
+        </>
+      )}
     </header>
 
     <!-- THE ORB: a hanging glass sphere that fills with cash as the pool grows -->
@@ -188,17 +240,112 @@ const hostOf = (u) => {
       </div>
     </section>
 
-    <!-- Countdown — below the pot so it doesn't fight the visual -->
-    <section class="bg-countdown" data-countdown data-target={String(startAt)} aria-label="Countdown to the first game">
-      <span class="bg-cd-lead">the first game opens</span>
+    <!-- Countdown — below the pot so it doesn't fight the visual. Counts to
+         the start until the flip, then to the window close (the client
+         reloads at zero, so open tabs flip themselves). -->
+    <section class="bg-countdown" data-countdown data-target={String(cdTarget)} aria-label={started ? 'Countdown to the window close' : 'Countdown to the first game'}>
+      <span class="bg-cd-lead">{started ? 'the build window closes' : 'the first game opens'}</span>
       <span class="bg-cd-row">
         <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-days>{cd.days}</b><span class="bg-cd-unit">d</span></span>
         <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-hours>{cd.hours}</b><span class="bg-cd-unit">h</span></span>
         <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-mins>{cd.minutes}</b><span class="bg-cd-unit">m</span></span>
         <span class="bg-cd-cell"><b class="bg-cd-num" data-cd-secs>{cd.seconds}</b><span class="bg-cd-unit">s</span></span>
       </span>
-      <span class="bg-cd-when">september 1 · midnight new york</span>
+      <span class="bg-cd-when">{started ? 'september 30 · midnight new york' : 'september 1 · midnight new york'}</span>
     </section>
+
+    {/* ---------- GAME PHASE: the entry form, front and centre ---------- */}
+    {started && (<>
+      <section class="bg-enter" id="enter" aria-label="Enter the games">
+        <div class="list-head bg-list-head">
+          <h2>enter the games</h2>
+          {entryCount > 0 && <span class="note">{entryCount} {entryCount === 1 ? 'entry' : 'entries'} so far</span>}
+        </div>
+        {canEnter ? (
+          <form class="bg-enter-form" method="post" action="/api/thebuildgames/enter" data-entry-form>
+            <label class="hp" aria-hidden="true">
+              Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            <div class="bg-enter-row">
+              <label>
+                <span>your name</span>
+                <input type="text" name="name" required maxlength={NAME_MAX} placeholder="ada lovelace" />
+              </label>
+              <label>
+                <span>handle · optional</span>
+                <input type="text" name="handle" maxlength="41" placeholder="@you" />
+              </label>
+            </div>
+            <label>
+              <span>demo url</span>
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="demo_url" required maxlength="300" placeholder="https://your-build.app" />
+              <span class="bg-enter-hint">a public URL anyone can open</span>
+            </label>
+            <label>
+              <span>github repo</span>
+              <input type="text" inputmode="url" autocomplete="url" spellcheck="false" name="repo_url" required maxlength="300" placeholder="https://github.com/you/your-build" />
+              <span class="bg-enter-hint">public repo · the commit history has to show the work happened inside the window</span>
+            </label>
+            <label>
+              <span>what you built · optional, up to {BLURB_MAX} characters</span>
+              <textarea name="blurb" maxlength={BLURB_MAX} rows="2" placeholder="one or two lines"></textarea>
+            </label>
+            <label>
+              <span>email</span>
+              <input type="email" name="email" required maxlength="254" placeholder="you@wherever.dev" />
+              <span class="bg-enter-hint">your edit link goes here · you can change your entry until the window closes</span>
+            </label>
+            <label class="bg-enter-optin">
+              <input type="checkbox" name="newsletter_optin" value="1" />
+              <span>email me the results and winners</span>
+            </label>
+            <div class="bg-enter-actions">
+              <button class="btn primary" type="submit">submit your entry</button>
+              <span class="bg-enter-note">free · no account · one entry per person or team</span>
+            </div>
+            <p class="bg-bid-err" data-entry-err hidden></p>
+          </form>
+        ) : (
+          <p class="bg-enter-closed">the build window has closed · entries are locked for judging.</p>
+        )}
+      </section>
+
+      <section class="bg-cats" aria-label="Prize categories">
+        <div class="list-head bg-list-head">
+          <h2>three categories</h2>
+          <span class="note">each takes a third of the pool · one winner each</span>
+        </div>
+        <ul class="bg-cat-tiles" role="list">
+          {CATEGORIES.map((c, i) => (
+            <li class="bg-cat">
+              <span class="bg-cat-n">{i + 1}</span>
+              <b class="bg-cat-name">{c.name}</b>
+              <p class="bg-cat-line">{c.line}</p>
+              <span class="bg-cat-share">{usd(Math.floor(potCents / 3))} today</span>
+            </li>
+          ))}
+        </ul>
+        <p class="bg-cats-note">judges may name runners-up in each category · recognition, no money attached.</p>
+      </section>
+
+      <section class="bg-judges" aria-label="The judges">
+        <div class="list-head bg-list-head">
+          <h2>the judges</h2>
+          <span class="note">independent · scoring on published criteria · sponsors never judge</span>
+        </div>
+        <ul class="bg-judge-row" role="list">
+          {JUDGES.map((j) => (
+            <li class="bg-judge">
+              <img class="bg-judge-img" src={j.img} alt="" width="96" height="96" loading="lazy" />
+              <b class="bg-judge-name">{j.name}</b>
+              <a class="bg-judge-handle" href={j.url} target="_blank" rel="noopener">@{j.handle}</a>
+              <p class="bg-judge-bio">{j.bio}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>)}
 
     <!-- The buy button, where a buyer actually is: straight under the clock,
          above the board. Scrolling to the bottom to find out how to sponsor
@@ -215,6 +362,7 @@ const hostOf = (u) => {
           data-open-rank={String(openRank)}
           aria-label="Take a spot on the board"
         >
+          {started && <p class="bg-claim-eyebrow">sponsors · you buy visibility, never influence</p>}
           <p class="bg-claim-head">
             <span class="bg-claim-word">take spot</span>
             <span class="bg-stepper">
@@ -259,14 +407,42 @@ const hostOf = (u) => {
       )
     }
 
-    <!-- Leaderboard -->
+    <!-- Leaderboard: in game phase the top 3 stand on a podium and the list
+         continues from #4; before the flip it's the flat ranked list. -->
     <section class="bg-board">
       <div class="list-head bg-list-head">
         <h2>the sponsors</h2>
+        {started && <span class="note">they fund the pool · they don't judge</span>}
       </div>
 
+      {started && podium.length > 0 && (
+        <ol class="bg-podium" role="list">
+          {podium.map((s, i) => (
+            <li class:list={['bg-pod', `bg-pod-${i + 1}`]}>
+              <span class="bg-pod-rank">{i + 1}</span>
+              <span class="bg-pod-logo">
+                {s.icon_url ? (
+                  <img src={s.icon_url} alt="" width="56" height="56" loading="lazy" referrerpolicy="no-referrer" />
+                ) : faviconUrl(s.link) ? (
+                  <img src={faviconUrl(s.link)} alt="" width="56" height="56" loading="lazy" referrerpolicy="no-referrer" />
+                ) : (
+                  <span class="bg-monogram">{monogram(s.name ?? hostOf(s.link) ?? displayName(s))}</span>
+                )}
+              </span>
+              <span class="bg-pod-name">
+                <a href={withUtm(s.link, 'build_games')} rel="sponsored nofollow noopener" target="_blank" data-bg-out={s.id}>
+                  {s.name ?? hostOf(s.link) ?? displayName(s)}
+                </a>
+              </span>
+              {s.tagline && <span class="bg-pod-tagline">{s.tagline}</span>}
+              <span class="bg-pod-amount">{usd(s.cleared_total)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
       {
-        ranked.length > 0 ? (
+        pageRows.length > 0 ? (
           <ol class="bg-rows">
             {pageRows.map((s, i) => (<>
               <li class:list={['bg-row', { lead: rankOf(i) === 1, p2: rankOf(i) === 2, p3: rankOf(i) === 3 }]}>
@@ -298,9 +474,9 @@ const hostOf = (u) => {
               )}
             </>))}
           </ol>
-        ) : (
+        ) : ranked.length === 0 ? (
           <p class="bg-empty">no sponsors yet · the first bid starts the pool.</p>
-        )
+        ) : null
       }
 
       {totalPages > 1 && (
@@ -393,7 +569,7 @@ const hostOf = (u) => {
             <div class="bg-bid-actions">
               <button class="btn primary" type="submit">place bid</button>
               <span class="bg-bid-note">
-                it lists once payment clears · by bidding you agree to the
+                it lists once payment clears · by bidding you agree to the{' '}
                 <a href="/thebuildgames/terms">terms</a>
               </span>
             </div>
@@ -403,6 +579,29 @@ const hostOf = (u) => {
       }
     </section>
 
+    {/* ---------- GAME PHASE: the rules, all on this page ---------- */}
+    {started && (
+      <section class="bg-rules" aria-label="The rules">
+        <div class="list-head bg-list-head">
+          <h2>the rules</h2>
+        </div>
+        <ul class="bg-rules-list" role="list">
+          <li>free entry, always · paying never improves anyone's chances</li>
+          <li>build inside the window · your repo's commit history is the evidence</li>
+          <li>AI tools expected · use whatever you like</li>
+          <li>a public demo URL and a public GitHub repo are required</li>
+          <li>one entry per person or team</li>
+          <li>the pool splits evenly across the 3 categories · one winner each · judges may name runners-up with no money attached</li>
+          <li>3 independent judges decide against the published criteria · their decision is final · sponsors never judge</li>
+          <li>100% of the sponsorship money, less payment processing fees, is paid out to builders · none of it goes to us</li>
+        </ul>
+        <p class="bg-rules-fine">
+          the contract is <a href="/thebuildgames/terms">the Build Games terms</a> · plain-english
+          version for builders: <a href="/thebuildgames/builders">how it works</a>
+        </p>
+      </section>
+    )}
+
     <BuildGamesNewsletter variant="section" />
 
     <!-- The per-row report buttons are gone (they were visual noise on the
@@ -410,9 +609,11 @@ const hostOf = (u) => {
          placement can still point somewhere it shouldn't, and "no route to
          tell us" is not a defensible position. One quiet line, out of the
          way of the board. -->
+    {/* Astro collapses the whitespace between a text line and an <a> on the
+        next line — the explicit {' '} separators are load-bearing. */}
     <p class="bg-terms-foot">
-      <a href="/thebuildgames/builders">for the builders</a> · free skill-judged entry · independent judging ·
-      <a href="/thebuildgames/terms">the Build Games terms</a> ·
+      <a href="/thebuildgames/builders">for the builders</a> · free skill-judged entry · independent judging ·{' '}
+      <a href="/thebuildgames/terms">the Build Games terms</a> ·{' '}
       <a href="mailto:digest@canivibecodeit.com?subject=Build%20Games%20listing%20report">report a listing</a>
     </p>
   </main>
@@ -1498,6 +1699,483 @@ const hostOf = (u) => {
       overflow: hidden;
       font-size: 14px;
       line-height: 1.25;
+    }
+  }
+
+  /* ═══════════ GAME PHASE (post-midnight layout) ═══════════ */
+
+  /* ---------- hero clarity block ---------- */
+  .bg-clarity {
+    margin-top: 12px;
+    margin-inline: auto;
+    max-width: 56ch;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  .bg-clarity-meta {
+    margin-top: 10px;
+    font: 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .bg-theme {
+    margin-top: 14px;
+    margin-inline: auto;
+    max-width: 40ch;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.35;
+    color: var(--primary);
+    text-wrap: balance;
+  }
+
+  /* ---------- entry form (front and centre) ---------- */
+  .bg-enter {
+    padding-top: 44px;
+  }
+
+  .bg-enter-form {
+    max-width: 640px;
+    margin: 12px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 8px 30px -18px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
+  .bg-enter-row {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 520px) {
+    .bg-enter-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .bg-enter-form label > span:first-child {
+    display: block;
+    padding-bottom: 6px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-enter-form input:not([type='checkbox']),
+  .bg-enter-form textarea {
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    font: 14px var(--font-mono);
+    resize: vertical;
+  }
+
+  @media (max-width: 640px) {
+    .bg-enter-form input:not([type='checkbox']),
+    .bg-enter-form textarea {
+      font-size: 16px;
+    }
+  }
+
+  .bg-enter-hint {
+    display: block;
+    padding-top: 6px;
+    font: 11px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-enter-optin {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .bg-enter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bg-enter-note {
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-enter-closed {
+    padding: 24px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ---------- categories ---------- */
+  .bg-cats {
+    padding-top: 44px;
+  }
+
+  .bg-cat-tiles {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .bg-cat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .bg-cat-n {
+    font: 800 13px var(--font-mono);
+    color: var(--primary);
+  }
+
+  .bg-cat-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .bg-cat-line {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .bg-cat-share {
+    margin-top: auto;
+    padding-top: 8px;
+    font: 12px var(--font-mono);
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-cats-note {
+    padding-top: 10px;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ---------- judges ---------- */
+  .bg-judges {
+    padding-top: 44px;
+  }
+
+  .bg-judge-row {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .bg-judge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .bg-judge-img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    outline: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+    outline-offset: -1px;
+    margin-bottom: 6px;
+  }
+
+  .bg-judge-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .bg-judge-handle {
+    font: 12px var(--font-mono);
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .bg-judge-handle:hover {
+    text-decoration: underline;
+  }
+
+  .bg-judge-bio {
+    padding-top: 4px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* ---------- claim bar demotion label ---------- */
+  .bg-claim-eyebrow {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  /* game phase: the claim bar is secondary furniture, give it its own air */
+  .bg-judges ~ .bg-claim,
+  .bg-enter ~ .bg-claim {
+    padding-top: 44px;
+  }
+
+  /* ---------- sponsor podium (#1 centre and big, #2 left, #3 right lower) ---------- */
+  .bg-podium {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    gap: 12px;
+    align-items: end;
+    padding-top: 14px;
+  }
+
+  .bg-pod {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 18px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .bg-pod:hover,
+  .bg-pod:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  .bg-pod-1 {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 26px 18px;
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary), 0 10px 34px -16px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+
+  .bg-pod-2 {
+    grid-column: 1;
+    grid-row: 1;
+    transform: translateY(10px);
+  }
+
+  .bg-pod-3 {
+    grid-column: 3;
+    grid-row: 1;
+    transform: translateY(18px);
+  }
+
+  .bg-pod-rank {
+    font: 800 18px var(--font-display);
+    color: var(--muted);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-pod-1 .bg-pod-rank {
+    font-size: 28px;
+    background: linear-gradient(135deg, #ff7a68, #35d0a5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-pod-logo img,
+  .bg-pod-logo .bg-monogram {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .bg-pod-1 .bg-pod-logo img,
+  .bg-pod-1 .bg-pod-logo .bg-monogram {
+    width: 60px;
+    height: 60px;
+  }
+
+  .bg-pod-name a {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--fg);
+  }
+
+  .bg-pod-1 .bg-pod-name a {
+    font-size: 18px;
+  }
+
+  /* whole card navigates, same stretched-link mechanic as the rows */
+  .bg-pod-name a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+  }
+
+  .bg-pod-name a:hover {
+    color: var(--primary);
+  }
+
+  .bg-pod-tagline {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--fg) 78%, var(--muted));
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bg-pod-amount {
+    padding-top: 4px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bg-pod-1 .bg-pod-amount {
+    font-size: 30px;
+  }
+
+  .bg-podium + .bg-rows {
+    padding-top: 22px;
+  }
+
+  /* ---------- rules ---------- */
+  .bg-rules {
+    padding-top: 44px;
+  }
+
+  .bg-rules-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 8px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .bg-rules-list li {
+    position: relative;
+    padding: 9px 0 9px 22px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--fg) 85%, var(--muted));
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  }
+
+  .bg-rules-list li:last-child {
+    border-bottom: 0;
+  }
+
+  .bg-rules-list li::before {
+    content: '·';
+    position: absolute;
+    left: 6px;
+    color: var(--primary);
+    font-weight: 800;
+  }
+
+  .bg-rules-fine {
+    padding-top: 12px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bg-rules-fine a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bg-rules-fine a:hover {
+    color: var(--fg);
+  }
+
+  /* ---------- game phase, small screens ---------- */
+  @media (max-width: 640px) {
+    .bg-cat-tiles,
+    .bg-judge-row {
+      grid-template-columns: 1fr;
+    }
+
+    /* podium stacks: #1 first (DOM order), full width, no stagger */
+    .bg-podium {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+
+    .bg-pod-1 {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .bg-pod-2 {
+      grid-column: 1;
+      grid-row: 2;
+      transform: none;
+    }
+
+    .bg-pod-3 {
+      grid-column: 1;
+      grid-row: 3;
+      transform: none;
+    }
+
+    .bg-enter,
+    .bg-cats,
+    .bg-judges,
+    .bg-rules {
+      padding-top: 36px;
+    }
+
+    .bg-enter-form {
+      padding: 16px;
     }
   }
 </style>
