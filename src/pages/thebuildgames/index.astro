@@ -365,11 +365,12 @@ const hostOf = (u) => {
           <span class="note">{JUDGES_NOTE}</span>
         </div>
         <ul class="bg-judge-row" role="list">
+          {/* Handle-led by design: @handle is the name line, linked — no
+              real names on the panel (final operator copy, Aug 31). */}
           {JUDGES.map((j) => (
             <li class="bg-judge">
               <img class="bg-judge-img" src={j.img} alt="" width="96" height="96" loading="lazy" />
-              <b class="bg-judge-name">{j.name}</b>
-              <a class="bg-judge-handle" href={j.url} target="_blank" rel="noopener">@{j.handle}</a>
+              <a class="bg-judge-name" href={j.url} target="_blank" rel="noopener">@{j.handle}</a>
               <p class="bg-judge-bio">{j.bio}</p>
             </li>
           ))}
@@ -2018,16 +2019,12 @@ const hostOf = (u) => {
     font-family: var(--font-display);
     font-size: 16px;
     font-weight: 700;
-  }
-
-  .bg-judge-handle {
-    font: 12px var(--font-mono);
-    color: var(--primary);
+    color: var(--fg);
     text-decoration: none;
   }
 
-  .bg-judge-handle:hover {
-    text-decoration: underline;
+  .bg-judge-name:hover {
+    color: var(--primary);
   }
 
   .bg-judge-bio {

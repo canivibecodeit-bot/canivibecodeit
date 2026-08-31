@@ -83,16 +83,16 @@ export const CATEGORIES = [
   },
 ];
 
-// The judges' panel. Portraits are self-hosted under
-// public/thebuildgames/judges/ (never hotlinked). dudufolio is pseudonymous:
-// the handle IS the display name, never a real name (operator directive).
+// The judges' panel — FINAL copy (operator, Aug 31). Handle-led by design:
+// every judge renders as @handle + one-liner, no real names anywhere on the
+// panel (judge 2 is pseudonymous, so all three display consistently), and
+// NO disclosure line under any judge (operator's standing decision).
+// Portraits are self-hosted under public/thebuildgames/judges/ (never
+// hotlinked).
 export const JUDGES = [
-  { name: 'Tony Dinh', handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'maker of TypingMind and DevUtils' },
-  { name: 'dudufolio', handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'designer and maker of Toolfolio and Shotbase' },
-  // BIO_3 pending fresh verification (parent research task) — the final line
-  // arrives shaped like 'founder of CRHQ' + verified products. Placeholder
-  // until then; do not guess products.
-  { name: 'Scheemunai', handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'BIO_3' },
+  { handle: 'tdinh_me', url: 'https://x.com/tdinh_me', img: '/thebuildgames/judges/tdinh_me.jpg', bio: 'maker of TypingMind and DevUtils' },
+  { handle: 'dudufolio', url: 'https://x.com/dudufolio', img: '/thebuildgames/judges/dudufolio.jpg', bio: 'designer and maker of Toolfolio and Shotbase' },
+  { handle: 'scheemunai', url: 'https://x.com/scheemunai', img: '/thebuildgames/judges/scheemunai.jpg', bio: 'founder of CRHQ and maker of TranscriptAPI' },
 ];
 
 // The note beside the judges heading. Heading stays 'the judges'; describing
