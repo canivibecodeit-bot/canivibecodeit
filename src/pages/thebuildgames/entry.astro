@@ -95,7 +95,9 @@ const description = 'Your Build Games entry.';
         {justSubmitted && (
           <aside class="bge-rec">
             <span class="bge-rec-label">while you build · a recommendation</span>
-            <a class="bge-rec-card" href={`/api/thebuildgames/rec?to=howtoai`} target="_blank" rel="noopener">
+            {/* Reciprocal partner arrangement: sponsored+nofollow so no link
+                equity passes through the 302. */}
+            <a class="bge-rec-card" href={`/api/thebuildgames/rec?to=howtoai`} target="_blank" rel="sponsored nofollow noopener">
               <span class="bge-rec-name">{HOWTOAI_REC.name}</span>
               <span class="bge-rec-line">{HOWTOAI_REC.line}</span>
               <span class="bge-rec-go">take a look →</span>

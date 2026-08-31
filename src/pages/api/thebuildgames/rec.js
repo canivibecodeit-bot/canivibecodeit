@@ -5,6 +5,7 @@
 import { bgRecClick, rateLimit } from '../../../lib/db.js';
 import { buildGamesLive } from '../../../lib/flags.js';
 import { clientIp } from '../../../lib/request.js';
+import { withUtm } from '../../../lib/sponsors.js';
 import { HOWTOAI_REC } from '../../../lib/buildgames.js';
 
 const RECS = { howtoai: HOWTOAI_REC };
@@ -22,5 +23,10 @@ export async function GET({ request, clientAddress, url }) {
   } catch {
     /* the count is best-effort; the navigation never is */
   }
-  return new Response(null, { status: 302, headers: { Location: rec.url } });
+  // UTM-tagged so the partner sees the referral in his own stats; noindex on
+  // the redirect as belt on braces (the anchor's rel does the SEO work).
+  return new Response(null, {
+    status: 302,
+    headers: { Location: withUtm(rec.url, 'build_games'), 'X-Robots-Tag': 'noindex' },
+  });
 }
