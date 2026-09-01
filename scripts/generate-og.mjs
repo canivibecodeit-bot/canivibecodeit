@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
+import { SHOWCASE_MODELS } from '../src/lib/models.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const outDir = path.join(root, 'public/og');
@@ -169,6 +170,26 @@ function homeCard(mrr) {
   ]);
 }
 
+/* Model showcase card: same family as the home card. One per registry
+   entry; the page wires ogImage="/og/built-with-<slug>.png". */
+function builtWithCard(model) {
+  return page([
+    logoRow,
+    el('div', { display: 'flex', flexDirection: 'column', gap: 30, marginTop: 56 }, [
+      el('div', { ...mono(26, COLORS.muted), letterSpacing: '0.14em' }, 'MODEL SHOWCASE'),
+      el('div', {
+        fontFamily: 'Space Grotesk', fontSize: 84, fontWeight: 700,
+        color: COLORS.fg, letterSpacing: '-0.02em', lineHeight: 1.05,
+      }, `built with ${model.name}`),
+      el('div', mono(30, COLORS.muted), 'what people one-shotted with it on day one, prompts included.'),
+    ]),
+    el('div', { display: 'flex', marginTop: 'auto', justifyContent: 'space-between' }, [
+      el('div', mono(22, COLORS.muted), `canivibecodeit.com/built-with/${model.slug}`),
+      el('div', mono(22, COLORS.muted), 'the demos and the prompts →'),
+    ]),
+  ]);
+}
+
 function newsletterCard() {
   return page([
     logoRow,
@@ -257,6 +278,9 @@ if (range) {
   await renderCached(homeCard(mrr), 'home.png', `home:${mrr}`, cache);
   await renderCached(siteCard(), 'vibecode-this-site.png', 'site', cache);
   await renderCached(newsletterCard(), 'newsletter.png', 'newsletter:1', cache);
+  for (const m of SHOWCASE_MODELS) {
+    await renderCached(builtWithCard(m), `built-with-${m.slug}.png`, `built-with:${m.slug}:${m.name}:2`, cache);
+  }
   saveCache(cache);
   const { spawnSync } = await import('node:child_process');
   const self = new URL(import.meta.url).pathname;

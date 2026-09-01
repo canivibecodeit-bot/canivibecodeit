@@ -7,10 +7,11 @@
 //   they've posted. This is the page maker names link to.
 import Base from '../../layouts/Base.astro';
 import MakerIcon from '../../components/MakerIcon.astro';
+import BuildRow from '../../components/BuildRow.astro';
 import { buildById, buildUserNames, liveBuilds, userByHandle } from '../../lib/db.js';
 import { buildsLive } from '../../lib/flags.js';
 import { getApp } from '../../lib/apps.js';
-import { BUILD_ID_RE, HANDLE_RE, ago, buildHref, goesLabel } from '../../lib/builds.js';
+import { BUILD_ID_RE, HANDLE_RE, buildHref } from '../../lib/builds.js';
 
 if (!buildsLive()) return new Response(null, { status: 404 });
 
@@ -41,13 +42,6 @@ const replacedPerMo = Math.round(
     0
   )
 );
-const media = (b) => {
-  try {
-    return JSON.parse(b.media || '[]');
-  } catch {
-    return [];
-  }
-};
 ---
 
 <Base
@@ -71,34 +65,7 @@ const media = (b) => {
     </div>
 
     <div class="bd-rows" style="margin-top: 26px;">
-      {
-        builds.map((b) => {
-          const app = b.app_slug ? getApp(b.app_slug) : null;
-          const shots = media(b);
-          return (
-            <a class="bd-row" href={buildHref(names, b)}>
-              <span class="bd-thumb">{shots[0] ? <img src={shots[0]} alt="" loading="lazy" /> : ''}</span>
-              <span class="bd-main">
-                <span class="bd-title-row">
-                  {app && (
-                    <img class="bd-tile" src={`/icons/${app.slug}.png`} alt="" width="22" height="22" loading="lazy" />
-                  )}
-                  <span class="bd-name">{b.name}</span>
-                  <span class="bd-goes">{goesLabel(b)}</span>
-                </span>
-                <span class="bd-meta">
-                  {b.one_liner}
-                  {app?.priceMonthly != null && ` · takes on $${app.priceMonthly}/mo`}
-                </span>
-              </span>
-              <span class="bd-side">
-                <span>{b.tool}</span>
-                <span>{ago(b.created_at)}</span>
-              </span>
-            </a>
-          );
-        })
-      }
+      {builds.map((b) => <BuildRow build={b} {names} app={b.app_slug ? getApp(b.app_slug) : null} showBy={false} priceWord="takes on" />)}
       {builds.length === 0 && <p class="mk-empty">nothing live yet.</p>}
     </div>
 

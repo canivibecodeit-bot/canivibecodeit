@@ -4,10 +4,11 @@
    fetch failure the curated fallback below keeps the form usable. */
 
 const FALLBACK = [
-  'Opus 5',
-  'Sonnet 5',
-  'Fable 5',
-  'Haiku 4.5',
+  'Claude Opus 5',
+  'Claude Sonnet 5',
+  'Claude Fable 5.1',
+  'Claude Fable 5',
+  'Claude Haiku 4.5',
   'GPT-5.2',
   'GPT-5.2-Codex',
   'Gemini 3 Pro',
@@ -56,4 +57,36 @@ export async function modelNames() {
   // First render after a cold start waits at most the 8s fetch timeout; every
   // later render hits the cache.
   return inflight;
+}
+
+/* ---------- model showcases (/built-with/<slug>) ---------- */
+
+/* The registry behind /built-with. One entry per showcased model; the slug
+   is the URL and the key every demo and build is grouped under. */
+export const SHOWCASE_MODELS = [
+  {
+    slug: 'fable-5-1',
+    name: 'Fable 5.1',
+    label: 'Claude Fable 5.1',
+    vendor: 'Anthropic',
+    releasedAt: '2026-09-01',
+  },
+];
+
+/* Canonical slug for any spelling a maker might type: 'Fable 5.1',
+   'Claude Fable 5.1', 'claude-fable-5.1', 'Anthropic: Claude Fable 5.1' all
+   become 'fable-5-1'. Vendor and family prefixes are dropped, everything
+   non-alphanumeric collapses to one dash. */
+export function modelSlug(raw) {
+  return String(raw ?? '')
+    .toLowerCase()
+    .replace(/^[^:]{2,24}:\s*/, '')
+    .replace(/^(anthropic|openai|google|meta|claude)[\s-]+/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function showcaseModel(slugOrName) {
+  const slug = modelSlug(slugOrName);
+  return SHOWCASE_MODELS.find((m) => m.slug === slug) ?? null;
 }

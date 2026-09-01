@@ -5,7 +5,9 @@ import Base from '../../layouts/Base.astro';
 import { buildsLive } from '../../lib/flags.js';
 import { liveBuilds, buildUserNames } from '../../lib/db.js';
 import { getApp } from '../../lib/apps.js';
-import { GOES, ago, buildHref, builderName, goesLabel } from '../../lib/builds.js';
+import BuildRow from '../../components/BuildRow.astro';
+import { GOES } from '../../lib/builds.js';
+import { SHOWCASE_MODELS, modelSlug } from '../../lib/models.js';
 
 if (!buildsLive()) return new Response(null, { status: 404 });
 
@@ -16,12 +18,14 @@ const names = await buildUserNames(all.map((b) => b.user_id));
 // Filters are plain query params so every state has a URL.
 const q = Astro.url.searchParams;
 const goesFilter = Object.hasOwn(GOES, q.get('goes') ?? '') ? q.get('goes') : null;
-const modelFilter = (q.get('model') ?? '').slice(0, 60).toLowerCase() || null;
+// Model filter: canonical slug, so 'Fable 5.1' / 'Claude Fable 5.1' /
+// 'claude-fable-5.1' all land in the same bucket.
+const modelFilter = modelSlug((q.get('model') ?? '').slice(0, 60)) || null;
 const appFilter = q.get('app') && getApp(q.get('app')) ? q.get('app') : null;
 
 const filtered = all.filter((b) => {
   if (goesFilter && b.goes !== goesFilter) return false;
-  if (modelFilter && b.model_norm !== modelFilter) return false;
+  if (modelFilter && modelSlug(b.model_norm ?? b.model) !== modelFilter) return false;
   if (appFilter && b.app_slug !== appFilter) return false;
   return true;
 });
@@ -36,7 +40,8 @@ const rows = filtered.slice((pageNum - 1) * PER_PAGE, pageNum * PER_PAGE);
 // (first spelling seen wins; the typeahead makes those consistent).
 const modelLabels = new Map();
 for (const b of all) {
-  if (b.model_norm && !modelLabels.has(b.model_norm)) modelLabels.set(b.model_norm, b.model);
+  const key = modelSlug(b.model_norm ?? b.model);
+  if (key && !modelLabels.has(key)) modelLabels.set(key, b.model);
 }
 const models = [...modelLabels.keys()].sort();
 
@@ -48,13 +53,6 @@ const replacedPerMo = Math.round(
   replacedSlugs.reduce((sum, slug) => sum + (getApp(slug)?.priceMonthly ?? 0), 0)
 );
 
-const media = (b) => {
-  try {
-    return JSON.parse(b.media || '[]');
-  } catch {
-    return [];
-  }
-};
 const rowApp = (b) => (b.app_slug ? getApp(b.app_slug) : null);
 
 const href = (over = {}) => {
@@ -80,6 +78,13 @@ const href = (over = {}) => {
     <p class="bd-sub">
       what people vibe coded, with the prompts that made it. newest first, failures welcome.
     </p>
+    {SHOWCASE_MODELS.length > 0 && (
+      <p class="bd-showcase-link">
+        {SHOWCASE_MODELS.map((m) => (
+          <a href={`/built-with/${m.slug}`}>built with {m.name} →</a>
+        ))}
+      </p>
+    )}
 
     <div class="bd-stats">
       <div class="bd-stat">
@@ -148,39 +153,12 @@ const href = (over = {}) => {
     }
 
     <div class="bd-rows">
-      {
-        rows.map((b) => {
-          const app = rowApp(b);
-          const shots = media(b);
-          return (
-            <a class="bd-row" href={buildHref(names, b)}>
-              <span class="bd-thumb">{shots[0] ? <img src={shots[0]} alt="" loading="lazy" /> : ''}</span>
-              <span class="bd-main">
-                <span class="bd-title-row">
-                  {app && (
-                    <img class="bd-tile" src={`/icons/${app.slug}.png`} alt="" width="22" height="22" loading="lazy" />
-                  )}
-                  <span class="bd-name">{b.name}</span>
-                  <span class="bd-by">by {builderName(names, b)}</span>
-                  <span class="bd-goes">{goesLabel(b)}</span>
-                </span>
-                <span class="bd-meta">
-                  {b.one_liner}
-                  {app?.priceMonthly != null && ` · replaces $${app.priceMonthly}/mo`}
-                </span>
-              </span>
-              <span class="bd-side">
-                <span>{b.tool}</span>
-                <span>{ago(b.created_at)}</span>
-              </span>
-            </a>
-          );
-        })
-      }
+      {rows.map((b) => <BuildRow build={b} {names} app={rowApp(b)} />)}
       {
         rows.length === 0 && (
           <p class="bd-empty">
-            nothing here yet under that filter. <a href="/post-a-build">yours could be first →</a>
+            {goesFilter || modelFilter || appFilter ? 'nothing here yet under that filter.' : 'nothing here yet.'}{' '}
+            <a href="/post-a-build">yours could be first →</a>
           </p>
         )
       }
@@ -334,6 +312,24 @@ const href = (over = {}) => {
 
   .bd-model-opt[hidden] {
     display: none;
+  }
+
+  .bd-showcase-link {
+    padding-top: 10px;
+    font: 13px var(--font-mono);
+  }
+
+  .bd-showcase-link a {
+    color: var(--primary);
+  }
+
+  /* On a phone a long active model label can push the post button onto a
+     third chip row; give it a full row of its own instead. */
+  @media (max-width: 420px) {
+    .bd-post-btn {
+      flex-basis: 100%;
+      justify-content: center;
+    }
   }
 
   .bd-appnote {

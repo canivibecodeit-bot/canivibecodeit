@@ -36,6 +36,8 @@ const catalog = allApps().map((a) => ({
 
 const q = Astro.url.searchParams;
 const preApp = catalog.find((a) => a.slug === q.get('app'))?.slug ?? '';
+// ?model= prefills the model field (the showcase CTA links here with it).
+const preModel = (q.get('model') ?? '').replace(/[<>]/g, '').trim().slice(0, 60);
 const mediaOn = r2Configured();
 ---
 
@@ -47,6 +49,7 @@ const mediaOn = r2Configured();
   <main
     class="wrap bp-wrap"
     data-preselect-app={preApp || null}
+    data-preselect-model={preModel || null}
     data-signed-in={user ? '1' : null}
   >
     <div class="bp-head">
@@ -103,7 +106,7 @@ const mediaOn = r2Configured();
           <div class="bp-field">
             <label class="bp-flabel" for="bp-model">model · optional</label>
             <div class="bp-combo" data-bd-combo="models">
-              <input id="bp-model" name="model" type="text" maxlength="60" placeholder="Claude Opus 5" autocomplete="off" />
+              <input id="bp-model" name="model" type="text" maxlength="60" placeholder="Claude Opus 5" autocomplete="off" value={preModel} />
               <div class="bp-results" hidden></div>
             </div>
           </div>

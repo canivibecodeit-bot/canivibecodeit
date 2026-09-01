@@ -1,5 +1,6 @@
 import { allApps, alternativesSitemapApps, productsSitemap, categoriesInUse, moatsInUse } from '../lib/apps.js';
-import { challengeLive } from '../lib/flags.js';
+import { buildsLive, challengeLive } from '../lib/flags.js';
+import { SHOWCASE_MODELS } from '../lib/models.js';
 
 export async function GET() {
   const base = 'https://canivibecodeit.com';
@@ -20,6 +21,7 @@ export async function GET() {
     `${base}/newsletter`,
     `${base}/best-vibe-coding-tools`,
     `${base}/vibecode-this-site`,
+    ...(buildsLive() ? [`${base}/built-with`, ...SHOWCASE_MODELS.map((m) => `${base}/built-with/${m.slug}`)] : []),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

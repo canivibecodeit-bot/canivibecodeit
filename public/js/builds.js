@@ -613,6 +613,12 @@
       }
     } catch {}
 
+    /* ?model= prefill (the showcase CTA): applied after the draft restore so
+       a draft with an empty model field cannot blank a deliberate choice. */
+    const preModel = wrap.dataset.preselectModel;
+    const modelInput = $('#bp-model');
+    if (preModel && modelInput && !modelInput.value) modelInput.value = preModel;
+
     /* Files stashed while signed out: upload them now if a session exists,
        otherwise re-preview them so nothing looks lost. */
     stashedFiles().then(async (files) => {

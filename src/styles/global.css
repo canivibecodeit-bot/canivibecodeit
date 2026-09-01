@@ -931,6 +931,46 @@ h3 {
   border-color: var(--primary);
 }
 
+/* The model-showcase strip: one 40px row directly under the games strip. */
+.hatch-strip.model-strip {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 10px;
+  height: 40px;
+  margin-top: 10px;
+  padding: 0 14px 0 12px;
+  background: transparent;
+  color: var(--fg);
+}
+
+[data-theme='light'] .hatch-strip.model-strip {
+  background: var(--surface);
+}
+
+.model-strip .ms-title {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.model-strip .ms-counts {
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.model-strip .hs-cta {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .model-strip .ms-counts,
+  .model-strip .ms-cta-word {
+    display: none;
+  }
+}
+
 @media (max-width: 760px) {
   .hatch-strip {
     font-size: 12px;

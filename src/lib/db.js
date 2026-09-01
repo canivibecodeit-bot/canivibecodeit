@@ -340,6 +340,32 @@ const SCHEMA_SQLITE = `
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (src, day)
   );
+  /* Model showcase demos (/built-with/<model>): curated posts pulled from
+     X / GitHub / YouTube / the web, media self-hosted on R2, text short and
+     editable. status = live | hidden. Ordered by featured_order. */
+  CREATE TABLE IF NOT EXISTS model_demos (
+    id TEXT PRIMARY KEY,
+    model_slug TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'x',
+    source_url TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    author_handle TEXT,
+    author_name TEXT,
+    author_avatar_url TEXT,
+    text TEXT,
+    media_kind TEXT NOT NULL DEFAULT 'none',
+    media_url TEXT,
+    poster_url TEXT,
+    width INTEGER,
+    height INTEGER,
+    featured_order INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'live',
+    fetched_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS model_demos_source ON model_demos (model_slug, source, source_id);
+  CREATE INDEX IF NOT EXISTS model_demos_model ON model_demos (model_slug, status, featured_order);
 `;
 
 const SCHEMA_PG = `
@@ -643,6 +669,29 @@ const SCHEMA_PG = `
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (src, day)
   );
+  CREATE TABLE IF NOT EXISTS model_demos (
+    id TEXT PRIMARY KEY,
+    model_slug TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'x',
+    source_url TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    author_handle TEXT,
+    author_name TEXT,
+    author_avatar_url TEXT,
+    text TEXT,
+    media_kind TEXT NOT NULL DEFAULT 'none',
+    media_url TEXT,
+    poster_url TEXT,
+    width INTEGER,
+    height INTEGER,
+    featured_order INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'live',
+    fetched_at BIGINT,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS model_demos_source ON model_demos (model_slug, source, source_id);
+  CREATE INDEX IF NOT EXISTS model_demos_model ON model_demos (model_slug, status, featured_order);
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
@@ -798,6 +847,23 @@ function bgEntryParts(fields) {
 }
 
 const bgEntryRow = numericRow(['created_at', 'updated_at', 'newsletter_optin']);
+
+/* Model demos: writable fields for the curation API, BIGINT coercion. */
+const MD_FIELDS = [
+  'author_handle', 'author_name', 'author_avatar_url', 'text', 'media_kind', 'media_url',
+  'poster_url', 'width', 'height', 'featured_order', 'status', 'fetched_at', 'updated_at',
+];
+const MD_COLS = [
+  'id', 'model_slug', 'source', 'source_url', 'source_id', 'author_handle', 'author_name',
+  'author_avatar_url', 'text', 'media_kind', 'media_url', 'poster_url', 'width', 'height',
+  'featured_order', 'status', 'fetched_at', 'created_at', 'updated_at',
+];
+function mdParts(fields) {
+  const keys = Object.keys(fields).filter((k) => MD_FIELDS.includes(k));
+  if (keys.length === 0) throw new Error('updateModelDemo: no writable fields');
+  return keys;
+}
+const mdRow = numericRow(['width', 'height', 'featured_order', 'fetched_at', 'created_at', 'updated_at']);
 
 let driver;
 
@@ -1520,6 +1586,36 @@ async function pgDriver() {
       const r = await pool.query('SELECT src, day, count FROM rec_impressions WHERE day >= $1 ORDER BY day, src', [sinceDay]);
       return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
     },
+    /* ---- model demos ---- */
+    async insertModelDemo(d) {
+      await pool.query(
+        `INSERT INTO model_demos (${MD_COLS.join(', ')}) VALUES (${MD_COLS.map((_, i) => `$${i + 1}`).join(', ')})`,
+        MD_COLS.map((c) => d[c] ?? null)
+      );
+    },
+    async updateModelDemo(id, fields) {
+      const keys = mdParts(fields);
+      const r = await pool.query(
+        `UPDATE model_demos SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`,
+        [id, ...keys.map((k) => fields[k])]
+      );
+      return r.rowCount;
+    },
+    async modelDemoBySource(modelSlug, source, sourceId) {
+      const r = await pool.query('SELECT * FROM model_demos WHERE model_slug = $1 AND source = $2 AND source_id = $3', [modelSlug, source, sourceId]);
+      return mdRow(r.rows[0]);
+    },
+    async modelDemoById(id) {
+      const r = await pool.query('SELECT * FROM model_demos WHERE id = $1', [id]);
+      return mdRow(r.rows[0]);
+    },
+    async modelDemos(modelSlug, statuses) {
+      const r = await pool.query(
+        'SELECT * FROM model_demos WHERE model_slug = $1 AND status = ANY($2) ORDER BY featured_order ASC, created_at ASC',
+        [modelSlug, statuses]
+      );
+      return r.rows.map(mdRow);
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -2180,6 +2276,30 @@ async function sqliteDriver() {
     async recImpressionRows(sinceDay) {
       return db.prepare('SELECT src, day, count FROM rec_impressions WHERE day >= ? ORDER BY day, src').all(sinceDay);
     },
+    /* ---- model demos ---- */
+    async insertModelDemo(d) {
+      db.prepare(`INSERT INTO model_demos (${MD_COLS.join(', ')}) VALUES (${MD_COLS.map(() => '?').join(', ')})`)
+        .run(...MD_COLS.map((c) => d[c] ?? null));
+    },
+    async updateModelDemo(id, fields) {
+      const keys = mdParts(fields);
+      return db
+        .prepare(`UPDATE model_demos SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`)
+        .run(...keys.map((k) => fields[k]), id).changes;
+    },
+    async modelDemoBySource(modelSlug, source, sourceId) {
+      return mdRow(db.prepare('SELECT * FROM model_demos WHERE model_slug = ? AND source = ? AND source_id = ?').get(modelSlug, source, sourceId));
+    },
+    async modelDemoById(id) {
+      return mdRow(db.prepare('SELECT * FROM model_demos WHERE id = ?').get(id));
+    },
+    async modelDemos(modelSlug, statuses) {
+      const marks = statuses.map(() => '?').join(', ');
+      return db
+        .prepare(`SELECT * FROM model_demos WHERE model_slug = ? AND status IN (${marks}) ORDER BY featured_order ASC, created_at ASC`)
+        .all(modelSlug, ...statuses)
+        .map(mdRow);
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -2480,6 +2600,13 @@ export async function recClick(src, day) { return (await getDriver()).recClick(s
 export async function recClickRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickRows(sinceDay); }
 export async function recImpression(src, day) { return (await getDriver()).recImpression(src, day); }
 export async function recImpressionRows(sinceDay = '0000-00-00') { return (await getDriver()).recImpressionRows(sinceDay); }
+
+/* ---- model demos (/built-with) ---- */
+export async function insertModelDemo(d) { return (await getDriver()).insertModelDemo(d); }
+export async function updateModelDemo(id, fields) { return (await getDriver()).updateModelDemo(id, { ...fields, updated_at: Date.now() }); }
+export async function modelDemoBySource(modelSlug, source, sourceId) { return (await getDriver()).modelDemoBySource(modelSlug, source, sourceId); }
+export async function modelDemoById(id) { return (await getDriver()).modelDemoById(id); }
+export async function modelDemos(modelSlug, statuses = ['live']) { return (await getDriver()).modelDemos(modelSlug, statuses); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });

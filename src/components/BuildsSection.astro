@@ -5,7 +5,8 @@
 // reads as an ad; two reads as a scene).
 import { buildsLive } from '../lib/flags.js';
 import { liveBuilds, buildUserNames } from '../lib/db.js';
-import { ago, buildHref, builderName, goesLabel } from '../lib/builds.js';
+import BuildRow from './BuildRow.astro';
+import { buildHref, builderName } from '../lib/builds.js';
 
 const { app } = Astro.props;
 
@@ -21,13 +22,6 @@ if (buildsLive()) {
 }
 const shown = builds.slice(0, 3);
 const baseName = app.name.split(' / ')[0];
-const media = (b) => {
-  try {
-    return JSON.parse(b.media || '[]');
-  } catch {
-    return [];
-  }
-};
 ---
 
 {
@@ -52,34 +46,21 @@ const media = (b) => {
 
       <div class="bd-rows" style="margin-top: 18px;">
         {shown.map((b) => (
-          <div class="bd-row">
-            <span class="bd-thumb lg">
-              {media(b)[0] ? <img src={media(b)[0]} alt="" loading="lazy" /> : ''}
+          <BuildRow build={b} {names} as="div" thumb="lg" inlineMeta>
+            <span class="bd-links">
+              {b.demo_url && (
+                <a href={b.demo_url} target="_blank" rel="ugc nofollow noopener">
+                  live demo ↗
+                </a>
+              )}
+              {b.repo_url && (
+                <a href={b.repo_url} target="_blank" rel="ugc nofollow noopener">
+                  repo ↗
+                </a>
+              )}
+              <a href={buildHref(names, b)}>the build →</a>
             </span>
-            <div class="bd-main">
-              <div class="bd-title-row">
-                <span class="bd-name">{b.name}</span>
-                <span class="bd-by">by {builderName(names, b)}</span>
-                <span class="bd-goes">{goesLabel(b)}</span>
-              </div>
-              <span class="bd-meta">
-                {b.one_liner} · {b.tool} · {ago(b.created_at)}
-              </span>
-              <div class="bd-links">
-                {b.demo_url && (
-                  <a href={b.demo_url} target="_blank" rel="ugc nofollow noopener">
-                    live demo ↗
-                  </a>
-                )}
-                {b.repo_url && (
-                  <a href={b.repo_url} target="_blank" rel="ugc nofollow noopener">
-                    repo ↗
-                  </a>
-                )}
-                <a href={buildHref(names, b)}>the build →</a>
-              </div>
-            </div>
-          </div>
+          </BuildRow>
         ))}
       </div>
 

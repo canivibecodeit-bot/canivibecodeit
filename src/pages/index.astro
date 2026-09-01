@@ -5,9 +5,10 @@ import AppRow from '../components/AppRow.astro';
 import VisitorGlobe from '../components/VisitorGlobe.astro';
 import DigestCard from '../components/DigestCard.astro';
 import { allApps, appsWithAlternativesPage, topCategories, categoriesInUse } from '../lib/apps.js';
-import { bgPotCents, voteCounts } from '../lib/db.js';
+import { bgPotCents, liveBuilds, modelDemos, voteCounts } from '../lib/db.js';
 import { buildGamesLive, buildsLive } from '../lib/flags.js';
 import { usd } from '../lib/buildgames.js';
+import { SHOWCASE_MODELS, modelSlug } from '../lib/models.js';
 
 // The Build Games strip carries the LIVE pool number (0 hides the figure,
 // the link still stands). Never let a DB hiccup take the homepage down.
@@ -17,6 +18,20 @@ if (buildGamesLive()) {
     gamesPotCents = await bgPotCents();
   } catch {
     gamesPotCents = 0;
+  }
+}
+
+// The model-showcase strip under the games strip: real counts, hidden on
+// phones. The first registry entry is the featured showcase.
+const showcase = SHOWCASE_MODELS[0] ?? null;
+let showcaseDemos = 0;
+let showcaseBuilds = 0;
+if (showcase && buildsLive()) {
+  try {
+    showcaseDemos = (await modelDemos(showcase.slug, ['live'])).length;
+    showcaseBuilds = (await liveBuilds()).filter((b) => modelSlug(b.model_norm ?? b.model) === showcase.slug).length;
+  } catch {
+    /* the strip still renders without counts */
   }
 }
 
@@ -156,6 +171,18 @@ const jsonld = [
             alternatives across {altApps.length} apps
           </span>
           <span class="hs-cta">browse them →</span>
+        </a>
+      )
+    }
+    {
+      showcase && buildsLive() && (
+        <a class="hatch-strip model-strip" href={`/built-with/${showcase.slug}`}>
+          <span class="new-tag">NEW</span>
+          <span class="ms-title">built with {showcase.name}</span>
+          <span class="ms-counts">
+            {' · '}{showcaseDemos} {showcaseDemos === 1 ? 'demo' : 'demos'} from X · {showcaseBuilds} {showcaseBuilds === 1 ? 'build' : 'builds'} · day one
+          </span>
+          <span class="hs-cta"><span class="ms-cta-word">see the showcase </span>→</span>
         </a>
       )
     }

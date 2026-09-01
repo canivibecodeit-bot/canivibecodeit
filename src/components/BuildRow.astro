@@ -1,0 +1,55 @@
+---
+/* One build in a list. The same row the /builds feed, the maker page, the
+   verdict-page section and the model showcase all draw, so the markup lives
+   once (audit item). Styles are the existing global .bd-* classes.
+   props: build, names, app (optional), as 'a' (whole row links to the build)
+   or 'div' (static, with an optional links slot), showBy, priceWord
+   ('replaces' | 'takes on'), thumb ('' | 'lg'), inlineMeta (tool and age in
+   the meta line instead of the side column). */
+import { ago, buildHref, builderName, goesLabel } from '../lib/builds.js';
+
+const {
+  build: b,
+  names,
+  app = null,
+  as = 'a',
+  showBy = true,
+  priceWord = 'replaces',
+  thumb = '',
+  inlineMeta = false,
+} = Astro.props;
+
+const shots = (() => {
+  try {
+    return JSON.parse(b.media || '[]');
+  } catch {
+    return [];
+  }
+})();
+const Tag = as === 'div' ? 'div' : 'a';
+const linkProps = as === 'div' ? {} : { href: buildHref(names, b) };
+---
+
+<Tag class="bd-row" {...linkProps}>
+  <span class:list={['bd-thumb', thumb]}>{shots[0] ? <img src={shots[0]} alt="" loading="lazy" /> : ''}</span>
+  <span class="bd-main">
+    <span class="bd-title-row">
+      {app && <img class="bd-tile" src={`/icons/${app.slug}.png`} alt="" width="22" height="22" loading="lazy" />}
+      <span class="bd-name">{b.name}</span>
+      {showBy && <span class="bd-by">by {builderName(names, b)}</span>}
+      <span class="bd-goes">{goesLabel(b)}</span>
+    </span>
+    <span class="bd-meta">
+      {b.one_liner}
+      {inlineMeta && ` · ${b.tool} · ${ago(b.created_at)}`}
+      {!inlineMeta && app?.priceMonthly != null && ` · ${priceWord} $${app.priceMonthly}/mo`}
+    </span>
+    <slot />
+  </span>
+  {!inlineMeta && (
+    <span class="bd-side">
+      <span>{b.tool}</span>
+      <span>{ago(b.created_at)}</span>
+    </span>
+  )}
+</Tag>

@@ -60,7 +60,8 @@ const recHideHash = createHash('sha256').update(REC_HIDE_SCRIPT, 'utf8').digest(
      screenshots served from the R2 media host (R2_PUBLIC_BASE) ride the
      same allowance.
    - font-src data:: Vite inlines sub-4KB font subsets into the CSS.
-   - media-src: the header radio streams from nightride.fm.
+   - media-src: the header radio streams from nightride.fm; showcase demo
+     videos are self-hosted on the R2 media domain.
    - form-action: the sponsor checkout form ends in a redirect to Stripe,
      which some browsers validate against form-action. */
 const POLICY = [
@@ -70,7 +71,7 @@ const POLICY = [
   "img-src 'self' data: https:",
   "font-src 'self' data:",
   "connect-src 'self'",
-  "media-src 'self' https://stream.nightride.fm",
+  "media-src 'self' https://stream.nightride.fm https://media.canivibecodeit.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self' https://checkout.stripe.com",
