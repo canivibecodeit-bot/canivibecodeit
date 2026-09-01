@@ -7,7 +7,14 @@
    the endpoint never echoes anything back.
 
    NEVER widen the policy from a report alone: reports are forgeable and a
-   line here proves nothing. Reproduce the violation in a real browser first. */
+   line here proves nothing. Reproduce the violation in a real browser first.
+
+   OPEN QUESTION (2026-09-01): under Report-Only, WebKit reported media-src
+   violations for every showcase mp4 on /built-with/fable-5-1 even though
+   the media host is allowed. Until that is understood and reproduced, CSP
+   must NOT be enforced (CSP_ENFORCE stays unset), or enforcing would blank
+   every showcase video for Safari users. The user-agent and disposition
+   are logged below precisely so a burst like that can be tied to an engine. */
 import { rateLimit } from '../../lib/db.js';
 import { clientIp } from '../../lib/request.js';
 
@@ -20,6 +27,7 @@ const FIELDS = [
   ['source-file', 'sourceFile', true],
   ['line-number', 'lineNumber', false],
   ['script-sample', 'sample', false],
+  ['disposition', 'disposition', false],
 ];
 const STRIP = /[\u0000-\u001f\u007f\u2028\u2029\u202a-\u202e]/g;
 
@@ -70,7 +78,10 @@ export async function POST({ request, clientAddress }) {
       const raw = report[kebab] ?? report[camel];
       return `${kebab}=${clean(isUrl ? pathOnly(raw) : raw)}`;
     }).join(' ');
-    console.warn(`csp-report: ${line}`);
+    // Attribution: a sanitised, truncated user-agent so a burst of reports
+    // can be tied to an engine (the report body itself never carries one).
+    const ua = String(request.headers.get('user-agent') ?? '').replace(STRIP, ' ').slice(0, 80);
+    console.warn(`csp-report: ${line} ua=${ua}`);
   } catch {
     // A malformed report is not our problem.
   }

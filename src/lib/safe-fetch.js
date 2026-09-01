@@ -100,25 +100,33 @@ function pinnedGet(url, { maxBytes, timeoutMs, headers, skipBody }) {
         const status = res.statusCode ?? 0;
         const location = res.headers.location ?? null;
         const contentType = res.headers['content-type'] ?? '';
+        // Origin-declared size (null when absent): callers that store bytes
+        // compare it with what arrived, so a capped read is never mistaken
+        // for a whole file.
+        const declared = Number.parseInt(res.headers['content-length'] ?? '', 10);
+        const contentLength = Number.isFinite(declared) ? declared : null;
 
         if (skipBody || status < 200 || status >= 300) {
           res.destroy();
-          return resolve({ status, location, contentType, body: null });
+          return resolve({ status, location, contentType, contentLength, truncated: false, body: null });
         }
 
         const chunks = [];
         let size = 0;
+        let truncated = false;
         res.on('data', (chunk) => {
           size += chunk.length;
           if (size > maxBytes) {
             chunks.push(chunk.subarray(0, chunk.length - (size - maxBytes)));
-            res.destroy(); // cap hit — stop reading, keep what we have
+            truncated = true; // cap hit: what we keep is NOT the whole file
+            res.destroy();
             return;
           }
           chunks.push(chunk);
         });
-        res.on('end', () => resolve({ status, location, contentType, body: Buffer.concat(chunks) }));
-        res.on('close', () => resolve({ status, location, contentType, body: Buffer.concat(chunks) }));
+        const finish = () => resolve({ status, location, contentType, contentLength, truncated, body: Buffer.concat(chunks) });
+        res.on('end', finish);
+        res.on('close', finish);
         res.on('error', reject);
       }
     );

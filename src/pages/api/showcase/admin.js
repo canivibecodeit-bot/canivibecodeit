@@ -26,7 +26,10 @@ export async function POST({ request }) {
   const urls = Array.isArray(body.urls) ? body.urls.map(String).slice(0, 50) : [];
   if (urls.length === 0) return noindex(json({ error: 'urls[] required' }, 400));
   const lines = [];
-  const results = await ingestUrls({ model: model.slug, urls, dryRun: !!body.dryRun, log: (l) => lines.push(l) });
+  // keepOrder: true = refresh media only, false = the list is the new order;
+  // omitted = a single URL keeps its slot, a list re-orders.
+  const keepOrder = typeof body.keepOrder === 'boolean' ? body.keepOrder : null;
+  const results = await ingestUrls({ model: model.slug, urls, dryRun: !!body.dryRun, keepOrder, log: (l) => lines.push(l) });
   return noindex(json({ ok: true, model: model.slug, results, log: lines }));
 }
 

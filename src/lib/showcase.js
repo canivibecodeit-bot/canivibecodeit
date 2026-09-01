@@ -91,24 +91,27 @@ export function pickMedia(synd, fx) {
     const fxFormats = (fx?.media?.videos?.[0]?.formats ?? fxMedia?.formats ?? [])
       .filter((f) => f.container === 'mp4' && f.url && typeof f.bitrate === 'number')
       .sort((a, b) => b.bitrate - a.bitrate);
-    let chosen = null;
-    for (const f of fxFormats) {
-      const estBytes = durationS > 0 ? (f.bitrate * durationS) / 8 : 0;
-      if (!estBytes || estBytes <= MAX_VIDEO_BYTES) {
-        chosen = f.url;
-        break;
-      }
-    }
-    if (!chosen) {
-      // syndication lists variants in ascending size without bitrates; the
-      // last mp4 is the largest, the one before it the safer pick.
+    /* Candidate mp4s, best first: fxtwitter formats whose estimated size
+       (bitrate x duration) fits the budget, largest first, then the smaller
+       ones as fall-backs; else the syndication variants, largest first. The
+       hosting step walks this list and rejects anything that arrives
+       truncated, so an under-estimate can never ship a corrupt clip. */
+    let variants = fxFormats
+      .filter((f) => {
+        const estBytes = durationS > 0 ? (f.bitrate * durationS) / 8 : 0;
+        return !estBytes || estBytes <= MAX_VIDEO_BYTES;
+      })
+      .map((f) => f.url);
+    if (variants.length === 0) {
       const mp4s = (synd?.video?.variants ?? []).filter((v) => v.type === 'video/mp4' && v.src).map((v) => v.src);
-      chosen = mp4s.length > 1 ? mp4s[mp4s.length - 2] : mp4s[0] ?? fxMedia?.url ?? null;
+      variants = mp4s.reverse();
+      if (variants.length === 0 && fxMedia?.url) variants = [fxMedia.url];
     }
-    if (!chosen) return { kind: 'none' };
+    if (variants.length === 0) return { kind: 'none' };
     return {
       kind: type === 'animated_gif' ? 'gif' : 'video',
-      url: chosen,
+      url: variants[0],
+      variants,
       poster: details?.media_url_https ?? fxMedia?.thumbnail_url ?? null,
       width,
       height,
@@ -161,22 +164,35 @@ async function hostImage(url, key, { w, h, fit = 'inside' }) {
   }
 }
 
-async function hostVideo(url, key) {
-  if (!url) return null;
-  if (!r2Configured()) return { url, hosted: false };
-  try {
-    const res = await fetchBytes(url, MAX_VIDEO_BYTES + 512 * 1024, 90000);
-    if (!res || !/video\/mp4|application\/octet-stream/.test(res.contentType)) return { url, hosted: false };
-    await r2Put(key, res.body, 'video/mp4');
-    return { url: r2PublicUrl(key), hosted: true };
-  } catch {
-    return { url, hosted: false };
+/* Walks the candidate mp4s best-first and hosts the first one that arrives
+   WHOLE: a body that hit the byte cap (truncated) or that disagrees with the
+   origin content-length is rejected and the next smaller variant is tried.
+   Returns null when no variant fits, so the caller falls back to the
+   poster image rather than a remote video URL or corrupt bytes. Without R2
+   (the mirror) the best remote URL is kept for review. */
+async function hostVideo(variants, key) {
+  const list = (variants ?? []).filter(Boolean);
+  if (list.length === 0) return null;
+  if (!r2Configured()) return { url: list[0], hosted: false };
+  for (const url of list) {
+    try {
+      const res = await fetchBytes(url, MAX_VIDEO_BYTES, 90000);
+      if (!res || !/video\/mp4|application\/octet-stream/.test(res.contentType)) continue;
+      if (res.truncated) continue;
+      if (res.contentLength != null && res.body.length !== res.contentLength) continue;
+      if (res.body.length === 0) continue;
+      await r2Put(key, res.body, 'video/mp4');
+      return { url: r2PublicUrl(key), hosted: true };
+    } catch {
+      /* try the next smaller variant */
+    }
   }
+  return null;
 }
 
 /* ---------- one URL → one row ---------- */
 
-export async function ingestXUrl({ modelSlug, url, order, dryRun = false }) {
+export async function ingestXUrl({ modelSlug, url, order, dryRun = false, keepOrder = false }) {
   const parsed = parseXUrl(url);
   if (!parsed) return { url, ok: false, error: 'not an x.com status url' };
   const { id, canonical } = parsed;
@@ -193,42 +209,56 @@ export async function ingestXUrl({ modelSlug, url, order, dryRun = false }) {
   const summary = { url: canonical, id, handle, kind: media.kind, width: media.width, height: media.height, text: text.slice(0, 80) };
   if (dryRun) return { ...summary, ok: true, dryRun: true };
 
-  const avatar = await hostImage(avatarRemote, `showcase/avatars/${handle.toLowerCase()}.webp`, { w: 96, h: 96, fit: 'cover' });
+  /* Keys carry fetched_at: r2Put marks objects immutable for a year at the
+     edge, so a re-ingest under the same key would keep serving old bytes.
+     A new key per fetch means a refresh really refreshes. */
+  const now = Date.now();
+  const stem = `showcase/${modelSlug}/${id}-${now}`;
+  const avatar = await hostImage(avatarRemote, `showcase/avatars/${handle.toLowerCase()}-${now}.webp`, { w: 96, h: 96, fit: 'cover' });
+  let kind = media.kind;
   let mediaUrl = null;
   let posterUrl = null;
   let hosted = false;
   if (media.kind === 'image') {
-    const img = await hostImage(media.url, `showcase/${modelSlug}/${id}.webp`, { w: 1600, h: 1600 });
+    const img = await hostImage(media.url, `${stem}.webp`, { w: 1600, h: 1600 });
     mediaUrl = img?.url ?? null;
     hosted = !!img?.hosted;
   } else if (media.kind === 'video' || media.kind === 'gif') {
     const [vid, poster] = await Promise.all([
-      hostVideo(media.url, `showcase/${modelSlug}/${id}.mp4`),
-      hostImage(media.poster, `showcase/${modelSlug}/${id}-poster.webp`, { w: 1600, h: 1600 }),
+      hostVideo(media.variants ?? [media.url], `${stem}.mp4`),
+      hostImage(media.poster, `${stem}-poster.webp`, { w: 1600, h: 1600 }),
     ]);
-    mediaUrl = vid?.url ?? null;
-    posterUrl = poster?.url ?? null;
-    hosted = !!vid?.hosted;
+    if (vid) {
+      mediaUrl = vid.url;
+      posterUrl = poster?.url ?? null;
+      hosted = !!vid.hosted;
+    } else if (poster?.url) {
+      // no variant arrived whole: the card becomes an image of the poster
+      kind = 'image';
+      mediaUrl = poster.url;
+      hosted = !!poster.hosted;
+    }
   }
 
-  const now = Date.now();
   const existing = await modelDemoBySource(modelSlug, 'x', id);
   const fields = {
     author_handle: handle,
     author_name: name,
     author_avatar_url: avatar?.url ?? null,
-    media_kind: mediaUrl ? media.kind : 'none',
+    media_kind: mediaUrl ? kind : 'none',
     media_url: mediaUrl,
     poster_url: posterUrl,
     width: media.width ?? null,
     height: media.height ?? null,
-    featured_order: order,
     fetched_at: now,
   };
+  const keys = { media: mediaUrl ? `${stem}.${kind === 'image' ? 'webp' : 'mp4'}` : null };
   if (existing) {
-    // Re-ingest refreshes media and order; curated text is never overwritten.
-    await updateModelDemo(existing.id, { ...fields, ...(existing.text ? {} : { text }) });
-    return { ...summary, ok: true, action: 'update', demoId: existing.id, hosted };
+    // Re-ingest refreshes media; curated text is never overwritten, and the
+    // order is kept unless the caller is re-ordering the whole list.
+    const nextOrder = keepOrder ? existing.featured_order : order;
+    await updateModelDemo(existing.id, { ...fields, featured_order: nextOrder, ...(existing.text ? {} : { text }) });
+    return { ...summary, kind, ok: true, action: 'update', demoId: existing.id, hosted, order: nextOrder, keys };
   }
   const demoId = newId('md');
   await insertModelDemo({
@@ -241,25 +271,28 @@ export async function ingestXUrl({ modelSlug, url, order, dryRun = false }) {
     status: 'live',
     created_at: now,
     updated_at: now,
+    featured_order: order,
     ...fields,
   });
-  return { ...summary, ok: true, action: 'insert', demoId, hosted };
+  return { ...summary, kind, ok: true, action: 'insert', demoId, hosted, order, keys };
 }
 
 /* The batch: line order = featured order, one failure never stops the rest. */
-export async function ingestUrls({ model, urls, dryRun = false, log = () => {} }) {
+export async function ingestUrls({ model, urls, dryRun = false, keepOrder = null, log = () => {} }) {
   const m = showcaseModel(model);
   if (!m) throw new Error(`unknown showcase model: ${model}`);
+  const clean = urls.map((u) => String(u).trim()).filter((u) => u && !u.startsWith('#'));
+  // One URL is a refresh of that post and keeps its slot; a list is the
+  // curated order and re-orders. Callers can force either way.
+  const keep = keepOrder ?? clean.length === 1;
   const results = [];
   let order = 0;
-  for (const raw of urls) {
-    const url = String(raw).trim();
-    if (!url || url.startsWith('#')) continue;
+  for (const url of clean) {
     order += 1;
     try {
-      const r = await ingestXUrl({ modelSlug: m.slug, url, order, dryRun });
+      const r = await ingestXUrl({ modelSlug: m.slug, url, order, dryRun, keepOrder: keep });
       results.push(r);
-      log(`${r.ok ? 'ok ' : 'ERR'} #${order} ${url} ${r.ok ? `${r.kind}${r.hosted === false ? ' (remote media, R2 off)' : ''}` : r.error}`);
+      log(`${r.ok ? 'ok ' : 'ERR'} #${order} ${url} ${r.ok ? `${r.kind}${r.order != null ? ` order ${r.order}` : ''}${r.hosted === false ? ' (remote media, R2 off)' : ''}` : r.error}`);
     } catch (err) {
       results.push({ url, ok: false, error: err.message });
       log(`ERR #${order} ${url} ${err.message}`);
