@@ -20,10 +20,23 @@ if (!isPrivatePage) {
     Astro.request.headers.get('user-agent')
   );
 }
-// Every slot renders a card in every state — a rail with holes in it reads as
-// broken, and each state has something honest to say.
-const left = board.left;
-const right = board.right;
+/* Contraction (operator decision, Sep 2): each rail renders every occupied
+   card (live / reserved / house) plus AT MOST ONE open slot, then stops —
+   surplus open slots don't render at all. No placeholders, no gaps, cards
+   keep their uniform cap; the rail just gets shorter, and the two rails may
+   end up different lengths. Full availability lives on /sponsor, never as a
+   column of empty units in production. */
+const contract = (col) => {
+  let openShown = false;
+  return col.filter((slot) => {
+    if (slot.state !== 'open' || slot.house) return true;
+    if (openShown) return false;
+    openShown = true;
+    return true;
+  });
+};
+const left = contract(board.left);
+const right = contract(board.right);
 const total = board.slots.length;
 // Only an all-running board gets the sold-out card; anything held shows a
 // reserved card instead, so the rails already carry something clickable.

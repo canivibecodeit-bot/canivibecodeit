@@ -49,6 +49,24 @@ export const DEFAULT_TINT = '#33e667';
 
 const BOARD_TTL_MS = 60 * 1000;
 
+/* House cards: our own placements filling listed slots that have no live
+   purchase — the rails render them as normal-looking cards instead of open
+   units. A real PAID sponsor always outranks a house card in the same slot
+   (the derivation puts live first), and the slot stays fully buyable on
+   /sponsor: house occupancy is a rails-only rendering, never inventory.
+   Clicks go out through withUtm campaign 'house' so analytics can tell
+   them from paid placements. Logos are self-hosted under public/icons. */
+export const HOUSE_CARDS = [
+  {
+    slot: 'R3',
+    name: 'SuperX',
+    tagline: 'Grow and monetize your X audience',
+    url: 'https://superx.so',
+    logoUrl: '/icons/superx.webp',
+    tint: '#f77d43',
+  },
+];
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /* ---------- money + dates ---------- */
@@ -142,6 +160,9 @@ async function deriveBoard(now) {
       // reserved = paid for, but not running yet (or an operator hold via
       // RESERVED_SLOTS). Stripe checkout holds show as open.
       state: live ? 'live' : blocked || heldByOperator.has(id) ? 'reserved' : 'open',
+      // House card for an otherwise-open slot: rails render it instead of an
+      // open unit; /sponsor still sells the slot (state stays 'open').
+      house: !live && !blocked && !heldByOperator.has(id) ? HOUSE_CARDS.find((h) => h.slot === id) ?? null : null,
       endsAt: live?.ends_at ?? null,
       sponsor: live
         ? {

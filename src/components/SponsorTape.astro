@@ -7,7 +7,20 @@ import { faviconUrl, getBoard, usd, withUtm } from '../lib/sponsors.js';
 // halves and slides -50%, so the loop never shows a seam.
 const { side = 'left' } = Astro.props;
 const board = await getBoard();
-const slots = side === 'left' ? board.left : board.right;
+/* Same contraction as the rails (operator decision, Sep 2): occupied slots
+   plus at most one open item per tape — a marquee of "+ your product" units
+   is the same empty-board smell as a rail of them. House-carded slots ride
+   as normal items. */
+const contract = (col) => {
+  let openShown = false;
+  return col.filter((slot) => {
+    if (slot.state !== 'open' || slot.house) return true;
+    if (openShown) return false;
+    openShown = true;
+    return true;
+  });
+};
+const slots = contract(side === 'left' ? board.left : board.right);
 // Enough copies per half that the tape outruns any viewport width.
 const half = Array.from({ length: 3 }, () => slots).flat();
 const pos = side === 'left' ? 'top' : 'bottom';
@@ -35,6 +48,17 @@ const pos = side === 'left' ? 'top' : 'bottom';
                   loading="lazy"
                 />
                 <span>{s.sponsor.name}</span>
+              </a>
+            ) : s.state === 'open' && s.house ? (
+              <a
+                class="sp-tape-item live"
+                href={withUtm(s.house.url, 'house')}
+                target="_blank"
+                rel="sponsored noopener"
+                data-slot={s.id}
+              >
+                <img src={s.house.logoUrl} alt="" width="20" height="20" loading="lazy" />
+                <span>{s.house.name}</span>
               </a>
             ) : s.state === 'open' ? (
               <a class="sp-tape-item open" href="/sponsor" data-slot={s.id}>
