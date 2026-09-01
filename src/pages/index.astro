@@ -174,15 +174,18 @@ const jsonld = [
         </a>
       )
     }
+    {/* A structural twin of the games strip above: same classes, same box,
+        one centred line with the link inline at the end. The builds count
+        only appears once there is one. */}
     {
       showcase && buildsLive() && (
-        <a class="hatch-strip model-strip" href={`/built-with/${showcase.slug}`}>
-          <span class="new-tag">NEW</span>
-          <span class="ms-title">built with {showcase.name}</span>
-          <span class="ms-counts">
-            {' · '}{showcaseDemos} {showcaseDemos === 1 ? 'demo' : 'demos'} from X · {showcaseBuilds} {showcaseBuilds === 1 ? 'build' : 'builds'} · day one
+        <a class="hatch-strip games-strip" href={`/built-with/${showcase.slug}`}>
+          <span class="hs-copy">
+            <span class="new-tag">NEW</span> built with {showcase.name} · {showcaseDemos}{' '}
+            {showcaseDemos === 1 ? 'thing' : 'things'} people one-shotted on day one, hand-picked from X
+            {showcaseBuilds > 0 ? ` · ${showcaseBuilds} ${showcaseBuilds === 1 ? 'build' : 'builds'}` : ''}
           </span>
-          <span class="hs-cta"><span class="ms-cta-word">see the showcase </span>→</span>
+          <span class="hs-cta">see the showcase →</span>
         </a>
       )
     }

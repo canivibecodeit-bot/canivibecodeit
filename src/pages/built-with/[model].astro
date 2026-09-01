@@ -44,12 +44,18 @@ const description = `What people one-shotted with ${model.label} on day one, pul
     </div>
     <h1>built with {model.name}</h1>
     <p class="bw-sub">
-      what people one-shotted with it on day one, pulled from X. then what you built with it, prompts included.
+      {builds.length > 0
+        ? 'what people one-shotted with it on day one, pulled from X. then what you built with it, prompts included.'
+        : 'what people one-shotted with it on day one, hand-picked from X. post yours below.'}
     </p>
     <p class="bw-meta">
       <span>{plural(demos.length, 'demo from X', 'demos from X')}</span>
-      <span>·</span>
-      <span>{plural(builds.length, 'build submitted', 'builds submitted')}</span>
+      {builds.length > 0 && (
+        <>
+          <span>·</span>
+          <span>{plural(builds.length, 'build submitted', 'builds submitted')}</span>
+        </>
+      )}
       <span>·</span>
       <span>updated {updated}</span>
     </p>
