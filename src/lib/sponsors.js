@@ -104,6 +104,17 @@ async function deriveBoard(now) {
   const [slots, purchases] = await Promise.all([sponsorSlots(), activePurchases()]);
   const byId = new Map(slots.map((s) => [s.id, s]));
 
+  /* Operator holds: comma-separated slot ids in RESERVED_SLOTS render the
+     reserved treatment while a deal is mid-negotiation — no fake purchase
+     rows, no schema change, flip = env edit + restart. A LIVE sponsor
+     always outranks a hold (real money beats a handshake). */
+  const heldByOperator = new Set(
+    (process.env.RESERVED_SLOTS || '')
+      .split(',')
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean)
+  );
+
   const board = SLOT_IDS.map((id) => {
     const slot = byId.get(id);
     const mine = purchases.filter((p) => p.slot_id === id);
@@ -128,8 +139,9 @@ async function deriveBoard(now) {
       nextState: slot?.next_state || 'pending',
       nextTaken,
       nextStartsAt,
-      // reserved = paid for, but not running yet. Holds show as open.
-      state: live ? 'live' : blocked ? 'reserved' : 'open',
+      // reserved = paid for, but not running yet (or an operator hold via
+      // RESERVED_SLOTS). Stripe checkout holds show as open.
+      state: live ? 'live' : blocked || heldByOperator.has(id) ? 'reserved' : 'open',
       endsAt: live?.ends_at ?? null,
       sponsor: live
         ? {

@@ -3673,11 +3673,16 @@ button.sp-banner {
 
   /* The open card is a button inside a form; the form is the rail's flex
      child, so it must pass the granted height and width through, and be
-     allowed to shrink, or its content height would force the rail open. */
+     allowed to shrink, or its content height would force the rail open.
+     max-height matches the card cap: without it a rail of open slots split
+     the full viewport height between the forms and spread down the column
+     with huge gaps, while a filled rail tucked from the top — both rails
+     must stack identically regardless of the open/filled mix. */
   .sp-rail .sp-checkout-form {
     flex: 1 1 0;
     min-height: 0;
     display: flex;
+    max-height: 176px;
   }
 
   .sp-rail .sp-checkout-form .sp-card {

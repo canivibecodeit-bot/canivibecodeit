@@ -34,9 +34,11 @@ const showSoldOut = board.allLive;
 <aside class="sp-rail sp-left" aria-label="Sponsors, left">
   {left.map((slot, i) => <SponsorCard {slot} index={i} />)}
   {showSoldOut && <SponsorCard soldOut septLeft={total - board.prebookedCount} nextMonth={nextMonthLabel} total={total} index={left.length} />}
+  {!showSoldOut && <SponsorCard more index={left.length} />}
 </aside>
 
 <aside class="sp-rail sp-right" aria-label="Sponsors, right">
   {right.map((slot, i) => <SponsorCard {slot} index={i + left.length} />)}
   {showSoldOut && <SponsorCard soldOut septLeft={total - board.prebookedCount} nextMonth={nextMonthLabel} total={total} index={total} />}
+  {!showSoldOut && <SponsorCard more index={total} />}
 </aside>
