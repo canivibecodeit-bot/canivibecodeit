@@ -6,6 +6,7 @@
 import Base from '../../layouts/Base.astro';
 import BuildRow from '../../components/BuildRow.astro';
 import DemoCard from '../../components/DemoCard.astro';
+import RecModule from '../../components/RecModule.astro';
 import { buildsLive } from '../../lib/flags.js';
 import { buildUserNames, liveBuilds, modelDemos } from '../../lib/db.js';
 import { getApp } from '../../lib/apps.js';
@@ -102,6 +103,9 @@ const description = `What people one-shotted with ${model.label} on day one, pul
       </div>
       <p class="bw-honesty">every build here is what its maker told us · we check that the links load, that is all.</p>
     </section>
+
+    {/* How to AI placement: last thing on the page, after the CTA block */}
+    <RecModule src="showcase" />
   </main>
 </Base>
 

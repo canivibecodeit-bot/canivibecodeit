@@ -17,6 +17,7 @@ export const REC_SOURCES = new Set([
   'alt_page',
   'alt_hub',
   'category',
+  'showcase', // the /built-with model showcase, bottom of the page
   'email_entry',
   'email_editlink',
   'email_welcome',

@@ -602,7 +602,8 @@ h3 {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 26px;
+  --hero-gap: 26px;
+  gap: var(--hero-gap);
   padding: 84px 20px 56px;
 }
 
@@ -931,9 +932,11 @@ h3 {
   border-color: var(--primary);
 }
 
-/* Two strips stacked (games, then the model showcase): same box, a gap. */
+/* Two strips stacked (games, then the model showcase): exactly 10px apart.
+   The hero is a flex column with its own gap, so the second strip pulls
+   back by that gap and adds the 10px, at every width. */
 .hatch-strip + .hatch-strip {
-  margin-top: 10px;
+  margin-top: calc(10px - var(--hero-gap, 26px));
 }
 
 @media (max-width: 760px) {
