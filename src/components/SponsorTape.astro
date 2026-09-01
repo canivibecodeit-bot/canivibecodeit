@@ -1,5 +1,5 @@
 ---
-import { faviconUrl, getBoard, usd, withUtm } from '../lib/sponsors.js';
+import { composeRails, faviconUrl, getBoard, usd, withUtm } from '../lib/sponsors.js';
 
 // Sponsor tape: a slow infinite marquee of icon + name, one at the top of the
 // page and one fixed at the bottom. Top tape carries the left-rail slots,
@@ -7,20 +7,11 @@ import { faviconUrl, getBoard, usd, withUtm } from '../lib/sponsors.js';
 // halves and slides -50%, so the loop never shows a seam.
 const { side = 'left' } = Astro.props;
 const board = await getBoard();
-/* Same contraction as the rails (operator decision, Sep 2): occupied slots
-   plus at most one open item per tape — a marquee of "+ your product" units
-   is the same empty-board smell as a rail of them. House-carded slots ride
-   as normal items. */
-const contract = (col) => {
-  let openShown = false;
-  return col.filter((slot) => {
-    if (slot.state !== 'open' || slot.house) return true;
-    if (openShown) return false;
-    openShown = true;
-    return true;
-  });
-};
-const slots = contract(side === 'left' ? board.left : board.right);
+/* Same composition as the rails (composeRails, operator decision Sep 2 v2):
+   money per side, house cards floated for balance, one open unit on the
+   whole board — the tapes mirror exactly what the rails show. */
+const composed = composeRails(board);
+const slots = side === 'left' ? composed.left : composed.right;
 // Enough copies per half that the tape outruns any viewport width.
 const half = Array.from({ length: 3 }, () => slots).flat();
 const pos = side === 'left' ? 'top' : 'bottom';

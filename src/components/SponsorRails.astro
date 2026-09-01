@@ -1,7 +1,7 @@
 ---
 import SponsorCard from './SponsorCard.astro';
 import { recordImpressions } from '../lib/impressions.js';
-import { getBoard, nextRunMonthName } from '../lib/sponsors.js';
+import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
 
 const nextMonthLabel = nextRunMonthName();
 
@@ -20,23 +20,14 @@ if (!isPrivatePage) {
     Astro.request.headers.get('user-agent')
   );
 }
-/* Contraction (operator decision, Sep 2): each rail renders every occupied
-   card (live / reserved / house) plus AT MOST ONE open slot, then stops —
-   surplus open slots don't render at all. No placeholders, no gaps, cards
-   keep their uniform cap; the rail just gets shorter, and the two rails may
-   end up different lengths. Full availability lives on /sponsor, never as a
-   column of empty units in production. */
-const contract = (col) => {
-  let openShown = false;
-  return col.filter((slot) => {
-    if (slot.state !== 'open' || slot.house) return true;
-    if (openShown) return false;
-    openShown = true;
-    return true;
-  });
-};
-const left = contract(board.left);
-const right = contract(board.right);
+/* Rail composition v2 (operator decision, Sep 2): money cards pinned per
+   side, house cards float to the shorter rail, and exactly ONE open unit on
+   the whole board appended last to the shorter rail. The rules live in
+   composeRails (sponsors.js) so they stay testable and shared with the
+   tapes. Full availability lives on /sponsor, never as empty units here. */
+const composed = composeRails(board);
+const left = composed.left;
+const right = composed.right;
 const total = board.slots.length;
 // Only an all-running board gets the sold-out card; anything held shows a
 // reserved card instead, so the rails already carry something clickable.

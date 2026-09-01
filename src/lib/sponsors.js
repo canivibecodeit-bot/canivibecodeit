@@ -67,6 +67,31 @@ export const HOUSE_CARDS = [
   },
 ];
 
+/* Rail composition (operator decision, Sep 2, v2 — replaces one-open-per-side):
+   - money cards (live / reserved) stay pinned to their own side, packed from
+     the top in slot order — an open unit never sits between occupied cards;
+   - house cards are ours to place, so they FLOAT to whichever rail is
+     currently shorter (tie → left) to balance the board;
+   - exactly ONE open unit renders on the ENTIRE board — the first open slot
+     in SLOT_IDS order — appended LAST to the shorter rail regardless of
+     which side its slot id belongs to (its checkout still buys that real
+     slot). Every other open slot doesn't render at all.
+   Full availability lives on /sponsor, which uses the raw board. Pure
+   function of the board, so the balance rules are directly testable. */
+export function composeRails(board) {
+  const rails = {
+    left: board.left.filter((s) => s.state !== 'open'),
+    right: board.right.filter((s) => s.state !== 'open'),
+  };
+  const shorter = () => (rails.right.length < rails.left.length ? 'right' : 'left');
+  for (const slot of board.slots.filter((s) => s.state === 'open' && s.house)) {
+    rails[shorter()].push(slot);
+  }
+  const firstOpen = board.slots.find((s) => s.state === 'open' && !s.house) ?? null;
+  if (firstOpen) rails[shorter()].push(firstOpen);
+  return rails;
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /* ---------- money + dates ---------- */
