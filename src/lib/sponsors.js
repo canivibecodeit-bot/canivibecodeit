@@ -58,7 +58,7 @@ const BOARD_TTL_MS = 60 * 1000;
    them from paid placements. Logos are self-hosted under public/icons. */
 export const HOUSE_CARDS = [
   {
-    slot: 'R3',
+    slot: 'L3',
     name: 'SuperX',
     tagline: 'Grow and monetize your X audience',
     url: 'https://superx.so',
