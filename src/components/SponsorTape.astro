@@ -11,9 +11,26 @@ const board = await getBoard();
    money per side, house cards floated for balance, one open unit on the
    whole board — the tapes mirror exactly what the rails show. */
 const composed = composeRails(board);
-const slots = side === 'left' ? composed.left : composed.right;
-// Enough copies per half that the tape outruns any viewport width.
-const half = Array.from({ length: 3 }, () => slots).flat();
+const own = side === 'left' ? composed.left : composed.right;
+/* A marquee stutters when it repeats one card back-to-back. A thin rail
+   (fewer than TAPE_MIN composed items) fills its tape from the WHOLE board's
+   occupied cards (live / reserved / house) in slot order, open units
+   excluded; the loop then cycles the combined set and never shows the same
+   card twice in a row. A board with a single occupied card borrows the one
+   open unit the rails show, so there is always something to alternate with. */
+const TAPE_MIN = 3;
+let items = own;
+if (own.length < TAPE_MIN) {
+  items = board.slots.filter((s) => s.state !== 'open' || s.house);
+  if (items.length < 2) {
+    const openUnit = [...composed.left, ...composed.right].find((s) => s.state === 'open' && !s.house);
+    if (openUnit) items = [...items, openUnit];
+  }
+}
+// Enough copies per half that the tape outruns any viewport width; a set of
+// distinct items repeated whole never puts the same card back-to-back.
+const reps = items.length >= 2 ? Math.max(1, Math.ceil(6 / items.length)) : 1;
+const half = Array.from({ length: reps }, () => items).flat();
 const pos = side === 'left' ? 'top' : 'bottom';
 ---
 
