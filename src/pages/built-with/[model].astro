@@ -36,7 +36,7 @@ const title = `built with ${model.name} · canivibecodeit`;
 const description = `What people one-shotted with ${model.label} on day one, pulled from X, then what the community built with it, prompts included.`;
 ---
 
-<Base {title} {description} ogImage={`/og/built-with-${model.slug}.png`}>
+<Base {title} {description} ogImage={model.ogImage ?? `/og/built-with-${model.slug}.png`}>
   <main class="wrap bw">
     <div class="bw-eyebrow">
       <span class="microlabel">model showcase</span>

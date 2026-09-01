@@ -70,6 +70,9 @@ export const SHOWCASE_MODELS = [
     label: 'Claude Fable 5.1',
     vendor: 'Anthropic',
     releasedAt: '2026-09-01',
+    // Static share card for this launch; models without one fall back to
+    // the satori card the build renders at /og/built-with-<slug>.png.
+    ogImage: '/og-built-with-fable-5-1.png',
   },
 ];
 
