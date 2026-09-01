@@ -32,6 +32,25 @@ export const THEME_SCRIPT = `(() => {
 
 const themeHash = createHash('sha256').update(THEME_SCRIPT, 'utf8').digest('base64');
 
+/* Referrer-aware hide for the How to AI placements: a visitor who arrived
+   from Ruben's own Substack (referrer) or a substack/howtoai/ruben utm_source
+   is flagged for the session, and <html class="ruben-src"> hides every
+   [data-hide-for-ruben] element before first paint (no flash). Inline for
+   the same reason as the theme script; hashed the same way. */
+export const REC_HIDE_SCRIPT = `(() => {
+  try {
+    const k = 'cvci_rubensrc';
+    if (/substack\.com/i.test(document.referrer) || /[?&]utm_source=[^&]*(substack|howtoai|ruben)/i.test(location.search)) {
+      sessionStorage.setItem(k, '1');
+    }
+    const mark = (doc) => { if (sessionStorage.getItem(k) === '1') doc.documentElement.classList.add('ruben-src'); };
+    mark(document);
+    document.addEventListener('astro:before-swap', (e) => mark(e.newDocument));
+  } catch {}
+})();`;
+
+const recHideHash = createHash('sha256').update(REC_HIDE_SCRIPT, 'utf8').digest('base64');
+
 /* Directive notes:
    - script-src: everything is same-origin files except the theme snippet.
    - style-src 'unsafe-inline': style= attributes are all over the markup;
@@ -46,7 +65,7 @@ const themeHash = createHash('sha256').update(THEME_SCRIPT, 'utf8').digest('base
      which some browsers validate against form-action. */
 const POLICY = [
   "default-src 'self'",
-  `script-src 'self' 'sha256-${themeHash}' 'report-sample'`,
+  `script-src 'self' 'sha256-${themeHash}' 'sha256-${recHideHash}' 'report-sample'`,
   "style-src 'self' 'unsafe-inline' 'report-sample'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",

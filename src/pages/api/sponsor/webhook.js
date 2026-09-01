@@ -3,7 +3,7 @@ import {
   activePurchases, insertPurchase, purchaseById, purchaseBySession, setSlotNextState,
   updatePurchase,
 } from '../../../lib/db.js';
-import { alertRob, brandShell, button, esc, sendMail, shell } from '../../../lib/mail.js';
+import { recPs, alertRob, brandShell, button, esc, sendMail, shell } from '../../../lib/mail.js';
 import { json } from '../../../lib/request.js';
 import {
   blocksSlot, clearCache, isLive, newToken, RUN_MS, shortDate, siteUrl, SLOT_IDS, SPILL_MS, usd,
@@ -156,6 +156,7 @@ export async function reconcileLinkSession(session) {
         + ` <a href="${esc(`${siteUrl('/sponsor/stats')}?t=${encodeURIComponent(purchase.details_token)}`)}">keep this link</a>.</p>`
         + `<p style="color:#6e6e67; font-size:12px;">Want anything on the card changed for the`
         + ` new run? Reply to this email.</p>`
+        + recPs('email_sponsor')
       ),
     });
   } else {
@@ -169,6 +170,7 @@ export async function reconcileLinkSession(session) {
         + `<p>${button(detailsLink(purchase), 'finish your card')}</p>`
         + `<p style="color:#6e6e67; font-size:12px;">Name, one line, and your link. We review`
         + ` every placement by hand after that. Keep this email; it's the only copy of your link.</p>`
+        + recPs('email_sponsor')
       ),
     });
   }
@@ -283,6 +285,7 @@ export async function promoteFromSession(session, { notify = false } = {}) {
           + `<p style="color:#6e6e67; font-size:12px;">Name, one line, and your link. We review`
           + ` every placement by hand after that, usually within a few hours. Keep this email;`
           + ` it's the only copy of your link.</p>`
+          + recPs('email_sponsor')
         ),
       });
     }

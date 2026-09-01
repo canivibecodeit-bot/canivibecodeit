@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import Base from '../../layouts/Base.astro';
 import DigestCard from '../../components/DigestCard.astro';
 import VerdictBadge from '../../components/VerdictBadge.astro';
+import RecModule from '../../components/RecModule.astro';
 import {
   getProduct,
   productsWithPage,
@@ -201,6 +202,9 @@ const jsonld = [
         {spendYearly > 0 && ` · up to $${spendYearly.toLocaleString('en-US')}/yr replaced`} · no votes, no pay-to-list
       </span>
     </p>
+
+    {/* How to AI placement: after the facts, before the build CTA and siblings */}
+    <RecModule src="alt_page" />
 
     <section class="alt-build reveal">
       <span>Rather build your own version of any of these? Every verdict page above has the exact one-shot prompt, free.</span>

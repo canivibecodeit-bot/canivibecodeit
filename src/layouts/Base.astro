@@ -11,7 +11,7 @@ import SponsorTape from '../components/SponsorTape.astro';
 import { buildGamesLive, buildsLive } from '../lib/flags.js';
 import { getBoard, nextRunMonthName } from '../lib/sponsors.js';
 import { scriptJson } from '../lib/request.js';
-import { THEME_SCRIPT } from '../lib/csp.js';
+import { REC_HIDE_SCRIPT, THEME_SCRIPT } from '../lib/csp.js';
 
 // Next-month pre-book count for the footer link. Board is cached, so this
 // costs the layout nothing extra; the month names itself.
@@ -120,6 +120,9 @@ const headerLinks = navSections.filter((s) => s.top);
          The script text lives in lib/csp.js because the CSP header allows
          exactly this string by hash; edit it THERE, never here. -->
     <script is:inline set:html={THEME_SCRIPT} />
+    {/* Referrer-aware hide for the How to AI placements; text lives in
+        lib/csp.js next to its hash, same rule as the theme script. */}
+    <script is:inline set:html={REC_HIDE_SCRIPT} />
     {!isPrivate && <script is:inline src="/analytics.js" defer></script>}
     <ClientRouter />
   </head>
@@ -196,6 +199,23 @@ const headerLinks = navSections.filter((s) => s.top);
     {!hideDigest && <DigestBar />}
 
     {!user && <SignupModal />}
+
+    {/* Co-reg card shown after a successful newsletter signup (cloned by
+        app.js). No checkbox, nothing automatic: one button, one no-thanks. */}
+    <template id="rec-coreg-tpl">
+      <aside class="rec-coreg" data-hide-for-ruben data-rec-coreg>
+        <img class="rec-coreg-img" src="/thebuildgames/howtoai-grid.webp" alt="How to AI post grid" width="640" height="490" loading="lazy" />
+        <div class="rec-coreg-body">
+          <span class="rec-eyebrow">one more, free</span>
+          <b class="rec-coreg-title">How to AI by Ruben Hassid</b>
+          <p class="rec-coreg-text">the newsletter 890k people use to get better at AI. one tap, your email is already filled in.</p>
+          <div class="rec-coreg-actions">
+            <a class="btn primary rec-coreg-go" href="/api/rec/howtoai?src=coreg_digest" target="_blank" rel="sponsored nofollow noopener" data-rec-coreg-go>get How to AI</a>
+            <button class="rec-coreg-no" type="button" data-rec-coreg-no>no thanks</button>
+          </div>
+        </div>
+      </aside>
+    </template>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src={`/js/app.js?v=${__BUILD_ID__}`} defer></script>

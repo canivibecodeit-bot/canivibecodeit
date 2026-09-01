@@ -1,0 +1,93 @@
+---
+/* How to AI placement on app and alternative pages: a native content rec,
+   same visual family as the sponsor cards, plainly labelled sponsored, one
+   click target through the counting redirect. Hidden for Ruben-sourced
+   visitors ([data-hide-for-ruben]). Never fights the sponsor rails: it
+   lives in the content column. */
+const { src = 'apppage' } = Astro.props;
+---
+
+<aside class="rec-module" data-hide-for-ruben aria-label="Sponsored recommendation">
+  <a class="rec-module-card" href={`/api/rec/howtoai?src=${src}`} target="_blank" rel="sponsored nofollow noopener">
+    <img class="rec-module-img" src="/thebuildgames/howtoai-grid.webp" alt="How to AI post grid" width="640" height="490" loading="lazy" />
+    <span class="rec-module-body">
+      <span class="rec-eyebrow">sponsored</span>
+      <b class="rec-module-title">want to actually build this yourself?</b>
+      <span class="rec-module-text">Ruben teaches you to use AI. we test what AI can replace. his newsletter, How to AI, is free and read by 890k people.</span>
+      <span class="rec-module-go">read How to AI →</span>
+    </span>
+  </a>
+</aside>
+
+<style>
+  .rec-module {
+    padding-top: 40px;
+  }
+
+  .rec-module-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--fg);
+    text-decoration: none;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .rec-module-card:hover {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  .rec-module-img {
+    width: 200px;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .rec-module-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .rec-module-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .rec-module-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .rec-module-go {
+    padding-top: 4px;
+    font: 12.5px var(--font-mono);
+    color: var(--primary);
+  }
+
+  @media (max-width: 640px) {
+    .rec-module-card {
+      grid-template-columns: 1fr;
+    }
+
+    .rec-module-img {
+      width: 100%;
+    }
+
+    .rec-module-text {
+      font-size: 15px;
+    }
+  }
+</style>

@@ -1121,6 +1121,28 @@
       else setTimeout(() => bar?.classList.remove('show'), 2500);
     };
 
+    const COREG_OFF = 'cvci_rec_coreg_off';
+    const showCoreg = (form, email) => {
+      const tpl = document.getElementById('rec-coreg-tpl');
+      if (!tpl || localStorage.getItem(COREG_OFF) === '1') return false;
+      if (document.documentElement.classList.contains('ruben-src')) return false;
+      const card = tpl.content.firstElementChild.cloneNode(true);
+      const source = form.querySelector('input[name=source]')?.value === 'buildgames' ? 'coreg_buildgames' : 'coreg_digest';
+      const go = card.querySelector('[data-rec-coreg-go]');
+      go.href = '/api/rec/howtoai?src=' + source + (email ? '&email=' + encodeURIComponent(email) : '');
+      card.querySelector('[data-rec-coreg-no]').addEventListener('click', () => {
+        localStorage.setItem(COREG_OFF, '1');
+        card.remove();
+        if (bar && bar.contains(form)) bar.classList.remove('show');
+      });
+      go.addEventListener('click', () => {
+        localStorage.setItem(COREG_OFF, '1');
+        if (bar && bar.contains(form)) setTimeout(() => bar.classList.remove('show'), 800);
+      });
+      form.insertAdjacentElement('afterend', card);
+      return true;
+    };
+
     $$('form[data-digest]').forEach((form) => {
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1133,14 +1155,24 @@
         if (res?.ok) {
           btn.textContent = "you're in ✓";
           btn.disabled = true;
-          form.querySelector('input[type=email]').disabled = true;
+          const emailInput = form.querySelector('input[type=email]');
+          emailInput.disabled = true;
           toast('in. see you thursday.');
           // waitlist_signup is captured server-side in /api/waitlist — no
           // client event, or blocked-analytics visitors vanish from the count.
           remember('digest_subscribed');
           if (reveal && !reveal.contains(form)) reveal.hidden = true;
-          // A signup from the bar itself keeps its "you're in ✓" on screen.
-          if (bar) killBar(!bar.contains(form));
+          /* Co-reg: one card, one tap, their email already in the link. Never
+             again once dismissed (localStorage); never for Ruben-sourced
+             visitors (html.ruben-src hides it via CSS). If the card shows
+             inside the bar, the bar stays up for it instead of sliding away. */
+          const showedCoreg = showCoreg(form, emailInput.value);
+          if (bar) {
+            if (bar.contains(form) && showedCoreg) {
+              barOff = true;
+              barScroll.abort();
+            } else killBar(!bar.contains(form));
+          }
         } else {
           toast(res?.status === 429 ? 'slow down a little' : 'that email looks off');
         }

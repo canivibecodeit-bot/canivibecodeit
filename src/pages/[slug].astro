@@ -4,6 +4,7 @@ import VerdictBadge from '../components/VerdictBadge.astro';
 import DigestCard from '../components/DigestCard.astro';
 import DigestReveal from '../components/DigestReveal.astro';
 import AltCard from '../components/AltCard.astro';
+import RecModule from '../components/RecModule.astro';
 import BuildsSection from '../components/BuildsSection.astro';
 import { getApp, relatedApps, yearlySaving, sortedAlternatives, ALTERNATIVES_PAGE_MIN, CATEGORIES, VERDICTS, MOAT_TAGS, MOAT_TAG_EMOJI, VIBE_CODING_TOOL_SLUGS } from '../lib/apps.js';
 import { stackSlugs, voteCount, voteCounts } from '../lib/db.js';
@@ -339,6 +340,9 @@ const tweet = encodeURIComponent(
       >{inStack ? '✓ in your stack' : '+ save to my stack'}</button>
       <span class="tweet">"I just replaced {app.name.split(' / ')[0]}{app.priceMonthly != null ? ` ($${app.priceMonthly}/mo)` : ''} with one prompt"</span>
     </div>
+
+    {/* How to AI placement: after the verdict block, before the escape hatch */}
+    <RecModule src="apppage" />
 
     {
       alternatives.length > 0 && (

@@ -5250,3 +5250,101 @@ a.bd-row:hover {
 .head-save.saved .on {
   display: inline;
 }
+
+/* ---------- How to AI rec layer ---------- */
+
+/* Ruben-sourced visitors (referrer/utm, flagged by the inline REC_HIDE_SCRIPT
+   before first paint) never see the placements meant for everyone else. */
+html.ruben-src [data-hide-for-ruben] {
+  display: none !important;
+}
+
+.rec-eyebrow {
+  display: block;
+  font: 11px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* Co-reg card: injected after a successful newsletter signup. Compact,
+   plainly a recommendation, one primary tap and a quiet no. */
+.rec-coreg {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  width: min(560px, 100%);
+  margin: 16px auto 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.rec-coreg-img {
+  width: 148px;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.rec-coreg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.rec-coreg-title {
+  font-size: 15px;
+  color: var(--fg);
+}
+
+.rec-coreg-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.rec-coreg-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+.rec-coreg-go {
+  padding: 9px 16px;
+  font-size: 13.5px;
+}
+
+.rec-coreg-no {
+  font: 12px var(--font-mono);
+  color: var(--muted);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.rec-coreg-no:hover {
+  color: var(--fg);
+}
+
+@media (max-width: 560px) {
+  .rec-coreg {
+    grid-template-columns: 1fr;
+  }
+
+  .rec-coreg-img {
+    width: 100%;
+  }
+
+  .rec-coreg-text {
+    font-size: 15px;
+  }
+}

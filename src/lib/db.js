@@ -325,6 +325,14 @@ const SCHEMA_SQLITE = `
     rec TEXT PRIMARY KEY,
     count INTEGER NOT NULL DEFAULT 0
   );
+  /* How to AI rec layer: one counting redirect, clicks per (surface, day)
+     so placements can be reported weekly. No email, no IP, nothing personal. */
+  CREATE TABLE IF NOT EXISTS rec_clicks (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day)
+  );
 `;
 
 const SCHEMA_PG = `
@@ -615,6 +623,12 @@ const SCHEMA_PG = `
   CREATE TABLE IF NOT EXISTS buildgames_rec_clicks (
     rec TEXT PRIMARY KEY,
     count INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE TABLE IF NOT EXISTS rec_clicks (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day)
   );
 `;
 
@@ -1473,6 +1487,16 @@ async function pgDriver() {
         [rec]
       );
     },
+    async recClick(src, day) {
+      await pool.query(
+        'INSERT INTO rec_clicks (src, day, count) VALUES ($1, $2, 1) ON CONFLICT (src, day) DO UPDATE SET count = rec_clicks.count + 1',
+        [src, day]
+      );
+    },
+    async recClickRows(sinceDay) {
+      const r = await pool.query('SELECT src, day, count FROM rec_clicks WHERE day >= $1 ORDER BY day, src', [sinceDay]);
+      return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -2117,6 +2141,14 @@ async function sqliteDriver() {
         'INSERT INTO buildgames_rec_clicks (rec, count) VALUES (?, 1) ON CONFLICT(rec) DO UPDATE SET count = count + 1'
       ).run(rec);
     },
+    async recClick(src, day) {
+      db.prepare(
+        'INSERT INTO rec_clicks (src, day, count) VALUES (?, ?, 1) ON CONFLICT(src, day) DO UPDATE SET count = count + 1'
+      ).run(src, day);
+    },
+    async recClickRows(sinceDay) {
+      return db.prepare('SELECT src, day, count FROM rec_clicks WHERE day >= ? ORDER BY day, src').all(sinceDay);
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -2413,6 +2445,8 @@ export async function bgEntryByRepo(repoUrl) { return (await getDriver()).bgEntr
 export async function updateBgEntry(id, fields) { return (await getDriver()).updateBgEntry(id, { ...fields, updated_at: Date.now() }); }
 export async function bgEntryCount() { return (await getDriver()).bgEntryCount(); }
 export async function bgRecClick(rec) { return (await getDriver()).bgRecClick(rec); }
+export async function recClick(src, day) { return (await getDriver()).recClick(src, day); }
+export async function recClickRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickRows(sinceDay); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });

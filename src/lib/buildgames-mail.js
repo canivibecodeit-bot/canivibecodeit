@@ -14,7 +14,7 @@
    All Build Games sponsor-facing mail goes through here. alertRob and the
    opt-in LIST path (waitlist + Resend, its own unsubscribe) are separate. */
 import { rateLimit } from './db.js';
-import { brandShell, esc, sendMail, unmailable } from './mail.js';
+import { brandShell, esc, recPs, sendMail, unmailable } from './mail.js';
 import { usd } from './buildgames.js';
 
 async function suppressed(email) {
@@ -40,20 +40,25 @@ async function suppressed(email) {
    here can block or fail the money path. Goes to the Stripe-checkout email
    (payment-verified), so the E1 caps deliberately do not apply — receipts
    are 1:1 with real captures. */
+export function bgReceiptHtml({ capturedCents, ref }) {
+  return brandShell(
+    `<p>Payment received: <b>${usd(capturedCents)}</b> for a sponsored placement on the`
+    + ` canivibecodeit.com board.</p>`
+    + `<p>Your placement is live and ranks by cumulative sponsorship. You keep your spot`
+    + ` until another sponsor's total passes yours.</p>`
+    + `<p><a href="https://canivibecodeit.com/thebuildgames">see the board</a></p>`
+    + `<p style="color:#6e6e67; font-size:12px;">Reference: ${esc(String(ref))}. Stripe also`
+    + ` emails an invoice for your records. Questions? Reply to this email.</p>`
+    + recPs('email_sponsor')
+  );
+}
+
 export function sendBgReceipt({ to, capturedCents, ref }) {
   if (!to) return;
   sendMail({
     to,
     subject: `receipt · ${usd(capturedCents)} sponsored placement — canivibecodeit.com`,
-    html: brandShell(
-      `<p>Payment received: <b>${usd(capturedCents)}</b> for a sponsored placement on the`
-      + ` canivibecodeit.com board.</p>`
-      + `<p>Your placement is live and ranks by cumulative sponsorship — you keep your spot`
-      + ` until another sponsor's total passes yours.</p>`
-      + `<p><a href="https://canivibecodeit.com/thebuildgames">see the board</a></p>`
-      + `<p style="color:#6e6e67; font-size:12px;">Reference: ${esc(String(ref))}. Stripe also`
-      + ` emails an invoice for your records. Questions? Reply to this email.</p>`
-    ),
+    html: bgReceiptHtml({ capturedCents, ref }),
   }).catch((err) => console.error(`bg receipt mail failed: ${err.message}`));
 }
 
@@ -64,19 +69,24 @@ export function sendBgReceipt({ to, capturedCents, ref }) {
    means at most ONE of these can ever be triggered per address, behind the
    5/hr/IP entry rate limit. Fire-and-forget: a mail outage must not fail
    the entry. */
+export function entryEditLinkHtml(editUrl) {
+  return brandShell(
+    `<p>You're in. Your Build Games entry is submitted.</p>`
+    + `<p>Edit your entry any time before the window closes:</p>`
+    + `<p><a href="${esc(editUrl)}">${esc(editUrl)}</a></p>`
+    + `<p style="color:#6e6e67; font-size:12px;">Keep this link private, anyone with it can edit your entry.`
+    + ` Winners are announced after judging. Questions? Reply to this email.</p>`
+    + recPs('email_entry')
+  );
+}
+
 export function sendEntryEditLink({ to, editUrl }) {
   const addr = String(to || '').trim().toLowerCase();
   if (!addr || unmailable(addr)) return;
   sendMail({
     to: addr,
     subject: 'your Build Games entry — the edit link',
-    html: brandShell(
-      `<p>You're in. Your Build Games entry is submitted.</p>`
-      + `<p>Edit your entry any time before the window closes:</p>`
-      + `<p><a href="${esc(editUrl)}">${esc(editUrl)}</a></p>`
-      + `<p style="color:#6e6e67; font-size:12px;">Keep this link private — anyone with it can edit your entry.`
-      + ` Winners are announced after judging. Questions? Reply to this email.</p>`
-    ),
+    html: entryEditLinkHtml(editUrl),
   }).catch((err) => console.error(`bg entry mail failed: ${err.message}`));
 }
 

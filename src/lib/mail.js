@@ -218,6 +218,21 @@ export function brandShell(body) {
 </html>`;
 }
 
+/* The How to AI ps. block: one muted paragraph above the footer of the
+   transactional mails, Rob's voice, linked through the counting redirect so
+   email clicks report per surface. No images. */
+export function recPs(src) {
+  const href = `https://canivibecodeit.com/api/rec/howtoai?src=${encodeURIComponent(src)}`;
+  return `<p style="margin-top:28px; padding-top:18px; border-top:1px solid #e0e0db; color:#6e6e67; font-size:12.5px; line-height:1.6;">`
+    + `ps. if you want to get better at the AI side of this,`
+    + ` <a href="${esc(href)}" style="color:#0e9c47;">How to AI</a> by Ruben Hassid is the newsletter I read.`
+    + ` free, 890k readers.</p>`;
+}
+
+export function recPsText(src) {
+  return `\n\nps. if you want to get better at the AI side of this, How to AI by Ruben Hassid is the newsletter I read. free, 890k readers. https://canivibecodeit.com/api/rec/howtoai?src=${src}`;
+}
+
 export function button(href, label) {
   return `<a href="${esc(href)}" style="${MONO} display:inline-block; background:#0e9c47;`
     + ` color:#ffffff; font-size:14px; font-weight:700; text-decoration:none;`
