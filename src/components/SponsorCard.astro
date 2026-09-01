@@ -66,9 +66,11 @@ const icon = sponsor ? sponsor.logoUrl || faviconUrl(sponsor.url) : '';
 }
 
 {
-  /* The permanent bottom-of-rail path to /sponsor. The sold-out notice used
-     to be the only route there and it vanishes the moment a slot opens —
-     exactly when the pitch matters most. Same compact meta-card treatment. */
+  /* Bottom-of-rail path to /sponsor. Renders only when the board is fully
+     live — the buy-path when no open-slot cards exist; do not make
+     permanent (operator decision 2026-09-02). Currently unreferenced by
+     SponsorRails (the sold-out notice carries the fully-live state); kept
+     implemented and rediscoverable for when the board sells out. */
   state === 'more' && (
     <a class="sp-card soldout" href="/sponsor" data-state="more">
       <span class="sp-label">BECOME A SPONSOR</span>
