@@ -4,6 +4,7 @@
 import { existsSync } from 'node:fs';
 import Base from '../layouts/Base.astro';
 import DigestCard from '../components/DigestCard.astro';
+import RecModule from '../components/RecModule.astro';
 import { appsWithAlternativesPage, productsWithPage, CATEGORIES } from '../lib/apps.js';
 
 const apps = appsWithAlternativesPage();
@@ -116,6 +117,8 @@ const jsonld = [
         </section>
       ))
     }
+    {/* How to AI placement: after the escape-hatch groups */}
+    <RecModule src="alt_hub" />
   </main>
 
   <DigestCard source="alternatives_hub" />

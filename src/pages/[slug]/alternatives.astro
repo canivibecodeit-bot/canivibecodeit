@@ -6,6 +6,7 @@
 import Base from '../../layouts/Base.astro';
 import AltCard from '../../components/AltCard.astro';
 import DigestCard from '../../components/DigestCard.astro';
+import RecModule from '../../components/RecModule.astro';
 import VerdictBadge from '../../components/VerdictBadge.astro';
 import {
   getApp,
@@ -173,6 +174,9 @@ const jsonld = [
         </tbody>
       </table>
     </section>
+
+    {/* How to AI placement: after the alternatives, before the build CTA */}
+    <RecModule src="alt_page" />
 
     <section class="alt-build reveal">
       <span>Rather build it exactly your way? The one-shot prompt is free too.</span>

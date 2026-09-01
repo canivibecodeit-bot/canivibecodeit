@@ -3,7 +3,7 @@
    Substack subscribe page with the email prefilled (Location header only,
    NEVER stored) and utm_campaign = the surface, so clicks can be reported
    per surface per week from rec_clicks. Unknown surfaces are rejected. */
-import { recClick, rateLimit } from './db.js';
+import { recClick, recImpression, rateLimit } from './db.js';
 import { clientIp, validEmail } from './request.js';
 
 export const REC_TARGET = 'https://rubenhassid.substack.com/subscribe';
@@ -15,6 +15,8 @@ export const REC_SOURCES = new Set([
   'coreg_buildgames',
   'apppage',
   'alt_page',
+  'alt_hub',
+  'category',
   'email_entry',
   'email_editlink',
   'email_welcome',
@@ -54,4 +56,25 @@ export async function redirectToRec({ request, clientAddress, src, email }) {
       'Referrer-Policy': 'no-referrer',
     },
   });
+}
+
+/* Impressions: the CTR denominator per surface. Server side (RecModule's
+   SSR render) calls countImpression directly; the co-reg card beacons
+   POST /api/rec/impression?src= when it is shown. Best-effort, never
+   awaited by a render. */
+export function countImpression(src) {
+  if (!REC_SOURCES.has(src)) return;
+  recImpression(src, dayKey()).catch(() => {});
+}
+
+export async function impressionBeacon({ request, clientAddress, src }) {
+  if (!REC_SOURCES.has(src)) return new Response(null, { status: 400 });
+  try {
+    if (await rateLimit(`recimp:${clientIp(request, clientAddress)}`, 60, 60 * 60 * 1000)) {
+      await recImpression(src, dayKey());
+    }
+  } catch {
+    /* best-effort */
+  }
+  return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
 }

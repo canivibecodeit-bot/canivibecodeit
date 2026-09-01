@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import AppRow from '../../components/AppRow.astro';
 import DigestCard from '../../components/DigestCard.astro';
+import RecModule from '../../components/RecModule.astro';
 import { appsByCategory, categoriesInUse, categoryPhrase, CATEGORIES } from '../../lib/apps.js';
 import { voteCounts } from '../../lib/db.js';
 
@@ -103,6 +104,8 @@ const jsonld = [
         ))
       }
     </div>
+    {/* How to AI placement: after the category list */}
+    <RecModule src="category" />
   </main>
 
   <DigestCard source="category" />

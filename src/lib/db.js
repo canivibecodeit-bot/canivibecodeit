@@ -333,6 +333,13 @@ const SCHEMA_SQLITE = `
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (src, day)
   );
+  /* Impressions per (surface, day): the CTR denominator for rec_clicks. */
+  CREATE TABLE IF NOT EXISTS rec_impressions (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day)
+  );
 `;
 
 const SCHEMA_PG = `
@@ -625,6 +632,12 @@ const SCHEMA_PG = `
     count INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS rec_clicks (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day)
+  );
+  CREATE TABLE IF NOT EXISTS rec_impressions (
     src TEXT NOT NULL,
     day TEXT NOT NULL,
     count INTEGER NOT NULL DEFAULT 0,
@@ -1497,6 +1510,16 @@ async function pgDriver() {
       const r = await pool.query('SELECT src, day, count FROM rec_clicks WHERE day >= $1 ORDER BY day, src', [sinceDay]);
       return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
     },
+    async recImpression(src, day) {
+      await pool.query(
+        'INSERT INTO rec_impressions (src, day, count) VALUES ($1, $2, 1) ON CONFLICT (src, day) DO UPDATE SET count = rec_impressions.count + 1',
+        [src, day]
+      );
+    },
+    async recImpressionRows(sinceDay) {
+      const r = await pool.query('SELECT src, day, count FROM rec_impressions WHERE day >= $1 ORDER BY day, src', [sinceDay]);
+      return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
+    },
     async buildByUserSlug(userId, slug) {
       const r = await pool.query(
         'SELECT * FROM builds WHERE user_id = $1 AND slug = $2',
@@ -2149,6 +2172,14 @@ async function sqliteDriver() {
     async recClickRows(sinceDay) {
       return db.prepare('SELECT src, day, count FROM rec_clicks WHERE day >= ? ORDER BY day, src').all(sinceDay);
     },
+    async recImpression(src, day) {
+      db.prepare(
+        'INSERT INTO rec_impressions (src, day, count) VALUES (?, ?, 1) ON CONFLICT(src, day) DO UPDATE SET count = count + 1'
+      ).run(src, day);
+    },
+    async recImpressionRows(sinceDay) {
+      return db.prepare('SELECT src, day, count FROM rec_impressions WHERE day >= ? ORDER BY day, src').all(sinceDay);
+    },
     async userBuildSlugs(userId) {
       return db.prepare('SELECT slug FROM builds WHERE user_id = ?').all(userId).map((x) => x.slug);
     },
@@ -2447,6 +2478,8 @@ export async function bgEntryCount() { return (await getDriver()).bgEntryCount()
 export async function bgRecClick(rec) { return (await getDriver()).bgRecClick(rec); }
 export async function recClick(src, day) { return (await getDriver()).recClick(src, day); }
 export async function recClickRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickRows(sinceDay); }
+export async function recImpression(src, day) { return (await getDriver()).recImpression(src, day); }
+export async function recImpressionRows(sinceDay = '0000-00-00') { return (await getDriver()).recImpressionRows(sinceDay); }
 
 export async function updateBuild(id, fields) {
   return (await getDriver()).updateBuild(id, { ...fields, updated_at: Date.now() });

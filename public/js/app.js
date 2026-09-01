@@ -1140,6 +1140,12 @@
         if (bar && bar.contains(form)) setTimeout(() => bar.classList.remove('show'), 800);
       });
       form.insertAdjacentElement('afterend', card);
+      // Impression beacon: the CTR denominator for the co-reg surface.
+      try {
+        navigator.sendBeacon('/api/rec/impression?src=' + source);
+      } catch {
+        /* a lost beacon is a lost count, never a broken card */
+      }
       return true;
     };
 
