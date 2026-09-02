@@ -84,12 +84,22 @@
     if (!src) return;
     const probe = new Image();
     probe.crossOrigin = 'anonymous';
-    probe.onload = () => {
+    // The upload block shows the same icon; keep it in step when the URL
+    // (and so the favicon default) changes.
+    const blockImg = document.querySelector('[data-icon-preview]');
+    const paint = () => {
       iconEl.src = src;
+      if (blockImg) {
+        blockImg.src = src;
+        blockImg.hidden = false;
+      }
+    };
+    probe.onload = () => {
+      paint();
       if (!userPicked) setTint(sampleTint(probe));
     };
     probe.onerror = () => {
-      iconEl.src = src;
+      paint();
       if (!userPicked) setTint(defaultTint);
     };
     probe.src = src;

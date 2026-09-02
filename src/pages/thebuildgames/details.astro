@@ -16,6 +16,8 @@ import {
 import { buildGamesLive } from '../../lib/flags.js';
 import { NAME_MAX, TAGLINE_MAX, monogram, usd } from '../../lib/buildgames.js';
 import { faviconUrl } from '../../lib/sponsors.js';
+import { hostedIconUrl } from '../../lib/sponsor-icon.js';
+import IconUpload from '../../components/IconUpload.astro';
 import { getSession } from '../../lib/stripe.js';
 import { clearPayment } from '../../lib/buildgames-payments.js';
 import { sendBgReceipt } from '../../lib/buildgames-mail.js';
@@ -79,6 +81,10 @@ if (payment && sponsor) {
 }
 
 const clearedTotal = sponsor ? await bgSponsorClearedTotal(sponsor.id) : 0;
+// Uploaded = an icon we host under a VERSIONED key (the clear-time favicon
+// re-host lives at buildgames/<id>.webp, unversioned, and is the default).
+const iconUploaded =
+  !!sponsor && hostedIconUrl(sponsor.icon_url, 'buildgames') && /-\d{10,}\.webp$/.test(sponsor.icon_url);
 const hostName = (() => {
   try {
     return new URL(sponsor?.link ?? '').hostname.replace(/^www\./, '');
@@ -157,6 +163,17 @@ const description = 'Finish setting up your Build Games placement.';
           <span class="bgd-amount">{usd(clearedTotal)}</span>
         </div>
 
+        <div class="bgd-icon">
+          <IconUpload
+            endpoint="/api/thebuildgames/icon"
+            token={token}
+            current={sponsor.icon_url ?? ''}
+            fallback={faviconUrl(sponsor.link)}
+            uploaded={iconUploaded}
+            targets=".bgd-logo img"
+          />
+        </div>
+
         <form class="bgd-form" method="post" action="/api/thebuildgames/details" data-details-form>
           <input type="hidden" name="token" value={token} />
           <label>
@@ -192,6 +209,8 @@ const description = 'Finish setting up your Build Games placement.';
     )}
   </main>
 </Base>
+
+<script is:inline src={`/js/icon-upload.js?v=${__BUILD_ID__}`} defer></script>
 
 <script>
   // Live preview + save. External module (Astro-bundled), no inline script.
@@ -330,6 +349,11 @@ const description = 'Finish setting up your Build Games placement.';
     font-size: 22px;
     color: var(--primary);
     font-variant-numeric: tabular-nums;
+  }
+
+  .bgd-icon {
+    margin-top: 22px;
+    text-align: left;
   }
 
   .bgd-form {

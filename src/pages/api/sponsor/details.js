@@ -1,6 +1,7 @@
 import { purchaseByToken, rateLimit, updatePurchase } from '../../../lib/db.js';
 import { alertRob, button, esc, shell } from '../../../lib/mail.js';
 import { clientIp, json, readBody } from '../../../lib/request.js';
+import { hostedIconUrl } from '../../../lib/sponsor-icon.js';
 import {
   cleanText, cleanTint, cleanUrl, clearCache, DEFAULT_TINT, faviconUrl, LIMITS,
   signAction, siteUrl, usd, withUtm,
@@ -35,13 +36,16 @@ export async function POST({ request, clientAddress }) {
   if (!tagline) return json({ error: 'tagline is required' }, 400);
   if (!url) return json({ error: 'that URL looks off' }, 400);
 
+  // An icon the sponsor uploaded (hosted by us) survives a re-save even if
+  // the form carried no logo_url; anything else falls back to the favicon.
   const logoUrl = body.logo_url ? cleanUrl(body.logo_url) : null;
+  const keepHosted = hostedIconUrl(purchase.logo_url, 'sponsor-icons') ? purchase.logo_url : null;
   const now = Date.now();
   const fields = {
     name,
     tagline,
     url,
-    logo_url: logoUrl || faviconUrl(url),
+    logo_url: logoUrl || keepHosted || faviconUrl(url),
     tint: cleanTint(body.tint) || purchase.tint || DEFAULT_TINT,
     status: 'submitted',
     submitted_at: now,

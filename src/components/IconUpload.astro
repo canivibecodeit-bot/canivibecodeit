@@ -1,0 +1,48 @@
+---
+/* The icon block on a post-checkout details page: current icon, upload
+   control, revert to the favicon default. Logic lives in
+   /js/icon-upload.js; this renders state only. `current` is what the row
+   shows now, `fallback` the favicon-derived default, `uploaded` whether
+   `current` is an icon the sponsor uploaded (enables revert). */
+import { ICON_ACCEPT, ICON_HINT } from '../lib/sponsor-icon.js';
+
+const {
+  endpoint,
+  token,
+  current = '',
+  fallback = '',
+  uploaded = false,
+  targets = '',
+  hidden = '',
+  label = 'icon',
+} = Astro.props;
+const shown = current || fallback;
+---
+
+<div
+  class="icon-up"
+  data-icon-upload
+  data-endpoint={endpoint}
+  data-token={token}
+  data-default={fallback}
+  data-targets={targets || undefined}
+  data-hidden={hidden || undefined}
+>
+  <span class="microlabel">{label} · <b class="icon-up-state" data-icon-state>{uploaded ? 'uploaded icon' : 'site favicon'}</b></span>
+  <div class="icon-up-row">
+    <span class="icon-up-preview">
+      <img src={shown} alt="" width="64" height="64" hidden={!shown} referrerpolicy="no-referrer" data-icon-preview />
+    </span>
+    <div class="icon-up-actions">
+      <label class="btn ghost icon-up-pick">
+        upload an icon
+        <input type="file" accept={ICON_ACCEPT} />
+      </label>
+      <button type="button" class:list={['btn', 'ghost', 'icon-up-revert', { 'is-off': !uploaded }]} data-icon-revert>
+        use site favicon instead
+      </button>
+    </div>
+  </div>
+  <p class="icon-up-hint">{ICON_HINT}. png, jpeg, webp or svg.</p>
+  <p class="icon-up-msg" data-icon-msg role="status"></p>
+</div>

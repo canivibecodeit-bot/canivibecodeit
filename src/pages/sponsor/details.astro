@@ -1,7 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { purchaseByToken } from '../../lib/db.js';
-import { DEFAULT_TINT, LIMITS, RUN_DAYS, shortDate, tintChannels, usd } from '../../lib/sponsors.js';
+import IconUpload from '../../components/IconUpload.astro';
+import { DEFAULT_TINT, LIMITS, RUN_DAYS, faviconUrl, shortDate, tintChannels, usd } from '../../lib/sponsors.js';
+import { hostedIconUrl } from '../../lib/sponsor-icon.js';
 import { getSession } from '../../lib/stripe.js';
 import { promoteFromSession } from '../api/sponsor/webhook.js';
 
@@ -24,6 +26,9 @@ if (purchase && (purchase.status === 'hold' || purchase.status === 'expired_hold
 const status = purchase?.status ?? 'missing';
 const editable = status === 'paid' || status === 'submitted';
 const tint = purchase?.tint || DEFAULT_TINT;
+// Only an icon WE host counts as uploaded; a favicon or a pasted URL from
+// before the upload flow is treated as the default.
+const iconUploaded = !!purchase && hostedIconUrl(purchase.logo_url, 'sponsor-icons');
 
 const title = 'Your sponsor slot · canivibecodeit';
 const description = 'Finish setting up your sponsor placement.';
@@ -149,18 +154,19 @@ const description = 'Finish setting up your sponsor placement.';
                 />
               </label>
 
-              <label>
-                <span class="microlabel">icon url · optional, we grab your favicon otherwise</span>
-                <input
-                  type="text"
-                  inputmode="url"
-                  name="logo_url"
-                  autocomplete="off"
-                  id="sp-logo"
-                  placeholder="acme.com/icon.png"
-                  value={purchase.logo_url ?? ''}
-                />
-              </label>
+              {/* The hosted icon URL rides into the save in this hidden field;
+                  the upload block below writes it. An empty value means
+                  "use the favicon", which the server derives from the URL. */}
+              <input type="hidden" name="logo_url" id="sp-logo" value={iconUploaded ? purchase.logo_url : ''} />
+              <IconUpload
+                endpoint="/api/sponsor/icon"
+                token={token}
+                current={iconUploaded ? purchase.logo_url : ''}
+                fallback={purchase.url ? faviconUrl(purchase.url) : ''}
+                uploaded={iconUploaded}
+                targets="#sp-preview-icon"
+                hidden="#sp-logo"
+              />
 
               <label class="sp-color">
                 <span class="microlabel">card color</span>
@@ -201,3 +207,4 @@ const description = 'Finish setting up your sponsor placement.';
 </Base>
 
 <script is:inline src={`/js/sponsor-details.js?v=${__BUILD_ID__}`} defer></script>
+<script is:inline src={`/js/icon-upload.js?v=${__BUILD_ID__}`} defer></script>

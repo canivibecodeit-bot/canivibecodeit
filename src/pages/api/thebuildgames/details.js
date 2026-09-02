@@ -6,13 +6,12 @@
 // sponsor's identity claim (earliest cleared screened payment). Same
 // sanitisation as every other tagline path: cleanTagline + TAGLINE_MAX.
 // Writes go live immediately — no approval step, per Rob.
-import { bgFirstClearedScreenedPayment, bgPaymentByDetailsToken, bgSponsorById, rateLimit, updateBgSponsor } from '../../../lib/db.js';
+import { rateLimit, updateBgSponsor } from '../../../lib/db.js';
+import { bgEditableByToken } from '../../../lib/buildgames-details.js';
 import { buildGamesLive } from '../../../lib/flags.js';
 import { alertRob, esc } from '../../../lib/mail.js';
 import { clientIp, crossOrigin, json, readBody } from '../../../lib/request.js';
 import { NAME_MAX, TAGLINE_MAX, cleanName, cleanTagline } from '../../../lib/buildgames.js';
-
-const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // matches the details page
 
 export async function POST({ request, clientAddress }) {
   if (!buildGamesLive()) return new Response(null, { status: 404 });
@@ -30,29 +29,10 @@ export async function POST({ request, clientAddress }) {
     return json({ error: 'bad request' }, 400);
   }
 
-  const token = typeof body.token === 'string' ? body.token : '';
-  // newToken() values are long; anything short is noise, not a lookup.
-  if (token.length < 20 || token.length > 128) return json({ error: 'not found' }, 404);
-
-  const payment = await bgPaymentByDetailsToken(token);
-  if (!payment || Date.now() - Number(payment.created_at) > TOKEN_TTL_MS) {
-    return json({ error: 'not found' }, 404);
-  }
-  if (payment.status !== 'cleared') return json({ error: 'payment not cleared yet' }, 409);
-
-  const sponsor = await bgSponsorById(payment.sponsor_id);
-  if (!sponsor || sponsor.status !== 'active' || sponsor.first_cleared_at == null) {
-    return json({ error: 'this placement cannot be edited right now' }, 409);
-  }
-
-  // Only the payment that WON the identity claim may write the public row —
-  // a top-up token must never be able to deface the first payer's placement.
-  // The winner is the one RECORDED at claim time (claimed_by); the
-  // earliest-cleared proxy survives only for rows claimed before the column.
-  const winnerId = sponsor.claimed_by ?? (await bgFirstClearedScreenedPayment(sponsor.id))?.id;
-  if (winnerId !== payment.id) {
-    return json({ error: 'this payment tops up an existing placement' }, 403);
-  }
+  // Token -> payment -> sponsor, with the winner check (buildgames-details.js).
+  const auth = await bgEditableByToken(body.token);
+  if (auth.error) return json({ error: auth.error }, auth.status);
+  const { sponsor } = auth;
 
   const tagline = cleanTagline(body.tagline);
   if (!tagline) {
