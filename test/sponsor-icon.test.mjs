@@ -76,6 +76,15 @@ test('svg with <script> is rejected', async () => {
   assert.deepEqual(r, { ok: false, error: ICON_ERRORS.svgScript });
 });
 
+test('svg: namespace-prefixed and self-closing script tags are rejected too', async () => {
+  for (const tag of ['<svg:script>alert(1)</svg:script>', '<x:script/>', '<script/>', '<script src="https://evil.example/x.js"/>', '<SVG:SCRIPT />']) {
+    const r = await inspectIcon(Buffer.from(SVG_OK.replace('</svg>', `${tag}</svg>`)));
+    assert.deepEqual(r, { ok: false, error: ICON_ERRORS.svgScript }, tag);
+  }
+  // an element that merely starts with the word is not a script
+  assert.equal(svgProblem(SVG_OK.replace('</svg>', '<scripted-thing/></svg>')), null);
+});
+
 test('svg with an onload= handler is rejected', async () => {
   const r = await inspectIcon(Buffer.from(SVG_OK.replace('<svg ', '<svg onload="alert(1)" ')));
   assert.deepEqual(r, { ok: false, error: ICON_ERRORS.svgHandler });

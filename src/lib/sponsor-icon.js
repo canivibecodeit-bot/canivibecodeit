@@ -76,9 +76,12 @@ export function svgProblem(text) {
   // the first tag must be <svg.
   const afterProlog = body.replace(/^\s*(<\?[\s\S]*?\?>\s*)*/, '');
   if (!/^<svg[\s>]/i.test(afterProlog)) return ICON_ERRORS.svgRoot;
-  if (/<\s*script[\s>]/i.test(body)) return ICON_ERRORS.svgScript;
+  // Tag names may carry any namespace prefix (svg:script, x:script) and
+  // may self-close (<script/>); both forms are still the element.
+  const tag = (name) => new RegExp(`<\\s*(?:[\\w.-]+:)?${name}(?=[\\s>/])`, 'i');
+  if (tag('script').test(body)) return ICON_ERRORS.svgScript;
   if (/[\s"'/]on[a-z]+\s*=/i.test(body)) return ICON_ERRORS.svgHandler;
-  if (/<\s*foreignObject[\s>]/i.test(body)) return ICON_ERRORS.svgForeign;
+  if (tag('foreignObject').test(body)) return ICON_ERRORS.svgForeign;
   // href / xlink:href must be a fragment; url(...) in styles must be a
   // fragment; no javascript: anywhere; no HTML embeds.
   const hrefs = body.matchAll(/(?:xlink:)?href\s*=\s*(["'])([\s\S]*?)\1/gi);
@@ -90,7 +93,7 @@ export function svgProblem(text) {
     if (!m[2].trim().startsWith('#')) return ICON_ERRORS.svgExternal;
   }
   if (/javascript\s*:/i.test(body)) return ICON_ERRORS.svgScript;
-  if (/<\s*(iframe|embed|object|meta|link|base)[\s>/]/i.test(body)) return ICON_ERRORS.svgExternal;
+  if (tag('(?:iframe|embed|object|meta|link|base)').test(body)) return ICON_ERRORS.svgExternal;
   if (/@import/i.test(body)) return ICON_ERRORS.svgExternal;
   return null;
 }
