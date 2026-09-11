@@ -152,15 +152,16 @@ const jsonld = [
       {/* the disclosure lives here: study number, "commissioned by", and the
           sponsor's mark inline where the name would be, linked rel=sponsored */}
       <p class="st-eyebrow">
-        <span>moat study no. {study.number} · commissioned by</span>
-        {study.sponsor.logo ? (
-          <a class="st-eyebrow-mark" href={study.sponsor.url} target="_blank" rel="sponsored noopener" aria-label={study.sponsor.name}>
-            <img class="mark-dark" src={study.sponsor.logo} alt="" loading="eager" decoding="async" />
-            {study.sponsor.logoLight && <img class="mark-light" src={study.sponsor.logoLight} alt="" loading="eager" decoding="async" />}
-          </a>
-        ) : (
-          <a href={study.sponsor.url} target="_blank" rel="sponsored noopener">{study.sponsor.name}</a>
-        )}
+        <span>moat study no. {study.number}</span><span class="st-eyebrow-dot" aria-hidden="true"> · </span><span class="st-eyebrow-by">commissioned by
+          {study.sponsor.logo ? (
+            <a class="st-eyebrow-mark" href={study.sponsor.url} target="_blank" rel="sponsored noopener" aria-label={study.sponsor.name}>
+              <img class="mark-dark" src={study.sponsor.logo} alt="" loading="eager" decoding="async" />
+              {study.sponsor.logoLight && <img class="mark-light" src={study.sponsor.logoLight} alt="" loading="eager" decoding="async" />}
+            </a>
+          ) : (
+            <a href={study.sponsor.url} target="_blank" rel="sponsored noopener">{study.sponsor.name}</a>
+          )}
+        </span>
       </p>
       <h1>{study.title}</h1>
       <p class="st-standfirst">{curly(fm.standfirst)}</p>
@@ -358,7 +359,7 @@ const jsonld = [
   }
 
   .st-eyebrow {
-    font: 500 14px/16px var(--font-mono);
+    font: 500 14px/1.6 var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--primary);
@@ -371,17 +372,17 @@ const jsonld = [
   /* the sponsor's logo inline in the eyebrow, a proper mark rather than a
      cap-height glyph: about 24px tall on a desktop line and 20px on a
      phone, centred on the text line; one file per theme.
-     It stays in the text flow so on a phone, where the eyebrow wraps, it
-     follows "by" onto its line. Its bottom edge sits on the text baseline
-     (an image's baseline is its bottom edge), 0.9em after "by" so the space
-     reads like the one around the middle dot; the negative top margin keeps
-     the taller mark from stretching the 16px line. */
+     It stays in the text flow, its bottom edge on the text baseline (an
+     image's baseline is its bottom edge), 0.9em after "by" so the space
+     reads like the one around the middle dot. The eyebrow's 1.6 line height
+     leaves room for it; on phones the eyebrow is set as two centred lines on
+     purpose (see the 480px rule) so "by" and the mark always share a line. */
   .st-eyebrow-mark {
     --mark-h: clamp(20px, 1.25vw + 6px, 24px);
     display: inline-flex;
     align-items: flex-end;
     vertical-align: baseline;
-    margin: calc(16px - var(--mark-h)) 0 0 0.9em;
+    margin-left: 0.9em;
     line-height: 0;
   }
 
@@ -439,6 +440,8 @@ const jsonld = [
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+    text-align: center;
   }
 
   .st-stats dd {
@@ -451,10 +454,12 @@ const jsonld = [
   }
 
   .st-stats dt {
+    max-width: 100%;
     font: 12px/16px var(--font-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted);
+    text-wrap: balance;
   }
 
   .st-stat-verdict.no {
@@ -802,6 +807,18 @@ const jsonld = [
     }
   }
 
+  /* phones: the eyebrow is two centred lines by design, the study number on
+     one and "commissioned by" with the mark on the other; the dot goes */
+  @media (max-width: 480px) {
+    .st-eyebrow-dot {
+      display: none;
+    }
+
+    .st-eyebrow-by {
+      display: block;
+    }
+  }
+
   @media (max-width: 640px) {
     .st-cover {
       padding-top: 48px;
@@ -809,6 +826,10 @@ const jsonld = [
       gap: 18px;
     }
 
+    /* two equal columns; every tile centred with the same number / 6px /
+       label rhythm. One size for all four numbers, chosen so the longest
+       ("not really") stays on one line in half the row at 360 and up, which
+       also keeps the numbers of a row on one baseline. */
     .st-stats {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -817,9 +838,14 @@ const jsonld = [
       padding-bottom: 36px;
     }
 
+    .st-stats div {
+      gap: 6px;
+    }
+
     .st-stats dd {
-      font-size: 36px;
-      line-height: 44px;
+      font-size: clamp(22px, 8vw - 4.5px, 36px);
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .st-verdict {
