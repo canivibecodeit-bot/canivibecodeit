@@ -29,7 +29,7 @@ cards:
     - label: "The clone's ceiling"
       title: "The screens were up after 16 minutes, and the data behind them was still missing when the agent stopped at minute 54."
       body: "The clone found 5 referring domains for this site where Ahrefs shows 346, couldn't produce a search volume for any keyword, and ranked 0 of 10 keywords because no search engine would answer a server."
-    - label: "Agent A, the moat at work"
+    - label: "Letaido, the moat at work"
       title: "Ahrefs put its agent on the one input a clone cannot generate."
       body: "Letaido reads the Ahrefs index directly and writes the report for you, for $99 a month. Once an agent builds the dashboard on demand, the only thing left with a price is what the agent reads."
       accent: true
@@ -40,7 +40,7 @@ charts:
   - id: "cost"
     type: "columns"
     title: "What one person pays a month"
-    note: "What one person pays a month: $0 to build it, $129 for Ahrefs Lite, $99 for the agent."
+    note: "What one person pays a month: $0 to build it, Ahrefs from $29 with Lite at $129, $99 for the agent."
     alt: "Column chart of monthly cost for one person: build it yourself at zero dollars, buy Ahrefs with marks at 29, 129, 249 and 449 dollars and the 129 dollar Lite plan filled, and the vendor's agent at 99 dollars with a marker for an Ahrefs plan on top."
     prefix: "$"
     max: 500
@@ -215,7 +215,7 @@ Ahrefs' Rank Tracker updates weekly on all four plans, Enterprise included. For 
 
 The agent couldn't sign up for that key from a server, which anyone with a browser can.
 
-**Site audits.** Crawl your own domain and write what's broken to a file. Ahrefs knows this, which is why it gives that away in Ahrefs Free.
+**Site audits.** Crawl your own domain and write what's broken to a file. Ahrefs knows this, which is why it gives that away in [Ahrefs Free](https://ahrefs.com/free).
 
 **Keyword ideas.** The agent pulled 328 real phrases for "vibe coding" in a minute, at no cost. That was the one tool it said it would keep.
 
@@ -285,11 +285,11 @@ Three ways to get what Ahrefs does, priced per month for one person.
 | what you don't get | anyone else's data. volume and difficulty numbers you can defend | your time back | the dashboard. it builds one for you, but you're not the one holding it |
 | time to first answer | 16 minutes to a running tool. for volume or rankings, never | minutes | 2 minutes, $0.77 of the included credits |
 
-¹ ahrefs.com/pricing in USD, monthly billing, seen 7 Sep 2026. Annual billing is $1,290, $2,490 and $4,490 a year, which Ahrefs shows as $108, $208 and $374 a month. Enterprise is $1,499 a month on an annual contract. Ahrefs Free exists for sites you own.
+¹ ahrefs.com/pricing in USD, monthly billing, seen 7 Sep 2026. Annual billing is $1,290, $2,490 and $4,490 a year, which Ahrefs shows as $108, $208 and $374 a month. Enterprise is $1,499 a month on an annual contract. Ahrefs Free exists for sites you own. Ahrefs' own Starter plan page, seen 11 Sep 2026, puts Site Explorer, Keywords Explorer, Site Audit and Rank Tracker on the $29 plan, capped at 200 credits a month, 250 rows a report, one month of history and 50 tracked keywords.
 
 ² letaido.com/#pricing and docs.letaido.com/docs/pricing, seen 7 Sep 2026. Their docs: the agent's read access mirrors your Ahrefs plan's limits; a free Ahrefs account works but pulls only what a free plan can.
 
-[pull: The $129 rents a crawl that started before you needed it. | THE PRICE]
+[pull: From $29 a month you rent a crawl that started before you needed it. | THE PRICE]
 
 **The dashboard is the cheap part.**
 
@@ -301,7 +301,11 @@ There's no public source for who links to a competitor, and no free monthly volu
 
 The clone didn't find a cheaper way to get that data, because there's none.
 
-The $129 rents a crawl that started before you needed it.
+From $29 a month you rent a crawl that started before you needed it.
+
+Starter at $29 is the cheapest way in. It opens Site Explorer and Rank Tracker on any domain, with 250 rows a report, one month of history and 50 tracked keywords.
+
+Lite at $129 is the plan you'd actually work on, because it lifts those to 2,500 rows, six months of history and 750 keywords.
 
 For $99 a month you get an agent that reads the index directly and builds the report, and the docs are blunt that it reads exactly what your Ahrefs plan lets it read.
 
@@ -309,7 +313,7 @@ That's a way to stop building the dashboard at all.
 
 Which brings me to the card I cut from the mockup.
 
-## 6. Agent A: the moat at work
+## 6. Letaido: the moat at work
 
 The mockup for this study had a card that read "the moat, weaponized". I cut it because it sounded like a pitch deck, and then I read what Letaido actually is.
 
@@ -367,7 +371,7 @@ Three things follow.
 
 ![Two-branch decision tree whose root asks whether the value is in the software or in the data, with the software branch reading vibecode it and the data branch reading buy it or build on it.](/studies/ahrefs/fig19.webp "One question decides what to build.")
 
-**1. Rent the data and build the layer on top.** If the value you want is in the software, a weekend gets you the software; the clone's rank tracker plumbing took twenty minutes. What nobody builds in a weekend is a fact about the world that took years to collect. Find out early which of those your idea depends on, and price them. Ahrefs sells its fact for $129 a month, which is cheap next to a crawler.
+**1. Rent the data and build the layer on top.** If the value you want is in the software, a weekend gets you the software; the clone's rank tracker plumbing took twenty minutes. What nobody builds in a weekend is a fact about the world that took years to collect. Find out early which of those your idea depends on, and price them. Ahrefs sells its fact from $29 a month, which is cheap next to a crawler, and it sells the same data by API and [MCP](https://ahrefs.com/mcp) if you want it inside your own build.
 
 **2. Check the moat before the feature list.** Of 1,093 apps on this site, 612 lean on execution polish, and polish holds a not-really verdict 17% of the time. Proprietary data with infrastructure scale behind it holds 74%, so the polish is what to clone and the data is what to build a business on.
 
@@ -381,6 +385,6 @@ The clone was one AI coding agent session, one prompt, a six-hour limit, public 
 
 Every Ahrefs number in this study comes from a screenshot taken on my own paid account or from a page Ahrefs publishes, read on 7 September 2026. The index figures are as published on ahrefs.com/big-data on that day; the page itself carries no date on those numbers. Ahrefs prints three versions of the Brand Radar prompt figure on 9 September 2026: 459M+ on the Brand Radar page, 460M on the numbers page and 475M+ on the pricing page. We use the product page's.
 
-"Fifteen years of crawling" is Ahrefs' own phrase on ahrefs.com/about; its numbers page says 16 years of historical data. "Agent A" is the name Ahrefs used when we agreed this study and the address of their sign-up page, letaido.com/agent-a; the page itself doesn't use the name, and the product pages call the same thing Letaido's marketing agent.
+"Fifteen years of crawling" is Ahrefs' own phrase on ahrefs.com/about; its numbers page says 16 years of historical data. The agent covered in chapter 6 is called Letaido.
 
 Ahrefs read the draft for factual errors before publication. They didn't see the verdict before we wrote it and they had no say in it.
