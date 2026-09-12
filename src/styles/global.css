@@ -5918,3 +5918,623 @@ dialog.study-lightbox .lb-close:hover {
 .study-chart .col-label.inside {
   fill: var(--no-fg);
 }
+
+/* ---------- the ABCs of moats (/moats/abc) ---------- */
+/* Paper artboards 8MR-0 (desktop), 8MS-0 (phone), 8MT-0 (tile states),
+   8MU-0 (entry points). The drawer is built by /js/abc.js, so its styles
+   live here rather than in the page. */
+
+.abc {
+  padding-bottom: 72px;
+}
+
+.abc .crumbs {
+  padding-top: 36px;
+}
+
+.abc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-top: 22px;
+}
+
+.abc-head h1 {
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.abc-meta {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.abc-copy {
+  padding-top: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.abc-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 32px;
+}
+
+.abc-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.12s var(--ease-snap);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.abc-tile:hover {
+  border-color: var(--muted);
+}
+
+.abc-tile:focus-visible,
+.abc-tile.open {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.abc-tile.ghost {
+  background: transparent;
+  border-style: dashed;
+}
+
+.abc-tile.ghost.open {
+  border-style: solid;
+}
+
+.abc-tile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.abc-letter {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.abc-tile.ghost .abc-letter {
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.abc-extra {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+}
+
+.abc-tile-bot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.abc-word {
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.abc-q {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.abc-suggest-hint {
+  padding: 5px 0;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.abc-suggest-hint .short {
+  display: none;
+}
+
+/* the upvote pill: the app page's "I replaced this" recipe at tile scale;
+   voted = green fill */
+.abc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+  background: transparent;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.abc-pill:hover {
+  border-color: var(--muted);
+  color: var(--fg);
+}
+
+.abc-pill.voted {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.abc-pill.pop {
+  animation: vote-pop 0.45s var(--ease-snap);
+}
+
+.abc-how {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 0 0 12px 16px;
+}
+
+.abc-how-label {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.abc-how p:not(.abc-how-label) {
+  max-width: 52ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ----- the drawer: a full-width grid row under the tapped tile's row ----- */
+.abc-drawer {
+  grid-column: 1 / -1;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.abc-drawer[hidden] {
+  display: none;
+}
+
+.abc-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+}
+
+.abc-drawer-title {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.abc-close {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.abc-close:hover {
+  color: var(--fg);
+}
+
+.abc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
+}
+
+.abc-row-text {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+
+.abc-row-word {
+  font-size: 16px;
+  line-height: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.abc-row-why {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.abc-row.pending .abc-row-word,
+.abc-row.rejected .abc-row-word {
+  color: var(--muted);
+}
+
+.abc-row.pending .abc-row-why,
+.abc-row.rejected .abc-row-why {
+  opacity: 0.6;
+}
+
+.abc-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--kinda-bg);
+  vertical-align: middle;
+}
+
+.abc-row-state {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--kinda-bg);
+  white-space: nowrap;
+}
+
+.abc-row-state.muted {
+  color: var(--muted);
+}
+
+.abc-drawer-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.abc-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.abc-link.fg {
+  color: var(--fg);
+}
+
+.abc-link.primary {
+  color: var(--primary);
+}
+
+.abc-link:hover {
+  text-decoration: underline;
+}
+
+.abc-fine {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* the suggest form (signed in): word, why, button on one line */
+.abc-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.abc-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.abc-input:focus-within {
+  border-color: var(--primary);
+}
+
+.abc-input:first-child {
+  width: 190px;
+}
+
+.abc-input:nth-child(2) {
+  width: 210px;
+}
+
+.abc-input input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 16px;
+  outline: none;
+}
+
+.abc-input input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.abc-counter {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.abc-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.abc-submit {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+.abc-submit:disabled {
+  opacity: 0.6;
+}
+
+.abc-form-note {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+}
+
+.abc-err {
+  color: var(--no-bg);
+}
+
+.abc-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 56px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.abc-foot a:hover {
+  color: var(--fg);
+}
+
+/* ----- entry points ----- */
+.abc-az {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+}
+
+.chip-abc {
+  border-color: var(--primary);
+  gap: 8px;
+  padding-left: 12px;
+}
+
+.chip-abc .abc-n {
+  color: var(--muted);
+}
+
+.abc-strip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  transition: border-color 0.15s ease;
+}
+
+.abc-strip:hover {
+  border-color: var(--primary);
+}
+
+.abc-strip-name {
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.abc-strip-go {
+  font-weight: 500;
+  color: var(--primary);
+}
+
+@media (max-width: 1000px) {
+  .abc-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .abc-how {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .abc-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding-top: 16px;
+  }
+
+  .abc-head h1 {
+    font-size: 28px;
+  }
+
+  .abc-copy {
+    font-size: 14px;
+  }
+
+  .abc-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 11px;
+    padding-top: 24px;
+  }
+
+  .abc-tile {
+    padding: 10px 10px 9px;
+  }
+
+  .abc-letter {
+    font-size: 38px;
+  }
+
+  .abc-word,
+  .abc-q {
+    font-size: 14px;
+  }
+
+  .abc-pill {
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+
+  .abc-suggest-hint .long {
+    display: none;
+  }
+
+  .abc-suggest-hint .short {
+    display: inline;
+  }
+
+  .abc-how {
+    grid-column: 1 / -1;
+    padding: 4px 0 0;
+  }
+
+  .abc-drawer {
+    padding: 14px 14px 12px;
+  }
+
+  .abc-row {
+    padding: 10px 0;
+  }
+
+  .abc-row-text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .abc-row-word {
+    font-size: 14px;
+  }
+
+  .abc-row-why {
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  .abc-drawer-foot,
+  .abc-form-note {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .abc-drawer-foot {
+    padding-top: 12px;
+  }
+
+  .abc-fine {
+    white-space: normal;
+  }
+
+  .abc-input:first-child,
+  .abc-input:nth-child(2) {
+    width: 100%;
+  }
+
+  .abc-submit {
+    width: 100%;
+  }
+
+  .abc-foot {
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 40px;
+  }
+}

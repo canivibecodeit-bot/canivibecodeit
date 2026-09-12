@@ -1,6 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 import { allApps, moatsInUse, MOAT_TAG_DESCS } from '../lib/apps.js';
+import { abcSummary } from '../lib/abc.js';
+
+// The ABCs of moats strip under the intro (lib/abc.js).
+const abc = await abcSummary();
 
 const moats = moatsInUse();
 const apps = allApps();
@@ -52,6 +56,13 @@ const jsonld = [
       Code stopped being a moat. Every app here is tagged with what's left holding it
       up: 1 to 3 tags, strongest first.
     </p>
+
+    <a class="abc-strip" href="/moats/abc">
+      <b class="abc-az">A→Z</b>
+      <span class="abc-strip-name">the ABCs of moats</span>
+      <span>{abc.filled} of {abc.total} letters filled{abc.nextOpen ? ` · ${abc.nextOpen} is open` : ''}</span>
+      <span class="abc-strip-go">suggest a word →</span>
+    </a>
 
     <div class="moat-stat">
       <div class="ms-fig">

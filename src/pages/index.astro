@@ -6,6 +6,7 @@ import VisitorGlobe from '../components/VisitorGlobe.astro';
 import DigestCard from '../components/DigestCard.astro';
 import { allApps, appsWithAlternativesPage, topCategories, categoriesInUse } from '../lib/apps.js';
 import { bgPotCents, liveBuilds, modelDemos, voteCounts } from '../lib/db.js';
+import { abcSummary } from '../lib/abc.js';
 import { buildGamesLive, buildsLive, studiesLive } from '../lib/flags.js';
 import { featuredStudy, studiesCalloutActive } from '../lib/studies.js';
 import { usd } from '../lib/buildgames.js';
@@ -53,6 +54,9 @@ const ddCats = categoriesInUse().sort((a, b) => b.count - a.count);
 // /alternatives hub, so the claim can never drift from the pages.
 const altApps = appsWithAlternativesPage();
 const totalAlts = altApps.reduce((s, a) => s + a.alternatives.length, 0);
+
+// The ABCs of moats chip: letters filled so far (lib/abc.js).
+const abc = await abcSummary();
 
 const title = 'Can I Vibecode It? · what AI can rebuild, what survives';
 const description = `The live scoreboard of what AI can and can't replace, and which moats actually hold. Honest verdicts on ${apps.length} apps, the exact prompt to run, free.`;
@@ -149,6 +153,7 @@ const jsonld = [
       }
       <a class="chip chip-new" href="/alternatives">🚪 escape hatches <span class="new-tag">NEW</span></a>
       <a class="chip" href="/moats">🏰 moats</a>
+      <a class="chip chip-abc" href="/moats/abc"><b class="abc-az">A→Z</b> the ABCs of moats <span class="abc-n">{abc.filled}/{abc.total}</span></a>
       <a class="chip" href="/categories">all categories →</a>
     </nav>
     {/* Launch-week study callout (publish spec 5): STUDIES_LIVE plus the

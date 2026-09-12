@@ -1,0 +1,145 @@
+---
+/* /moats/abc: the ABCs of moats. 26 tiles, one word per letter, voted up
+   by anyone; signed-in visitors suggest words that a screener clears
+   before they show. Data and rules: lib/abc.js. The drawer, voting, form
+   and screening poll: public/js/abc.js, fed by the JSON below. */
+import Base from '../../layouts/Base.astro';
+import { LETTERS, SUGGEST_DAILY, WHY_MAX, WORD_MAX, abcBoard, voterKeyFor } from '../../lib/abc.js';
+import { scriptJson } from '../../lib/request.js';
+
+const user = Astro.locals.user ?? null;
+let clientAddress;
+try {
+  clientAddress = Astro.clientAddress;
+} catch {
+  clientAddress = undefined;
+}
+const voterKey = voterKeyFor(Astro.request, clientAddress, user);
+const board = await abcBoard({ voterKey, userId: user?.id });
+
+// Voted state is per visitor, so no shared cache may hold this page.
+Astro.response.headers.set('Cache-Control', 'private, no-cache');
+
+const total = LETTERS.length;
+const title = 'the ABCs of moats · one word per letter · Can I Vibecode It?';
+const description = `One word per letter for what a moat can be: ${board.filled} of ${total} letters filled, ${board.totalVotes} votes so far. Upvote the best, sign in to fill the gaps.`;
+
+const jsonld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'The Death List', item: 'https://canivibecodeit.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Moats', item: 'https://canivibecodeit.com/moats' },
+      { '@type': 'ListItem', position: 3, name: 'The ABCs of moats', item: 'https://canivibecodeit.com/moats/abc' },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'The ABCs of moats',
+    itemListElement: board.letters
+      .filter((l) => l.top)
+      .map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: `${l.letter}: ${l.top.word}` })),
+  },
+];
+
+const payload = {
+  user: !!user,
+  left: board.left,
+  dailyMax: SUGGEST_DAILY,
+  wordMax: WORD_MAX,
+  whyMax: WHY_MAX,
+  letters: board.letters.map((l) => ({ letter: l.letter, words: l.words })),
+};
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+---
+
+<Base {title} {description} {jsonld} ogImage="/og/moats-abc.png">
+  <main class="wrap abc" data-abc>
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/">the death list</a> / <a href="/moats">moats</a> / <span class="here">abc</span>
+    </nav>
+
+    <header class="abc-head">
+      <h1>the ABCs of moats</h1>
+      <p class="abc-meta" data-abc-meta>{board.filled} of {total} letters · {plural(board.totalVotes, 'vote', 'votes')}</p>
+    </header>
+    <p class="abc-copy">one word per letter for what a moat can be. upvote the best, fill the gaps.</p>
+
+    <section class="abc-grid" data-abc-grid aria-label="Letters">
+      {
+        board.letters.map((l) =>
+          l.top ? (
+            <div
+              class="abc-tile"
+              role="button"
+              tabindex="0"
+              data-letter={l.letter}
+              aria-expanded="false"
+              aria-label={`${l.letter}: ${l.top.word}, ${plural(l.extra + 1, 'word', 'words')}`}
+            >
+              <div class="abc-tile-top">
+                <span class="abc-letter">{l.letter}</span>
+                {l.extra > 0 && <span class="abc-extra">+{l.extra}</span>}
+              </div>
+              <div class="abc-tile-bot">
+                <span class="abc-word">{l.top.word}</span>
+                <button
+                  type="button"
+                  class:list={['abc-pill', { voted: l.top.voted }]}
+                  data-abc-vote={l.top.id}
+                  aria-pressed={l.top.voted ? 'true' : 'false'}
+                  aria-label={`upvote ${l.top.word}`}
+                >▲ <span data-abc-count={l.top.id}>{l.top.votes}</span></button>
+              </div>
+            </div>
+          ) : (
+            <div
+              class="abc-tile ghost"
+              role="button"
+              tabindex="0"
+              data-letter={l.letter}
+              aria-expanded="false"
+              aria-label={`${l.letter}: open, suggest a word`}
+            >
+              <span class="abc-letter">{l.letter}</span>
+              <div class="abc-tile-bot">
+                <span class="abc-q">?</span>
+                <span class="abc-suggest-hint"><span class="long">suggest a word</span><span class="short">suggest</span> →</span>
+              </div>
+            </div>
+          )
+        )
+      }
+      <div class="abc-how">
+        <p class="abc-how-label">how it works</p>
+        <p>anyone can upvote. sign in to suggest a word, {SUGGEST_DAILY} a day. a tile opens to show the runners-up.</p>
+      </div>
+      <div class="abc-drawer" data-abc-drawer hidden></div>
+    </section>
+
+    <footer class="abc-foot">
+      <a href="/moats">← back to moats</a>
+      <span>words are screened before they show · MIT · no tracking</span>
+    </footer>
+
+    {/* The drawer's sign-in link clicks this: app.js binds the existing
+        modal to [data-signin] at page load, with the copy below. */}
+    {
+      !user && (
+        <a
+          class="abc-signin-proxy"
+          href="/signin"
+          data-signin
+          data-signin-title="Sign in to suggest a word"
+          data-signin-sub={`free, github or google. ${SUGGEST_DAILY} words a day, screened before they show.`}
+          hidden
+        >sign in</a>
+      )
+    }
+  </main>
+  <script type="application/json" id="abc-data" set:html={scriptJson(payload)} />
+</Base>
+
+<script is:inline src={`/js/abc.js?v=${__BUILD_ID__}`} defer></script>
