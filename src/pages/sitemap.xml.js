@@ -17,6 +17,7 @@ export async function GET() {
     `${base}/categories`,
     ...moatsInUse().map((m) => `${base}/moat/${m.tag}`),
     `${base}/moats`,
+    `${base}/moats/abc`,
     `${base}/stats`,
     `${base}/submit`,
     `${base}/newsletter`,
