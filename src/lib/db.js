@@ -1004,21 +1004,21 @@ async function pgDriver() {
         message,
       ]);
     },
+    // One statement, so parallel requests cannot all read "under the cap"
+    // and all pass: the upsert either opens a new window (count 1) or bumps
+    // the current one, and the returned count decides. A blocked request
+    // still bumps the count; that only keeps it blocked.
     async rateLimit(key, max, windowMs) {
       const now = Date.now();
-      const r = await pool.query('SELECT count, window_start FROM rate_limits WHERE key = $1', [key]);
-      const row = r.rows[0];
-      if (!row || now - Number(row.window_start) > windowMs) {
-        await pool.query(
-          `INSERT INTO rate_limits (key, count, window_start) VALUES ($1, 1, $2)
-           ON CONFLICT (key) DO UPDATE SET count = 1, window_start = $2`,
-          [key, now]
-        );
-        return true;
-      }
-      if (row.count >= max) return false;
-      await pool.query('UPDATE rate_limits SET count = count + 1 WHERE key = $1', [key]);
-      return true;
+      const r = await pool.query(
+        `INSERT INTO rate_limits (key, count, window_start) VALUES ($1, 1, $2::bigint)
+         ON CONFLICT (key) DO UPDATE SET
+           count = CASE WHEN $2::bigint - rate_limits.window_start > $3::bigint THEN 1 ELSE rate_limits.count + 1 END,
+           window_start = CASE WHEN $2::bigint - rate_limits.window_start > $3::bigint THEN $2::bigint ELSE rate_limits.window_start END
+         RETURNING count`,
+        [key, now, windowMs]
+      );
+      return Number(r.rows[0].count) <= max;
     },
     async sponsorSlots() {
       const r = await pool.query(
