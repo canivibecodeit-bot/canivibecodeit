@@ -3,7 +3,8 @@
    2-24 letters in one or two words starting with the letter, why up to 80
    plain characters, no links/handles/emails anywhere). Gates in order: a
    session (401), same origin (403), the honeypot (a fake 202), 10 an hour
-   per IP, a small global cap, 3 per user per UTC day (429), then the
+   per IP, a small global cap, 3 per user per UTC day (429, enforced again
+   inside the insert so parallel posts cannot exceed it), then the
    duplicate check (409). The word is stored pending and screened in the
    background; the reply carries the id the page polls. */
 import { rateLimit } from '../../../lib/db.js';
@@ -44,8 +45,11 @@ export async function POST({ request, locals, clientAddress }) {
     return json({ error: `that's ${SUGGEST_DAILY} for today, back tomorrow`, left: 0 }, 429);
   }
 
-  const id = await addSuggestion({ letter: v.letter, word: v.word, why: v.why, userId: user.id });
-  if (id == null) return json({ error: 'already suggested', left }, 409);
+  // The insert itself enforces the quota again, atomically: the check above
+  // only exists for the friendlier message on the ordinary path.
+  const r = await addSuggestion({ letter: v.letter, word: v.word, why: v.why, userId: user.id });
+  if (r.error === 'duplicate') return json({ error: 'already suggested', left }, 409);
+  if (r.error) return json({ error: `that's ${SUGGEST_DAILY} for today, back tomorrow`, left: 0 }, 429);
 
-  return json({ id, letter: v.letter, word: v.word, why: v.why, status: 'pending', left: left - 1 }, 202);
+  return json({ id: r.id, letter: v.letter, word: v.word, why: v.why, status: 'pending', left: left - 1 }, 202);
 }

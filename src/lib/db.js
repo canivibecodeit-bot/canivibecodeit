@@ -1043,20 +1043,36 @@ async function pgDriver() {
       const r = await pool.query('SELECT word_id FROM abc_votes WHERE voter_key = $1', [voterKey]);
       return r.rows.map((x) => Number(x.word_id));
     },
-    // null = the same word is already live or pending for that letter (the
-    // partial unique index is the arbiter, so two concurrent inserts can't
-    // both win).
-    async abcInsertWord({ letter, word, why, userId, createdAt }) {
+    // The daily quota is checked and the row inserted under a per-user
+    // advisory lock in one transaction, so concurrent submits queue up and
+    // the (n+1)th sees n rows. A duplicate (partial unique index) rolls the
+    // transaction back and costs no quota.
+    async abcInsertWord({ letter, word, why, userId, createdAt, dayStart, dailyMax }) {
+      const client = await pool.connect();
       try {
-        const r = await pool.query(
+        await client.query('BEGIN');
+        await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`abc:${userId}`]);
+        const c = await client.query(
+          'SELECT count(*)::int AS c FROM abc_words WHERE user_id = $1 AND created_at >= $2',
+          [userId, dayStart]
+        );
+        if (c.rows[0].c >= dailyMax) {
+          await client.query('ROLLBACK');
+          return { error: 'quota', used: c.rows[0].c };
+        }
+        const r = await client.query(
           `INSERT INTO abc_words (letter, word, why, user_id, status, created_at)
            VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING id`,
           [letter, word, why, userId, createdAt]
         );
-        return Number(r.rows[0].id);
+        await client.query('COMMIT');
+        return { id: Number(r.rows[0].id) };
       } catch (err) {
-        if (err.code === '23505') return null;
+        await client.query('ROLLBACK').catch(() => {});
+        if (err.code === '23505') return { error: 'duplicate' };
         throw err;
+      } finally {
+        client.release();
       }
     },
     async abcScreened(id, status, reason) {
@@ -1934,20 +1950,26 @@ async function sqliteDriver() {
     async abcVotedIds(voterKey) {
       return db.prepare('SELECT word_id FROM abc_votes WHERE voter_key = ?').all(voterKey).map((x) => Number(x.word_id));
     },
-    // null = the same word is already live or pending for that letter (the
-    // partial unique index is the arbiter, so two concurrent inserts can't
-    // both win).
-    async abcInsertWord({ letter, word, why, userId, createdAt }) {
-      try {
+    // Quota check and insert in one synchronous transaction (better-sqlite3
+    // serialises, so nothing interleaves); a duplicate costs no quota.
+    async abcInsertWord({ letter, word, why, userId, createdAt, dayStart, dailyMax }) {
+      const tx = db.transaction(() => {
+        const { c } = db
+          .prepare('SELECT count(*) AS c FROM abc_words WHERE user_id = ? AND created_at >= ?')
+          .get(userId, dayStart);
+        if (c >= dailyMax) return { error: 'quota', used: c };
         const r = db
           .prepare(
             `INSERT INTO abc_words (letter, word, why, user_id, status, created_at)
              VALUES (?, ?, ?, ?, 'pending', ?)`
           )
           .run(letter, word, why, userId, createdAt);
-        return Number(r.lastInsertRowid);
+        return { id: Number(r.lastInsertRowid) };
+      });
+      try {
+        return tx();
       } catch (err) {
-        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') return null;
+        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') return { error: 'duplicate' };
         throw err;
       }
     },

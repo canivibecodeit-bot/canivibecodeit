@@ -113,11 +113,44 @@ export function crossOrigin(request) {
 // input contains one. Applied shallowly — our endpoints read flat fields.
 const stripNul = (v) => (typeof v === 'string' ? v.replaceAll('\0', '') : v);
 
-export async function readBody(request) {
+// maxBytes: read the body through a counting reader and give up as soon as
+// it runs over, so an endpoint can refuse a large body before parsing any
+// of it (nginx alone allows 50 MB). Throws BodyTooLarge; callers answer 413.
+export class BodyTooLarge extends Error {}
+
+async function readCapped(request, maxBytes) {
+  const reader = request.body?.getReader();
+  if (!reader) return '';
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      await reader.cancel().catch(() => {});
+      throw new BodyTooLarge('body too large');
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+export async function readBody(request, { maxBytes } = {}) {
   const type = request.headers.get('content-type') || '';
-  const body = type.includes('application/json')
-    ? await request.json()
-    : Object.fromEntries((await request.formData()).entries());
+  let body;
+  if (maxBytes) {
+    const declared = Number(request.headers.get('content-length'));
+    if (declared > maxBytes) throw new BodyTooLarge('body too large');
+    const text = await readCapped(request, maxBytes);
+    body = type.includes('application/json')
+      ? JSON.parse(text)
+      : Object.fromEntries(new URLSearchParams(text).entries());
+  } else {
+    body = type.includes('application/json')
+      ? await request.json()
+      : Object.fromEntries((await request.formData()).entries());
+  }
   if (body && typeof body === 'object') {
     for (const k of Object.keys(body)) body[k] = stripNul(body[k]);
   }

@@ -7,7 +7,8 @@
    votable) or `rejected` (kept with the reason, never shown). The
    screener is the only path from pending to live; an API failure leaves
    the word pending and the queue below retries it, capped, so nothing is
-   ever approved by accident.
+   ever approved by accident. A pending word is screened at most three
+   times; after that it stays pending for a human.
 
    Voter key: a signed-in user votes as `u:<id>`; a visitor votes as an
    HMAC of their IP (same bucket the app votes rate-limit on), so one
@@ -140,19 +141,32 @@ export async function abcSummary() {
 
 /* ---------- suggesting ---------- */
 
+/* Insert the word with the daily quota enforced by the same statement
+   (or transaction) that inserts, so ten parallel submits from one account
+   cannot all pass a separate "left > 0" check. Returns { id } or
+   { error: 'duplicate' | 'quota' }. */
 export async function addSuggestion({ letter, word, why, userId }) {
-  const id = await abcInsertWord({ letter, word, why, userId, createdAt: Date.now() });
-  if (id == null) return null;
+  const now = Date.now();
+  const r = await abcInsertWord({
+    letter,
+    word,
+    why,
+    userId,
+    createdAt: now,
+    dayStart: utcDayStart(now),
+    dailyMax: SUGGEST_DAILY,
+  });
+  if (r.error) return r;
   // Screen in the background; the visitor polls /api/abc/word/:id.
-  void runScreening(id).catch(() => {});
-  return id;
+  void runScreening(r.id).catch(() => {});
+  return r;
 }
 
 /* ---------- screening ---------- */
 
 const SCREEN_MODELS = ['anthropic/claude-haiku-4.5', 'google/gemini-2.5-flash-lite'];
 const SCREEN_TIMEOUT_MS = 8000;
-const SCREEN_MAX_ATTEMPTS = 6;
+const SCREEN_MAX_ATTEMPTS = 3;
 export const SCREEN_SYSTEM_PROMPT =
   'You screen one-word suggestions for a page listing what a business moat can be. ' +
   'Answer JSON {ok:true|false, reason} only. ' +

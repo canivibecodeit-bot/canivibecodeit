@@ -112,3 +112,27 @@ test('screener: parses the verdict, sends the word as data, falls back once, fai
   await assert.rejects(() => screenWord({ letter: 'A', word: 'audience' }, reply(200, '{"reason":"x"}')));
   await assert.rejects(() => screenWord({ letter: 'A', word: 'audience' }, reply(500, '{"ok":true}')));
 });
+
+/* The daily quota is enforced by the insert itself (SQLite driver, a
+   throwaway database): five parallel submits for five different letters
+   leave exactly three rows, and a duplicate costs no quota. */
+test('daily quota holds under parallel inserts and duplicates cost nothing', async () => {
+  const { mkdtempSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  process.env.DATA_DIR = mkdtempSync(join(tmpdir(), 'abc-test-'));
+  delete process.env.DATABASE_URL;
+  const { abcInsertWord, abcUserCount } = await import('../src/lib/db.js');
+  const base = { why: null, userId: 'user-quota', createdAt: Date.now(), dayStart: 0, dailyMax: 3 };
+  const results = await Promise.all(
+    ['G', 'H', 'I', 'J', 'K'].map((letter) => abcInsertWord({ ...base, letter, word: `${letter.toLowerCase()}word` }))
+  );
+  assert.equal(results.filter((r) => r.id).length, 3);
+  assert.equal(results.filter((r) => r.error === 'quota').length, 2);
+  assert.equal(await abcUserCount('user-quota', 0), 3);
+  // Another user is unaffected, and their duplicate is refused without using quota.
+  const other = { ...base, userId: 'user-two' };
+  assert.ok((await abcInsertWord({ ...other, letter: 'L', word: 'lock in' })).id);
+  assert.deepEqual(await abcInsertWord({ ...other, letter: 'L', word: 'Lock In'.toLowerCase() }), { error: 'duplicate' });
+  assert.equal(await abcUserCount('user-two', 0), 1);
+});
