@@ -257,25 +257,6 @@ function studiesIndexCard() {
   ]);
 }
 
-// /moats/abc share card: same frame as the studies index card.
-function abcCard() {
-  return page([
-    logoRow,
-    el('div', { display: 'flex', flexDirection: 'column', gap: 30, marginTop: 56 }, [
-      el('div', { ...mono(26, COLORS.muted), letterSpacing: '0.14em' }, 'MOATS · A→Z'),
-      el('div', {
-        fontFamily: 'Space Grotesk', fontSize: 84, fontWeight: 700,
-        color: COLORS.fg, letterSpacing: '-0.02em', lineHeight: 1.05,
-      }, 'the ABCs of moats'),
-      el('div', mono(30, COLORS.muted), 'one word per letter for what a moat can be. upvote the best, fill the gaps.'),
-    ]),
-    el('div', { display: 'flex', marginTop: 'auto', justifyContent: 'space-between' }, [
-      el('div', mono(22, COLORS.muted), 'canivibecodeit.com/moats/abc'),
-      el('div', mono(22, COLORS.muted), 'anyone can vote · sign in to suggest →'),
-    ]),
-  ]);
-}
-
 async function render(node, file) {
   const svg = await satori(node, { width: 1200, height: 630, fonts });
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -350,7 +331,6 @@ if (range) {
     await renderCached(builtWithCard(m), `built-with-${m.slug}.png`, `built-with:${m.slug}:${m.name}:2`, cache);
   }
   await renderCached(studiesIndexCard(), 'studies.png', 'studies-index:1', cache);
-  await renderCached(abcCard(), 'moats-abc.png', 'moats-abc:1', cache);
   for (const st of STUDIES) {
     await renderCached(studyCard(st), `studies/${st.slug}.png`, `study:${st.slug}:${st.title}:${st.verdict}:2`, cache);
   }

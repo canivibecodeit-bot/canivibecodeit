@@ -366,29 +366,6 @@ const SCHEMA_SQLITE = `
   );
   CREATE UNIQUE INDEX IF NOT EXISTS model_demos_source ON model_demos (model_slug, source, source_id);
   CREATE INDEX IF NOT EXISTS model_demos_model ON model_demos (model_slug, status, featured_order);
-  /* The ABCs of moats (lib/abc.js): one crowd-sourced word per letter.
-     Words are pending until the screener clears them; votes are one row per
-     voter key (a signed-in user id, or an HMAC of the visitor's IP). */
-  CREATE TABLE IF NOT EXISTS abc_words (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    letter TEXT NOT NULL,
-    word TEXT NOT NULL,
-    why TEXT,
-    user_id TEXT,
-    status TEXT NOT NULL,
-    screen_reason TEXT,
-    screen_attempts INTEGER NOT NULL DEFAULT 0,
-    created_at INTEGER NOT NULL,
-    seeded_at INTEGER
-  );
-  CREATE INDEX IF NOT EXISTS abc_words_letter ON abc_words (letter, status);
-  CREATE UNIQUE INDEX IF NOT EXISTS abc_words_open ON abc_words (letter, lower(word)) WHERE status IN ('live', 'pending');
-  CREATE TABLE IF NOT EXISTS abc_votes (
-    word_id INTEGER NOT NULL,
-    voter_key TEXT NOT NULL,
-    created_at INTEGER NOT NULL,
-    PRIMARY KEY (word_id, voter_key)
-  );
 `;
 
 const SCHEMA_PG = `
@@ -715,42 +692,9 @@ const SCHEMA_PG = `
   );
   CREATE UNIQUE INDEX IF NOT EXISTS model_demos_source ON model_demos (model_slug, source, source_id);
   CREATE INDEX IF NOT EXISTS model_demos_model ON model_demos (model_slug, status, featured_order);
-  CREATE TABLE IF NOT EXISTS abc_words (
-    id BIGSERIAL PRIMARY KEY,
-    letter TEXT NOT NULL,
-    word TEXT NOT NULL,
-    why TEXT,
-    user_id TEXT,
-    status TEXT NOT NULL,
-    screen_reason TEXT,
-    screen_attempts INTEGER NOT NULL DEFAULT 0,
-    created_at BIGINT NOT NULL,
-    seeded_at BIGINT
-  );
-  CREATE INDEX IF NOT EXISTS abc_words_letter ON abc_words (letter, status);
-  CREATE UNIQUE INDEX IF NOT EXISTS abc_words_open ON abc_words (letter, lower(word)) WHERE status IN ('live', 'pending');
-  CREATE TABLE IF NOT EXISTS abc_votes (
-    word_id BIGINT NOT NULL,
-    voter_key TEXT NOT NULL,
-    created_at BIGINT NOT NULL,
-    PRIMARY KEY (word_id, voter_key)
-  );
 `;
 
 /* Six fixed slots, three per rail side. Seed prices only — editable at runtime. */
-/* The ABCs of moats: the six words the page launches with. Seeds only ever
-   create a row that is missing (same letter, same word); nothing already
-   there is touched. user_id NULL + seeded_at mark them as the house's. */
-const ABC_SEED = [
-  ['A', 'audience'],
-  ['B', 'brand'],
-  ['C', 'community'],
-  ['D', 'data'],
-  ['E', 'execution'],
-  ['F', 'focus'],
-];
-const abcRow = numericRow(['id', 'votes', 'screen_attempts', 'created_at', 'seeded_at']);
-
 const SLOT_SEED = [
   ['L1', 29900],
   ['R1', 39900],
@@ -1011,91 +955,7 @@ async function pgDriver() {
       [id, cents]
     );
   }
-  for (const [letter, word] of ABC_SEED) {
-    await pool.query(
-      `INSERT INTO abc_words (letter, word, why, user_id, status, created_at, seeded_at)
-       SELECT $1, $2, NULL, NULL, 'live', $3, $3
-        WHERE NOT EXISTS (SELECT 1 FROM abc_words WHERE letter = $1 AND lower(word) = lower($2))`,
-      [letter, word, Date.now()]
-    );
-  }
   return {
-    /* ---------- the ABCs of moats (lib/abc.js) ---------- */
-    async abcWords() {
-      const r = await pool.query(
-        `SELECT w.id, w.letter, w.word, w.why, w.user_id, w.status, w.created_at, w.seeded_at,
-                (SELECT count(*) FROM abc_votes v WHERE v.word_id = w.id)::int AS votes
-           FROM abc_words w
-          WHERE w.status IN ('live', 'pending')
-          ORDER BY w.letter, votes DESC, w.created_at, w.id`
-      );
-      return r.rows.map(abcRow);
-    },
-    async abcWord(id) {
-      const r = await pool.query(
-        `SELECT w.*, (SELECT count(*) FROM abc_votes v WHERE v.word_id = w.id)::int AS votes
-           FROM abc_words w WHERE w.id = $1`,
-        [id]
-      );
-      return abcRow(r.rows[0]);
-    },
-    async abcVotedIds(voterKey) {
-      const r = await pool.query('SELECT word_id FROM abc_votes WHERE voter_key = $1', [voterKey]);
-      return r.rows.map((x) => Number(x.word_id));
-    },
-    // null = the same word is already live or pending for that letter (the
-    // partial unique index is the arbiter, so two concurrent inserts can't
-    // both win).
-    async abcInsertWord({ letter, word, why, userId, createdAt }) {
-      try {
-        const r = await pool.query(
-          `INSERT INTO abc_words (letter, word, why, user_id, status, created_at)
-           VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING id`,
-          [letter, word, why, userId, createdAt]
-        );
-        return Number(r.rows[0].id);
-      } catch (err) {
-        if (err.code === '23505') return null;
-        throw err;
-      }
-    },
-    async abcScreened(id, status, reason) {
-      await pool.query(
-        `UPDATE abc_words SET status = $2, screen_reason = $3, screen_attempts = screen_attempts + 1
-          WHERE id = $1 AND status = 'pending'`,
-        [id, status, reason]
-      );
-    },
-    async abcScreenFailed(id) {
-      await pool.query('UPDATE abc_words SET screen_attempts = screen_attempts + 1 WHERE id = $1', [id]);
-    },
-    async abcPending(maxAttempts, limit) {
-      const r = await pool.query(
-        `SELECT * FROM abc_words WHERE status = 'pending' AND screen_attempts < $1
-          ORDER BY created_at LIMIT $2`,
-        [maxAttempts, limit]
-      );
-      return r.rows.map(abcRow);
-    },
-    async abcUserCount(userId, sinceMs) {
-      const r = await pool.query(
-        'SELECT count(*)::int AS c FROM abc_words WHERE user_id = $1 AND created_at >= $2',
-        [userId, sinceMs]
-      );
-      return r.rows[0].c;
-    },
-    async abcToggleVote(wordId, voterKey) {
-      const ins = await pool.query(
-        'INSERT INTO abc_votes (word_id, voter_key, created_at) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-        [wordId, voterKey, Date.now()]
-      );
-      const voted = ins.rowCount > 0;
-      if (!voted) {
-        await pool.query('DELETE FROM abc_votes WHERE word_id = $1 AND voter_key = $2', [wordId, voterKey]);
-      }
-      const c = await pool.query('SELECT count(*)::int AS c FROM abc_votes WHERE word_id = $1', [wordId]);
-      return { voted, count: c.rows[0].c };
-    },
     async voteCount(slug) {
       const r = await pool.query('SELECT count FROM votes WHERE slug = $1', [slug]);
       return r.rows[0]?.count ?? 0;
@@ -1885,12 +1745,6 @@ async function sqliteDriver() {
   db.exec("UPDATE waitlist SET source = 'scanner' WHERE source IS NULL");
   const seedSlot = db.prepare('INSERT OR IGNORE INTO sponsor_slots (id, price_cents) VALUES (?, ?)');
   for (const [id, cents] of SLOT_SEED) seedSlot.run(id, cents);
-  const seedAbc = db.prepare(`
-    INSERT INTO abc_words (letter, word, why, user_id, status, created_at, seeded_at)
-    SELECT ?, ?, NULL, NULL, 'live', ?, ?
-     WHERE NOT EXISTS (SELECT 1 FROM abc_words WHERE letter = ? AND lower(word) = lower(?))
-  `);
-  for (const [letter, word] of ABC_SEED) seedAbc.run(letter, word, Date.now(), Date.now(), letter, word);
   const stmts = {
     getVote: db.prepare('SELECT count FROM votes WHERE slug = ?'),
     allVotes: db.prepare('SELECT slug, count FROM votes'),
@@ -1908,81 +1762,6 @@ async function sqliteDriver() {
     bumpLimit: db.prepare('UPDATE rate_limits SET count = count + 1 WHERE key = ?'),
   };
   return {
-    /* ---------- the ABCs of moats (lib/abc.js) ---------- */
-    async abcWords() {
-      return db
-        .prepare(
-          `SELECT w.id, w.letter, w.word, w.why, w.user_id, w.status, w.created_at, w.seeded_at,
-                  (SELECT count(*) FROM abc_votes v WHERE v.word_id = w.id) AS votes
-             FROM abc_words w
-            WHERE w.status IN ('live', 'pending')
-            ORDER BY w.letter, votes DESC, w.created_at, w.id`
-        )
-        .all()
-        .map(abcRow);
-    },
-    async abcWord(id) {
-      return abcRow(
-        db
-          .prepare(
-            `SELECT w.*, (SELECT count(*) FROM abc_votes v WHERE v.word_id = w.id) AS votes
-               FROM abc_words w WHERE w.id = ?`
-          )
-          .get(id)
-      );
-    },
-    async abcVotedIds(voterKey) {
-      return db.prepare('SELECT word_id FROM abc_votes WHERE voter_key = ?').all(voterKey).map((x) => Number(x.word_id));
-    },
-    // null = the same word is already live or pending for that letter (the
-    // partial unique index is the arbiter, so two concurrent inserts can't
-    // both win).
-    async abcInsertWord({ letter, word, why, userId, createdAt }) {
-      try {
-        const r = db
-          .prepare(
-            `INSERT INTO abc_words (letter, word, why, user_id, status, created_at)
-             VALUES (?, ?, ?, ?, 'pending', ?)`
-          )
-          .run(letter, word, why, userId, createdAt);
-        return Number(r.lastInsertRowid);
-      } catch (err) {
-        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') return null;
-        throw err;
-      }
-    },
-    async abcScreened(id, status, reason) {
-      db.prepare(
-        `UPDATE abc_words SET status = ?, screen_reason = ?, screen_attempts = screen_attempts + 1
-          WHERE id = ? AND status = 'pending'`
-      ).run(status, reason, id);
-    },
-    async abcScreenFailed(id) {
-      db.prepare('UPDATE abc_words SET screen_attempts = screen_attempts + 1 WHERE id = ?').run(id);
-    },
-    async abcPending(maxAttempts, limit) {
-      return db
-        .prepare(
-          `SELECT * FROM abc_words WHERE status = 'pending' AND screen_attempts < ?
-            ORDER BY created_at LIMIT ?`
-        )
-        .all(maxAttempts, limit)
-        .map(abcRow);
-    },
-    async abcUserCount(userId, sinceMs) {
-      return db
-        .prepare('SELECT count(*) AS c FROM abc_words WHERE user_id = ? AND created_at >= ?')
-        .get(userId, sinceMs).c;
-    },
-    async abcToggleVote(wordId, voterKey) {
-      const ins = db
-        .prepare('INSERT OR IGNORE INTO abc_votes (word_id, voter_key, created_at) VALUES (?, ?, ?)')
-        .run(wordId, voterKey, Date.now());
-      const voted = ins.changes > 0;
-      if (!voted) db.prepare('DELETE FROM abc_votes WHERE word_id = ? AND voter_key = ?').run(wordId, voterKey);
-      const { c } = db.prepare('SELECT count(*) AS c FROM abc_votes WHERE word_id = ?').get(wordId);
-      return { voted, count: c };
-    },
     async voteCount(slug) {
       return stmts.getVote.get(slug)?.count ?? 0;
     },
@@ -2599,35 +2378,6 @@ export async function addSponsorInquiry(email, message) {
 
 export async function rateLimit(key, max, windowMs) {
   return (await getDriver()).rateLimit(key, max, windowMs);
-}
-
-/* ---------- the ABCs of moats ---------- */
-export async function abcWords() {
-  return (await getDriver()).abcWords();
-}
-export async function abcWord(id) {
-  return (await getDriver()).abcWord(id);
-}
-export async function abcVotedIds(voterKey) {
-  return (await getDriver()).abcVotedIds(voterKey);
-}
-export async function abcInsertWord(fields) {
-  return (await getDriver()).abcInsertWord(fields);
-}
-export async function abcScreened(id, status, reason) {
-  return (await getDriver()).abcScreened(id, status, reason);
-}
-export async function abcScreenFailed(id) {
-  return (await getDriver()).abcScreenFailed(id);
-}
-export async function abcPending(maxAttempts, limit) {
-  return (await getDriver()).abcPending(maxAttempts, limit);
-}
-export async function abcUserCount(userId, sinceMs) {
-  return (await getDriver()).abcUserCount(userId, sinceMs);
-}
-export async function abcToggleVote(wordId, voterKey) {
-  return (await getDriver()).abcToggleVote(wordId, voterKey);
 }
 
 export async function sponsorSlots() {
