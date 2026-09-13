@@ -237,7 +237,7 @@ Ahrefs carries two: proprietary data, then infrastructure scale.
 
 The chart at the top of this page draws all 13 live, with Ahrefs' two tags picked out. Here's the table behind it, 1,093 apps as of this week. "Held" means the app kept a not-really verdict.
 
-| moat tag | apps tagged | held (not really) | ahrefs has it |
+| moat tag | apps tagged | held (not really) | one of Ahrefs' moats? |
 |---|---:|---:|---|
 | marketplace liquidity | 10 | 90% | no |
 | brand and trust | 99 | 69% | partly |
