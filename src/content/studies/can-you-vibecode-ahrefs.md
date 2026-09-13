@@ -223,7 +223,7 @@ Ahrefs lists 11,162 for the same seed, with a volume against each one. Ahrefs ch
 
 Ahrefs is a thin layer of software over a dataset that took fifteen years to collect, and the tiers price the dataset.
 
-If you only ever look at your own site, the free tier plus a weekend covers you, and Ahrefs' own pricing page more or less says so; type in a domain you don't own and you're back at chapter 2.
+If you only ever look at your own site, [Ahrefs Free](https://ahrefs.com/free) plus a weekend covers you, and Ahrefs' own pricing page more or less says so; type in a domain you don't own and you're back at chapter 2.
 
 ![Diagram of a thin dashboard panel resting on a thick stack of data layers labelled 15 years of crawl data, with a bracket marking the panel as one weekend.](/studies/ahrefs/fig15.webp "A thin layer of software on top of fifteen years of data.")
 
