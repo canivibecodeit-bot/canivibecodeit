@@ -1,6 +1,6 @@
-/* The Attention Playbook house ad: the site owner's own course, promoted in
-   a tracked module that reuses the How to AI rec layer (rec_clicks and
-   rec_impressions keyed `tap:<placement>`) and never touches a sponsor slot.
+/* The Attention Playbook house ad: a plain ad block for the course, tracked
+   through the How to AI rec layer (rec_clicks and rec_impressions keyed
+   `tap:<placement>`) and never touching a sponsor slot.
 
    One counting redirect for every placement: GET /api/rec/tap?p=<placement>
    302s to the course site with utm_campaign = the placement, so clicks and
@@ -19,7 +19,7 @@ export const TAP_PLACEMENTS = ['app', 'category', 'home'];
 const PLACEMENT_SET = new Set(TAP_PLACEMENTS);
 
 // What the module says when the live counter cannot be read.
-export const TAP_FALLBACK_LINE = 'Pre-order, $224. $299 at launch.';
+export const TAP_FALLBACK_LINE = 'Pre-order $224, $299 at launch.';
 
 const srcKey = (placement) => `tap:${placement}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -114,17 +114,14 @@ export function _setSales(data, ttlMs = SALES_TTL_MS) {
 
 const usd = (n) => `$${Number(n).toLocaleString('en-US')}`;
 
-/* The line under the pitch. Sentences, house style: no dashes, every one
-   ends with a period. */
+/* The line under the pitch, operator copy: "195 sold at $224, then $249".
+   No dashes. */
 export function tapLine(data) {
   if (!data) return TAP_FALLBACK_LINE;
-  if (data.launched) return `Now live, ${usd(data.price)}.`;
-  const sold = data.sold != null && data.sold > 0 ? `${data.sold.toLocaleString('en-US')} sold. ` : '';
-  const step =
-    data.remainingAtPrice != null && data.remainingAtPrice > 0 && data.nextPrice != null
-      ? `${data.remainingAtPrice} left at ${usd(data.price)}, then ${usd(data.nextPrice)}.`
-      : `Pre-order, ${usd(data.price)}.`;
-  return `${sold}${step}`;
+  if (data.launched) return `Now live at ${usd(data.price)}`;
+  const sold = data.sold != null && data.sold > 0 ? `${data.sold.toLocaleString('en-US')} sold at ` : 'Pre-order ';
+  const next = data.nextPrice != null && data.nextPrice > data.price ? `, then ${usd(data.nextPrice)}` : '';
+  return `${sold}${usd(data.price)}${next}`;
 }
 
 /* ---------- counting ---------- */

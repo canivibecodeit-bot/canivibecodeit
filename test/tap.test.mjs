@@ -31,15 +31,15 @@ test('redirect target carries the house-ad utm set with the placement as campaig
 });
 
 test('line copy: live counter, launched, capped and fallback', () => {
-  assert.equal(tapLine({ sold: 197, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), '197 sold. 3 left at $224, then $249.');
-  assert.equal(tapLine({ sold: 1200, price: 249, nextPrice: 299, remainingAtPrice: 40, launched: false }), '1,200 sold. 40 left at $249, then $299.');
-  assert.equal(tapLine({ sold: 0, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), '3 left at $224, then $249.');
-  assert.equal(tapLine({ sold: 250, price: 249, nextPrice: null, remainingAtPrice: 0, launched: false }), '250 sold. Pre-order, $249.');
-  assert.equal(tapLine({ sold: 400, price: 299, nextPrice: null, remainingAtPrice: null, launched: true }), 'Now live, $299.');
+  assert.equal(tapLine({ sold: 195, price: 224, nextPrice: 249, remainingAtPrice: 5, launched: false }), '195 sold at $224, then $249');
+  assert.equal(tapLine({ sold: 1200, price: 249, nextPrice: 299, remainingAtPrice: 40, launched: false }), '1,200 sold at $249, then $299');
+  assert.equal(tapLine({ sold: 0, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), 'Pre-order $224, then $249');
+  assert.equal(tapLine({ sold: 250, price: 249, nextPrice: null, remainingAtPrice: 0, launched: false }), '250 sold at $249');
+  assert.equal(tapLine({ sold: 400, price: 299, nextPrice: null, remainingAtPrice: null, launched: true }), 'Now live at $299');
   assert.equal(tapLine(null), TAP_FALLBACK_LINE);
-  for (const s of [tapLine({ sold: 197, price: 224, nextPrice: 249, remainingAtPrice: 3 }), TAP_FALLBACK_LINE]) {
-    assert.doesNotMatch(s, /[—–]/, 'no dashes in public copy');
-    assert.match(s, /\.$/, 'ends with a period');
+  assert.equal(TAP_FALLBACK_LINE, 'Pre-order $224, $299 at launch.');
+  for (const line of [tapLine({ sold: 195, price: 224, nextPrice: 249, remainingAtPrice: 5 }), TAP_FALLBACK_LINE]) {
+    assert.doesNotMatch(line, /[\u2014\u2013]/, 'no dashes in public copy');
   }
 });
 
