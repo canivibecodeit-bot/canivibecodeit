@@ -1,0 +1,140 @@
+---
+// /admin/tap-ad: the Attention Playbook house-ad numbers. Impressions,
+// clicks and CTR per placement over four windows. Token-gated exactly like
+// /admin/thebuildgames: a one-time ?token= sets the HttpOnly cookie and
+// redirects to the bare path; thereafter the cookie alone authenticates.
+import Base from '../../layouts/Base.astro';
+import { isAdmin } from '../../lib/sponsors.js';
+import { TAP_PLACEMENTS, TAP_WINDOWS, tapLine, tapSales, tapSalesAge, tapStats } from '../../lib/tap.js';
+
+const urlToken = Astro.url.searchParams.get('token');
+if (urlToken && isAdmin(urlToken)) {
+  Astro.cookies.set('bg_admin', urlToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  });
+  return Astro.redirect('/admin/tap-ad');
+}
+const token = Astro.cookies.get('bg_admin')?.value || '';
+if (!isAdmin(token)) return new Response(null, { status: 404 });
+
+const [stats, sales] = await Promise.all([tapStats(), tapSales()]);
+const rows = [...TAP_PLACEMENTS.map((p) => ({ key: p, label: p })), { key: 'total', label: 'all placements' }];
+const n = (v) => Number(v).toLocaleString('en-US');
+const ageMs = tapSalesAge();
+const age = ageMs == null ? 'not read yet' : ageMs < 60 * 1000 ? 'read under a minute ago' : `read ${Math.round(ageMs / 60000)} min ago`;
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<Base title="house ad admin" description="" ogImage="/og/home.png">
+  <main class="wrap admin tap-admin">
+    <div class="list-head">
+      <h2>The Attention Playbook house ad</h2>
+      <span class="note">UTC days · today is {today}</span>
+    </div>
+
+    <p class="tap-admin-line">
+      <span class="microlabel">the module says</span>
+      <span>{tapLine(sales)}</span>
+      <span class="note">live counter {age} · cached five minutes · falls back to a static line when unreadable</span>
+    </p>
+
+    {TAP_WINDOWS.map((w) => (
+      <section class="tap-admin-window">
+        <div class="list-head" style="padding-top: 28px;">
+          <h2>{w.label}</h2>
+          <span class="note">impressions · clicks · CTR</span>
+        </div>
+        <table class="tap-admin-table">
+          <thead>
+            <tr><th>placement</th><th>impressions</th><th>clicks</th><th>CTR</th></tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr class:list={[{ 'is-total': r.key === 'total' }]}>
+                <td>{r.label}</td>
+                <td>{n(stats[r.key][w.key].impressions)}</td>
+                <td>{n(stats[r.key][w.key].clicks)}</td>
+                <td>{stats[r.key][w.key].ctr.toFixed(2)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    ))}
+
+    <p class="note tap-admin-foot">
+      Conversions are counted on the Attention Playbook side by utm_source=canivibecodeit (utm_campaign carries the
+      placement). Placements: app pages, category pages, home. Bots and repeat clicks past the per-IP limit are not
+      counted. JSON: <code>/api/admin/tap-ad</code> with the same cookie, an Authorization: Bearer header or ?token=.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .tap-admin-line {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 18px;
+    font-size: 15px;
+  }
+
+  .tap-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .tap-admin-table th,
+  .tap-admin-table td {
+    padding: 9px 12px;
+    text-align: right;
+    border-top: 1px solid var(--border);
+  }
+
+  .tap-admin-table th {
+    font: 11px var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .tap-admin-table th:first-child,
+  .tap-admin-table td:first-child {
+    text-align: left;
+    padding-left: 0;
+  }
+
+  .tap-admin-table th:last-child,
+  .tap-admin-table td:last-child {
+    padding-right: 0;
+  }
+
+  .tap-admin-table td:not(:first-child) {
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  .tap-admin-table tr.is-total td {
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .tap-admin-foot {
+    padding-top: 32px;
+    max-width: 68ch;
+    line-height: 1.6;
+  }
+
+  .tap-admin-foot code {
+    font: 12.5px var(--font-mono);
+  }
+</style>

@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import AppRow from '../../components/AppRow.astro';
 import DigestCard from '../../components/DigestCard.astro';
 import RecModule from '../../components/RecModule.astro';
+import HouseAd from '../../components/HouseAd.astro';
 import { appsByCategory, categoriesInUse, categoryPhrase, CATEGORIES } from '../../lib/apps.js';
 import { voteCounts } from '../../lib/db.js';
 
@@ -57,7 +58,7 @@ const jsonld = [
 ];
 ---
 
-<Base {title} {description} {socialTitle} {jsonld}>
+<Base {title} {description} {socialTitle} {jsonld} houseAd="category">
   <main class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
       <a href="/">the death list</a> / <span class="here">{meta.label.toLowerCase()}</span>
@@ -106,6 +107,8 @@ const jsonld = [
     </div>
     {/* How to AI placement: after the category list */}
     <RecModule src="category" />
+    {/* House ad: rail at rail widths (Base houseAd), this inline copy below. */}
+    <HouseAd placement="category" hideAtRail />
   </main>
 
   <DigestCard source="category" />

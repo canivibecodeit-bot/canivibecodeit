@@ -1,8 +1,13 @@
 ---
+import HouseAd from './HouseAd.astro';
 import SponsorCard from './SponsorCard.astro';
 import { recordImpressions } from '../lib/impressions.js';
 import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
 
+// Our own house ad rides LAST in the right rail, after every slot card. It
+// is not a slot: composeRails never sees it and no sponsor inventory moves.
+// The page's inline instance counts the impression; this one never does.
+const { houseAd = null } = Astro.props;
 const nextMonthLabel = nextRunMonthName();
 
 const board = await getBoard();
@@ -48,4 +53,5 @@ const showSoldOut = board.allLive;
 <aside class="sp-rail sp-right" aria-label="Sponsors, right">
   {right.map((slot, i) => <SponsorCard {slot} index={i + left.length} />)}
   {showSoldOut && <SponsorCard soldOut septLeft={total - board.prebookedCount} nextMonth={nextMonthLabel} total={total} index={total} />}
+  {houseAd && <HouseAd placement={houseAd} variant="rail" count={false} />}
 </aside>

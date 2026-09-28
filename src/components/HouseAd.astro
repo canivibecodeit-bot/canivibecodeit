@@ -1,0 +1,34 @@
+---
+/* The Attention Playbook house ad: the site owner's own course, labelled as
+   such, never a sponsor. Two shapes of one module: `rail` sits last in the
+   right sponsor rail on wide viewports (mounted by SponsorRails through the
+   Base `houseAd` prop) and `inline` lives in the content column, hidden at
+   rail widths on pages that also carry the rail shape. Whichever shape the
+   page shows, the page renders the module once for counting: the instance
+   with `count` logs the impression, the other never does. Clicks go through
+   the counting redirect (lib/tap.js). */
+import { countTapImpression, isTapPlacement, tapLine, tapSales } from '../lib/tap.js';
+
+const { placement, variant = 'inline', count = true, hideAtRail = false } = Astro.props;
+if (!isTapPlacement(placement)) throw new Error(`unknown house-ad placement: ${placement}`);
+
+const line = tapLine(await tapSales());
+if (count) countTapImpression(placement, Astro.request.headers.get('user-agent'));
+---
+
+<aside
+  class:list={['tap-ad', `tap-ad-${variant}`, { 'tap-ad-hide-rail': hideAtRail }]}
+  aria-label="The Attention Playbook, from the maker of this site"
+  data-tap={placement}
+>
+  <a class="tap-ad-card" href={`/api/rec/tap?p=${placement}`} target="_blank" rel="nofollow noopener">
+    <img class="tap-ad-logo" src="/house/attention-playbook.svg" alt="" width="40" height="40" loading="lazy" />
+    <span class="tap-ad-body">
+      <span class="rec-eyebrow">from the maker of this site</span>
+      <b class="tap-ad-title">The Attention Playbook</b>
+      <span class="tap-ad-text">Everything you need to grow on X as a founder. By Rob Hallam.</span>
+      <span class="tap-ad-line">{line}</span>
+      <span class="tap-ad-go">Pre-order</span>
+    </span>
+  </a>
+</aside>
