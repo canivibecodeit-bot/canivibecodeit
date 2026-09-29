@@ -5,7 +5,7 @@
 // redirects to the bare path; thereafter the cookie alone authenticates.
 import Base from '../../layouts/Base.astro';
 import { isAdmin } from '../../lib/sponsors.js';
-import { TAP_PLACEMENTS, TAP_WINDOWS, tapLine, tapSales, tapSalesAge, tapStats } from '../../lib/tap.js';
+import { TAP_CLASSES, TAP_PLACEMENTS, TAP_WINDOWS, tapClassStats, tapLine, tapSales, tapSalesAge, tapStats } from '../../lib/tap.js';
 
 const urlToken = Astro.url.searchParams.get('token');
 if (urlToken && isAdmin(urlToken)) {
@@ -21,7 +21,8 @@ if (urlToken && isAdmin(urlToken)) {
 const token = Astro.cookies.get('bg_admin')?.value || '';
 if (!isAdmin(token)) return new Response(null, { status: 404 });
 
-const [stats, sales] = await Promise.all([tapStats(), tapSales()]);
+const [stats, classes, sales] = await Promise.all([tapStats(), tapClassStats(), tapSales()]);
+const CLASS_LABEL = { browser: 'browser', prefetch: 'prefetch', bot: 'known bot', headless: 'headless', other: 'other' };
 const rows = [...TAP_PLACEMENTS.map((p) => ({ key: p, label: p })), { key: 'total', label: 'all placements' }];
 const n = (v) => Number(v).toLocaleString('en-US');
 const ageMs = tapSalesAge();
@@ -63,13 +64,20 @@ const today = new Date().toISOString().slice(0, 10);
             ))}
           </tbody>
         </table>
+        <p class="tap-admin-classes">
+          requests to the redirect: {classes[w.key].total === 0
+            ? 'none recorded'
+            : TAP_CLASSES.map((c) => `${CLASS_LABEL[c]} ${n(classes[w.key][c])}`).join(' · ')}
+        </p>
       </section>
     ))}
 
     <p class="note tap-admin-foot">
       Conversions are counted on the Attention Playbook side by utm_source=canivibecodeit (utm_campaign carries the
-      placement). Placements: app pages, category pages, home. Bots and repeat clicks past the per-IP limit are not
-      counted. JSON: <code>/api/admin/tap-ad</code> with the same cookie, an Authorization: Bearer header or ?token=.
+      placement). Placements: app pages, category pages, home. A click is a person navigating: background
+      prefetches, link previews, crawlers, headless browsers, HEAD requests and repeat clicks past the per-IP limit
+      are redirected and not counted. The class line under each table records what kind of request arrived, since
+      2026-09-29; no user agent string or IP is stored. JSON: <code>/api/admin/tap-ad</code> with the same cookie, an Authorization: Bearer header or ?token=.
     </p>
   </main>
 </Base>
@@ -126,6 +134,14 @@ const today = new Date().toISOString().slice(0, 10);
   .tap-admin-table tr.is-total td {
     font-weight: 600;
     color: var(--fg);
+  }
+
+  .tap-admin-classes {
+    padding-top: 8px;
+    font: 11px var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
   .tap-admin-foot {
