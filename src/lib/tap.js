@@ -158,6 +158,54 @@ export async function redirectToTap({ request, clientAddress, placement }) {
   });
 }
 
+/* ---------- rail fit ---------- */
+
+/* The rail module must never cost a sponsor card a pixel. It is therefore
+   OUT of the rail's flex flow (absolutely placed under the cards, see
+   global.css), so the cards lay out exactly as on a page with no module,
+   and it is shown only on viewports with room for every right-rail card at
+   full height plus the module. Everywhere else the page's inline copy
+   shows instead. Pure CSS, emitted in <head>, so the choice is made before
+   first paint and nothing shifts.
+
+   These numbers mirror the rail rules in global.css ("sponsor rails"): the
+   rail runs from 76px under the top to 14px above the bottom, cards cap at
+   176px (the sold-out notice at 128px) with a 10px gap. */
+export const TAP_RAIL = { chrome: 90, gap: 10, card: 176, soldOut: 128 };
+
+/* Height reserved for the module per viewport width. The rail card widens
+   with the viewport, so the module gets shorter; each tier reserves the
+   height measured at its narrowest width (304, 256, 238, 221) plus 20px,
+   room for the counter line to wrap once more. */
+export const TAP_RAIL_TIERS = [
+  { minWidth: 1280, reserve: 324 },
+  { minWidth: 1680, reserve: 276 },
+  { minWidth: 1760, reserve: 260 },
+  { minWidth: 1840, reserve: 242 },
+];
+
+// cards: slot cards in the right rail (live, house, reserved, open).
+export function tapRailFit({ cards, soldOut = false }) {
+  const n = Math.max(0, Math.floor(Number(cards) || 0));
+  const items = n + (soldOut ? 1 : 0);
+  const cardsPx = n * TAP_RAIL.card + (soldOut ? TAP_RAIL.soldOut : 0) + Math.max(0, items - 1) * TAP_RAIL.gap;
+  const top = items > 0 ? cardsPx + TAP_RAIL.gap : 0;
+  return {
+    top,
+    tiers: TAP_RAIL_TIERS.map((t) => ({ ...t, minHeight: TAP_RAIL.chrome + top + t.reserve })),
+  };
+}
+
+export function tapRailCss(fit) {
+  const blocks = fit.tiers.map(
+    (t) =>
+      `@media (min-width:${t.minWidth}px) and (min-height:${t.minHeight}px){` +
+      `aside.sp-rail .tap-ad-rail{display:block;max-height:${t.reserve}px}` +
+      `aside.tap-ad-hide-rail{display:none}}`
+  );
+  return `aside.sp-rail .tap-ad-rail{top:${fit.top}px}${blocks.join('')}`;
+}
+
 /* ---------- reporting ---------- */
 
 export const TAP_WINDOWS = [

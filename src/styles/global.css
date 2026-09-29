@@ -5568,12 +5568,19 @@ html.ruben-src [data-hide-for-ruben] {
   }
 }
 
-/* Rail shape: the rail's flex column, its card width and corner radius. It
-   never grows or shrinks; the slot cards above it give way first (their
-   taglines clamp, see the rail rules), and on viewports too short for the
-   cards plus this module it steps out entirely. */
+/* Rail shape. OUT of the rail's flex flow on purpose: absolutely placed
+   under the slot cards, so the cards lay out exactly as they do on a page
+   with no module and can never lose height to it. Hidden by default; the
+   page's <head> carries media queries (tapRailCss in lib/tap.js) that show
+   it only where every right-rail card fits at full height with this module
+   below, and hide the inline copy at the same moment. `top` and
+   `max-height` come from those rules. */
 .sp-rail .tap-ad-rail {
-  flex: 0 0 auto;
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
 }
 
 .sp-rail .tap-ad-card {
@@ -5611,19 +5618,6 @@ html.ruben-src [data-hide-for-ruben] {
   text-align: center;
   padding: 7px 12px;
   font-size: 12.5px;
-}
-
-@media (min-width: 1280px) {
-  /* Pages that carry the rail shape hide their inline copy at rail widths. */
-  .tap-ad-hide-rail {
-    display: none;
-  }
-
-  @media (max-height: 700px) {
-    .sp-rail .tap-ad-rail {
-      display: none;
-    }
-  }
 }
 
 /* ---------- studies: rendered markdown (src/content/studies) ----------
