@@ -22,10 +22,10 @@ const isPrivatePage =
   Astro.url.pathname.startsWith('/sponsor/stats') ||
   Astro.url.search.includes('token=');
 if (!isPrivatePage) {
-  recordImpressions(
-    board.live.map((s) => s.id),
-    Astro.request.headers.get('user-agent')
-  );
+  const liveIds = board.live.map((s) => s.id);
+  recordImpressions(liveIds, Astro.request.headers.get('user-agent'));
+  // Noted for the flood guard: a served copy of this page counts the same.
+  Astro.locals.counted?.push({ k: 'sponsor', ids: liveIds });
 }
 /* Rail composition v2 (operator decision, Sep 2): money cards pinned per
    side, house cards float to the shorter rail, and exactly ONE open unit on

@@ -11,6 +11,8 @@ const { src = 'apppage' } = Astro.props;
 // this surface (best-effort, never awaited). Visitors the client hides for
 // being Ruben-sourced still count here; the server can't know.
 countImpression(src);
+// Noted for the flood guard: a served copy of this page counts the same.
+Astro.locals.counted?.push({ k: 'rec', src });
 ---
 
 <aside class="rec-module" data-hide-for-ruben aria-label="Sponsored recommendation">
