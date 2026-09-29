@@ -5477,6 +5477,155 @@ html.ruben-src [data-hide-for-ruben] {
   }
 }
 
+/* ---------- The Attention Playbook house ad (lib/tap.js) ---------- */
+
+/* The same family as the rec module: one bordered card, one click target.
+   `inline` sits in the content column; `rail` rides last in the right
+   sponsor rail and takes the rail's own card geometry. */
+.tap-ad-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--fg);
+  text-decoration: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.tap-ad-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+}
+
+.tap-ad-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+}
+
+.tap-ad-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tap-ad-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.tap-ad-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* The live counter line: figures change between renders, so tabular. */
+.tap-ad-line {
+  font: 12.5px var(--font-mono);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.tap-ad-go {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.tap-ad-card:hover .tap-ad-go {
+  border-color: var(--muted);
+}
+
+/* Inline shape: after the How to AI module on app and category pages, and
+   among the death-list rows on the home page. */
+.tap-ad-inline {
+  padding-top: 24px;
+}
+
+#rows .tap-ad-inline {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .tap-ad-text {
+    font-size: 15px;
+  }
+}
+
+/* Rail shape: the rail's flex column, its card width and corner radius. It
+   never grows or shrinks; the slot cards above it give way first (their
+   taglines clamp, see the rail rules), and on viewports too short for the
+   cards plus this module it steps out entirely. */
+.sp-rail .tap-ad-rail {
+  flex: 0 0 auto;
+}
+
+.sp-rail .tap-ad-card {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 6px;
+}
+
+.sp-rail .tap-ad-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+}
+
+.sp-rail .tap-ad-body {
+  gap: 4px;
+}
+
+.sp-rail .tap-ad-title {
+  font-size: 14px;
+}
+
+.sp-rail .tap-ad-text {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sp-rail .tap-ad-line {
+  font-size: 11px;
+}
+
+.sp-rail .tap-ad-go {
+  align-self: stretch;
+  text-align: center;
+  padding: 7px 12px;
+  font-size: 12.5px;
+}
+
+@media (min-width: 1280px) {
+  /* Pages that carry the rail shape hide their inline copy at rail widths. */
+  .tap-ad-hide-rail {
+    display: none;
+  }
+
+  @media (max-height: 700px) {
+    .sp-rail .tap-ad-rail {
+      display: none;
+    }
+  }
+}
+
 /* ---------- studies: rendered markdown (src/content/studies) ----------
    Global on purpose: the prose comes from the content collection, so it
    carries no component scope. Measure about 70ch. */

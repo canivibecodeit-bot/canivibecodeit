@@ -33,6 +33,9 @@ const {
   // Pages with their OWN email capture suppress the sticky digest bar too —
   // one page, one ask (and on mobile the bar overlapped the inline form).
   hideDigest = false,
+  // Placement key for the Attention Playbook house ad in the right rail
+  // (lib/tap.js); null = no rail module on this page.
+  houseAd = null,
 } = Astro.props;
 
 const user = Astro.locals.user ?? null;
@@ -170,7 +173,7 @@ const headerLinks = navSections.filter((s) => s.top);
 
     <slot />
 
-    {!hideSponsors && <SponsorRails />}
+    {!hideSponsors && <SponsorRails {houseAd} />}
 
     <footer class="site-footer">
       {/* Sitewide section links. The header hides most of these on narrow

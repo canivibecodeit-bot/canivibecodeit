@@ -5,6 +5,7 @@ import DigestCard from '../components/DigestCard.astro';
 import DigestReveal from '../components/DigestReveal.astro';
 import AltCard from '../components/AltCard.astro';
 import RecModule from '../components/RecModule.astro';
+import HouseAd from '../components/HouseAd.astro';
 import BuildsSection from '../components/BuildsSection.astro';
 import { getApp, relatedApps, yearlySaving, sortedAlternatives, ALTERNATIVES_PAGE_MIN, CATEGORIES, VERDICTS, MOAT_TAGS, MOAT_TAG_EMOJI, VIBE_CODING_TOOL_SLUGS } from '../lib/apps.js';
 import { stackSlugs, voteCount, voteCounts } from '../lib/db.js';
@@ -150,7 +151,7 @@ const tweet = encodeURIComponent(
 );
 ---
 
-<Base {title} {description} socialTitle={brandTitle} ogImage={`/og/${app.slug}.png`} {jsonld}>
+<Base {title} {description} socialTitle={brandTitle} ogImage={`/og/${app.slug}.png`} {jsonld} houseAd="app">
   <main class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
       {/* one line: the compiler strips the newline after "/", eating the space */}
@@ -343,6 +344,9 @@ const tweet = encodeURIComponent(
 
     {/* How to AI placement: after the verdict block, before the escape hatch */}
     <RecModule src="apppage" />
+    {/* House ad: the right rail carries it at rail widths (Base houseAd);
+        below that this inline copy takes over. One impression per page. */}
+    <HouseAd placement="app" hideAtRail />
 
     {
       alternatives.length > 0 && (

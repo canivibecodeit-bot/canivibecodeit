@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Ticker from '../components/Ticker.astro';
 import AppRow from '../components/AppRow.astro';
 import VisitorGlobe from '../components/VisitorGlobe.astro';
+import HouseAd from '../components/HouseAd.astro';
 import DigestCard from '../components/DigestCard.astro';
 import { allApps, appsWithAlternativesPage, topCategories, categoriesInUse } from '../lib/apps.js';
 import { bgPotCents, liveBuilds, modelDemos, voteCounts } from '../lib/db.js';
@@ -287,6 +288,7 @@ const jsonld = [
           <Fragment>
             <AppRow {app} rank={i + 1} votes={votes(app.slug)} />
             {i === 9 && <VisitorGlobe />}
+            {i === 19 && <HouseAd placement="home" />}
           </Fragment>
         ))
       }

@@ -79,19 +79,27 @@
     let activeCat = '';
     let activeVerdict = '';
 
-    // The live globe rides after the 10th VISIBLE row. A fixed DOM slot means
-    // a filtered list can render the globe before its first matching entry.
+    // List riders: the live globe after the 10th VISIBLE row, the house ad
+    // after the 20th. A fixed DOM slot means a filtered list could render a
+    // rider before its first matching entry, so they are re-seated on every
+    // filter and sort. Seated top-down so a short list keeps their order.
+    const RIDERS = [
+      ['#globe-strip', 9],
+      ['#rows .tap-ad', 19],
+    ];
     const placeGlobe = () => {
       const box = $('#rows');
-      const globe = $('#globe-strip');
-      if (!box || !globe || !box.contains(globe)) return;
-      const visible = $$('.row', box).filter((r) => r.style.display !== 'none');
-      if (!visible.length) {
-        globe.style.display = 'none';
-        return;
+      const visible = box ? $$('.row', box).filter((r) => r.style.display !== 'none') : [];
+      for (const [sel, after] of RIDERS) {
+        const rider = $(sel);
+        if (!box || !rider || !box.contains(rider)) continue;
+        if (!visible.length) {
+          rider.style.display = 'none';
+          continue;
+        }
+        rider.style.display = '';
+        visible[Math.min(after, visible.length - 1)].after(rider);
       }
-      globe.style.display = '';
-      visible[Math.min(9, visible.length - 1)].after(globe);
     };
 
     const applyFilter = () => {

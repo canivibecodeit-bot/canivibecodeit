@@ -12,7 +12,7 @@ import { bumpImpressions } from './db.js';
 const FLUSH_MS = 30 * 1000;
 const FLUSH_MAX = 500;
 
-const BOT_RE =
+export const BOT_RE =
   /bot|crawl|spider|slurp|headless|lighthouse|pingdom|monitor|preview|scrape|python-requests|curl|wget|facebookexternalhit/i;
 
 let pending = new Map(); // "slot\tday" -> count
