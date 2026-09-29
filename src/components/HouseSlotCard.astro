@@ -1,0 +1,34 @@
+---
+/* The Attention Playbook's house slot: a card of the rail, in the sequence
+   with the sponsor cards and sized exactly like them (lib/sponsors.js,
+   composeRails and the rail sizing rules). Logo, name, tagline, one short
+   line from the live counter; the whole card is the link.
+
+   It carries its own class names, never `sp-card`: app.js books every
+   `.sp-card` click as a sponsor click for its slot. Clicks go through the
+   counting redirect under `rail`; the link opts out of the client router's
+   prefetch. One impression per render under `rail`, noted for the flood
+   guard so a served copy counts the same. */
+import { countTapImpression, tapLineShort, tapSales } from '../lib/tap.js';
+
+const { count = true } = Astro.props;
+const shortLine = tapLineShort(await tapSales());
+if (count) {
+  countTapImpression('rail', Astro.request.headers.get('user-agent'));
+  Astro.locals.counted?.push({ k: 'tap', placement: 'rail' });
+}
+---
+
+<a
+  class="tap-slot-card"
+  href="/api/rec/tap?p=rail"
+  target="_blank"
+  rel="nofollow noopener"
+  data-astro-prefetch="false"
+  aria-label="The Attention Playbook: Stop posting into the void. Pre-order."
+>
+  <img class="tap-rail-icon" src="/house/attention-playbook.svg" alt="" width="26" height="26" loading="lazy" />
+  <span class="tap-rail-name">The Attention Playbook</span>
+  <span class="tap-rail-tag">Stop posting into the void.</span>
+  <span class="tap-rail-line">{shortLine}</span>
+</a>

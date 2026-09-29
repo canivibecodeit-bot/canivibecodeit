@@ -5568,32 +5568,28 @@ html.ruben-src [data-hide-for-ruben] {
   }
 }
 
-/* Rail shape. OUT of the rail's flex flow on purpose: absolutely placed
-   under the slot cards, so the cards lay out exactly as they do on a page
-   with no module and can never lose height to it. Hidden by default; the
-   page's <head> carries a media query (tapRailCss in lib/tap.js) that shows
-   it only where every right-rail card fits at full height with this card
-   below, and hides the inline copy at the same moment. `top` comes from
-   that rule. */
-.sp-rail .tap-ad-rail {
-  display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  overflow: hidden;
+/* Where the rails are displayed the house slot carries the ad, so the
+   inline module is for smaller screens only and a page never shows it
+   twice. Without the house slot (HOUSE_TAP_SLOT=0, or a page with no
+   rails) the inline module shows at every width. */
+@media (min-width: 1280px) {
+  .has-tap-slot .tap-ad-inline {
+    display: none;
+  }
 }
 
-/* A card of the sponsor cards' own geometry and type scale (their 176px
-   rail height, 12/14 padding, 6px corners, 26px icon, 14px name, 11px
-   tagline), in the rail's neutral surface so it never reads as a paid tint
-   or outshines one. No breathing icon for the same reason. Its own class
-   names: app.js tracks every .sp-card as a sponsor click. */
-.tap-rail-card {
+/* The Attention Playbook's house slot: a card of the rail with the sponsor
+   cards' own geometry and type scale (12/14 padding, 6px corners, 26px
+   icon, 14px name, 11px tagline), in the rail's neutral surface so it never
+   reads as a paid tint or outshines one. No breathing icon for the same
+   reason. Its own class names: app.js tracks every .sp-card as a sponsor
+   click. Its height comes from the rail sizing rules below, like every
+   other card. */
+.tap-slot-card {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 176px;
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -5605,14 +5601,17 @@ html.ruben-src [data-hide-for-ruben] {
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.tap-rail-card:hover {
+.tap-slot-card:hover {
   background: var(--surface-2);
   border-color: var(--muted);
 }
 
+.tap-slot-card > * {
+  flex-shrink: 0;
+}
+
 .tap-rail-icon {
   display: block;
-  flex-shrink: 0;
   width: 26px;
   height: 26px;
   margin-inline: auto;
@@ -5651,6 +5650,52 @@ html.ruben-src [data-hide-for-ruben] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Its item in the tapes: the values of `.sp-tape-item`, under its own name. */
+.tap-tape-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.tap-tape-item img {
+  border-radius: 4px;
+}
+
+.tap-tape-item:hover span {
+  text-decoration: underline;
+}
+
+/* ---------- rail sizing: every card the same height ----------
+
+   Fairness rule: no card in either rail may be smaller than any other.
+   The rails can hold different numbers of cards, so a card is no longer
+   sized by its own rail's share. Every card in BOTH rails gets the height
+   of a card in the rail that holds more: the rail's height shared between
+   --sp-rows cards, capped at 176px. --sp-rows and the tagline rules that
+   go with it come from the page <head> (railSizingCss in lib/sponsors.js).
+   With equal rails this gives exactly the heights the flex split gave.
+   The sold-out notice keeps its own, shorter, rule. */
+@media (min-width: 1280px) {
+  .sp-rail {
+    --sp-card-h: min(176px, calc((100vh - 90px - (var(--sp-rows, 5) - 1) * 10px) / var(--sp-rows, 5)));
+  }
+
+  .sp-rail > .sp-card:not(.soldout),
+  .sp-rail > .sp-checkout-form,
+  .sp-rail > .tap-slot-card {
+    flex: 0 0 var(--sp-card-h);
+    height: var(--sp-card-h);
+    min-height: 0;
+    max-height: none;
+  }
 }
 
 /* ---------- studies: rendered markdown (src/content/studies) ----------

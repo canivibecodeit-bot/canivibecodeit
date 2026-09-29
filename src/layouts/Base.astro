@@ -9,8 +9,7 @@ import SignupModal from '../components/SignupModal.astro';
 import SponsorRails from '../components/SponsorRails.astro';
 import SponsorTape from '../components/SponsorTape.astro';
 import { buildGamesLive, buildsLive, studiesLive } from '../lib/flags.js';
-import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
-import { tapRailCss, tapRailFit } from '../lib/tap.js';
+import { composeRails, getBoard, nextRunMonthName, railRows, railSizingCss, tapSlotOn } from '../lib/sponsors.js';
 import { scriptJson } from '../lib/request.js';
 import { REC_HIDE_SCRIPT, THEME_SCRIPT } from '../lib/csp.js';
 
@@ -34,18 +33,15 @@ const {
   // Pages with their OWN email capture suppress the sticky digest bar too —
   // one page, one ask (and on mobile the bar overlapped the inline form).
   hideDigest = false,
-  // Placement key for the Attention Playbook house ad in the right rail
-  // (lib/tap.js); null = no rail module on this page.
-  houseAd = null,
 } = Astro.props;
 
-// Where the rail module may show: only on viewports with room for every
-// right-rail card at full height plus the module (lib/tap.js). Emitted in
-// <head> so the rail-or-inline choice is made before first paint.
-const houseAdCss =
-  houseAd && !hideSponsors
-    ? tapRailCss(tapRailFit({ cards: composeRails(septBoard).right.length, soldOut: septBoard.allLive }))
-    : '';
+// Rail sizing: every card in both rails the same height, sized by the rail
+// that holds more cards (lib/sponsors.js). The rules depend on the number
+// of rows, so they are generated here and go out in <head>.
+const railCss = hideSponsors ? '' : railSizingCss(railRows(composeRails(septBoard), septBoard.allLive));
+// The house slot carries the ad wherever the rails display; the inline
+// module is then for small screens only (global.css, .has-tap-slot).
+const hasTapSlot = !hideSponsors && tapSlotOn();
 
 const user = Astro.locals.user ?? null;
 const userInitial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase();
@@ -140,9 +136,9 @@ const headerLinks = navSections.filter((s) => s.top);
     <script is:inline set:html={REC_HIDE_SCRIPT} />
     {!isPrivate && <script is:inline src="/analytics.js" defer></script>}
     <ClientRouter />
-    {houseAdCss && <style is:inline set:html={houseAdCss}></style>}
+    {railCss && <style is:inline set:html={railCss}></style>}
   </head>
-  <body data-user={user ? '1' : undefined} class:list={[{ 'no-tape': hideSponsors }]}>
+  <body data-user={user ? '1' : undefined} class:list={[{ 'no-tape': hideSponsors, 'has-tap-slot': hasTapSlot }]}>
     {!hideSponsors && <SponsorTape side="left" />}
     <header class="site-header">
       <div class="inner">
@@ -183,7 +179,7 @@ const headerLinks = navSections.filter((s) => s.top);
 
     <slot />
 
-    {!hideSponsors && <SponsorRails {houseAd} />}
+    {!hideSponsors && <SponsorRails />}
 
     <footer class="site-footer">
       {/* Sitewide section links. The header hides most of these on narrow

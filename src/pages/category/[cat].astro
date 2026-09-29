@@ -58,7 +58,7 @@ const jsonld = [
 ];
 ---
 
-<Base {title} {description} {socialTitle} {jsonld} houseAd="category">
+<Base {title} {description} {socialTitle} {jsonld}>
   <main class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
       <a href="/">the death list</a> / <span class="here">{meta.label.toLowerCase()}</span>
@@ -107,8 +107,8 @@ const jsonld = [
     </div>
     {/* How to AI placement: after the category list */}
     <RecModule src="category" />
-    {/* House ad: rail at rail widths (Base houseAd), this inline copy below. */}
-    <HouseAd placement="category" hideAtRail />
+    {/* House ad, inline: for screens where the rails are not displayed. */}
+    <HouseAd placement="category" />
   </main>
 
   <DigestCard source="category" />

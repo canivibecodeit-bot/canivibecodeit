@@ -76,9 +76,23 @@ export const HOUSE_CARDS = [
      in SLOT_IDS order — appended LAST to the shorter rail regardless of
      which side its slot id belongs to (its checkout still buys that real
      slot). Every other open slot doesn't render at all.
+   - The Attention Playbook's house slot (operator decision, Sep 29) sits
+     immediately ABOVE that open unit, in the same rail: a slot of the
+     sequence, not an extra under it.
    Full availability lives on /sponsor, which uses the raw board. Pure
    function of the board, so the balance rules are directly testable. */
-export function composeRails(board) {
+/* The Attention Playbook's house slot. A slot of the rails in its own right,
+   like the house card above, but not one of the ten sellable slots: it has
+   no price, takes no inventory and never appears on /sponsor. It renders
+   as components/HouseSlotCard.astro. HOUSE_TAP_SLOT=0 removes it without a
+   deploy. */
+export const TAP_SLOT = Object.freeze({ id: 'TAP', side: null, state: 'tap', house: null, sponsor: null, priceCents: 0 });
+
+export function tapSlotOn() {
+  return process.env.HOUSE_TAP_SLOT !== '0';
+}
+
+export function composeRails(board, { tapSlot = tapSlotOn() } = {}) {
   const rails = {
     left: board.left.filter((s) => s.state !== 'open'),
     right: board.right.filter((s) => s.state !== 'open'),
@@ -88,8 +102,74 @@ export function composeRails(board) {
     rails[shorter()].push(slot);
   }
   const firstOpen = board.slots.find((s) => s.state === 'open' && !s.house) ?? null;
-  if (firstOpen) rails[shorter()].push(firstOpen);
+  /* The rail the open unit goes to is chosen exactly as before. The
+     Attention Playbook's slot sits immediately above the open unit in that
+     rail; with no open unit it closes the rail the open unit would have
+     taken. Every slot above it keeps its rail and its order. */
+  const side = shorter();
+  if (tapSlot) rails[side].push(TAP_SLOT);
+  if (firstOpen) rails[side].push(firstOpen);
   return rails;
+}
+
+/* ---------- rail sizing: every card the same height ----------
+
+   Fairness rule: no card in either rail may be smaller than any other. The
+   rails can hold different numbers of cards, so every card in BOTH rails
+   is sized by the rail that holds more: the rail's height (the viewport
+   less RAIL.chrome) shared between that many cards, capped at the card's
+   full height. Both rails start at the same top.
+
+   What fits in a card follows from its height, not from the viewport: a
+   card holds its frame, the icon, the name and as many tagline lines as
+   the rest allows. The rules are generated from the number of rows, which
+   the server knows, and go out in the page <head>. */
+export const RAIL = {
+  chrome: 90, // 76px above the rails, 14px below
+  gap: 10,
+  cardMax: 176,
+  frame: 26, // 12px padding top and bottom, 1px border each
+  icon: 26,
+  name: 25, // 7px above, one 18px line
+  tagGap: 2,
+  tagLine: 15,
+  tagMaxLines: 4,
+  // The Attention Playbook's card at the narrowest rail width: name and
+  // tagline wrap to two lines each, then the counter line.
+  tapFull: 148,
+  tapNoLine: 127,
+};
+
+// Cards in the taller rail; the sold-out notice, when shown, is one more row.
+export function railRows(rails, soldOut = false) {
+  return Math.max(1, Math.max(rails.left.length, rails.right.length) + (soldOut ? 1 : 0));
+}
+
+// The height every card gets at a viewport height.
+export function railCardHeight(rows, viewportHeight) {
+  return Math.min(RAIL.cardMax, (viewportHeight - RAIL.chrome - (rows - 1) * RAIL.gap) / rows);
+}
+
+// The shortest viewport at which a card of this height still fits in the rows.
+const viewportFor = (rows, cardHeight) => Math.ceil(RAIL.chrome + rows * cardHeight + (rows - 1) * RAIL.gap);
+
+// Card height needed to show a sponsor's icon, name and this many tagline lines in full.
+export function cardHeightFor(tagLines) {
+  return RAIL.frame + RAIL.icon + RAIL.name + (tagLines > 0 ? RAIL.tagGap + tagLines * RAIL.tagLine : 0);
+}
+
+export function railSizingCss(rows) {
+  const n = Math.max(1, Math.floor(rows));
+  const tag = 'aside.sp-rail .sp-card .sp-tag';
+  const clamp = (lines) => `-webkit-line-clamp:${lines};line-clamp:${lines}`;
+  const out = [`aside.sp-rail{--sp-rows:${n}}`, `${tag}{display:-webkit-box;${clamp(RAIL.tagMaxLines)}}`];
+  for (let lines = RAIL.tagMaxLines; lines >= 1; lines--) {
+    const below = viewportFor(n, cardHeightFor(lines)) - 1;
+    out.push(`@media (max-height:${below}px){${tag}{${lines > 1 ? clamp(lines - 1) : 'display:none'}}}`);
+  }
+  out.push(`@media (max-height:${viewportFor(n, RAIL.tapFull) - 1}px){aside.sp-rail .tap-slot-card .tap-rail-line{display:none}}`);
+  out.push(`@media (max-height:${viewportFor(n, RAIL.tapNoLine) - 1}px){aside.sp-rail .tap-slot-card .tap-rail-tag{display:none}}`);
+  return `@media (min-width:1280px){${out.join('')}}`;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
