@@ -6,12 +6,14 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   TAP_FALLBACK_LINE,
+  TAP_FALLBACK_SHORT,
   TAP_PLACEMENTS,
   _setSales,
   aggregateTapStats,
   isTapPlacement,
   tapHref,
   tapLine,
+  tapLineShort,
   tapRailCss,
   tapRailFit,
   tapSales,
@@ -78,39 +80,44 @@ test('aggregation: windows are inclusive UTC days per placement plus a total', (
   assert.equal(s.total.today.ctr, 4);
 });
 
-test('rail fit: the module shows only where every card keeps full height', () => {
+test('short line for the rail card: one line, shortest form', () => {
+  assert.equal(tapLineShort({ sold: 198, price: 224, nextPrice: 249, remainingAtPrice: 2, launched: false }), '198 sold, $224');
+  assert.equal(tapLineShort({ sold: 1200, price: 249, nextPrice: 299, remainingAtPrice: 40, launched: false }), '1,200 sold, $249');
+  assert.equal(tapLineShort({ sold: 0, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), 'Pre-order $224');
+  assert.equal(tapLineShort({ sold: 400, price: 299, nextPrice: null, remainingAtPrice: null, launched: true }), 'Now live, $299');
+  assert.equal(tapLineShort(null), TAP_FALLBACK_SHORT);
+  assert.equal(TAP_FALLBACK_SHORT, 'Pre-order $224');
+  // Fits one line of the narrowest card: about 25 characters at this size.
+  for (const d of [{ sold: 198, price: 224 }, { sold: 12000, price: 299 }, null]) assert.ok(tapLineShort(d).length <= 24);
+});
+
+test('rail fit: the card shows only where every sponsor card keeps full height', () => {
   // Production shape: three slot cards in the right rail.
   const fit = tapRailFit({ cards: 3 });
   assert.equal(fit.top, 3 * 176 + 2 * 10 + 10);
-  for (const t of fit.tiers) {
-    // At the threshold the rail (viewport minus 90px of chrome) holds the
-    // cards at 176px, the gap and the reserved module height exactly.
-    assert.equal(t.minHeight - 90, fit.top + t.reserve);
-  }
-  // Wider viewports reserve less, so they qualify at lower heights.
-  const heights = fit.tiers.map((t) => t.minHeight);
-  assert.deepEqual(heights, [...heights].sort((a, b) => b - a));
-  assert.equal(fit.tiers[0].minWidth, 1280);
-  // Laptop sizes with three cards fall under every threshold: inline there.
-  const shows = (w, h) => fit.tiers.some((t) => w >= t.minWidth && h >= t.minHeight);
-  for (const [w, h] of [[1536, 864], [1440, 900], [1440, 800], [1366, 768], [1280, 720]]) {
-    assert.equal(shows(w, h), false, `${w}x${h} must get the inline copy`);
-  }
-  assert.equal(shows(1920, 1080), true);
+  assert.equal(fit.tiers.length, 1);
+  const [t] = fit.tiers;
+  assert.equal(t.minWidth, 1280);
+  assert.equal(t.reserve, 176);
+  // At the threshold the rail (viewport minus 90px of chrome) holds the
+  // sponsor cards at 176px, the gap and this card exactly.
+  assert.equal(t.minHeight, 90 + 558 + 176);
+  const shows = (w, h) => fit.tiers.some((x) => w >= x.minWidth && h >= x.minHeight);
+  for (const [w, h] of [[1920, 1080], [1536, 864], [1440, 900]]) assert.equal(shows(w, h), true, `${w}x${h} rail`);
+  for (const [w, h] of [[1440, 800], [1366, 768], [1280, 720], [1279, 1000]]) assert.equal(shows(w, h), false, `${w}x${h} inline`);
 });
 
 test('rail fit: more cards need more height, the sold-out notice counts at 128px', () => {
   assert.equal(tapRailFit({ cards: 0 }).top, 0);
   assert.equal(tapRailFit({ cards: 1 }).top, 176 + 10);
   assert.equal(tapRailFit({ cards: 5, soldOut: true }).top, 5 * 176 + 128 + 5 * 10 + 10);
-  assert.ok(tapRailFit({ cards: 4 }).tiers[0].minHeight > tapRailFit({ cards: 3 }).tiers[0].minHeight);
+  assert.equal(tapRailFit({ cards: 4 }).tiers[0].minHeight - tapRailFit({ cards: 3 }).tiers[0].minHeight, 186);
 });
 
-test('rail css: one rule set per tier, rail shown and inline hidden together', () => {
+test('rail css: rail shown and inline hidden by the same rule', () => {
   const css = tapRailCss(tapRailFit({ cards: 3 }));
-  assert.match(css, /^aside\.sp-rail \.tap-ad-rail\{top:558px\}/);
-  assert.equal(css.match(/@media/g).length, 4);
-  assert.equal(css.match(/aside\.tap-ad-hide-rail\{display:none\}/g).length, 4);
-  assert.match(css, /@media \(min-width:1280px\) and \(min-height:972px\)\{aside\.sp-rail \.tap-ad-rail\{display:block;max-height:324px\}/);
-  assert.doesNotMatch(css, /[<>]/, 'nothing that could close the style element');
+  assert.equal(
+    css,
+    'aside.sp-rail .tap-ad-rail{top:558px}@media (min-width:1280px) and (min-height:824px){aside.sp-rail .tap-ad-rail{display:block;max-height:176px}aside.tap-ad-hide-rail{display:none}}'
+  );
 });

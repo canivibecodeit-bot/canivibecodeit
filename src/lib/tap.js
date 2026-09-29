@@ -20,6 +20,8 @@ const PLACEMENT_SET = new Set(TAP_PLACEMENTS);
 
 // What the module says when the live counter cannot be read.
 export const TAP_FALLBACK_LINE = 'Pre-order $224, $299 at launch.';
+// The rail card's one-line form of the same.
+export const TAP_FALLBACK_SHORT = 'Pre-order $224';
 
 const srcKey = (placement) => `tap:${placement}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -124,6 +126,14 @@ export function tapLine(data) {
   return `${sold}${usd(data.price)}${next}`;
 }
 
+// The rail card's line: the shortest form, one line at card width.
+export function tapLineShort(data) {
+  if (!data) return TAP_FALLBACK_SHORT;
+  if (data.launched) return `Now live, ${usd(data.price)}`;
+  if (data.sold != null && data.sold > 0) return `${data.sold.toLocaleString('en-US')} sold, ${usd(data.price)}`;
+  return `Pre-order ${usd(data.price)}`;
+}
+
 /* ---------- counting ---------- */
 
 /* One impression per SSR render of a module, the CTR denominator. Bots are
@@ -173,16 +183,10 @@ export async function redirectToTap({ request, clientAddress, placement }) {
    176px (the sold-out notice at 128px) with a 10px gap. */
 export const TAP_RAIL = { chrome: 90, gap: 10, card: 176, soldOut: 128 };
 
-/* Height reserved for the module per viewport width. The rail card widens
-   with the viewport, so the module gets shorter; each tier reserves the
-   height measured at its narrowest width (304, 256, 238, 221) plus 20px,
-   room for the counter line to wrap once more. */
-export const TAP_RAIL_TIERS = [
-  { minWidth: 1280, reserve: 324 },
-  { minWidth: 1680, reserve: 276 },
-  { minWidth: 1760, reserve: 260 },
-  { minWidth: 1840, reserve: 242 },
-];
+/* Height reserved for the module per viewport width. The rail shape is a
+   card of the sponsor cards' own height at every rail width (fixed in
+   global.css), so one tier covers them all. */
+export const TAP_RAIL_TIERS = [{ minWidth: 1280, reserve: TAP_RAIL.card }];
 
 // cards: slot cards in the right rail (live, house, reserved, open).
 export function tapRailFit({ cards, soldOut = false }) {

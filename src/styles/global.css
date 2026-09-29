@@ -5571,10 +5571,10 @@ html.ruben-src [data-hide-for-ruben] {
 /* Rail shape. OUT of the rail's flex flow on purpose: absolutely placed
    under the slot cards, so the cards lay out exactly as they do on a page
    with no module and can never lose height to it. Hidden by default; the
-   page's <head> carries media queries (tapRailCss in lib/tap.js) that show
-   it only where every right-rail card fits at full height with this module
-   below, and hide the inline copy at the same moment. `top` and
-   `max-height` come from those rules. */
+   page's <head> carries a media query (tapRailCss in lib/tap.js) that shows
+   it only where every right-rail card fits at full height with this card
+   below, and hides the inline copy at the same moment. `top` comes from
+   that rule. */
 .sp-rail .tap-ad-rail {
   display: none;
   position: absolute;
@@ -5583,41 +5583,74 @@ html.ruben-src [data-hide-for-ruben] {
   overflow: hidden;
 }
 
-.sp-rail .tap-ad-card {
-  grid-template-columns: 1fr;
-  gap: 8px;
+/* A card of the sponsor cards' own geometry and type scale (their 176px
+   rail height, 12/14 padding, 6px corners, 26px icon, 14px name, 11px
+   tagline), in the rail's neutral surface so it never reads as a paid tint
+   or outshines one. No breathing icon for the same reason. Its own class
+   names: app.js tracks every .sp-card as a sponsor click. */
+.tap-rail-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 176px;
   padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  text-align: center;
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.tap-rail-card:hover {
+  background: var(--surface-2);
+  border-color: var(--muted);
+}
+
+.tap-rail-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-inline: auto;
   border-radius: 6px;
 }
 
-.sp-rail .tap-ad-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 7px;
-}
-
-.sp-rail .tap-ad-body {
-  gap: 4px;
-}
-
-.sp-rail .tap-ad-title {
+/* The sponsor name size. Sponsor names hold one line with an ellipsis; this
+   one is ours and a few characters too long for the narrowest card, so it
+   wraps to a second line instead of losing its last word. */
+.tap-rail-name {
+  display: block;
+  padding-top: 7px;
   font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  text-wrap: balance;
 }
 
-.sp-rail .tap-ad-text {
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.sp-rail .tap-ad-line {
+.tap-rail-tag {
+  display: block;
+  padding-top: 2px;
   font-size: 11px;
+  line-height: 15px;
+  color: var(--muted);
 }
 
-.sp-rail .tap-ad-go {
-  align-self: stretch;
-  text-align: center;
-  padding: 7px 12px;
-  font-size: 12.5px;
+/* The live counter: figures change between renders, so tabular. */
+.tap-rail-line {
+  display: block;
+  padding-top: 6px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ---------- studies: rendered markdown (src/content/studies) ----------
