@@ -21,7 +21,11 @@ const sales = await tapSales();
 const line = tapLine(sales);
 const shortLine = tapLineShort(sales);
 const isRail = variant === 'rail';
-if (count) countTapImpression(placement, Astro.request.headers.get('user-agent'));
+if (count) {
+  countTapImpression(placement, Astro.request.headers.get('user-agent'));
+  // Noted for the flood guard: a served copy of this page counts the same.
+  Astro.locals.counted?.push({ k: 'tap', placement });
+}
 ---
 
 <aside

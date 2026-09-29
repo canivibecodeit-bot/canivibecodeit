@@ -3,6 +3,7 @@
 // lib/csp.js: report-only until CSP_ENFORCE is set.
 import { getAuth } from './lib/auth.js';
 import { cspHeader } from './lib/csp.js';
+import { guardPage } from './lib/flood-guard.js';
 import { touchPresence } from './lib/presence.js';
 import { clientIp, originVerdict } from './lib/request.js';
 
@@ -70,7 +71,9 @@ export async function onRequest(context, next) {
     }
   }
 
-  return Promise.resolve(next()).then((res) => {
+  // The flood guard (lib/flood-guard.js) stands between the request and the
+  // render: in calm traffic it only renders, as before.
+  return Promise.resolve(guardPage(context, () => next())).then((res) => {
     try {
       res.headers.set('Strict-Transport-Security', 'max-age=15552000');
       res.headers.set('X-Content-Type-Options', 'nosniff');
