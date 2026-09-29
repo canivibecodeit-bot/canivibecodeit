@@ -1,15 +1,13 @@
 ---
-import HouseAd from './HouseAd.astro';
+import HouseSlotCard from './HouseSlotCard.astro';
 import SponsorCard from './SponsorCard.astro';
 import { recordImpressions } from '../lib/impressions.js';
 import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
 
-// The house ad sits under the right rail's slot cards, out of the rail's
-// flex flow, so the cards never give it a pixel; Base's <head> decides per
-// viewport whether it or the page's inline copy shows (lib/tap.js). It is
-// not a slot: composeRails never sees it and no sponsor inventory moves.
-// The page's inline instance counts the impression; this one never does.
-const { houseAd = null } = Astro.props;
+// The Attention Playbook holds a house slot of its own in the sequence
+// (composeRails puts it immediately above the open unit). Every card in
+// both rails is the same height: Base's <head> carries the sizing rules for
+// the number of rows (lib/sponsors.js, rail sizing).
 const nextMonthLabel = nextRunMonthName();
 
 const board = await getBoard();
@@ -48,12 +46,11 @@ const showSoldOut = board.allLive;
     the buy buttons and a bottom CTA is redundant. The 'more' card variant
     in SponsorCard.astro stays implemented for when the board sells out. */}
 <aside class="sp-rail sp-left" aria-label="Sponsors, left">
-  {left.map((slot, i) => <SponsorCard {slot} index={i} />)}
+  {left.map((slot, i) => (slot.state === 'tap' ? <HouseSlotCard count={!isPrivatePage} /> : <SponsorCard {slot} index={i} />))}
   {showSoldOut && <SponsorCard soldOut septLeft={total - board.prebookedCount} nextMonth={nextMonthLabel} total={total} index={left.length} />}
 </aside>
 
 <aside class="sp-rail sp-right" aria-label="Sponsors, right">
-  {right.map((slot, i) => <SponsorCard {slot} index={i + left.length} />)}
+  {right.map((slot, i) => (slot.state === 'tap' ? <HouseSlotCard count={!isPrivatePage} /> : <SponsorCard {slot} index={i + left.length} />))}
   {showSoldOut && <SponsorCard soldOut septLeft={total - board.prebookedCount} nextMonth={nextMonthLabel} total={total} index={total} />}
-  {houseAd && <HouseAd placement={houseAd} variant="rail" count={false} />}
 </aside>

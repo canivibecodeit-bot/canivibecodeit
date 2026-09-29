@@ -1,54 +1,30 @@
 ---
-/* The Attention Playbook house ad, never a sponsor slot. Two shapes of one
-   module. `inline` is a plain ad block in the rec module's family, in the
-   content column, hidden only where the rail shape shows (`hideAtRail`).
-   `rail` is a card of the sponsor cards' geometry and type scale under the
-   right rail's cards (mounted by SponsorRails through the Base `houseAd`
-   prop) on viewports with room for it: logo, name, tagline, one short
-   line, the whole card the link. It carries its own class names, never
-   `sp-card`, so sponsor click tracking cannot mistake it for a slot.
-   Whichever shape the page shows, the page renders the module once for
-   counting: the instance with `count` logs the impression, the other never
-   does. Clicks go through the counting redirect (lib/tap.js). Both links
-   opt out of the client router's prefetch: the redirect is same-origin, so
-   a hover would otherwise fetch it and reach the counter. */
-import { countTapImpression, isTapPlacement, tapLine, tapLineShort, tapSales } from '../lib/tap.js';
+/* The Attention Playbook's inline module: a plain ad block in the rec
+   module's family, in the content column. It is for screens where the
+   rails are not displayed; where they are, the house slot in the rail
+   carries the ad (components/HouseSlotCard.astro) and this module is
+   hidden, so a page never shows it twice.
 
-const { placement, variant = 'inline', count = true, hideAtRail = false } = Astro.props;
+   Counting: with the house slot on, the slot's card logs the page's one
+   impression and this module logs none. With the slot switched off
+   (HOUSE_TAP_SLOT=0) this module counts under its own placement, as it
+   did before the slot existed. Clicks go through the counting redirect
+   (lib/tap.js); the link opts out of the client router's prefetch. */
+import { tapSlotOn } from '../lib/sponsors.js';
+import { countTapImpression, isTapPlacement, tapLine, tapSales } from '../lib/tap.js';
+
+const { placement } = Astro.props;
 if (!isTapPlacement(placement)) throw new Error(`unknown house-ad placement: ${placement}`);
 
-const sales = await tapSales();
-const line = tapLine(sales);
-const shortLine = tapLineShort(sales);
-const isRail = variant === 'rail';
-if (count) {
+const line = tapLine(await tapSales());
+if (!tapSlotOn()) {
   countTapImpression(placement, Astro.request.headers.get('user-agent'));
   // Noted for the flood guard: a served copy of this page counts the same.
   Astro.locals.counted?.push({ k: 'tap', placement });
 }
 ---
 
-<aside
-  class:list={['tap-ad', `tap-ad-${variant}`, { 'tap-ad-hide-rail': hideAtRail }]}
-  aria-label="The Attention Playbook"
-  data-tap={placement}
->
-  {isRail && (
-    <a
-      class="tap-rail-card"
-      href={`/api/rec/tap?p=${placement}`}
-      target="_blank"
-      rel="nofollow noopener"
-      data-astro-prefetch="false"
-      aria-label="The Attention Playbook: Stop posting into the void. Pre-order."
-    >
-      <img class="tap-rail-icon" src="/house/attention-playbook.svg" alt="" width="26" height="26" loading="lazy" />
-      <span class="tap-rail-name">The Attention Playbook</span>
-      <span class="tap-rail-tag">Stop posting into the void.</span>
-      <span class="tap-rail-line">{shortLine}</span>
-    </a>
-  )}
-  {!isRail && (
+<aside class="tap-ad tap-ad-inline" aria-label="The Attention Playbook" data-tap={placement}>
   <a class="tap-ad-card" href={`/api/rec/tap?p=${placement}`} target="_blank" rel="nofollow noopener" data-astro-prefetch="false">
     <img class="tap-ad-logo" src="/house/attention-playbook.svg" alt="" width="40" height="40" loading="lazy" />
     <span class="tap-ad-body">
@@ -59,5 +35,4 @@ if (count) {
       <span class="tap-ad-go">Pre-order</span>
     </span>
   </a>
-  )}
 </aside>

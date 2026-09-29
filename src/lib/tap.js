@@ -21,15 +21,21 @@ import { clientIp } from './request.js';
 export const TAP_URL = 'https://theattentionplaybook.com/';
 export const TAP_SALES_URL = 'https://theattentionplaybook.com/api/sales';
 
-// A placement missing here 400s at the redirect and counts nothing, so a new
-// module is added HERE in the same change that mounts it.
-export const TAP_PLACEMENTS = ['app', 'category', 'home'];
+/* Placements. `rail` is The Attention Playbook's house slot in the rails
+   and the tapes, on every page that has them. `app`, `category` and `home`
+   are the inline module on those pages, shown where the rails are not
+   (small screens). A placement missing here 400s at the redirect and counts
+   nothing, so a new one is added HERE in the same change that mounts it. */
+export const TAP_PLACEMENTS = ['app', 'category', 'home', 'rail'];
 const PLACEMENT_SET = new Set(TAP_PLACEMENTS);
 
+// The price at launch. The feed names the next step only while there is
+// one before launch; once the pre-order price is fixed, this is what follows.
+export const TAP_LAUNCH_PRICE = 299;
 // What the module says when the live counter cannot be read.
-export const TAP_FALLBACK_LINE = 'Pre-order $224, $299 at launch.';
+export const TAP_FALLBACK_LINE = 'Pre-order $249, $299 at launch.';
 // The rail card's one-line form of the same.
-export const TAP_FALLBACK_SHORT = 'Pre-order $224';
+export const TAP_FALLBACK_SHORT = 'Pre-order $249';
 
 const srcKey = (placement) => `tap:${placement}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -130,7 +136,13 @@ export function tapLine(data) {
   if (!data) return TAP_FALLBACK_LINE;
   if (data.launched) return `Now live at ${usd(data.price)}`;
   const sold = data.sold != null && data.sold > 0 ? `${data.sold.toLocaleString('en-US')} sold at ` : 'Pre-order ';
-  const next = data.nextPrice != null && data.nextPrice > data.price ? `, then ${usd(data.nextPrice)}` : '';
+  // The next step while there is one; after the last step, the launch price.
+  const next =
+    data.nextPrice != null && data.nextPrice > data.price
+      ? `, then ${usd(data.nextPrice)}`
+      : data.price < TAP_LAUNCH_PRICE
+        ? `, ${usd(TAP_LAUNCH_PRICE)} at launch`
+        : '';
   return `${sold}${usd(data.price)}${next}`;
 }
 
@@ -144,9 +156,12 @@ export function tapLineShort(data) {
 
 /* ---------- counting ---------- */
 
-/* One impression per SSR render of a module, the CTR denominator. Bots are
-   skipped by user agent, same as sponsor impressions; best-effort and never
-   awaited by a render. */
+/* One impression per SSR render of a page that carries the ad, the CTR
+   denominator. With the house slot on, that is the slot's card, under
+   `rail`, and the inline module does not count as well; with it off, the
+   inline module counts under its own placement. Bots are skipped by user
+   agent, same as sponsor impressions; best-effort and never awaited by a
+   render. */
 export function countTapImpression(placement, userAgent) {
   if (!isTapPlacement(placement)) return;
   if (!userAgent || BOT_RE.test(String(userAgent))) return;
@@ -212,48 +227,6 @@ export async function redirectToTap({ request, clientAddress, placement }) {
       'Referrer-Policy': 'no-referrer',
     },
   });
-}
-
-/* ---------- rail fit ---------- */
-
-/* The rail module must never cost a sponsor card a pixel. It is therefore
-   OUT of the rail's flex flow (absolutely placed under the cards, see
-   global.css), so the cards lay out exactly as on a page with no module,
-   and it is shown only on viewports with room for every right-rail card at
-   full height plus the module. Everywhere else the page's inline copy
-   shows instead. Pure CSS, emitted in <head>, so the choice is made before
-   first paint and nothing shifts.
-
-   These numbers mirror the rail rules in global.css ("sponsor rails"): the
-   rail runs from 76px under the top to 14px above the bottom, cards cap at
-   176px (the sold-out notice at 128px) with a 10px gap. */
-export const TAP_RAIL = { chrome: 90, gap: 10, card: 176, soldOut: 128 };
-
-/* Height reserved for the module per viewport width. The rail shape is a
-   card of the sponsor cards' own height at every rail width (fixed in
-   global.css), so one tier covers them all. */
-export const TAP_RAIL_TIERS = [{ minWidth: 1280, reserve: TAP_RAIL.card }];
-
-// cards: slot cards in the right rail (live, house, reserved, open).
-export function tapRailFit({ cards, soldOut = false }) {
-  const n = Math.max(0, Math.floor(Number(cards) || 0));
-  const items = n + (soldOut ? 1 : 0);
-  const cardsPx = n * TAP_RAIL.card + (soldOut ? TAP_RAIL.soldOut : 0) + Math.max(0, items - 1) * TAP_RAIL.gap;
-  const top = items > 0 ? cardsPx + TAP_RAIL.gap : 0;
-  return {
-    top,
-    tiers: TAP_RAIL_TIERS.map((t) => ({ ...t, minHeight: TAP_RAIL.chrome + top + t.reserve })),
-  };
-}
-
-export function tapRailCss(fit) {
-  const blocks = fit.tiers.map(
-    (t) =>
-      `@media (min-width:${t.minWidth}px) and (min-height:${t.minHeight}px){` +
-      `aside.sp-rail .tap-ad-rail{display:block;max-height:${t.reserve}px}` +
-      `aside.tap-ad-hide-rail{display:none}}`
-  );
-  return `aside.sp-rail .tap-ad-rail{top:${fit.top}px}${blocks.join('')}`;
 }
 
 /* ---------- reporting ---------- */

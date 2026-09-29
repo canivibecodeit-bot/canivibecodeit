@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import {
   TAP_FALLBACK_LINE,
   TAP_FALLBACK_SHORT,
+  TAP_LAUNCH_PRICE,
   TAP_PLACEMENTS,
   _setSales,
   aggregateTapClasses,
@@ -16,13 +17,14 @@ import {
   tapHref,
   tapLine,
   tapLineShort,
-  tapRailCss,
-  tapRailFit,
   tapSales,
 } from '../src/lib/tap.js';
 
-test('placements are closed: only the three mounted keys count', () => {
-  assert.deepEqual(TAP_PLACEMENTS, ['app', 'category', 'home']);
+test('placements are closed: only the mounted keys count', () => {
+  assert.deepEqual(TAP_PLACEMENTS, ['app', 'category', 'home', 'rail']);
+  assert.equal(isTapPlacement('rail'), true);
+  assert.equal(new URL(tapHref('rail')).searchParams.get('utm_campaign'), 'rail');
+  assert.equal(isTapPlacement('rail_home'), false);
   assert.equal(isTapPlacement('app'), true);
   assert.equal(isTapPlacement('showcase'), false);
   assert.equal(isTapPlacement(''), false);
@@ -40,10 +42,14 @@ test('line copy: live counter, launched, capped and fallback', () => {
   assert.equal(tapLine({ sold: 195, price: 224, nextPrice: 249, remainingAtPrice: 5, launched: false }), '195 sold at $224, then $249');
   assert.equal(tapLine({ sold: 1200, price: 249, nextPrice: 299, remainingAtPrice: 40, launched: false }), '1,200 sold at $249, then $299');
   assert.equal(tapLine({ sold: 0, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), 'Pre-order $224, then $249');
-  assert.equal(tapLine({ sold: 250, price: 249, nextPrice: null, remainingAtPrice: 0, launched: false }), '250 sold at $249');
+  // No next step before launch: the launch price follows.
+  assert.equal(tapLine({ sold: 250, price: 249, nextPrice: null, remainingAtPrice: 0, launched: false }), '250 sold at $249, $299 at launch');
+  assert.equal(tapLine({ sold: 0, price: 249, nextPrice: null, remainingAtPrice: 0, launched: false }), 'Pre-order $249, $299 at launch');
+  assert.equal(tapLine({ sold: 900, price: 299, nextPrice: null, remainingAtPrice: 0, launched: false }), '900 sold at $299');
   assert.equal(tapLine({ sold: 400, price: 299, nextPrice: null, remainingAtPrice: null, launched: true }), 'Now live at $299');
   assert.equal(tapLine(null), TAP_FALLBACK_LINE);
-  assert.equal(TAP_FALLBACK_LINE, 'Pre-order $224, $299 at launch.');
+  assert.equal(TAP_FALLBACK_LINE, 'Pre-order $249, $299 at launch.');
+  assert.equal(TAP_LAUNCH_PRICE, 299);
   for (const line of [tapLine({ sold: 195, price: 224, nextPrice: 249, remainingAtPrice: 5 }), TAP_FALLBACK_LINE]) {
     assert.doesNotMatch(line, /[\u2014\u2013]/, 'no dashes in public copy');
   }
@@ -64,6 +70,7 @@ test('aggregation: windows are inclusive UTC days per placement plus a total', (
     { src: 'tap:home', day: '2026-08-01', count: 1000 }, // all time only
     { src: 'apppage', day: '2026-09-28', count: 999 }, // How to AI rows are ignored
     { src: 'tap:unknown', day: '2026-09-28', count: 5 }, // unmounted key ignored
+    { src: 'tap:rail', day: '2026-09-28', count: 40 }, // the house slot
   ];
   const clk = [
     { src: 'tap:app', day: '2026-09-28', count: 4 },
@@ -77,9 +84,11 @@ test('aggregation: windows are inclusive UTC days per placement plus a total', (
   assert.deepEqual(s.home.today, { impressions: 0, clicks: 0, ctr: 0 });
   assert.deepEqual(s.home.all, { impressions: 1000, clicks: 10, ctr: 1 });
   assert.equal(s.category.all.impressions, 0);
-  assert.equal(s.total.all.impressions, 1157);
+  assert.deepEqual(s.rail.today, { impressions: 40, clicks: 0, ctr: 0 });
+  assert.equal(s.total.all.impressions, 1197);
   assert.equal(s.total.all.clicks, 14);
-  assert.equal(s.total.today.ctr, 4);
+  // 4 clicks on 100 inline + 40 house slot impressions today.
+  assert.equal(s.total.today.ctr, 2.86);
 });
 
 test('short line for the rail card: one line, shortest form', () => {
@@ -88,40 +97,9 @@ test('short line for the rail card: one line, shortest form', () => {
   assert.equal(tapLineShort({ sold: 0, price: 224, nextPrice: 249, remainingAtPrice: 3, launched: false }), 'Pre-order $224');
   assert.equal(tapLineShort({ sold: 400, price: 299, nextPrice: null, remainingAtPrice: null, launched: true }), 'Now live, $299');
   assert.equal(tapLineShort(null), TAP_FALLBACK_SHORT);
-  assert.equal(TAP_FALLBACK_SHORT, 'Pre-order $224');
+  assert.equal(TAP_FALLBACK_SHORT, 'Pre-order $249');
   // Fits one line of the narrowest card: about 25 characters at this size.
   for (const d of [{ sold: 198, price: 224 }, { sold: 12000, price: 299 }, null]) assert.ok(tapLineShort(d).length <= 24);
-});
-
-test('rail fit: the card shows only where every sponsor card keeps full height', () => {
-  // Production shape: three slot cards in the right rail.
-  const fit = tapRailFit({ cards: 3 });
-  assert.equal(fit.top, 3 * 176 + 2 * 10 + 10);
-  assert.equal(fit.tiers.length, 1);
-  const [t] = fit.tiers;
-  assert.equal(t.minWidth, 1280);
-  assert.equal(t.reserve, 176);
-  // At the threshold the rail (viewport minus 90px of chrome) holds the
-  // sponsor cards at 176px, the gap and this card exactly.
-  assert.equal(t.minHeight, 90 + 558 + 176);
-  const shows = (w, h) => fit.tiers.some((x) => w >= x.minWidth && h >= x.minHeight);
-  for (const [w, h] of [[1920, 1080], [1536, 864], [1440, 900]]) assert.equal(shows(w, h), true, `${w}x${h} rail`);
-  for (const [w, h] of [[1440, 800], [1366, 768], [1280, 720], [1279, 1000]]) assert.equal(shows(w, h), false, `${w}x${h} inline`);
-});
-
-test('rail fit: more cards need more height, the sold-out notice counts at 128px', () => {
-  assert.equal(tapRailFit({ cards: 0 }).top, 0);
-  assert.equal(tapRailFit({ cards: 1 }).top, 176 + 10);
-  assert.equal(tapRailFit({ cards: 5, soldOut: true }).top, 5 * 176 + 128 + 5 * 10 + 10);
-  assert.equal(tapRailFit({ cards: 4 }).tiers[0].minHeight - tapRailFit({ cards: 3 }).tiers[0].minHeight, 186);
-});
-
-test('rail css: rail shown and inline hidden by the same rule', () => {
-  const css = tapRailCss(tapRailFit({ cards: 3 }));
-  assert.equal(
-    css,
-    'aside.sp-rail .tap-ad-rail{top:558px}@media (min-width:1280px) and (min-height:824px){aside.sp-rail .tap-ad-rail{display:block;max-height:176px}aside.tap-ad-hide-rail{display:none}}'
-  );
 });
 
 const UA_CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';

@@ -151,7 +151,7 @@ const tweet = encodeURIComponent(
 );
 ---
 
-<Base {title} {description} socialTitle={brandTitle} ogImage={`/og/${app.slug}.png`} {jsonld} houseAd="app">
+<Base {title} {description} socialTitle={brandTitle} ogImage={`/og/${app.slug}.png`} {jsonld}>
   <main class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
       {/* one line: the compiler strips the newline after "/", eating the space */}
@@ -344,9 +344,9 @@ const tweet = encodeURIComponent(
 
     {/* How to AI placement: after the verdict block, before the escape hatch */}
     <RecModule src="apppage" />
-    {/* House ad: the right rail carries it at rail widths (Base houseAd);
-        below that this inline copy takes over. One impression per page. */}
-    <HouseAd placement="app" hideAtRail />
+    {/* House ad, inline: for screens where the rails are not displayed. Where
+        they are, the house slot in the rail carries it. */}
+    <HouseAd placement="app" />
 
     {
       alternatives.length > 0 && (

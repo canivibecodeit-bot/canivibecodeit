@@ -40,7 +40,22 @@ const pos = side === 'left' ? 'top' : 'bottom';
       [0, 1].map((copy) => (
         <div class="sp-tape-half" aria-hidden={copy === 1 ? 'true' : undefined}>
           {half.map((s) =>
-            s.state === 'live' ? (
+            s.state === 'tap' ? (
+              /* The Attention Playbook's house slot, as in the rails. Its own
+                 class, never `sp-tape-item`: app.js books those clicks as
+                 sponsor clicks. */
+              <a
+                class="tap-tape-item"
+                href="/api/rec/tap?p=rail"
+                target="_blank"
+                rel="nofollow noopener"
+                data-astro-prefetch="false"
+                aria-label="The Attention Playbook: Stop posting into the void. Pre-order."
+              >
+                <img src="/house/attention-playbook.svg" alt="" width="20" height="20" loading="lazy" />
+                <span>The Attention Playbook</span>
+              </a>
+            ) : s.state === 'live' ? (
               <a
                 class="sp-tape-item live"
                 href={withUtm(s.sponsor.url)}
