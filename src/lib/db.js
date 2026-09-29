@@ -340,6 +340,17 @@ const SCHEMA_SQLITE = `
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (src, day)
   );
+  /* Requests to a counting redirect per (surface, day, class). The class is
+     coarse on purpose (browser, prefetch, bot, headless, other): it says
+     what kind of request arrived, never who sent it. No user agent string,
+     no IP. Only the browser class is counted as a click in rec_clicks. */
+  CREATE TABLE IF NOT EXISTS rec_click_classes (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    cls TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day, cls)
+  );
   /* Model showcase demos (/built-with/<model>): curated posts pulled from
      X / GitHub / YouTube / the web, media self-hosted on R2, text short and
      editable. status = live | hidden. Ordered by featured_order. */
@@ -691,6 +702,13 @@ const SCHEMA_PG = `
     day TEXT NOT NULL,
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (src, day)
+  );
+  CREATE TABLE IF NOT EXISTS rec_click_classes (
+    src TEXT NOT NULL,
+    day TEXT NOT NULL,
+    cls TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (src, day, cls)
   );
   CREATE TABLE IF NOT EXISTS model_demos (
     id TEXT PRIMARY KEY,
@@ -1742,6 +1760,16 @@ async function pgDriver() {
       const r = await pool.query('SELECT src, day, count FROM rec_impressions WHERE day >= $1 ORDER BY day, src', [sinceDay]);
       return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
     },
+    async recClickClass(src, day, cls) {
+      await pool.query(
+        'INSERT INTO rec_click_classes (src, day, cls, count) VALUES ($1, $2, $3, 1) ON CONFLICT (src, day, cls) DO UPDATE SET count = rec_click_classes.count + 1',
+        [src, day, cls]
+      );
+    },
+    async recClickClassRows(sinceDay) {
+      const r = await pool.query('SELECT src, day, cls, count FROM rec_click_classes WHERE day >= $1 ORDER BY day, src, cls', [sinceDay]);
+      return r.rows.map((x) => ({ ...x, count: Number(x.count) }));
+    },
     /* ---- model demos ---- */
     async insertModelDemo(d) {
       await pool.query(
@@ -2519,6 +2547,14 @@ async function sqliteDriver() {
     async recImpressionRows(sinceDay) {
       return db.prepare('SELECT src, day, count FROM rec_impressions WHERE day >= ? ORDER BY day, src').all(sinceDay);
     },
+    async recClickClass(src, day, cls) {
+      db.prepare(
+        'INSERT INTO rec_click_classes (src, day, cls, count) VALUES (?, ?, ?, 1) ON CONFLICT(src, day, cls) DO UPDATE SET count = count + 1'
+      ).run(src, day, cls);
+    },
+    async recClickClassRows(sinceDay) {
+      return db.prepare('SELECT src, day, cls, count FROM rec_click_classes WHERE day >= ? ORDER BY day, src, cls').all(sinceDay);
+    },
     /* ---- model demos ---- */
     async insertModelDemo(d) {
       db.prepare(`INSERT INTO model_demos (${MD_COLS.join(', ')}) VALUES (${MD_COLS.map(() => '?').join(', ')})`)
@@ -2872,6 +2908,8 @@ export async function recClick(src, day) { return (await getDriver()).recClick(s
 export async function recClickRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickRows(sinceDay); }
 export async function recImpression(src, day) { return (await getDriver()).recImpression(src, day); }
 export async function recImpressionRows(sinceDay = '0000-00-00') { return (await getDriver()).recImpressionRows(sinceDay); }
+export async function recClickClass(src, day, cls) { return (await getDriver()).recClickClass(src, day, cls); }
+export async function recClickClassRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickClassRows(sinceDay); }
 
 /* ---- model demos (/built-with) ---- */
 export async function insertModelDemo(d) { return (await getDriver()).insertModelDemo(d); }

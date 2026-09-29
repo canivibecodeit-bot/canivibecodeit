@@ -6,7 +6,15 @@
    302s to the course site with utm_campaign = the placement, so clicks and
    impressions can be read per placement from /admin/tap-ad. Conversions are
    attributed on the course side by utm_source. */
-import { rateLimit, recClick, recClickRows, recImpression, recImpressionRows } from './db.js';
+import {
+  rateLimit,
+  recClick,
+  recClickClass,
+  recClickClassRows,
+  recClickRows,
+  recImpression,
+  recImpressionRows,
+} from './db.js';
 import { BOT_RE } from './impressions.js';
 import { clientIp } from './request.js';
 
@@ -145,15 +153,53 @@ export function countTapImpression(placement, userAgent) {
   recImpression(srcKey(placement), dayKey()).catch(() => {});
 }
 
-/* The redirect. Counting never blocks the navigation: a bot, or a visitor
-   past the per-IP limit, is still sent through, it just does not count. */
+/* What kind of request reached the redirect. Only `browser` is a click: a
+   person navigating. The site's client router prefetches every same-origin
+   link on hover and on keyboard focus, and the ad link IS same-origin, so
+   before this check a pointer passing over the ad was booked as a click.
+   The links now opt out of prefetching (data-astro-prefetch="false"); this
+   is the second line, and it also covers other people's prefetchers, link
+   previews, crawlers and HEAD probes.
+
+   Coarse on purpose: the class is stored per (placement, day) and says what
+   arrived, never who. No user agent string and no IP is kept anywhere. */
+export const TAP_CLASSES = ['browser', 'prefetch', 'bot', 'headless', 'other'];
+
+const PURPOSE_HEADERS = ['sec-purpose', 'purpose', 'x-purpose', 'x-moz'];
+const PURPOSE_RE = /prefetch|prerender|preview/i;
+
+export function classifyTapRequest(request) {
+  if (String(request.method || 'GET').toUpperCase() !== 'GET') return 'other';
+  const h = request.headers;
+  if (PURPOSE_HEADERS.some((name) => PURPOSE_RE.test(h.get(name) || ''))) return 'prefetch';
+  // A person following the link is a document navigation. Anything else a
+  // browser labels (empty for fetch and <link rel=prefetch>, image, script)
+  // is the page or an extension fetching in the background. Browsers too
+  // old to send the header fall through to the user agent checks.
+  const dest = (h.get('sec-fetch-dest') || '').toLowerCase();
+  if (dest && dest !== 'document') return 'prefetch';
+  const ua = h.get('user-agent') || '';
+  if (!ua) return 'other';
+  if (/headless/i.test(ua)) return 'headless';
+  if (BOT_RE.test(ua)) return 'bot';
+  return 'browser';
+}
+
+/* The redirect. Counting never blocks the navigation: whatever arrives is
+   sent through, and only a person's navigation inside the per-IP limit
+   counts. A browser past the limit is filed under `other`. */
 export async function redirectToTap({ request, clientAddress, placement }) {
   if (!isTapPlacement(placement)) return new Response('unknown placement', { status: 400 });
-  const ua = request.headers.get('user-agent') || '';
+  let cls = classifyTapRequest(request);
   try {
-    if (ua && !BOT_RE.test(ua) && (await rateLimit(`rec:${clientIp(request, clientAddress)}`, 20, 60 * 60 * 1000))) {
-      await recClick(srcKey(placement), dayKey());
+    if (cls === 'browser') {
+      if (await rateLimit(`rec:${clientIp(request, clientAddress)}`, 20, 60 * 60 * 1000)) {
+        await recClick(srcKey(placement), dayKey());
+      } else {
+        cls = 'other';
+      }
     }
+    await recClickClass(srcKey(placement), dayKey(), cls);
   } catch {
     /* count is best-effort */
   }
@@ -161,7 +207,7 @@ export async function redirectToTap({ request, clientAddress, placement }) {
     status: 302,
     headers: {
       Location: tapHref(placement),
-      'X-Robots-Tag': 'noindex',
+      'X-Robots-Tag': 'noindex, nofollow',
       'Cache-Control': 'no-store',
       'Referrer-Policy': 'no-referrer',
     },
@@ -256,4 +302,27 @@ export function aggregateTapStats(impressionRows, clickRows, now = Date.now()) {
 export async function tapStats(now = Date.now()) {
   const [impressions, clicks] = await Promise.all([recImpressionRows('0000-00-00'), recClickRows('0000-00-00')]);
   return aggregateTapStats(impressions, clicks, now);
+}
+
+/* Requests to the redirect per window and class, all placements together.
+   Pure, like aggregateTapStats. `browser` here can exceed the click count
+   only by rows written before a failed click write; normally they match. */
+export function aggregateTapClasses(classRows, now = Date.now()) {
+  const out = Object.fromEntries(
+    TAP_WINDOWS.map((w) => [w.key, Object.fromEntries([...TAP_CLASSES.map((c) => [c, 0]), ['total', 0]])])
+  );
+  for (const r of classRows) {
+    if (!String(r.src).startsWith('tap:') || !isTapPlacement(String(r.src).slice(4))) continue;
+    const cls = TAP_CLASSES.includes(r.cls) ? r.cls : 'other';
+    for (const w of TAP_WINDOWS) {
+      if (r.day < sinceDay(w.days, now)) continue;
+      out[w.key][cls] += Number(r.count) || 0;
+      out[w.key].total += Number(r.count) || 0;
+    }
+  }
+  return out;
+}
+
+export async function tapClassStats(now = Date.now()) {
+  return aggregateTapClasses(await recClickClassRows('0000-00-00'), now);
 }

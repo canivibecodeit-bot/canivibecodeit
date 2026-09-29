@@ -9,7 +9,9 @@
    `sp-card`, so sponsor click tracking cannot mistake it for a slot.
    Whichever shape the page shows, the page renders the module once for
    counting: the instance with `count` logs the impression, the other never
-   does. Clicks go through the counting redirect (lib/tap.js). */
+   does. Clicks go through the counting redirect (lib/tap.js). Both links
+   opt out of the client router's prefetch: the redirect is same-origin, so
+   a hover would otherwise fetch it and reach the counter. */
 import { countTapImpression, isTapPlacement, tapLine, tapLineShort, tapSales } from '../lib/tap.js';
 
 const { placement, variant = 'inline', count = true, hideAtRail = false } = Astro.props;
@@ -33,6 +35,7 @@ if (count) countTapImpression(placement, Astro.request.headers.get('user-agent')
       href={`/api/rec/tap?p=${placement}`}
       target="_blank"
       rel="nofollow noopener"
+      data-astro-prefetch="false"
       aria-label="The Attention Playbook: Stop posting into the void. Pre-order."
     >
       <img class="tap-rail-icon" src="/house/attention-playbook.svg" alt="" width="26" height="26" loading="lazy" />
@@ -42,7 +45,7 @@ if (count) countTapImpression(placement, Astro.request.headers.get('user-agent')
     </a>
   )}
   {!isRail && (
-  <a class="tap-ad-card" href={`/api/rec/tap?p=${placement}`} target="_blank" rel="nofollow noopener">
+  <a class="tap-ad-card" href={`/api/rec/tap?p=${placement}`} target="_blank" rel="nofollow noopener" data-astro-prefetch="false">
     <img class="tap-ad-logo" src="/house/attention-playbook.svg" alt="" width="40" height="40" loading="lazy" />
     <span class="tap-ad-body">
       <span class="rec-eyebrow">The Attention Playbook</span>

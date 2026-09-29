@@ -1,7 +1,10 @@
 // The one counting redirect for every Attention Playbook house-ad placement
-// (see lib/tap.js): GET /api/rec/tap?p=<placement>.
+// (see lib/tap.js): GET /api/rec/tap?p=<placement>. HEAD is answered by the
+// same handler, which redirects it and never counts it.
 import { redirectToTap } from '../../../lib/tap.js';
 
-export async function GET({ request, clientAddress, url }) {
-  return redirectToTap({ request, clientAddress, placement: url.searchParams.get('p') ?? '' });
-}
+const handle = ({ request, clientAddress, url }) =>
+  redirectToTap({ request, clientAddress, placement: url.searchParams.get('p') ?? '' });
+
+export const GET = handle;
+export const HEAD = handle;

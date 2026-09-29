@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
+Disallow: /api/rec/
 
 Sitemap: https://canivibecodeit.com/sitemap.xml
