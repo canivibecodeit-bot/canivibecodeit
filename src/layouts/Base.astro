@@ -9,7 +9,8 @@ import SignupModal from '../components/SignupModal.astro';
 import SponsorRails from '../components/SponsorRails.astro';
 import SponsorTape from '../components/SponsorTape.astro';
 import { buildGamesLive, buildsLive, studiesLive } from '../lib/flags.js';
-import { getBoard, nextRunMonthName } from '../lib/sponsors.js';
+import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
+import { tapRailCss, tapRailFit } from '../lib/tap.js';
 import { scriptJson } from '../lib/request.js';
 import { REC_HIDE_SCRIPT, THEME_SCRIPT } from '../lib/csp.js';
 
@@ -37,6 +38,14 @@ const {
   // (lib/tap.js); null = no rail module on this page.
   houseAd = null,
 } = Astro.props;
+
+// Where the rail module may show: only on viewports with room for every
+// right-rail card at full height plus the module (lib/tap.js). Emitted in
+// <head> so the rail-or-inline choice is made before first paint.
+const houseAdCss =
+  houseAd && !hideSponsors
+    ? tapRailCss(tapRailFit({ cards: composeRails(septBoard).right.length, soldOut: septBoard.allLive }))
+    : '';
 
 const user = Astro.locals.user ?? null;
 const userInitial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase();
@@ -131,6 +140,7 @@ const headerLinks = navSections.filter((s) => s.top);
     <script is:inline set:html={REC_HIDE_SCRIPT} />
     {!isPrivate && <script is:inline src="/analytics.js" defer></script>}
     <ClientRouter />
+    {houseAdCss && <style is:inline set:html={houseAdCss}></style>}
   </head>
   <body data-user={user ? '1' : undefined} class:list={[{ 'no-tape': hideSponsors }]}>
     {!hideSponsors && <SponsorTape side="left" />}

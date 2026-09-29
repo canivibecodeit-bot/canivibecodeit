@@ -4,8 +4,10 @@ import SponsorCard from './SponsorCard.astro';
 import { recordImpressions } from '../lib/impressions.js';
 import { composeRails, getBoard, nextRunMonthName } from '../lib/sponsors.js';
 
-// Our own house ad rides LAST in the right rail, after every slot card. It
-// is not a slot: composeRails never sees it and no sponsor inventory moves.
+// The house ad sits under the right rail's slot cards, out of the rail's
+// flex flow, so the cards never give it a pixel; Base's <head> decides per
+// viewport whether it or the page's inline copy shows (lib/tap.js). It is
+// not a slot: composeRails never sees it and no sponsor inventory moves.
 // The page's inline instance counts the impression; this one never does.
 const { houseAd = null } = Astro.props;
 const nextMonthLabel = nextRunMonthName();

@@ -1,9 +1,9 @@
 ---
 /* The Attention Playbook house ad: a plain ad block in the same family as
-   the rec module, never a sponsor slot. Two shapes of one module: `rail` sits last in the
-   right sponsor rail on wide viewports (mounted by SponsorRails through the
-   Base `houseAd` prop) and `inline` lives in the content column, hidden at
-   rail widths on pages that also carry the rail shape. Whichever shape the
+   the rec module, never a sponsor slot. Two shapes of one module: `rail` sits under the
+   right sponsor rail's cards (mounted by SponsorRails through the Base
+   `houseAd` prop) on viewports with room for it, and `inline` lives in the
+   content column, hidden only where the rail shape shows (`hideAtRail`). Whichever shape the
    page shows, the page renders the module once for counting: the instance
    with `count` logs the impression, the other never does. Clicks go through
    the counting redirect (lib/tap.js). */
