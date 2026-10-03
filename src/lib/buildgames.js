@@ -43,6 +43,21 @@ export const gamesStarted = (now = Date.now()) => now >= gamesStartAt();
 // Entries are accepted only inside the build window.
 export const entriesOpen = (now = Date.now()) => now >= gamesStartAt() && now < gamesEndAt();
 
+// The build window has closed: entries are locked and judging has begun.
+export const gamesEnded = (now = Date.now()) => now >= gamesEndAt();
+
+/* What the page's clock is doing. Before the start it counts to the start;
+   inside the window it counts to the close; after the close there is
+   nothing left to count, so there is NO target and the page renders a
+   closed state instead of a countdown. A countdown aimed at a moment
+   already past reads zero on every load, and the script that reloads the
+   page at zero then reloads it for ever (it did, from Oct 1). */
+export function gameClock(now = Date.now()) {
+  if (!gamesStarted(now)) return { phase: 'pregame', target: gamesStartAt() };
+  if (!gamesEnded(now)) return { phase: 'running', target: gamesEndAt() };
+  return { phase: 'ended', target: null };
+}
+
 /* ---------- game copy — THE editable block ----------
    Operator: final wording lands here and nowhere else. Every string below is
    a placeholder until the theme/category/judging copy is decided; the page

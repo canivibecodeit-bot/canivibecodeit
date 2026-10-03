@@ -26,8 +26,7 @@ import {
   displayName,
   entriesOpen,
   fillLevel,
-  gamesEndAt,
-  gamesStartAt,
+  gameClock,
   gamesStarted,
   monogram,
   rankSponsors,
@@ -83,9 +82,11 @@ const nlInline = page === 1 && pageRows.length >= 6;
 const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 
 // The clock counts to the start until the flip, then to the window close.
-const startAt = gamesStartAt();
-const endAt = gamesEndAt();
-const cdTarget = started ? endAt : startAt;
+// Once the window has closed there is no target: the strip shows a closed
+// state and carries no countdown at all (lib/buildgames.js, gameClock).
+const clock = gameClock();
+const ended = clock.phase === 'ended';
+const cdTarget = clock.target ?? 0;
 const cd = countdownParts(cdTarget);
 
 /* The game-ends clock: zero-padded two-digit segments in fixed-width cells
@@ -93,7 +94,7 @@ const cd = countdownParts(cdTarget);
    (a month-long clock ticking seconds reads anxious; the endgame earns it).
    The client tick mirrors both rules via data-cd-pad / [data-cd-sec-cell]. */
 const pad2 = (n) => String(n).padStart(2, '0');
-const showSeconds = cdTarget - Date.now() < 24 * 60 * 60 * 1000;
+const showSeconds = !ended && cdTarget - Date.now() < 24 * 60 * 60 * 1000;
 
 // Social proof for buyers: live presence (own in-process counter) + the real
 // all-time PostHog totals (2-min stale-safe cache; null hides the stat rather
@@ -255,26 +256,43 @@ const hostOf = (u) => {
     )}
 
     {/* Game phase: the headline stat strip — pool, clock, entries as one row
-        of big numerals styled on the pot treatment. It carries the countdown
-        data attrs (client tick + reload-at-zero work unchanged) and the pot
-        poll updates [data-pot-amount] here. Pre-game keeps the countdown. */}
+        of big numerals styled on the pot treatment. While the window is open
+        it carries the countdown data attrs (client tick + one reload at
+        zero) and the pot poll updates [data-pot-amount] here. Once the
+        window has closed the strip carries NO countdown attrs: the clock
+        cell says so in words and nothing on the page can reload it.
+        Pre-game keeps the countdown. */}
     {started ? (
-      <section class="bg-statgrid" data-countdown data-cd-pad data-target={String(cdTarget)} aria-label="Sponsorship pool, time remaining and entries">
+      <section
+        class="bg-statgrid"
+        data-countdown={ended ? undefined : ''}
+        data-cd-pad={ended ? undefined : ''}
+        data-target={ended ? undefined : String(cdTarget)}
+        aria-label={ended ? 'Sponsorship pool, build window and entries' : 'Sponsorship pool, time remaining and entries'}
+      >
         <div class="bg-sg-cell">
           <span class="bg-sg-label">sponsorship pool</span>
           <span class="bg-sg-num bg-sg-money" data-pot-amount data-pot-cents={potCents}>{usd(potCents)}</span>
           <span class="bg-sg-sub">funded by sponsor bids</span>
         </div>
-        <div class="bg-sg-cell">
-          <span class="bg-sg-label">the game ends in</span>
-          <span class="bg-sg-num bg-sg-cd">
-            <b data-cd-days>{pad2(cd.days)}</b><i>d</i>
-            <b data-cd-hours>{pad2(cd.hours)}</b><i>h</i>
-            <b data-cd-mins>{pad2(cd.minutes)}</b><i>m</i>
-            <span class="bg-sg-sec" data-cd-sec-cell hidden={!showSeconds}><b data-cd-secs>{pad2(cd.seconds)}</b><i>s</i></span>
-          </span>
-          <span class="bg-sg-sub">september 30 · midnight new york</span>
-        </div>
+        {ended ? (
+          <div class="bg-sg-cell">
+            <span class="bg-sg-label">the build window</span>
+            <span class="bg-sg-num">closed</span>
+            <span class="bg-sg-sub">judging now · winners by {ANNOUNCE_BY}</span>
+          </div>
+        ) : (
+          <div class="bg-sg-cell">
+            <span class="bg-sg-label">the game ends in</span>
+            <span class="bg-sg-num bg-sg-cd">
+              <b data-cd-days>{pad2(cd.days)}</b><i>d</i>
+              <b data-cd-hours>{pad2(cd.hours)}</b><i>h</i>
+              <b data-cd-mins>{pad2(cd.minutes)}</b><i>m</i>
+              <span class="bg-sg-sec" data-cd-sec-cell hidden={!showSeconds}><b data-cd-secs>{pad2(cd.seconds)}</b><i>s</i></span>
+            </span>
+            <span class="bg-sg-sub">september 30 · midnight new york</span>
+          </div>
+        )}
         <div class="bg-sg-cell">
           <span class="bg-sg-label">entries</span>
           <span class="bg-sg-num">{entryCount}</span>
