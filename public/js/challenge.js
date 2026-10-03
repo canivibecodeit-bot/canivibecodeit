@@ -42,6 +42,9 @@
       const h = $('[data-cd-hours]', cd);
       const m = $('[data-cd-mins]', cd);
       const sec = $('[data-cd-secs]', cd);
+      // Armed only when the target was still ahead when this page loaded: a
+      // page that loads past its target must never reload (see buildgames.js).
+      const armed = Number.isFinite(target) && target > Date.now();
       const tick = () => {
         const s = Math.max(0, Math.floor((target - Date.now()) / 1000));
         if (d) d.textContent = Math.floor(s / 86400);
@@ -50,7 +53,7 @@
         if (sec) sec.textContent = s % 60;
         // The moment passes: a reload flips the page to its next state
         // (open form appears, or the gallery closes). One reload, not a loop.
-        if (s === 0 && !cd.dataset.done) {
+        if (s === 0 && armed && !cd.dataset.done) {
           cd.dataset.done = '1';
           setTimeout(() => location.reload(), 1500);
         }
