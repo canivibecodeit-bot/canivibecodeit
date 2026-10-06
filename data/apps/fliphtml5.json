@@ -1,0 +1,50 @@
+{
+  "slug": "fliphtml5",
+  "name": "FlipHTML5",
+  "domain": "fliphtml5.com",
+  "category": "publishing",
+  "subcategory": "PDF to page-flip flipbooks",
+  "tagline": "Turns PDFs into hosted HTML5 page-flip publications with embeds, a bookshelf, and reader analytics.",
+  "priceMonthly": null,
+  "pricing": {
+    "plan": null,
+    "basis": null,
+    "unit": "flat",
+    "source": "https://fliphtml5.com/",
+    "checkedOn": "2026-10-06",
+    "confidence": "low",
+    "notes": "AI-drafted from a site submission; price unverified.",
+    "native": null
+  },
+  "verdict": "yes",
+  "verdictConfidence": "medium",
+  "verdictSummary": "The entire product is a page-curl animation wrapped around a PDF, and that animation has been open source for over a decade. pdf.js renders the pages, StPageFlip or turn.js does the flip, and a build script spits out a static folder you can drop on any host. What you are actually paying FlipHTML5 for is hosting, a tidy bookshelf page, and per-page reader stats, none of which is load-bearing for one person publishing one catalog or zine. The honest gap is the authoring layer: embedded video, clickable hotspots, slideshows, and background music are a real editor, not a weekend of work. If you just want your PDF to flip on your own domain, build it.",
+  "coreLoopDIY": "A CLI that takes a PDF, pre-renders every page to images plus a text layer, and emits a self-contained static flipbook viewer with page-flip animation, zoom, thumbnails, search, and deep-linkable page URLs.",
+  "diyTimeEstimate": "one sitting",
+  "requirements": [
+    "Node 20+ and a place to serve static files",
+    "The source PDF (fonts embedded, ideally under about 200 pages for sane build times)",
+    "ImageMagick or sharp for raster resizing"
+  ],
+  "whatYouLose": [
+    "Hosted CDN delivery and the bookshelf page that collects all your publications",
+    "Reader analytics: pages viewed, time per page, drop-off, download counts",
+    "The interactive editor for hotspots, embedded video, audio, and lead-capture forms",
+    "Their mobile apps and offline app export",
+    "Someone else's problem when a 400 page PDF with transparency groups renders wrong"
+  ],
+  "moatTags": [
+    "execution-polish",
+    "scale-infra"
+  ],
+  "moatNotes": "The flip is commodity. The authoring UI and the fact that it serves a 300MB catalog to 10,000 readers without you thinking about it are the parts that cost money.",
+  "whyPeopleStillPay": "Marketing and catalog teams are not the audience for a build script. They want to upload a PDF, drop in three video hotspots and a request-a-quote form, get a link by lunch, and show a chart of which spread people lingered on. FlipHTML5 sells the absence of a pipeline: no builds, no hosting decisions, no asking a developer when the spring catalog needs reposting. For a single person with one document and a static host, none of that applies, which is exactly why the DIY version holds up.",
+  "priorArt": [],
+  "alternatives": [],
+  "rejectedAlternatives": [],
+  "pagePriority": 3,
+  "verifiedOneShot": false,
+  "notes": "Flipbooks peaked aesthetically around 2011 and the libraries have not needed to change since, which is good news for you.",
+  "prompt": "Build a static PDF flipbook generator and viewer. Node 20, TypeScript, no framework, no backend.\n\nStack, non-negotiable:\n- pdfjs-dist to rasterize pages and extract the text layer\n- sharp to resize and encode page images as WebP\n- page-flip (StPageFlip) for the flip animation in the viewer\n- esbuild to bundle the viewer into one JS file plus one CSS file\n- No React, no Tailwind, no server, no accounts, no analytics, no telemetry\n\nCLI: `npm run build -- ./input.pdf --out ./dist --title \"My Catalog\"`\nIt must:\n1. Render every page at two sizes: 1600px tall for display, 200px tall for thumbnails. WebP, quality 82.\n2. Extract per-page text into a single search index JSON (page number plus plain text).\n3. Extract PDF link annotations per page with normalized rect coordinates so external links stay clickable.\n4. Copy the source PDF into dist for a Download button.\n5. Emit dist/index.html, assets/, pages/, thumbs/, data.json. The folder must work when opened over file:// as well as from any static host.\n\nViewer requirements:\n- Two-page spread on wide screens, single page on narrow, portrait-aware\n- Keyboard arrows, click-drag corner flip, swipe on touch\n- Thumbnail strip toggle, zoom to fit/100%/pinch, fullscreen\n- Deep links: #page=12 on load and on every flip, so pages are shareable\n- Client-side text search that jumps to the matching page and highlights nothing fancy, just navigates\n- Clickable link overlays positioned from the extracted annotations\n- Lazy load page images two spreads ahead, preload the first spread eagerly\n\nExplicitly out of scope: a visual editor, video or audio hotspots, lead forms, background music, mobile app export, password protection, multi-document bookshelf.\n\nWrite a README with build timings on a 50 page PDF and one note on how to publish dist to any static host. No .env needed, there are no secrets.",
+  "promptCurated": false
+}
