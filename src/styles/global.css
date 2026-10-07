@@ -5808,28 +5808,6 @@ html.ruben-src [data-hide-for-ruben] {
   color: var(--muted);
 }
 
-.au-split {
-  display: flex;
-  width: 100%;
-  gap: 3px;
-}
-
-.au-seg {
-  flex: 0 0 var(--w, 0%);
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
-  font-size: 12.5px;
-}
-
-.au-seg b {
-  font-weight: 600;
-}
-
 .au-end {
   max-width: 76ch;
 }
@@ -5849,8 +5827,28 @@ html.ruben-src [data-hide-for-ruben] {
     grid-column: auto;
   }
 
+  /* Narrow screens: the name takes the full first line and may wrap, the bar
+     and the figure sit on the second line, so a long name is never cut. */
   .au-list li {
-    grid-template-columns: 7.5em minmax(0, 1fr) 4em;
+    grid-template-columns: minmax(0, 1fr) 4em;
+    grid-template-areas:
+      'name name'
+      'bar val';
+    row-gap: 4px;
+  }
+
+  .au-list .au-name {
+    grid-area: name;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .au-list .au-bar {
+    grid-area: bar;
+  }
+
+  .au-list .au-val {
+    grid-area: val;
   }
 }
 
