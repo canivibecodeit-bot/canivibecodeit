@@ -4,6 +4,7 @@
 import { getAuth } from './lib/auth.js';
 import { cspHeader } from './lib/csp.js';
 import { guardPage } from './lib/flood-guard.js';
+import { warmAudience } from './lib/audience.js';
 import { touchPresence } from './lib/presence.js';
 import { clientIp, originVerdict } from './lib/request.js';
 
@@ -15,6 +16,10 @@ import { clientIp, originVerdict } from './lib/request.js';
 // cacheable, anywhere. Everything else on the site stays cache-friendly for
 // the ~99% anonymous traffic.
 const PRIVATE_PATH = /^\/(api\/auth\/|api\/stack|api\/account|account\/?$|signin\/?$|studies\/p\/)/;
+
+// The audience page's figures are read at boot so its first render after a
+// deploy does not have to wait on PostHog (lib/audience.js).
+warmAudience();
 
 export async function onRequest(context, next) {
   context.locals.user = null;
