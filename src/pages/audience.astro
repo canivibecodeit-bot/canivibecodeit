@@ -131,11 +131,20 @@ const description = `Who reads canivibecodeit.com: unique visitors, sessions, co
         <p class="au-foot">Share of sessions by the site they arrived from. Other search is Brave, DuckDuckGo and Bing.</p>
       </section>
 
-      <section class="panel span-2 au-devices">
+      <section class="panel span-2">
         <header><span class="microlabel">devices · unique visitors</span></header>
-        <div class="au-split" role="img" aria-label={a.devices.map((d) => `${d.type} ${fmtPct(d.share)}`).join(', ')}>
-          {a.devices.map((d) => <span class="au-seg" style={`--w: ${(100 * d.share).toFixed(1)}%`}><b>{d.type}</b> {fmtPct(d.share)}</span>)}
-        </div>
+        {/* The same list as the countries panel; each bar is the device's own
+            share of visitors, so a 1% device keeps its full label and figure
+            beside a short bar instead of being squeezed into a strip. */}
+        <ol class="au-list">
+          {a.devices.map((d) => (
+            <li>
+              <span class="au-name">{d.type}</span>
+              <span class="au-bar" style={`--w: ${Math.max(1, Math.round(100 * d.share))}%`}></span>
+              <span class="au-val">{fmtPct(d.share)}</span>
+            </li>
+          ))}
+        </ol>
       </section>
     </div>
 
