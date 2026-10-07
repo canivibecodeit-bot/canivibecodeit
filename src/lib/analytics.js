@@ -17,7 +17,7 @@ const BOT_UAS = [
 ]
   .map((ua) => `'${ua}'`)
   .join(', ');
-const SITE = `properties.$host = 'canivibecodeit.com'
+export const SITE = `properties.$host = 'canivibecodeit.com'
   AND coalesce(properties.$raw_user_agent, '') NOT IN (${BOT_UAS})`;
 
 const QUERY = `
@@ -72,7 +72,7 @@ export function captureServer(event, properties = {}, distinctId = 'server') {
    stop asking for five minutes and let every caller serve its stale cache. */
 let pausedUntil = 0;
 
-async function hogql(query, { fresh = false } = {}) {
+export async function hogql(query, { fresh = false } = {}) {
   if (Date.now() < pausedUntil) throw new Error('posthog rate limited');
   const res = await fetch(`${HOST}/api/projects/${PROJECT}/query/`, {
     method: 'POST',

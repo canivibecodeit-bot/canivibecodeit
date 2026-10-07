@@ -1,0 +1,149 @@
+---
+/* /audience: the last 30 days of this site's traffic, for sponsors. Every
+   figure is read from PostHog server-side (lib/audience.js) and cached for
+   six hours; the page renders from the cache, or from a dated snapshot
+   while the first read runs, so it never waits on PostHog. No script, no
+   impression counts (those are not a measure of people), one honest line
+   on sponsor card clicks, which are recorded on the click. */
+import Base from '../layouts/Base.astro';
+import { audienceStats, countryName, fmtDay, fmtDuration, fmtPct } from '../lib/audience.js';
+import { sponsorClickRows } from '../lib/db.js';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const [a, clickRows] = await Promise.all([audienceStats(), sponsorClickRows(Date.now() - 30 * DAY_MS).catch(() => [])]);
+const sponsorClicks = clickRows.length;
+const n = (v) => Number(v ?? 0).toLocaleString('en-GB');
+
+// The bar chart: one bar per day, unique visitors, drawn server-side.
+const series = a.perDay.series;
+const chartW = 600;
+const chartH = 120;
+const peak = Math.max(1, ...series.map((d) => d.visitors));
+const barW = series.length ? chartW / series.length : 0;
+const bars = series.map((d, i) => {
+  const h = Math.max(1, Math.round((d.visitors / peak) * (chartH - 4)));
+  return { x: +(i * barW + barW * 0.15).toFixed(1), y: chartH - h, w: +(barW * 0.7).toFixed(1), h, label: `${fmtDay(d.day)}: ${n(d.visitors)} visitors` };
+});
+const firstDay = series[0]?.day;
+const lastDay = series[series.length - 1]?.day;
+
+const title = 'Audience · Can I Vibecode It?';
+const description = `Who reads canivibecodeit.com: unique visitors, sessions, countries, referrers and devices for the last ${a.range.days} days, measured with PostHog.`;
+---
+
+<Base {title} {description}>
+  <main class="wrap audience">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/">the death list</a> / <span class="here">audience</span>
+    </nav>
+
+    <div class="list-head" style="padding-top: 20px;">
+      <h2>Audience</h2>
+      <span class="note">{fmtDay(a.range.from)} to {fmtDay(a.range.to)} · {a.range.days} days</span>
+    </div>
+    <p class="au-note">
+      Measured with PostHog, bots and automated traffic excluded, refreshed every six hours.
+      {!a.live && ` These figures were read on ${fmtDay(a.asOf.slice(0, 10))}; a fresh read is running.`}
+    </p>
+
+    <div class="dash-tiles au-tiles">
+      <div class="tile">
+        <span class="t-label">unique visitors</span>
+        <span class="t-num">{n(a.visitors)}</span>
+        <span class="t-def">people, counted once each</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">page views</span>
+        <span class="t-num">{n(a.views)}</span>
+        <span class="t-def">pages opened</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">sessions</span>
+        <span class="t-num">{n(a.sessions)}</span>
+        <span class="t-def">visits, a new one after 30 minutes away</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">pages per session</span>
+        <span class="t-num">{a.pagesPerSession.toFixed(1)}</span>
+        <span class="t-def">on average</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">average session</span>
+        <span class="t-num t-num-text">{fmtDuration(a.sessionSeconds)}</span>
+        <span class="t-def">time on the site per visit</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">beyond one page</span>
+        <span class="t-num">{fmtPct(a.beyondOne)}</span>
+        <span class="t-def">share of sessions that open a second page</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">visitors per day</span>
+        <span class="t-num">{n(a.perDay.median)}</span>
+        <span class="t-def">median · from {n(a.perDay.min)} to {n(a.perDay.max)}</span>
+      </div>
+      <div class="tile">
+        <span class="t-label">sponsor card clicks</span>
+        <span class="t-num">{n(sponsorClicks)}</span>
+        <span class="t-def">last 30 days, all slots, counted on the click</span>
+      </div>
+    </div>
+
+    <div class="panels au-panels">
+      <section class="panel span-2">
+        <header>
+          <span class="microlabel">unique visitors per day</span>
+          {firstDay && <span class="au-range">{fmtDay(firstDay)} to {fmtDay(lastDay)}</span>}
+        </header>
+        {series.length ? (
+          <svg class="au-chart" viewBox={`0 0 ${chartW} ${chartH}`} preserveAspectRatio="none" role="img" aria-label={`Unique visitors per day, ${n(a.perDay.min)} to ${n(a.perDay.max)}, median ${n(a.perDay.median)}`}>
+            {bars.map((b) => <rect x={b.x} y={b.y} width={b.w} height={b.h}><title>{b.label}</title></rect>)}
+          </svg>
+        ) : (
+          <p class="au-empty">The daily series is part of the next read.</p>
+        )}
+      </section>
+
+      <section class="panel">
+        <header><span class="microlabel">top countries · unique visitors</span></header>
+        <ol class="au-list">
+          {a.countries.map((c) => (
+            <li>
+              <span class="au-name">{countryName(c.code)}</span>
+              <span class="au-bar" style={`--w: ${Math.max(2, Math.round(100 * c.share / (a.countries[0]?.share || 1)))}%`}></span>
+              <span class="au-val">{fmtPct(c.share)}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section class="panel">
+        <header><span class="microlabel">where sessions come from</span></header>
+        <ol class="au-list">
+          {a.referrers.map((r) => (
+            <li>
+              <span class="au-name">{r.name}</span>
+              <span class="au-bar" style={`--w: ${Math.max(2, Math.round(100 * r.share / (a.referrers[0]?.share || 1)))}%`}></span>
+              <span class="au-val">{fmtPct(r.share)}</span>
+            </li>
+          ))}
+        </ol>
+        <p class="au-foot">Share of sessions by the site they arrived from. Other search is Brave, DuckDuckGo and Bing.</p>
+      </section>
+
+      <section class="panel span-2 au-devices">
+        <header><span class="microlabel">devices · unique visitors</span></header>
+        <div class="au-split" role="img" aria-label={a.devices.map((d) => `${d.type} ${fmtPct(d.share)}`).join(', ')}>
+          {a.devices.map((d) => <span class="au-seg" style={`--w: ${(100 * d.share).toFixed(1)}%`}><b>{d.type}</b> {fmtPct(d.share)}</span>)}
+        </div>
+      </section>
+    </div>
+
+    <p class="dash-foot au-end">
+      Unique visitors are distinct browsers, so one person on two devices counts twice. Sessions, pages per session and
+      session length come from PostHog's session records. The Build Games page is left out for 1 to 3 October 2026,
+      when a fault reloaded it repeatedly.
+      · <a href="/sponsor">sponsor the site</a>
+    </p>
+  </main>
+</Base>
