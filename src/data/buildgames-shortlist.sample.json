@@ -2,7 +2,8 @@
   {
     "rank": 1,
     "entryId": "sample-01",
-    "name": "Pennywise",
+    "product": "Pennywise",
+    "name": "Sample Builder 1",
     "handle": "alex_builds",
     "demoUrl": "https://example.com/pennywise",
     "repoUrl": "https://github.com/alex_builds/pennywise",
@@ -16,7 +17,8 @@
   {
     "rank": 2,
     "entryId": "sample-02",
-    "name": "Inkwell",
+    "product": "Inkwell",
+    "name": "Sample Builder 2",
     "handle": "mira.codes",
     "demoUrl": "https://example.com/inkwell",
     "repoUrl": "https://github.com/miracodes/inkwell",
@@ -30,7 +32,8 @@
   {
     "rank": 3,
     "entryId": "sample-03",
-    "name": "Shotlist",
+    "product": "Shotlist",
+    "name": "Sample Builder 3",
     "handle": "devpriya",
     "demoUrl": "https://example.com/shotlist",
     "repoUrl": "https://github.com/devpriya/shotlist",
@@ -44,7 +47,8 @@
   {
     "rank": 4,
     "entryId": "sample-04",
-    "name": "Tally Lite",
+    "product": "Tally Lite",
+    "name": "Sample Builder 4",
     "handle": "jon_ships",
     "demoUrl": "https://example.com/tally-lite",
     "repoUrl": "https://github.com/jon_ships/tally-lite",
@@ -58,7 +62,8 @@
   {
     "rank": 5,
     "entryId": "sample-05",
-    "name": "Looply",
+    "product": "Looply",
+    "name": "Sample Builder 5",
     "handle": "sam.k",
     "demoUrl": "https://example.com/looply",
     "repoUrl": "https://github.com/samk/looply",
@@ -72,7 +77,8 @@
   {
     "rank": 6,
     "entryId": "sample-06",
-    "name": "Queuebert",
+    "product": "Queuebert",
+    "name": "Sample Builder 6",
     "handle": "nat_dev",
     "demoUrl": "https://example.com/queuebert",
     "repoUrl": "https://github.com/nat_dev/queuebert",
@@ -86,7 +92,8 @@
   {
     "rank": 7,
     "entryId": "sample-07",
-    "name": "Pagerly",
+    "product": "Pagerly",
+    "name": "Sample Builder 7",
     "handle": "oli_h",
     "demoUrl": "https://example.com/pagerly",
     "repoUrl": "https://github.com/oli_h/pagerly",
@@ -100,7 +107,8 @@
   {
     "rank": 8,
     "entryId": "sample-08",
-    "name": "Mailbrief",
+    "product": "Mailbrief",
+    "name": "Sample Builder 8",
     "handle": "zoe.writes",
     "demoUrl": "https://example.com/mailbrief",
     "repoUrl": "https://github.com/zoewrites/mailbrief",
@@ -114,7 +122,8 @@
   {
     "rank": 9,
     "entryId": "sample-09",
-    "name": "Kanbun",
+    "product": "Kanbun",
+    "name": "Sample Builder 9",
     "handle": "leo_makes",
     "demoUrl": "https://example.com/kanbun",
     "repoUrl": "https://github.com/leo_makes/kanbun",
@@ -128,7 +137,8 @@
   {
     "rank": 10,
     "entryId": "sample-10",
-    "name": "Clipcase",
+    "product": "Clipcase",
+    "name": "Sample Builder 10",
     "handle": "ana_codes",
     "demoUrl": "https://example.com/clipcase",
     "repoUrl": "https://github.com/ana_codes/clipcase",
@@ -142,7 +152,8 @@
   {
     "rank": 11,
     "entryId": "sample-11",
-    "name": "Fontwise",
+    "product": "Fontwise",
+    "name": "Sample Builder 11",
     "handle": "rhys.dev",
     "demoUrl": "https://example.com/fontwise",
     "repoUrl": "https://github.com/rhysdev/fontwise",
@@ -156,7 +167,8 @@
   {
     "rank": 12,
     "entryId": "sample-12",
-    "name": "Deckling",
+    "product": "Deckling",
+    "name": "Sample Builder 12",
     "handle": "ivy_builds",
     "demoUrl": "https://example.com/deckling",
     "repoUrl": "https://github.com/ivy_builds/deckling",
@@ -170,7 +182,8 @@
   {
     "rank": 13,
     "entryId": "sample-13",
-    "name": "Invoicely Mini",
+    "product": "Invoicely Mini",
+    "name": "Sample Builder 13",
     "handle": "maxdoesit",
     "demoUrl": "https://example.com/invoicely-mini",
     "repoUrl": "https://github.com/maxdoesit/invoicely-mini",
@@ -184,7 +197,8 @@
   {
     "rank": 14,
     "entryId": "sample-14",
-    "name": "Habitat",
+    "product": "Habitat",
+    "name": "Sample Builder 14",
     "handle": "june_codes",
     "demoUrl": "https://example.com/habitat",
     "repoUrl": "https://github.com/june_codes/habitat",
@@ -198,7 +212,8 @@
   {
     "rank": 15,
     "entryId": "sample-15",
-    "name": "Bookmarq",
+    "product": "Bookmarq",
+    "name": "Sample Builder 15",
     "handle": "tomas.sh",
     "demoUrl": "https://example.com/bookmarq",
     "repoUrl": "https://github.com/tomassh/bookmarq",

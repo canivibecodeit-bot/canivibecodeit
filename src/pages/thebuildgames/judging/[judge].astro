@@ -130,10 +130,13 @@ const description = 'Score the Build Games shortlist.';
                 <div class="jg-top">
                   <span class="jg-rank">{e.rank}</span>
                   <a class="jg-name" href={e.demoUrl} target="_blank" rel="noopener nofollow ugc">
-                    {e.name} <span class="jg-arrow" aria-hidden="true">↗</span>
+                    {e.product} <span class="jg-arrow" aria-hidden="true">↗</span>
                   </a>
-                  {e.handle && <span class="jg-handle">@{e.handle}</span>}
                 </div>
+                <p class="jg-by">
+                  {e.name}
+                  {e.handle && <span class="jg-handle">@{e.handle}</span>}
+                </p>
                 {e.oneLine && <p class="jg-line">{e.oneLine}</p>}
                 <div class="jg-meta">
                   {e.repoUrl && (
@@ -152,7 +155,7 @@ const description = 'Score the Build Games shortlist.';
                   name={`note-${e.key}`}
                   maxlength={NOTE_MAX}
                   placeholder="note (optional)"
-                  aria-label={`Note for ${e.name}`}
+                  aria-label={`Note for ${e.product}`}
                   value={cell.note ?? ''}
                   disabled={locked}
                   data-jg-note
@@ -173,7 +176,7 @@ const description = 'Score the Build Games shortlist.';
                           name={`s-${e.key}-${c.key}`}
                           value={v}
                           checked={cell[c.key] === v}
-                          aria-label={`${c.name} ${v} for ${e.name}`}
+                          aria-label={`${c.name} ${v} for ${e.product}`}
                         />
                         <label for={`s-${e.key}-${c.key}-${v}`}>{v}</label>
                       </span>

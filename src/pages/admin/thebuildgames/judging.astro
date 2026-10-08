@@ -105,10 +105,11 @@ const api = '/api/admin/thebuildgames-judging';
                   <td class="jga-num">{r.rank}</td>
                   <td class="jga-entry">
                     <a class="admin-strong" href={r.demoUrl} target="_blank" rel="noopener nofollow ugc">
-                      {r.name}
+                      {r.product}
                     </a>
                     <span class="admin-sub">
-                      {r.handle && `@${r.handle}`}
+                      {r.name}
+                      {r.handle && ` @${r.handle}`}
                       {r.repoUrl && (
                         <>
                           {r.handle && ' · '}

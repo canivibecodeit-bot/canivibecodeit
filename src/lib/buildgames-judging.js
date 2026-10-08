@@ -144,6 +144,8 @@ export function normaliseShortlist(raw) {
       key,
       rank: Number.isInteger(e?.rank) ? e.rank : i + 1,
       name,
+      // What the judges see first: the product, falling back to the entrant.
+      product: cleanText(e?.product, 80) || name,
       handle: cleanText(e?.handle, 40).replace(/^@/, ''),
       demoUrl,
       repoUrl: cleanUrl(e?.repoUrl),
@@ -247,7 +249,7 @@ const csvCell = (v) => {
 };
 
 export function resultsCsv({ results, progress }, judges = judgeList()) {
-  const head = ['rank', 'entry', 'handle', 'demo', 'repo'];
+  const head = ['rank', 'product', 'entrant', 'handle', 'demo', 'repo'];
   for (const c of SCORE_CATEGORIES) {
     for (const j of judges) head.push(`${c.key}_${j.slug}`);
     head.push(`${c.key}_total`);
@@ -256,7 +258,7 @@ export function resultsCsv({ results, progress }, judges = judgeList()) {
   for (const j of judges) head.push(`note_${j.slug}`);
   const lines = [head.map(csvCell).join(',')];
   for (const r of results) {
-    const line = [r.rank, r.name, r.handle, r.demoUrl, r.repoUrl];
+    const line = [r.rank, r.product, r.name, r.handle, r.demoUrl, r.repoUrl];
     for (const c of SCORE_CATEGORIES) {
       for (const j of judges) line.push(r.byJudge[j.slug][c.key]);
       line.push(r.categoryTotals[c.key]);
