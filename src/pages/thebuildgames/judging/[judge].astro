@@ -1,0 +1,193 @@
+---
+/* A judge's scoring page for The Build Games. One page per judge, never
+   linked or listed: /thebuildgames/judging/<handle>. A password (the first
+   name as printed on the game page) sets a signed HttpOnly cookie for 30
+   days; attempts are rate limited per address. Scores save as they change
+   through /api/thebuildgames/judging/score (public/js/judging.js). An
+   unknown judge is a 404, and so is the whole surface until the shortlist
+   file is in the repo (lib/buildgames-shortlist.js). This path is on the
+   Base.astro isPrivate list and the middleware's PRIVATE_PATH. */
+import Base from '../../../layouts/Base.astro';
+import { bgJudgingRows, rateLimit } from '../../../lib/db.js';
+import { clientIp, crossOrigin, readBody } from '../../../lib/request.js';
+import {
+  COOKIE_DAYS,
+  COOKIE_NAME,
+  NOTE_MAX,
+  SCORE_CATEGORIES,
+  SCORE_MAX,
+  SCORE_MIN,
+  entryScored,
+  isLocked,
+  judgeBySlug,
+  judgeCookieSecret,
+  judgeSheet,
+  parseJudgeCookie,
+  signJudgeCookie,
+  verifyJudgePassword,
+} from '../../../lib/buildgames-judging.js';
+import { shortlist } from '../../../lib/buildgames-shortlist.js';
+
+const entries = shortlist();
+const judge = judgeBySlug(Astro.params.judge);
+const secret = judgeCookieSecret();
+if (!entries || !judge || !secret) return new Response(null, { status: 404 });
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+
+const here = `/thebuildgames/judging/${judge.slug}`;
+let signedIn = parseJudgeCookie(Astro.cookies.get(COOKIE_NAME)?.value, secret)?.slug === judge.slug;
+let loginError = '';
+
+if (Astro.request.method === 'POST') {
+  if (crossOrigin(Astro.request)) return new Response('bad origin', { status: 403 });
+  const ip = clientIp(Astro.request, Astro.clientAddress);
+  if (!(await rateLimit(`judgelogin:${ip}`, 10, 15 * 60 * 1000))) {
+    loginError = 'Too many tries. Wait a few minutes.';
+  } else {
+    let body = {};
+    try {
+      body = await readBody(Astro.request, { maxBytes: 4096 });
+    } catch {
+      body = {};
+    }
+    if (verifyJudgePassword(judge.slug, body.password)) {
+      Astro.cookies.set(COOKIE_NAME, signJudgeCookie(judge.slug, secret), {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: COOKIE_DAYS * 24 * 60 * 60,
+      });
+      return Astro.redirect(here, 303);
+    }
+    loginError = 'That is not it.';
+  }
+}
+
+const rows = signedIn ? await bgJudgingRows() : [];
+const locked = signedIn && isLocked(rows);
+const sheet = judgeSheet(rows, judge.slug);
+const scoredCount = entries.filter((e) => entryScored(sheet.get(e.key))).length;
+const values = Array.from({ length: SCORE_MAX - SCORE_MIN + 1 }, (_, i) => SCORE_MIN + i);
+
+const title = 'Judging · The Build Games';
+const description = 'Score the Build Games shortlist.';
+---
+
+<Base {title} {description} ogImage="/og-buildgames.png" hideSponsors={true} hideDigest={true} noindex={true}>
+  {!signedIn ? (
+    <main class="wrap jg jg-login">
+      <p class="microlabel">The Build Games · judging</p>
+      <h1>{judge.name}</h1>
+      <form method="post" action={here} class="jg-login-form" data-astro-reload>
+        <label for="jg-password">Password</label>
+        <input id="jg-password" name="password" type="password" autocomplete="current-password" required maxlength="64" autofocus />
+        <button class="btn primary" type="submit">Sign in</button>
+        {loginError && <p class="jg-error" role="alert">{loginError}</p>}
+      </form>
+    </main>
+  ) : (
+    <main class="wrap jg" data-jg-page data-jg-total={entries.length} data-jg-locked={locked ? '1' : undefined}>
+      <header class="jg-head">
+        <p class="microlabel">The Build Games · judging · {judge.name}</p>
+        <h1>Score the shortlist.</h1>
+        <p class="jg-intro">
+          {entries.length} entries made the shortlist. Open each one, have a quick look, score it. {SCORE_MIN} is bad, {SCORE_MAX} is
+          great. Takes about 10 minutes. Your scores save as you go.
+        </p>
+        {locked && <p class="jg-locked" role="status">Judging is locked. Your scores are in. Thank you.</p>}
+      </header>
+
+      <div class="jg-bar" role="status" aria-live="polite">
+        <span class="jg-done">
+          <b data-jg-done>{scoredCount}</b> of {entries.length} scored
+        </span>
+        <span class="jg-status" data-jg-status data-state="saved">
+          <span data-jg-status-text>{locked ? 'locked' : 'saved'}</span>
+          <button type="button" class="jg-retry" data-jg-retry hidden>retry</button>
+        </span>
+      </div>
+
+      <div class="jg-cols" aria-hidden="true">
+        <div class="jg-col-entry">Entry</div>
+        {SCORE_CATEGORIES.map((c) => (
+          <div class="jg-col">
+            <b>{c.name}</b>
+            <span>{c.help}</span>
+          </div>
+        ))}
+      </div>
+
+      <ol class="jg-list" role="list">
+        {entries.map((e) => {
+          const cell = sheet.get(e.key) ?? {};
+          const got = SCORE_CATEGORIES.filter((c) => Number.isInteger(cell[c.key])).length;
+          return (
+            <li class="jg-entry" data-jg-entry={e.key} data-scored={got}>
+              <div class="jg-main">
+                <div class="jg-top">
+                  <span class="jg-rank">{e.rank}</span>
+                  <a class="jg-name" href={e.demoUrl} target="_blank" rel="noopener nofollow ugc">
+                    {e.name} <span class="jg-arrow" aria-hidden="true">↗</span>
+                  </a>
+                  {e.handle && <span class="jg-handle">@{e.handle}</span>}
+                </div>
+                {e.oneLine && <p class="jg-line">{e.oneLine}</p>}
+                <div class="jg-meta">
+                  {e.repoUrl && (
+                    <a class="jg-repo" href={e.repoUrl} target="_blank" rel="noopener nofollow ugc">
+                      repo
+                    </a>
+                  )}
+                  <span class="jg-state" data-jg-state>
+                    {got === SCORE_CATEGORIES.length ? 'scored' : got === 0 ? 'not scored' : `${got} of ${SCORE_CATEGORIES.length}`}
+                  </span>
+                  <span class="jg-row-status" data-jg-row-status></span>
+                </div>
+                <input
+                  class="jg-note"
+                  type="text"
+                  name={`note-${e.key}`}
+                  maxlength={NOTE_MAX}
+                  placeholder="note (optional)"
+                  aria-label={`Note for ${e.name}`}
+                  value={cell.note ?? ''}
+                  disabled={locked}
+                  data-jg-note
+                />
+              </div>
+              {SCORE_CATEGORIES.map((c) => (
+                <fieldset class="jg-score" data-jg-score={c.key} disabled={locked}>
+                  <legend class="jg-score-label">
+                    <b>{c.name}</b>
+                    <span>{c.help}</span>
+                  </legend>
+                  <div class="jg-seg" data-scored={Number.isInteger(cell[c.key]) ? '1' : '0'}>
+                    {values.map((v) => (
+                      <span class="jg-seg-cell">
+                        <input
+                          type="radio"
+                          id={`s-${e.key}-${c.key}-${v}`}
+                          name={`s-${e.key}-${c.key}`}
+                          value={v}
+                          checked={cell[c.key] === v}
+                          aria-label={`${c.name} ${v} for ${e.name}`}
+                        />
+                        <label for={`s-${e.key}-${c.key}-${v}`}>{v}</label>
+                      </span>
+                    ))}
+                  </div>
+                </fieldset>
+              ))}
+            </li>
+          );
+        })}
+      </ol>
+
+      <p class="jg-foot">You can change any score until judging closes.</p>
+    </main>
+  )}
+  <script is:inline src={`/js/judging.js?v=${__BUILD_ID__}`} defer></script>
+</Base>

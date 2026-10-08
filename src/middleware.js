@@ -15,7 +15,7 @@ import { clientIp, originVerdict } from './lib/request.js';
 // Session-varying surfaces, plus the token-carrying study previews: never
 // cacheable, anywhere. Everything else on the site stays cache-friendly for
 // the ~99% anonymous traffic.
-const PRIVATE_PATH = /^\/(api\/auth\/|api\/stack|api\/account|account\/?$|signin\/?$|studies\/p\/)/;
+const PRIVATE_PATH = /^\/(api\/auth\/|api\/stack|api\/account|account\/?$|signin\/?$|studies\/p\/|thebuildgames\/judging\/|api\/thebuildgames\/judging\/)/;
 
 // The audience page's figures are read at boot so its first render after a
 // deploy does not have to wait on PostHog (lib/audience.js).
