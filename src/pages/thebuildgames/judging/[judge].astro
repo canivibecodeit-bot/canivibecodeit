@@ -6,7 +6,13 @@
    through /api/thebuildgames/judging/score (public/js/judging.js). An
    unknown judge is a 404, and so is the whole surface until the shortlist
    file is in the repo (lib/buildgames-shortlist.js). This path is on the
-   Base.astro isPrivate list and the middleware's PRIVATE_PATH. */
+   Base.astro isPrivate list and the middleware's PRIVATE_PATH.
+
+   Layout: one card per entry. Left the product (linked), entrant, one line,
+   the "Open the demo" button and the repo link; right (or beneath on narrow
+   screens) three scoring groups, each with its own coloured label and
+   chips 0 to 10. The "judged on" sentences live once in the legend at the
+   top and behind each label (title, tap to reveal). */
 import Base from '../../../layouts/Base.astro';
 import { bgJudgingRows, rateLimit } from '../../../lib/db.js';
 import { clientIp, crossOrigin, readBody } from '../../../lib/request.js';
@@ -71,6 +77,7 @@ const locked = signedIn && isLocked(rows);
 const sheet = judgeSheet(rows, judge.slug);
 const scoredCount = entries.filter((e) => entryScored(sheet.get(e.key))).length;
 const values = Array.from({ length: SCORE_MAX - SCORE_MIN + 1 }, (_, i) => SCORE_MIN + i);
+const pct = entries.length ? Math.round((scoredCount / entries.length) * 100) : 0;
 
 const title = 'Judging · The Build Games';
 const description = 'Score the Build Games shortlist.';
@@ -89,17 +96,7 @@ const description = 'Score the Build Games shortlist.';
       </form>
     </main>
   ) : (
-    <main class="wrap jg" data-jg-page data-jg-total={entries.length} data-jg-locked={locked ? '1' : undefined}>
-      <header class="jg-head">
-        <p class="microlabel">The Build Games · judging · {judge.name}</p>
-        <h1>Score the shortlist.</h1>
-        <p class="jg-intro">
-          {entries.length} entries made the shortlist. Open each one, have a quick look, score it. {SCORE_MIN} is bad, {SCORE_MAX} is
-          great. Takes about 10 minutes. Your scores save as you go.
-        </p>
-        {locked && <p class="jg-locked" role="status">Judging is locked. Your scores are in. Thank you.</p>}
-      </header>
-
+    <main class="wrap jg" data-jg-page data-jg-total={entries.length} data-jg-locked={locked ? '1' : undefined} style={`--jg-pct:${pct}%`}>
       <div class="jg-bar" role="status" aria-live="polite">
         <span class="jg-done">
           <b data-jg-done>{scoredCount}</b> of {entries.length} scored
@@ -108,82 +105,117 @@ const description = 'Score the Build Games shortlist.';
           <span data-jg-status-text>{locked ? 'locked' : 'saved'}</span>
           <button type="button" class="jg-retry" data-jg-retry hidden>retry</button>
         </span>
+        <span class="jg-track" aria-hidden="true"><span class="jg-fill"></span></span>
       </div>
 
-      <div class="jg-cols" aria-hidden="true">
-        <div class="jg-col-entry">Entry</div>
-        {SCORE_CATEGORIES.map((c) => (
-          <div class="jg-col">
-            <b>{c.name}</b>
-            <span>{c.help}</span>
-          </div>
-        ))}
-      </div>
+      <header class="jg-head">
+        <p class="microlabel">The Build Games · judging · {judge.name}</p>
+        <h1>Score the shortlist.</h1>
+        <p class="jg-intro">
+          Open each entry, have a look, score it from {SCORE_MIN} (bad) to {SCORE_MAX} (great). Your scores save as you go.
+        </p>
+        {locked && <p class="jg-locked" role="status">Judging is locked. Your scores are in. Thank you.</p>}
+        <dl class="jg-legend">
+          {SCORE_CATEGORIES.map((c) => (
+            <div class={`jg-legend-item jg-cat-${c.key}`}>
+              <dt>{c.name}</dt>
+              <dd>{c.help}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
 
       <ol class="jg-list" role="list">
         {entries.map((e) => {
           const cell = sheet.get(e.key) ?? {};
           const got = SCORE_CATEGORIES.filter((c) => Number.isInteger(cell[c.key])).length;
+          const hasNote = !!cell.note;
           return (
-            <li class="jg-entry" data-jg-entry={e.key} data-scored={got}>
+            <li class="jg-card" data-jg-entry={e.key} data-scored={got}>
               <div class="jg-main">
                 <div class="jg-top">
                   <span class="jg-rank">{e.rank}</span>
                   <a class="jg-name" href={e.demoUrl} target="_blank" rel="noopener nofollow ugc">
-                    {e.product} <span class="jg-arrow" aria-hidden="true">↗</span>
+                    {e.product}
                   </a>
+                  <svg class="jg-tick" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+                    <circle cx="10" cy="10" r="9" fill="currentColor"></circle>
+                    <path d="M6 10.5l2.6 2.6L14.5 7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                  <span class="jg-sr" data-jg-done-word>{got === SCORE_CATEGORIES.length ? ' scored' : ''}</span>
                 </div>
                 <p class="jg-by">
-                  {e.name}
+                  {e.name && e.name.toLowerCase() !== e.handle.toLowerCase() && <span>{e.name}</span>}
                   {e.handle && <span class="jg-handle">@{e.handle}</span>}
                 </p>
                 {e.oneLine && <p class="jg-line">{e.oneLine}</p>}
-                <div class="jg-meta">
+                <div class="jg-actions">
+                  <a class="jg-open" href={e.demoUrl} target="_blank" rel="noopener nofollow ugc">
+                    Open the demo
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M6 3h7v7M13 3 7 9M11 13H3V5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  </a>
                   {e.repoUrl && (
                     <a class="jg-repo" href={e.repoUrl} target="_blank" rel="noopener nofollow ugc">
                       repo
                     </a>
                   )}
-                  <span class="jg-state" data-jg-state>
-                    {got === SCORE_CATEGORIES.length ? 'scored' : got === 0 ? 'not scored' : `${got} of ${SCORE_CATEGORIES.length}`}
-                  </span>
                   <span class="jg-row-status" data-jg-row-status></span>
                 </div>
-                <input
-                  class="jg-note"
-                  type="text"
-                  name={`note-${e.key}`}
-                  maxlength={NOTE_MAX}
-                  placeholder="note (optional)"
-                  aria-label={`Note for ${e.product}`}
-                  value={cell.note ?? ''}
-                  disabled={locked}
-                  data-jg-note
-                />
+                <div class="jg-note-wrap">
+                  <button type="button" class="jg-note-toggle" data-jg-note-toggle hidden={hasNote || locked} aria-expanded="false">
+                    add a note
+                  </button>
+                  <input
+                    class="jg-note"
+                    type="text"
+                    name={`note-${e.key}`}
+                    maxlength={NOTE_MAX}
+                    placeholder="note (optional)"
+                    aria-label={`Note for ${e.product}`}
+                    value={cell.note ?? ''}
+                    disabled={locked}
+                    hidden={!hasNote && !locked}
+                    data-jg-note
+                  />
+                </div>
               </div>
-              {SCORE_CATEGORIES.map((c) => (
-                <fieldset class="jg-score" data-jg-score={c.key} disabled={locked}>
-                  <legend class="jg-score-label">
-                    <b>{c.name}</b>
-                    <span>{c.help}</span>
-                  </legend>
-                  <div class="jg-seg" data-scored={Number.isInteger(cell[c.key]) ? '1' : '0'}>
-                    {values.map((v) => (
-                      <span class="jg-seg-cell">
-                        <input
-                          type="radio"
-                          id={`s-${e.key}-${c.key}-${v}`}
-                          name={`s-${e.key}-${c.key}`}
-                          value={v}
-                          checked={cell[c.key] === v}
-                          aria-label={`${c.name} ${v} for ${e.product}`}
-                        />
-                        <label for={`s-${e.key}-${c.key}-${v}`}>{v}</label>
-                      </span>
-                    ))}
-                  </div>
-                </fieldset>
-              ))}
+              <div class="jg-groups">
+                {SCORE_CATEGORIES.map((c) => (
+                  <fieldset
+                    class={`jg-group jg-cat-${c.key}`}
+                    data-jg-score={c.key}
+                    data-scored={Number.isInteger(cell[c.key]) ? '1' : '0'}
+                    disabled={locked}
+                  >
+                    <legend class="jg-sr">{`${c.name} for ${e.product}`}</legend>
+                    <button type="button" class="jg-group-label" title={c.help} aria-expanded="false" data-jg-help-toggle>
+                      {c.name}
+                    </button>
+                    <p class="jg-help" hidden>{c.help}</p>
+                    <div class="jg-chips">
+                      {values.map((v) => (
+                        <span class="jg-chip">
+                          <input
+                            type="radio"
+                            id={`s-${e.key}-${c.key}-${v}`}
+                            name={`s-${e.key}-${c.key}`}
+                            value={v}
+                            checked={cell[c.key] === v}
+                            aria-label={`${c.name} ${v} for ${e.product}`}
+                          />
+                          <label for={`s-${e.key}-${c.key}-${v}`}>{v}</label>
+                        </span>
+                      ))}
+                    </div>
+                    <div class="jg-ends" aria-hidden="true">
+                      <span>bad</span>
+                      <span>great</span>
+                    </div>
+                  </fieldset>
+                ))}
+              </div>
             </li>
           );
         })}

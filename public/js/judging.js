@@ -63,17 +63,19 @@
       let done = 0;
       for (const li of page.querySelectorAll('[data-jg-entry]')) {
         let got = 0;
-        for (const seg of li.querySelectorAll('.jg-seg')) {
+        for (const seg of li.querySelectorAll('.jg-group')) {
           const scored = !!seg.querySelector('input:checked');
           seg.dataset.scored = scored ? '1' : '0';
           if (scored) got += 1;
         }
         li.dataset.scored = String(got);
-        const state = li.querySelector('[data-jg-state]');
-        if (state) state.textContent = got === CATEGORIES ? 'scored' : got === 0 ? 'not scored' : `${got} of ${CATEGORIES}`;
+        const word = li.querySelector('[data-jg-done-word]');
+        if (word) word.textContent = got === CATEGORIES ? ' scored' : '';
         if (got === CATEGORIES) done += 1;
       }
       if (doneEl) doneEl.textContent = String(done);
+      const total = Number(page.dataset.jgTotal) || 0;
+      page.style.setProperty('--jg-pct', `${total ? Math.round((done / total) * 100) : 0}%`);
     };
 
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -164,6 +166,26 @@
       input._jgTimer = setTimeout(() => {
         save(entryEl, 'note', { entry: entryEl.dataset.jgEntry, category: 'note', note: input.value });
       }, 700);
+    });
+
+    // "add a note" opens the field; a label opens its "judged on" line.
+    page.addEventListener('click', (e) => {
+      const toggle = e.target.closest('[data-jg-note-toggle]');
+      if (toggle) {
+        const input = toggle.parentElement.querySelector('[data-jg-note]');
+        toggle.hidden = true;
+        toggle.setAttribute('aria-expanded', 'true');
+        input.hidden = false;
+        input.focus();
+        return;
+      }
+      const label = e.target.closest('[data-jg-help-toggle]');
+      if (label) {
+        const help = label.parentElement.querySelector('.jg-help');
+        const open = help.hidden;
+        help.hidden = !open;
+        label.setAttribute('aria-expanded', String(open));
+      }
     });
 
     retryBtn?.addEventListener('click', () => {

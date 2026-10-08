@@ -6915,14 +6915,19 @@ dialog.study-lightbox .lb-close:hover {
 }
 
 /* ---------- The Build Games judging (judge pages) ---------- */
-/* Three layouts: a table of entry + three score rows from 1200px (a
-   pointer); from 900px the three controls sit in a row under the entry as
-   small keypads; below that one control per line. Every cell is 44px on
-   touch widths. Native radios carry the state; CSS reads :checked. */
+/* One card per entry: the product, entrant, one line and the demo button on
+   the left; three scoring groups on the right (beneath on narrow screens),
+   each with its own coloured label and chips 0 to 10. Native radios carry
+   the state; CSS reads :checked. Chips are 36px with a pointer, 44px on
+   touch widths. */
 
 .jg {
-  padding-top: 36px;
+  padding-top: 0;
   padding-bottom: 100px;
+}
+
+.jg-head {
+  padding-top: 28px;
 }
 
 .jg h1 {
@@ -6937,7 +6942,7 @@ dialog.study-lightbox .lb-close:hover {
   line-height: 1.6;
   color: var(--muted);
   max-width: 62ch;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
 }
 
 .jg-locked {
@@ -6949,7 +6954,60 @@ dialog.study-lightbox .lb-close:hover {
   font-size: 14px;
 }
 
+.jg-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* category colours: a tint (rgb), a label colour, a fill with white text */
+.jg-cat-replacement {
+  --cat-rgb: 51, 230, 103;
+  --cat-fg: #33e667;
+  --cat-fill: #1f8f45;
+}
+
+.jg-cat-creative {
+  --cat-rgb: 110, 170, 255;
+  --cat-fg: #6eaaff;
+  --cat-fill: #2f6fd6;
+}
+
+.jg-cat-polished {
+  --cat-rgb: 255, 176, 0;
+  --cat-fg: #ffb000;
+  --cat-fill: #b8780a;
+}
+
+[data-theme='light'] .jg-cat-replacement {
+  --cat-rgb: 11, 124, 57;
+  --cat-fg: #0b7c39;
+  --cat-fill: #0b7c39;
+}
+
+[data-theme='light'] .jg-cat-creative {
+  --cat-rgb: 29, 95, 207;
+  --cat-fg: #1d5fcf;
+  --cat-fill: #1d5fcf;
+}
+
+[data-theme='light'] .jg-cat-polished {
+  --cat-rgb: 170, 110, 0;
+  --cat-fg: #8a6200;
+  --cat-fill: #8a6200;
+}
+
 /* sign-in */
+.jg-login {
+  padding-top: 36px;
+}
+
 .jg-login-form {
   display: flex;
   flex-direction: column;
@@ -6990,21 +7048,20 @@ dialog.study-lightbox .lb-close:hover {
   margin: 0;
 }
 
-/* progress bar, stuck under the site header */
+/* progress: a thin bar stuck under the site header */
 .jg-bar {
   position: sticky;
-  top: var(--jg-top, 58px);
+  top: var(--jg-top, 63px);
   z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 28px;
-  padding: 12px 0;
+  margin: 0 -20px;
+  padding: 10px 20px 12px;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .jg-done b {
@@ -7016,15 +7073,28 @@ dialog.study-lightbox .lb-close:hover {
   text-align: right;
 }
 
+.jg-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--border);
+}
+
+.jg-fill {
+  display: block;
+  height: 100%;
+  width: var(--jg-pct, 0%);
+  background: var(--primary);
+  transition: width 0.3s var(--ease-out);
+}
+
 .jg-status {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: var(--muted);
-}
-
-.jg-status[data-state='saving'] {
   color: var(--muted);
 }
 
@@ -7050,31 +7120,80 @@ dialog.study-lightbox .lb-close:hover {
   outline-offset: 2px;
 }
 
-/* the list */
-.jg-list {
-  list-style: none;
-  margin: 0;
+/* legend: the three "judged on" sentences, once */
+.jg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 18px 0 0;
   padding: 0;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-.jg-entry {
+.jg-legend-item {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.jg-legend dt {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cat-fg);
+}
+
+.jg-legend dt::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cat-fg);
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.jg-legend dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* the cards */
+.jg-list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jg-card {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
 }
 
 .jg-main {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .jg-top {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px 10px;
   min-width: 0;
@@ -7092,15 +7211,9 @@ dialog.study-lightbox .lb-close:hover {
   text-align: center;
 }
 
-.jg-entry[data-scored='3'] .jg-rank {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--on-primary);
-}
-
 .jg-name {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--fg);
   overflow-wrap: anywhere;
@@ -7110,49 +7223,82 @@ dialog.study-lightbox .lb-close:hover {
   color: var(--primary);
 }
 
-.jg-arrow {
-  font-size: 13px;
-  color: var(--muted);
+.jg-tick {
+  display: none;
+  color: var(--primary);
+  flex: none;
 }
 
-/* the entrant, under the product */
+.jg-card[data-scored='3'] .jg-tick {
+  display: block;
+}
+
 .jg-by {
-  margin: -2px 0 0;
+  margin: 0;
   font-size: 13px;
   line-height: 1.5;
   color: var(--muted);
   overflow-wrap: anywhere;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
 }
 
 .jg-handle {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-  padding-left: 6px;
 }
 
 .jg-line {
-  margin: 0;
+  margin: 2px 0 0;
   font-size: 15px;
   line-height: 1.5;
   color: var(--fg);
   overflow-wrap: anywhere;
 }
 
-.jg-meta {
+.jg-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: 13px;
-  color: var(--muted);
+  gap: 8px 16px;
+  padding-top: 8px;
+}
+
+/* the card's one primary action */
+.jg-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px 0 18px;
+  border-radius: 8px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.jg-open:hover {
+  filter: brightness(1.15);
+}
+
+[data-theme='light'] .jg-open:hover {
+  filter: brightness(1.4);
+}
+
+.jg-open:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .jg-repo {
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 3px;
+  font-size: 13px;
   min-height: 24px;
   display: inline-flex;
   align-items: center;
@@ -7162,23 +7308,41 @@ dialog.study-lightbox .lb-close:hover {
   color: var(--fg);
 }
 
-.jg-state {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
-.jg-entry[data-scored='3'] .jg-state {
-  color: var(--primary);
-}
-
 .jg-row-status {
   font-size: 12px;
+  color: var(--muted);
 }
 
 .jg-row-status[data-state='error'] {
   color: var(--no-bg);
   font-weight: 600;
+}
+
+.jg-note-wrap {
+  padding-top: 6px;
+}
+
+.jg-note-toggle {
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  min-height: 32px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.jg-note-toggle:hover {
+  color: var(--fg);
+}
+
+.jg-note-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .jg-note {
@@ -7207,52 +7371,68 @@ dialog.study-lightbox .lb-close:hover {
   opacity: 0.6;
 }
 
-/* a score control: label line, then the 0 to 10 cells */
-.jg-score {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-  max-width: 560px;
-}
-
-.jg-score-label {
+/* scoring groups */
+.jg-groups {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.jg-group {
+  margin: 0;
+  padding: 10px 12px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(var(--cat-rgb), 0.08);
+  min-width: 0;
+}
+
+.jg-group[data-scored='0'] {
+  outline: 1px dotted rgba(var(--cat-rgb), 0.7);
+  outline-offset: -1px;
+}
+
+.jg-group-label {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cat-fg);
+  background: none;
+  border: 0;
   padding: 0 0 8px;
-  font-size: 14px;
+  cursor: help;
+  text-align: left;
 }
 
-.jg-score-label b {
-  font-weight: 600;
+.jg-group-label:focus-visible {
+  outline: 2px solid var(--cat-fg);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
-.jg-score-label span {
+.jg-help {
+  margin: -4px 0 8px;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--muted);
 }
 
-.jg-seg {
+.jg-chips {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   gap: 4px;
-  border-radius: 8px;
 }
 
-.jg-seg[data-scored='0'] {
-  outline: 1px dashed var(--border);
-  outline-offset: 4px;
-}
-
-.jg-seg-cell {
+.jg-chip {
   position: relative;
   display: block;
   min-width: 0;
 }
 
-.jg-seg-cell input {
+.jg-chip input {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -7262,154 +7442,58 @@ dialog.study-lightbox .lb-close:hover {
   cursor: pointer;
 }
 
-.jg-seg-cell label {
+.jg-chip label {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid rgba(var(--cat-rgb), 0.35);
+  border-radius: 999px;
   background: var(--surface);
-  color: var(--muted);
+  color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   user-select: none;
 }
 
-.jg-seg-cell input:hover + label {
-  border-color: var(--muted);
-  color: var(--fg);
-}
-
-.jg-seg-cell input:checked + label {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--on-primary);
+.jg-chip:first-child label,
+.jg-chip:last-child label {
   font-weight: 700;
 }
 
-.jg-seg-cell input:focus-visible + label {
-  outline: 2px solid var(--primary);
+.jg-chip input:hover + label {
+  border-color: var(--cat-fg);
+}
+
+.jg-chip input:checked + label {
+  background: var(--cat-fill);
+  border-color: var(--cat-fill);
+  color: #fff;
+  font-weight: 700;
+}
+
+.jg-chip input:focus-visible + label {
+  outline: 2px solid var(--cat-fg);
   outline-offset: 2px;
 }
 
-.jg-score:disabled .jg-seg-cell input {
+.jg-group:disabled .jg-chip input {
   cursor: default;
 }
 
-.jg-score:disabled .jg-seg-cell input:not(:checked) + label {
+.jg-group:disabled .jg-chip input:not(:checked) + label {
   opacity: 0.5;
 }
 
-/* column heads: desktop table only */
-.jg-cols {
-  display: none;
-}
-
-@media (min-width: 900px) {
-  .jg-entry {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px 20px;
-  }
-
-  .jg-main {
-    grid-column: 1 / -1;
-  }
-
-  .jg-score {
-    max-width: none;
-  }
-}
-
-@media (min-width: 1200px) {
-  /* a pointer: the three controls share a row under the entry, 11 cells in
-     one line, the category heads carry the help text once at the top */
-  .jg-cols,
-  .jg-entry {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px 20px;
-  }
-
-  .jg-cols {
-    padding: 22px 0 10px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .jg-col-entry {
-    display: none;
-  }
-
-  .jg-cols .jg-col {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .jg-cols .jg-col b {
-    font-weight: 600;
-    color: var(--fg);
-  }
-
-  .jg-cols .jg-col span {
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .jg-entry {
-    padding: 16px 0 18px;
-    border-top: 1px solid var(--border);
-    border-bottom: 0;
-  }
-
-  .jg-entry:last-child {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .jg-main {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    gap: 6px 24px;
-    align-items: start;
-  }
-
-  .jg-main .jg-note {
-    grid-column: 2;
-    grid-row: 1 / span 3;
-    align-self: start;
-    max-width: none;
-  }
-
-  .jg-score {
-    max-width: none;
-  }
-
-  .jg-score-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .jg-seg {
-    grid-template-columns: repeat(11, minmax(0, 1fr));
-    gap: 2px;
-  }
-
-  .jg-seg-cell label {
-    height: 36px;
-    font-size: 13px;
-    border-radius: 5px;
-  }
+.jg-ends {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 6px 0;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 @media (max-width: 599px) {
@@ -7417,12 +7501,48 @@ dialog.study-lightbox .lb-close:hover {
     font-size: 28px;
   }
 
-  .jg-bar {
-    font-size: 14px;
+  .jg-card {
+    padding: 16px 14px;
   }
 
-  .jg-entry {
-    gap: 16px;
+  .jg-open {
+    width: 100%;
+  }
+
+  .jg-actions .jg-repo {
+    min-height: 36px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .jg-group {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* two columns: the entry left, the three groups right (44px chips, a
+     landscape tablet is touch) */
+  .jg-card {
+    grid-template-columns: minmax(0, 1fr) 468px;
+    gap: 20px 28px;
+    padding: 20px 22px;
+  }
+
+  .jg-chips {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  /* a pointer: 36px chips */
+  .jg-card {
+    grid-template-columns: minmax(0, 1fr) 420px;
+  }
+
+  .jg-chip label {
+    height: 36px;
+    font-size: 13px;
   }
 }
 
