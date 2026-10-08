@@ -1,0 +1,152 @@
+[
+  {
+    "rank": 1,
+    "entryId": "bge_b9ysh6kzac",
+    "name": "ibo",
+    "handle": "ibocodes",
+    "demoUrl": "https://openheard.com/",
+    "repoUrl": "https://github.com/Heilonng23/openheard",
+    "oneLine": "Open source Canny: feedback board, roadmap, changelog, with MCP for agents.",
+    "blurb": "open source canny alternative. collect feedback from your users, let them vote on features and see your roadmap and changelog. built for agents too, app is usable via mcp"
+  },
+  {
+    "rank": 2,
+    "entryId": "bge_287wrcy2t8",
+    "name": "Brandon Theriot",
+    "handle": "btheriot",
+    "demoUrl": "https://footnote-receipts.vercel.app/",
+    "repoUrl": "https://github.com/Btheriot83/footnote",
+    "oneLine": "Granola replacement where every AI note line plays its source moment.",
+    "blurb": "Meeting notes with receipts: a Granola replacement where every AI-written line links to, and plays, the exact moment it was said. Runs in your browser. Free with your own key."
+  },
+  {
+    "rank": 3,
+    "entryId": "bge_7wqjtqv9ae",
+    "name": "Hauke Jung",
+    "handle": "haukejung",
+    "demoUrl": "https://thermite.rs/",
+    "repoUrl": "https://github.com/hauju/thermite-rs",
+    "oneLine": "Self-hosted Sentry replacement in Rust; agents triage issues over MCP.",
+    "blurb": "Thermite: a self-hosted error tracker that speaks Sentry's wire protocol and serves every issue over MCP, so your coding agent triages production bugs with the same view you have. Rust, one binary."
+  },
+  {
+    "rank": 4,
+    "entryId": "bge_mpewgdyjcg",
+    "name": "Aleksandar Jovanovic",
+    "handle": "AleksDoesCode",
+    "demoUrl": "https://usertrack.dev/",
+    "repoUrl": "https://github.com/The-CodeCave/UserTrack",
+    "oneLine": "TrustMRR-style public user-growth leaderboard with read-only source connectors.",
+    "blurb": "TrustMRR for tracking and showing how many user you have and how active they are. Great motivation if you have no sales yet."
+  },
+  {
+    "rank": 5,
+    "entryId": "bge_8re5r478fs",
+    "name": "Umer farooq",
+    "handle": "umership",
+    "demoUrl": "https://trymuxr.com/",
+    "repoUrl": "https://github.com/umeranjum17/muxr",
+    "oneLine": "Mobile console for local coding agents; replaces remote terminal tools.",
+    "blurb": "muxr puts every local coding agent on your phone. See what's Working, what Needs you, and what's Done-then open the exact live terminal, prompt the same session, review the diff, or talk it through."
+  },
+  {
+    "rank": 6,
+    "entryId": "bge_45vnk923sg",
+    "name": "Jeremy lasne",
+    "handle": "jeremylasne",
+    "demoUrl": "https://brain.jeremylasne.com/",
+    "repoUrl": "https://github.com/jlasne/brain",
+    "oneLine": "Personal knowledge filer with cited answers; replaces Readwise or Mem.",
+    "blurb": "A knowledge organization. Drop compiles each source once into concepts, every claim signed with its author and date. Ask reads those concepts to answer you."
+  },
+  {
+    "rank": 7,
+    "entryId": "bge_s87jeazb67",
+    "name": "Priyesh Pandey",
+    "handle": "Priyesh80415523",
+    "demoUrl": "https://caption-generator-iota-jet.vercel.app/",
+    "repoUrl": "https://github.com/PriyeshPandey2000/caption-generator",
+    "oneLine": "Browser caption editor with animated presets; replaces Submagic and Captions.",
+    "blurb": "Turn any video into styled, animated captions. Pick a preset (Hormozi, MrBeast, Neon...), drag/scale live, auto camera punch-ins, edit every word, export MP4/SRT/VTT, all in-browser."
+  },
+  {
+    "rank": 8,
+    "entryId": "bge_969k3fecfz",
+    "name": "aidan tan",
+    "handle": "cdtreys",
+    "demoUrl": "https://excerpt-rho.vercel.app/",
+    "repoUrl": "https://github.com/treycodex/excerpt",
+    "oneLine": "Mac meeting app with live captions and screen captures; Granola alternative.",
+    "blurb": "Inspired by Granola, but build for visual learners. Excerpt, is a free Mac app, with movie-style live captions, visual captures that go straight to your notes, along with other cool features."
+  },
+  {
+    "rank": 9,
+    "entryId": "bge_fhmz8pxay2",
+    "name": "Andrii Solokh",
+    "handle": "AndriiSolokh",
+    "demoUrl": "https://nodoku.solokh.com/dots",
+    "repoUrl": "https://github.com/andrii-solokh/Nodoku",
+    "oneLine": "Free 3D dot-connection puzzle in the browser; replaces paid puzzle apps.",
+    "blurb": "Free browser alternative to paid logic puzzle apps: solve generated 2D/3D connection boards with touch or keyboard, hints, saved progress, and three character editions."
+  },
+  {
+    "rank": 10,
+    "entryId": "bge_4m9jcvknkv",
+    "name": "Novak Blagojevic",
+    "handle": "thohared",
+    "demoUrl": "https://plinth-phi.vercel.app/",
+    "repoUrl": "https://github.com/thohared/plinth",
+    "oneLine": "Browser 3D device mockups from screenshots; replaces Rotato or Mockuuups.",
+    "blurb": "Turn screenshots into studio-lit 3D device mockups. Customize the angle, lighting and background, then export PNG. Free, no account. Your images stay in your browser."
+  },
+  {
+    "rank": 11,
+    "entryId": "bge_bewg2w6jrt",
+    "name": "Vanya Belomestov",
+    "handle": "_sslinNn",
+    "demoUrl": "https://paper-planes-three.vercel.app/play",
+    "repoUrl": "https://github.com/sslinNn/paper-planes",
+    "oneLine": "Game that flies your real X replies as paper planes to recipients.",
+    "blurb": "Airmail: fly your real X replies as paper planes to the people you wrote. AI reads each reply into a letter; storms form where X argues. Endless free flight, a daily leaderboard, ranks."
+  },
+  {
+    "rank": 12,
+    "entryId": "bge_hkqccvybpb",
+    "name": "Youssef Mohamed",
+    "handle": "y_automates",
+    "demoUrl": "https://framesmith.pages.dev/",
+    "repoUrl": "https://github.com/ywageeh/framesmith",
+    "oneLine": "Private browser screenshot beautifier; replaces Xnapper, Shots.so, CleanShot.",
+    "blurb": "Free, private Xnapper/Shots.so replacement: paste a screenshot, get backgrounds, window frames, real 3D tilt, arrows, redaction & social sizes. Zero deps, all in your browser."
+  },
+  {
+    "rank": 13,
+    "entryId": "bge_k8535tznqt",
+    "name": "tobias",
+    "handle": "goldenagesurfer",
+    "demoUrl": "https://ok-rich.com/",
+    "repoUrl": "https://github.com/stolz-kiberatung/ok-rich",
+    "oneLine": "Joke one-page store selling thumbs-up photos; spec-driven zero-dependency build.",
+    "blurb": "Ok Rich is an e-commerce store for terrible investments: You pay me money to make me rich and I will send you one (1) real, custom thumbs-up photo as a gesture of goodwill. That's it."
+  },
+  {
+    "rank": 14,
+    "entryId": "bge_4jef5232vz",
+    "name": "NOUREDDINE RATBAOUI",
+    "handle": "outhex",
+    "demoUrl": "https://in-motion-2e119ccbfdf3.herokuapp.com/",
+    "repoUrl": "https://github.com/NourEddine-Rat/immersive-workout-mc",
+    "oneLine": "Phone-sensor workout arcade; your body controls 3D browser games.",
+    "blurb": "InMotion, an immersive workout fun experience to play games with your body. Your body is the controller, No camera detection just your phone sensors. The idea was inspired by a viral challenge."
+  },
+  {
+    "rank": 15,
+    "entryId": "bge_87hsz9wvf2",
+    "name": "pinkesh",
+    "handle": "pinkeshdpatel",
+    "demoUrl": "https://tryvouch.vercel.app/",
+    "repoUrl": "https://github.com/pinkeshpatel1998/vouch",
+    "oneLine": "Testimonial collection and embeddable wall; replaces Senja and Testimonial.to.",
+    "blurb": "Vouch helps businesses collect, manage, and publish customer testimonials through customizable walls that can be securely embedded on any website."
+  }
+]

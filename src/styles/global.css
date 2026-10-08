@@ -6913,3 +6913,635 @@ dialog.study-lightbox .lb-close:hover {
     padding-top: 40px;
   }
 }
+
+/* ---------- The Build Games judging (judge pages) ---------- */
+/* Three layouts: a table of entry + three score rows from 1200px (a
+   pointer); from 900px the three controls sit in a row under the entry as
+   small keypads; below that one control per line. Every cell is 44px on
+   touch widths. Native radios carry the state; CSS reads :checked. */
+
+.jg {
+  padding-top: 36px;
+  padding-bottom: 100px;
+}
+
+.jg h1 {
+  font-size: 34px;
+  margin: 10px 0 0;
+}
+
+.jg-intro,
+.jg-locked,
+.jg-foot {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 62ch;
+  margin: 14px 0 0;
+}
+
+.jg-locked {
+  color: var(--fg);
+}
+
+.jg-foot {
+  padding-top: 28px;
+  font-size: 14px;
+}
+
+/* sign-in */
+.jg-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+  padding-top: 24px;
+}
+
+.jg-login-form label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.jg-login-form input {
+  font: inherit;
+  font-size: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  min-height: 48px;
+}
+
+.jg-login-form input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.jg-login-form .btn {
+  justify-content: center;
+  min-height: 48px;
+}
+
+.jg-error {
+  font-size: 14px;
+  color: var(--no-bg);
+  margin: 0;
+}
+
+/* progress bar, stuck under the site header */
+.jg-bar {
+  position: sticky;
+  top: var(--jg-top, 58px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 12px 0;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+
+.jg-done b {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  display: inline-block;
+  min-width: 1.4em;
+  text-align: right;
+}
+
+.jg-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.jg-status[data-state='saving'] {
+  color: var(--muted);
+}
+
+.jg-status[data-state='error'] {
+  color: var(--no-bg);
+  font-weight: 600;
+}
+
+.jg-retry {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  min-height: 36px;
+  border: 1px solid var(--no-bg);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--no-bg);
+  cursor: pointer;
+}
+
+.jg-retry:focus-visible {
+  outline: 2px solid var(--no-bg);
+  outline-offset: 2px;
+}
+
+/* the list */
+.jg-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jg-entry {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.jg-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.jg-top {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.jg-rank {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 7px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.jg-entry[data-scored='3'] .jg-rank {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+
+.jg-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.jg-name:hover {
+  color: var(--primary);
+}
+
+.jg-arrow {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.jg-handle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.jg-line {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.jg-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.jg-repo {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jg-repo:hover {
+  color: var(--fg);
+}
+
+.jg-state {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jg-entry[data-scored='3'] .jg-state {
+  color: var(--primary);
+}
+
+.jg-row-status {
+  font-size: 12px;
+}
+
+.jg-row-status[data-state='error'] {
+  color: var(--no-bg);
+  font-weight: 600;
+}
+
+.jg-note {
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  min-height: 44px;
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.jg-note::placeholder {
+  color: var(--muted);
+}
+
+.jg-note:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.jg-note:disabled {
+  opacity: 0.6;
+}
+
+/* a score control: label line, then the 0 to 10 cells */
+.jg-score {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  max-width: 560px;
+}
+
+.jg-score-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 8px;
+  font-size: 14px;
+}
+
+.jg-score-label b {
+  font-weight: 600;
+}
+
+.jg-score-label span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.jg-seg {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.jg-seg[data-scored='0'] {
+  outline: 1px dashed var(--border);
+  outline-offset: 4px;
+}
+
+.jg-seg-cell {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.jg-seg-cell input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.jg-seg-cell label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  user-select: none;
+}
+
+.jg-seg-cell input:hover + label {
+  border-color: var(--muted);
+  color: var(--fg);
+}
+
+.jg-seg-cell input:checked + label {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+}
+
+.jg-seg-cell input:focus-visible + label {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.jg-score:disabled .jg-seg-cell input {
+  cursor: default;
+}
+
+.jg-score:disabled .jg-seg-cell input:not(:checked) + label {
+  opacity: 0.5;
+}
+
+/* column heads: desktop table only */
+.jg-cols {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .jg-entry {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 20px;
+  }
+
+  .jg-main {
+    grid-column: 1 / -1;
+  }
+
+  .jg-score {
+    max-width: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  /* a pointer: the three controls share a row under the entry, 11 cells in
+     one line, the category heads carry the help text once at the top */
+  .jg-cols,
+  .jg-entry {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 20px;
+  }
+
+  .jg-cols {
+    padding: 22px 0 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .jg-col-entry {
+    display: none;
+  }
+
+  .jg-cols .jg-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .jg-cols .jg-col b {
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .jg-cols .jg-col span {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .jg-entry {
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--border);
+    border-bottom: 0;
+  }
+
+  .jg-entry:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .jg-main {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 6px 24px;
+    align-items: start;
+  }
+
+  .jg-main .jg-note {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    align-self: start;
+    max-width: none;
+  }
+
+  .jg-score {
+    max-width: none;
+  }
+
+  .jg-score-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .jg-seg {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .jg-seg-cell label {
+    height: 36px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+}
+
+@media (max-width: 599px) {
+  .jg h1 {
+    font-size: 28px;
+  }
+
+  .jg-bar {
+    font-size: 14px;
+  }
+
+  .jg-entry {
+    gap: 16px;
+  }
+}
+
+/* ---------- The Build Games judging (admin results) ---------- */
+
+.jga-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 18px 0 10px;
+}
+
+.jga-progress {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.jga-progress b {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.jga-top .admin-actions {
+  padding-top: 0;
+}
+
+.jga-top .admin-actions form {
+  display: inline;
+}
+
+.jga-scroll {
+  overflow-x: auto;
+  margin: 8px -20px 0;
+  padding: 0 20px;
+}
+
+.jga-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.jga-table th,
+.jga-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.jga-table th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.jga-table .jga-cat {
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+
+.jga-table .jga-sub th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-top: 0;
+}
+
+.jga-table .jga-num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 34px;
+}
+
+.jga-table .jga-sum {
+  font-weight: 700;
+  border-right: 1px solid var(--border);
+}
+
+.jga-table .jga-total {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.jga-empty {
+  color: var(--muted);
+}
+
+.jga-entry {
+  min-width: 180px;
+}
+
+.jga-entry .admin-strong {
+  display: block;
+  font-size: 14px;
+}
+
+.jga-entry .admin-sub {
+  display: block;
+}
+
+.jga-notes {
+  min-width: 220px;
+  max-width: 360px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.jga-notes span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.jga-notes b {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.jga-foot {
+  padding-top: 14px;
+}

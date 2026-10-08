@@ -1,0 +1,151 @@
+---
+/* /admin/thebuildgames/judging: the judges' scores side by side, per
+   category and in total, with each judge's notes and progress, a lock
+   that makes the judge pages read-only, and CSV / JSON exports. Sums only;
+   the operator picks the winners. Same token gate as the other admin
+   consoles (one-time ?token= sets the bg_admin cookie). */
+import Base from '../../../layouts/Base.astro';
+import { bgJudgingRows } from '../../../lib/db.js';
+import { isAdmin } from '../../../lib/sponsors.js';
+import { SCORE_CATEGORIES, computeResults, isLocked, judgeList } from '../../../lib/buildgames-judging.js';
+import { shortlist, shortlistIsSample } from '../../../lib/buildgames-shortlist.js';
+
+const urlToken = Astro.url.searchParams.get('token');
+if (urlToken && isAdmin(urlToken)) {
+  Astro.cookies.set('bg_admin', urlToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 8,
+  });
+  return Astro.redirect('/admin/thebuildgames/judging');
+}
+const token = Astro.cookies.get('bg_admin')?.value || '';
+if (!isAdmin(token)) return new Response(null, { status: 404 });
+
+const entries = shortlist();
+const rows = entries ? await bgJudgingRows() : [];
+const locked = isLocked(rows);
+const judges = judgeList();
+const { results, progress } = entries ? computeResults(entries, rows, judges) : { results: [], progress: [] };
+const msg = Astro.url.searchParams.get('msg') || '';
+const api = '/api/admin/thebuildgames-judging';
+---
+
+<Base title="build games judging" description="" ogImage="/og/home.png">
+  <main class="wrap admin jga">
+    <div class="list-head">
+      <h2>Judging</h2>
+      <span class="note">{locked ? 'locked' : 'open'}{entries ? ` · ${entries.length} entries` : ''}</span>
+    </div>
+    {msg && <p class="admin-msg">{msg}</p>}
+
+    {!entries ? (
+      <p class="admin-msg">No shortlist file yet. The judge pages are off until src/data/buildgames-shortlist.json is in the build.</p>
+    ) : (
+      <>
+        {shortlistIsSample() && <p class="admin-msg">Sample shortlist (BUILDGAMES_JUDGING_SAMPLE). Not the real entries.</p>}
+
+        <div class="jga-top">
+          <p class="jga-progress">
+            {progress.map((p, i) => (
+              <>
+                {i > 0 && <span class="jga-sep">·</span>}
+                <span>
+                  <b>{p.firstName}</b> {p.scored} of {p.of}
+                </span>
+              </>
+            ))}
+          </p>
+          <div class="admin-actions">
+            <form method="post" action={api} data-astro-reload>
+              <input type="hidden" name="action" value={locked ? 'unlock' : 'lock'} />
+              <button class={`btn ${locked ? 'ghost' : 'primary'}`} type="submit">
+                {locked ? 'Unlock judging' : 'Lock judging'}
+              </button>
+            </form>
+            <a class="btn ghost" href={`${api}?format=csv`}>CSV</a>
+            <a class="btn ghost" href={api}>JSON</a>
+          </div>
+        </div>
+
+        <div class="jga-scroll">
+          <table class="jga-table">
+            <thead>
+              <tr>
+                <th class="jga-num">#</th>
+                <th>Entry</th>
+                {SCORE_CATEGORIES.map((c) => (
+                  <th class="jga-cat" colspan={judges.length + 1}>{c.name}</th>
+                ))}
+                <th class="jga-num">Total</th>
+                <th>Notes</th>
+              </tr>
+              <tr class="jga-sub">
+                <th></th>
+                <th></th>
+                {SCORE_CATEGORIES.map(() => (
+                  <>
+                    {judges.map((j) => (
+                      <th class="jga-num" title={j.name}>
+                        {j.firstName.slice(0, 1)}
+                      </th>
+                    ))}
+                    <th class="jga-num">sum</th>
+                  </>
+                ))}
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr>
+                  <td class="jga-num">{r.rank}</td>
+                  <td class="jga-entry">
+                    <a class="admin-strong" href={r.demoUrl} target="_blank" rel="noopener nofollow ugc">
+                      {r.name}
+                    </a>
+                    <span class="admin-sub">
+                      {r.handle && `@${r.handle}`}
+                      {r.repoUrl && (
+                        <>
+                          {r.handle && ' · '}
+                          <a href={r.repoUrl} target="_blank" rel="noopener nofollow ugc">
+                            repo
+                          </a>
+                        </>
+                      )}
+                    </span>
+                  </td>
+                  {SCORE_CATEGORIES.map((c) => (
+                    <>
+                      {judges.map((j) => (
+                        <td class="jga-num">{r.byJudge[j.slug][c.key] ?? <span class="jga-empty">·</span>}</td>
+                      ))}
+                      <td class="jga-num jga-sum">{r.categoryTotals[c.key]}</td>
+                    </>
+                  ))}
+                  <td class="jga-num jga-total">{r.total}</td>
+                  <td class="jga-notes">
+                    {judges
+                      .filter((j) => r.byJudge[j.slug].note)
+                      .map((j) => (
+                        <span>
+                          <b>{j.firstName}</b> {r.byJudge[j.slug].note}
+                        </span>
+                      ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="admin-sub jga-foot">
+          Sums only. Sorted by total, ties by shortlist rank. A dot is an entry the judge has not scored yet.
+        </p>
+      </>
+    )}
+  </main>
+</Base>

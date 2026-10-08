@@ -325,6 +325,20 @@ const SCHEMA_SQLITE = `
     rec TEXT PRIMARY KEY,
     count INTEGER NOT NULL DEFAULT 0
   );
+  /* Build Games judging: one row per (judge, entry, category) score, 0 to
+     10. A row with category 'note' carries the judge's note for the entry
+     (score NULL). The lock the operator sets is one reserved row
+     (judge '_admin', entry '*', category 'lock'). Entrants appear only by
+     the entry key the shortlist file assigns; nothing personal is stored. */
+  CREATE TABLE IF NOT EXISTS buildgames_judging_scores (
+    judge TEXT NOT NULL,
+    entry_key TEXT NOT NULL,
+    category TEXT NOT NULL,
+    score INTEGER,
+    note TEXT,
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY (judge, entry_key, category)
+  );
   /* How to AI rec layer: one counting redirect, clicks per (surface, day)
      so placements can be reported weekly. No email, no IP, nothing personal. */
   CREATE TABLE IF NOT EXISTS rec_clicks (
@@ -691,6 +705,15 @@ const SCHEMA_PG = `
     rec TEXT PRIMARY KEY,
     count INTEGER NOT NULL DEFAULT 0
   );
+  CREATE TABLE IF NOT EXISTS buildgames_judging_scores (
+    judge TEXT NOT NULL,
+    entry_key TEXT NOT NULL,
+    category TEXT NOT NULL,
+    score INTEGER,
+    note TEXT,
+    updated_at BIGINT NOT NULL,
+    PRIMARY KEY (judge, entry_key, category)
+  );
   CREATE TABLE IF NOT EXISTS rec_clicks (
     src TEXT NOT NULL,
     day TEXT NOT NULL,
@@ -932,6 +955,19 @@ const MD_COLS = [
   'author_avatar_url', 'text', 'media_kind', 'media_url', 'poster_url', 'width', 'height',
   'featured_order', 'status', 'fetched_at', 'created_at', 'updated_at',
 ];
+// Postgres hands BIGINT back as a string and INTEGER as a number; SQLite
+// gives numbers. One shape for the judging code either way.
+function judgingRow(r) {
+  return {
+    judge: r.judge,
+    entry_key: r.entry_key,
+    category: r.category,
+    score: r.score == null ? null : Number(r.score),
+    note: r.note ?? null,
+    updated_at: Number(r.updated_at),
+  };
+}
+
 function mdParts(fields) {
   const keys = Object.keys(fields).filter((k) => MD_FIELDS.includes(k));
   if (keys.length === 0) throw new Error('updateModelDemo: no writable fields');
@@ -1740,6 +1776,27 @@ async function pgDriver() {
         [rec]
       );
     },
+    /* ---- Build Games judging ---- */
+    async bgJudgingRows() {
+      const r = await pool.query('SELECT judge, entry_key, category, score, note, updated_at FROM buildgames_judging_scores');
+      return r.rows.map(judgingRow);
+    },
+    async bgJudgingUpsert(row) {
+      await pool.query(
+        `INSERT INTO buildgames_judging_scores (judge, entry_key, category, score, note, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (judge, entry_key, category) DO UPDATE SET
+           score = EXCLUDED.score, note = EXCLUDED.note, updated_at = EXCLUDED.updated_at`,
+        [row.judge, row.entry_key, row.category, row.score, row.note, row.updated_at]
+      );
+    },
+    async bgJudgingDelete(judge, entryKey, category) {
+      await pool.query('DELETE FROM buildgames_judging_scores WHERE judge = $1 AND entry_key = $2 AND category = $3', [
+        judge,
+        entryKey,
+        category,
+      ]);
+    },
     async recClick(src, day) {
       await pool.query(
         'INSERT INTO rec_clicks (src, day, count) VALUES ($1, $2, 1) ON CONFLICT (src, day) DO UPDATE SET count = rec_clicks.count + 1',
@@ -2531,6 +2588,21 @@ async function sqliteDriver() {
         'INSERT INTO buildgames_rec_clicks (rec, count) VALUES (?, 1) ON CONFLICT(rec) DO UPDATE SET count = count + 1'
       ).run(rec);
     },
+    /* ---- Build Games judging ---- */
+    async bgJudgingRows() {
+      return db.prepare('SELECT judge, entry_key, category, score, note, updated_at FROM buildgames_judging_scores').all().map(judgingRow);
+    },
+    async bgJudgingUpsert(row) {
+      db.prepare(
+        `INSERT INTO buildgames_judging_scores (judge, entry_key, category, score, note, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(judge, entry_key, category) DO UPDATE SET
+           score = excluded.score, note = excluded.note, updated_at = excluded.updated_at`
+      ).run(row.judge, row.entry_key, row.category, row.score, row.note, row.updated_at);
+    },
+    async bgJudgingDelete(judge, entryKey, category) {
+      db.prepare('DELETE FROM buildgames_judging_scores WHERE judge = ? AND entry_key = ? AND category = ?').run(judge, entryKey, category);
+    },
     async recClick(src, day) {
       db.prepare(
         'INSERT INTO rec_clicks (src, day, count) VALUES (?, ?, 1) ON CONFLICT(src, day) DO UPDATE SET count = count + 1'
@@ -2904,6 +2976,11 @@ export async function bgEntryByRepo(repoUrl) { return (await getDriver()).bgEntr
 export async function updateBgEntry(id, fields) { return (await getDriver()).updateBgEntry(id, { ...fields, updated_at: Date.now() }); }
 export async function bgEntryCount() { return (await getDriver()).bgEntryCount(); }
 export async function bgRecClick(rec) { return (await getDriver()).bgRecClick(rec); }
+
+/* ---------- Build Games judging (lib/buildgames-judging.js) ---------- */
+export async function bgJudgingRows() { return (await getDriver()).bgJudgingRows(); }
+export async function bgJudgingUpsert(row) { return (await getDriver()).bgJudgingUpsert(row); }
+export async function bgJudgingDelete(judge, entryKey, category) { return (await getDriver()).bgJudgingDelete(judge, entryKey, category); }
 export async function recClick(src, day) { return (await getDriver()).recClick(src, day); }
 export async function recClickRows(sinceDay = '0000-00-00') { return (await getDriver()).recClickRows(sinceDay); }
 export async function recImpression(src, day) { return (await getDriver()).recImpression(src, day); }

@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
 Disallow: /api/rec/
+Disallow: /thebuildgames/judging/
 
 Sitemap: https://canivibecodeit.com/sitemap.xml
