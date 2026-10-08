@@ -94,7 +94,7 @@ test('cookie secret: the judging secret, else the auth secret, else nothing (fai
 
 const RAW = [
   { rank: 2, name: 'Inkwell', handle: '@mira', demoUrl: 'https://inkwell.example/', repoUrl: 'https://github.com/mira/inkwell', oneLine: 'notes' },
-  { rank: 1, entryId: 'E-01', name: 'Pennywise', handle: 'alex', demoUrl: 'https://penny.example/', repoUrl: 'javascript:alert(1)', oneLine: 'money <b>x</b>' },
+  { rank: 1, entryId: 'E-01', product: ' Penny <b>Wise</b> ', name: 'Pennywise', handle: 'alex', demoUrl: 'https://penny.example/', repoUrl: 'javascript:alert(1)', oneLine: 'money <b>x</b>' },
   { name: 'Shot list', demoUrl: 'https://shot.example/', oneLine: 'a\u0000b​c' },
 ];
 
@@ -109,6 +109,8 @@ test('shortlist: keys are stable, order by rank, urls checked, control character
     ]
   );
   assert.equal(list[1].handle, 'mira');
+  assert.equal(list[0].product, 'Penny <b>Wise</b>', 'product as text; the page escapes it');
+  assert.equal(list[1].product, 'Inkwell', 'no product: the entrant name stands in');
   assert.equal(list[0].repoUrl, '', 'a javascript: url is dropped');
   assert.equal(list[0].oneLine, 'money <b>x</b>', 'text is kept as text; the page escapes it');
   assert.equal(list[2].oneLine, 'abc');
@@ -255,9 +257,9 @@ test('csv: one row per entry, quoted where needed, progress at the foot', () => 
   const data = computeResults(entries, [...ROWS, row('scheemunai', 'e-01', 'note', null, 'good, "really"')]);
   const csv = resultsCsv(data);
   const lines = csv.split('\r\n');
-  assert.equal(lines[0].split(',').slice(0, 5).join(','), 'rank,entry,handle,demo,repo');
-  assert.equal(lines[0].split(',').length, 5 + 3 * 4 + 1 + 3);
-  assert.match(lines[1], /^1,Pennywise,alex,https:\/\/penny\.example\/,,8,7,,15,6,10,,16,9,5,,14,45,ship it,,"good, ""really"""$/);
-  assert.match(lines[2], /^2,Inkwell,mira,/);
+  assert.equal(lines[0].split(',').slice(0, 6).join(','), 'rank,product,entrant,handle,demo,repo');
+  assert.equal(lines[0].split(',').length, 6 + 3 * 4 + 1 + 3);
+  assert.match(lines[1], /^1,Penny <b>Wise<\/b>,Pennywise,alex,https:\/\/penny\.example\/,,8,7,,15,6,10,,16,9,5,,14,45,ship it,,"good, ""really"""$/);
+  assert.match(lines[2], /^2,Inkwell,Inkwell,mira,/);
   assert.equal(lines[5], 'Tony Dinh: 1 of 3 scored,Dudu: 2 of 3 scored,Andrej: 0 of 3 scored');
 });

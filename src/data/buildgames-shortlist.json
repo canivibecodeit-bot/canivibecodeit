@@ -2,6 +2,7 @@
   {
     "rank": 1,
     "entryId": "bge_b9ysh6kzac",
+    "product": "openheard",
     "name": "ibo",
     "handle": "ibocodes",
     "demoUrl": "https://openheard.com/",
@@ -12,6 +13,7 @@
   {
     "rank": 2,
     "entryId": "bge_287wrcy2t8",
+    "product": "Footnote",
     "name": "Brandon Theriot",
     "handle": "btheriot",
     "demoUrl": "https://footnote-receipts.vercel.app/",
@@ -22,6 +24,7 @@
   {
     "rank": 3,
     "entryId": "bge_7wqjtqv9ae",
+    "product": "Thermite",
     "name": "Hauke Jung",
     "handle": "haukejung",
     "demoUrl": "https://thermite.rs/",
@@ -32,6 +35,7 @@
   {
     "rank": 4,
     "entryId": "bge_mpewgdyjcg",
+    "product": "UserTrack",
     "name": "Aleksandar Jovanovic",
     "handle": "AleksDoesCode",
     "demoUrl": "https://usertrack.dev/",
@@ -42,6 +46,7 @@
   {
     "rank": 5,
     "entryId": "bge_8re5r478fs",
+    "product": "muxr",
     "name": "Umer farooq",
     "handle": "umership",
     "demoUrl": "https://trymuxr.com/",
@@ -52,6 +57,7 @@
   {
     "rank": 6,
     "entryId": "bge_45vnk923sg",
+    "product": "Tasu",
     "name": "Jeremy lasne",
     "handle": "jeremylasne",
     "demoUrl": "https://brain.jeremylasne.com/",
@@ -62,6 +68,7 @@
   {
     "rank": 7,
     "entryId": "bge_s87jeazb67",
+    "product": "CaptionLab",
     "name": "Priyesh Pandey",
     "handle": "Priyesh80415523",
     "demoUrl": "https://caption-generator-iota-jet.vercel.app/",
@@ -72,6 +79,7 @@
   {
     "rank": 8,
     "entryId": "bge_969k3fecfz",
+    "product": "Excerpt",
     "name": "aidan tan",
     "handle": "cdtreys",
     "demoUrl": "https://excerpt-rho.vercel.app/",
@@ -82,6 +90,7 @@
   {
     "rank": 9,
     "entryId": "bge_fhmz8pxay2",
+    "product": "Nodoku",
     "name": "Andrii Solokh",
     "handle": "AndriiSolokh",
     "demoUrl": "https://nodoku.solokh.com/dots",
@@ -92,6 +101,7 @@
   {
     "rank": 10,
     "entryId": "bge_4m9jcvknkv",
+    "product": "Plinth",
     "name": "Novak Blagojevic",
     "handle": "thohared",
     "demoUrl": "https://plinth-phi.vercel.app/",
@@ -102,6 +112,7 @@
   {
     "rank": 11,
     "entryId": "bge_bewg2w6jrt",
+    "product": "Airmail (Paper Planes)",
     "name": "Vanya Belomestov",
     "handle": "_sslinNn",
     "demoUrl": "https://paper-planes-three.vercel.app/play",
@@ -112,6 +123,7 @@
   {
     "rank": 12,
     "entryId": "bge_hkqccvybpb",
+    "product": "Framesmith",
     "name": "Youssef Mohamed",
     "handle": "y_automates",
     "demoUrl": "https://framesmith.pages.dev/",
@@ -122,6 +134,7 @@
   {
     "rank": 13,
     "entryId": "bge_k8535tznqt",
+    "product": "OK RICH",
     "name": "tobias",
     "handle": "goldenagesurfer",
     "demoUrl": "https://ok-rich.com/",
@@ -132,6 +145,7 @@
   {
     "rank": 14,
     "entryId": "bge_4jef5232vz",
+    "product": "InMotion",
     "name": "NOUREDDINE RATBAOUI",
     "handle": "outhex",
     "demoUrl": "https://in-motion-2e119ccbfdf3.herokuapp.com/",
@@ -142,6 +156,7 @@
   {
     "rank": 15,
     "entryId": "bge_87hsz9wvf2",
+    "product": "Vouch",
     "name": "pinkesh",
     "handle": "pinkeshdpatel",
     "demoUrl": "https://tryvouch.vercel.app/",
