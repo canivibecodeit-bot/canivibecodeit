@@ -23,17 +23,6 @@
   },
   {
     "rank": 3,
-    "entryId": "bge_7wqjtqv9ae",
-    "product": "Thermite",
-    "name": "Hauke Jung",
-    "handle": "haukejung",
-    "demoUrl": "https://thermite.rs/",
-    "repoUrl": "https://github.com/hauju/thermite-rs",
-    "oneLine": "Self-hosted Sentry replacement in Rust; agents triage issues over MCP.",
-    "blurb": "Thermite: a self-hosted error tracker that speaks Sentry's wire protocol and serves every issue over MCP, so your coding agent triages production bugs with the same view you have. Rust, one binary."
-  },
-  {
-    "rank": 4,
     "entryId": "bge_mpewgdyjcg",
     "product": "UserTrack",
     "name": "Aleksandar Jovanovic",
@@ -44,18 +33,7 @@
     "blurb": "TrustMRR for tracking and showing how many user you have and how active they are. Great motivation if you have no sales yet."
   },
   {
-    "rank": 5,
-    "entryId": "bge_8re5r478fs",
-    "product": "muxr",
-    "name": "Umer farooq",
-    "handle": "umership",
-    "demoUrl": "https://trymuxr.com/",
-    "repoUrl": "https://github.com/umeranjum17/muxr",
-    "oneLine": "Mobile console for local coding agents; replaces remote terminal tools.",
-    "blurb": "muxr puts every local coding agent on your phone. See what's Working, what Needs you, and what's Done-then open the exact live terminal, prompt the same session, review the diff, or talk it through."
-  },
-  {
-    "rank": 6,
+    "rank": 4,
     "entryId": "bge_45vnk923sg",
     "product": "Tasu",
     "name": "Jeremy lasne",
@@ -66,7 +44,7 @@
     "blurb": "A knowledge organization. Drop compiles each source once into concepts, every claim signed with its author and date. Ask reads those concepts to answer you."
   },
   {
-    "rank": 7,
+    "rank": 5,
     "entryId": "bge_zf7fq8w748",
     "product": "Bloombroke",
     "name": "Max Reid",
@@ -77,7 +55,7 @@
     "blurb": "Keyboard-driven market terminal with live indices, FX and commodities."
   },
   {
-    "rank": 8,
+    "rank": 6,
     "entryId": "bge_s87jeazb67",
     "product": "CaptionLab",
     "name": "Priyesh Pandey",
@@ -88,7 +66,7 @@
     "blurb": "Turn any video into styled, animated captions. Pick a preset (Hormozi, MrBeast, Neon...), drag/scale live, auto camera punch-ins, edit every word, export MP4/SRT/VTT, all in-browser."
   },
   {
-    "rank": 9,
+    "rank": 7,
     "entryId": "bge_969k3fecfz",
     "product": "Excerpt",
     "name": "aidan tan",
@@ -99,7 +77,7 @@
     "blurb": "Inspired by Granola, but build for visual learners. Excerpt, is a free Mac app, with movie-style live captions, visual captures that go straight to your notes, along with other cool features."
   },
   {
-    "rank": 10,
+    "rank": 8,
     "entryId": "bge_fhmz8pxay2",
     "product": "Nodoku",
     "name": "Andrii Solokh",
@@ -110,7 +88,7 @@
     "blurb": "Free browser alternative to paid logic puzzle apps: solve generated 2D/3D connection boards with touch or keyboard, hints, saved progress, and three character editions."
   },
   {
-    "rank": 11,
+    "rank": 9,
     "entryId": "bge_4m9jcvknkv",
     "product": "Plinth",
     "name": "Novak Blagojevic",
@@ -121,7 +99,7 @@
     "blurb": "Turn screenshots into studio-lit 3D device mockups. Customize the angle, lighting and background, then export PNG. Free, no account. Your images stay in your browser."
   },
   {
-    "rank": 12,
+    "rank": 10,
     "entryId": "bge_bewg2w6jrt",
     "product": "Airmail (Paper Planes)",
     "name": "Vanya Belomestov",
@@ -132,7 +110,7 @@
     "blurb": "Airmail: fly your real X replies as paper planes to the people you wrote. AI reads each reply into a letter; storms form where X argues. Endless free flight, a daily leaderboard, ranks."
   },
   {
-    "rank": 13,
+    "rank": 11,
     "entryId": "bge_hkqccvybpb",
     "product": "Framesmith",
     "name": "Youssef Mohamed",
@@ -143,7 +121,7 @@
     "blurb": "Free, private Xnapper/Shots.so replacement: paste a screenshot, get backgrounds, window frames, real 3D tilt, arrows, redaction & social sizes. Zero deps, all in your browser."
   },
   {
-    "rank": 14,
+    "rank": 12,
     "entryId": "bge_k8535tznqt",
     "product": "OK RICH",
     "name": "tobias",
@@ -154,7 +132,7 @@
     "blurb": "Ok Rich is an e-commerce store for terrible investments: You pay me money to make me rich and I will send you one (1) real, custom thumbs-up photo as a gesture of goodwill. That's it."
   },
   {
-    "rank": 15,
+    "rank": 13,
     "entryId": "bge_4jef5232vz",
     "product": "InMotion",
     "name": "NOUREDDINE RATBAOUI",
