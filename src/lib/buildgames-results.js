@@ -80,6 +80,11 @@ export const RESULTS = {
 // to a link, and the results page renders.
 export const winnersAnnounced = () => RESULTS.winners.length > 0;
 
+// The line that closes the gap between the pool on the game page and the
+// fund here (the Lead's sentence, 14 Oct 2026; the operator can reword).
+export const FUND_NOTE =
+  "The board raised $2,750. After Stripe's card and currency fees and the swing from dollars to pounds and back, a little over $2,500 arrived; that is three prizes of $800, with the rest covering the cost of sending them abroad.";
+
 export const usd = (cents) => '$' + Math.round(cents / 100).toLocaleString('en-US');
 
 /* The page's view of the results: every key resolved to its shortlist

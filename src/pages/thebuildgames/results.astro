@@ -14,7 +14,7 @@ import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgLeaderboard } from '../../lib/db.js';
 import { CATEGORIES, JUDGES, MONEY_SENTENCE, displayName, rankSponsors } from '../../lib/buildgames.js';
-import { resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
+import { FUND_NOTE, resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
 import { shortlist } from '../../lib/buildgames-shortlist.js';
 import { withUtm } from '../../lib/sponsors.js';
 
@@ -132,6 +132,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     <section class="bgr-money" aria-label="How the money works">
       <p class="bgr-money-line">{MONEY_SENTENCE}</p>
       <p class="bgr-money-line">This year that came to {fund}: three prizes of {prize}, one per category.</p>
+      <p class="bgr-money-line">{FUND_NOTE}</p>
     </section>
 
     <section class="bgr-how" aria-labelledby="bgr-how-h">

@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { CATEGORIES } from '../src/lib/buildgames.js';
 import { SCORE_CATEGORIES, normaliseShortlist } from '../src/lib/buildgames-judging.js';
-import { RESULTS, resultsView, usd, winnersAnnounced } from '../src/lib/buildgames-results.js';
+import { FUND_NOTE, RESULTS, resultsView, usd, winnersAnnounced } from '../src/lib/buildgames-results.js';
 
 const shortlist = normaliseShortlist(
   JSON.parse(readFileSync(new URL('../src/data/buildgames-shortlist.json', import.meta.url), 'utf8'))
@@ -49,6 +49,13 @@ test('honourable mentions never include the category’s own winner, and never r
     assert.ok(!w.mentions.includes(w.entry), `${w.category}: the winner is not also a mention`);
     assert.equal(new Set(w.mentions).size, w.mentions.length, `${w.category}: no repeated mention`);
   }
+});
+
+test('the fund note names the pool, the fund and the prize, in house style', () => {
+  assert.match(FUND_NOTE, /\$2,750/);
+  assert.match(FUND_NOTE, /\$800/);
+  assert.ok(!/[\u2014\u2013]/.test(FUND_NOTE), 'no dashes');
+  assert.ok(!/admin fee/i.test(FUND_NOTE));
 });
 
 test('the fund is three prizes', () => {
