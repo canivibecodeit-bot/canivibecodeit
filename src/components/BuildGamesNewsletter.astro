@@ -13,6 +13,8 @@ const { variant = 'section' } = Astro.props; // 'inline' | 'section'
 const started = gamesStarted();
 // After the results: the ask is the next games, not this one's winners.
 const announced = gamesEnded() && winnersAnnounced();
+// No link to the builders page from the builders page itself.
+const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/builders';
 ---
 
 <div class:list={['bgn', `bgn-${variant}`]}>
@@ -34,7 +36,11 @@ const announced = gamesEnded() && winnersAnnounced();
       : started
         ? 'join the newsletter · the results and winners, by email'
         : 'join the newsletter · one email when the games open'}
-    {' · '}<a href="/thebuildgames/builders">how it works</a>
+    {!onBuilders && (
+      <>
+        {' · '}<a href="/thebuildgames/builders">how it works</a>
+      </>
+    )}
   </p>
 </div>
 

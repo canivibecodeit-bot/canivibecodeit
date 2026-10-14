@@ -674,6 +674,13 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       grid-template-columns: 1fr;
     }
 
+    /* A long heading and its note stack rather than share a row. */
+    .bgr-finalists .bgr-list-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
     .bgr-actions {
       justify-content: flex-start;
       gap: 18px;

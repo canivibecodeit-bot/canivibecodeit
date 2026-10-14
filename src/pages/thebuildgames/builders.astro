@@ -102,7 +102,7 @@ const faq = [
               {f.link && (
                 <>
                   {' '}
-                  <a href={f.link.href}>{f.link.text} →</a>
+                  <a class="bgb-nowrap" href={f.link.href}>{f.link.text} →</a>
                 </>
               )}
             </dd>
@@ -118,7 +118,7 @@ const faq = [
       are the contract · 18+, void where prohibited ·{' '}
       {announced && (
         <>
-          <a href="/thebuildgames/results">the 2026 winners</a> ·{' '}
+          <a class="bgb-nowrap" href="/thebuildgames/results">the 2026 winners</a> ·{' '}
         </>
       )}
       <a href="/thebuildgames">back to the board</a>
@@ -201,6 +201,10 @@ const faq = [
     margin-top: 30px;
     color: var(--muted);
     font-size: 12.5px;
+  }
+
+  .bgb-nowrap {
+    white-space: nowrap;
   }
 
   .bgb-qa dd a,
