@@ -8,6 +8,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, statSy
 import path from 'node:path';
 import { SHOWCASE_MODELS } from '../src/lib/models.js';
 import { STUDIES, paidLabelShort } from '../src/lib/studies.js';
+import { RESULTS, usd as usdCents } from '../src/lib/buildgames-results.js';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const outDir = path.join(root, 'public/og');
@@ -276,6 +277,31 @@ function abcCard() {
   ]);
 }
 
+/* The Build Games results card (og/buildgames-results.png): the three
+   winners by category. Force-added to git like the studies cards. */
+function buildGamesResultsCard() {
+  return page([
+    logoRow,
+    el('div', { display: 'flex', flexDirection: 'column', gap: 22, marginTop: 44 }, [
+      el('div', { ...mono(26, COLORS.muted), letterSpacing: '0.14em' }, `THE BUILD GAMES ${RESULTS.year}`),
+      el('div', {
+        fontFamily: 'Space Grotesk', fontSize: 84, fontWeight: 700,
+        color: COLORS.green, letterSpacing: '-0.02em', lineHeight: 1.05,
+      }, 'the winners'),
+      el('div', { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }, RESULTS.winners.map((w) =>
+        el('div', { display: 'flex', alignItems: 'baseline', gap: 18 }, [
+          el('div', { ...mono(24, COLORS.muted), width: 330 }, w.category),
+          el('div', { fontFamily: 'Space Grotesk', fontSize: 40, fontWeight: 700, color: COLORS.fg, lineHeight: 1.1 }, w.product),
+        ])
+      )),
+    ]),
+    el('div', { display: 'flex', marginTop: 'auto', justifyContent: 'space-between' }, [
+      el('div', mono(22, COLORS.muted), 'canivibecodeit.com/thebuildgames/results'),
+      el('div', mono(22, COLORS.muted), `${RESULTS.winners.length} prizes of ${usdCents(RESULTS.prizeCents)} · 3 judges →`),
+    ]),
+  ]);
+}
+
 async function render(node, file) {
   const svg = await satori(node, { width: 1200, height: 630, fonts });
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -351,6 +377,12 @@ if (range) {
   }
   await renderCached(studiesIndexCard(), 'studies.png', 'studies-index:1', cache);
   await renderCached(abcCard(), 'moats-abc.png', 'moats-abc:1', cache);
+  await renderCached(
+    buildGamesResultsCard(),
+    'buildgames-results.png',
+    `buildgames-results:${RESULTS.year}:${RESULTS.winners.map((w) => `${w.category}=${w.product}`).join(',')}:1`,
+    cache
+  );
   for (const st of STUDIES) {
     await renderCached(studyCard(st), `studies/${st.slug}.png`, `study:${st.slug}:${st.title}:${st.verdict}:2`, cache);
   }

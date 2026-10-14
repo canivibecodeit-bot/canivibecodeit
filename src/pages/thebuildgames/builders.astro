@@ -6,11 +6,13 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { ANNOUNCE_BY, MONEY_SENTENCE, gamesStarted } from '../../lib/buildgames.js';
+import { ANNOUNCE_BY, MONEY_SENTENCE, gamesEnded, gamesStarted } from '../../lib/buildgames.js';
+import { winnersAnnounced } from '../../lib/buildgames-results.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
 const started = gamesStarted();
+const announced = gamesEnded() && winnersAnnounced();
 
 const title = 'The Build Games · for the builders';
 const description = `How The Build Games works if you build: free entry, three categories, three judges. ${MONEY_SENTENCE}`;
@@ -28,7 +30,9 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
-    a: `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
+    a: announced
+      ? 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners. the judges also named runners-up, with no money attached. the 2026 winners are on the results page.'
+      : `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
   },
   {
     q: 'can i use AI to build?',
@@ -101,6 +105,11 @@ const faq = [
     <p class="bgb-fine">
       this is the plain english version · <a href="/thebuildgames/terms">the Build Games terms</a>{' '}
       are the contract · 18+, void where prohibited ·{' '}
+      {announced && (
+        <>
+          <a href="/thebuildgames/results">the 2026 winners</a> ·{' '}
+        </>
+      )}
       <a href="/thebuildgames">back to the board</a>
     </p>
   </main>

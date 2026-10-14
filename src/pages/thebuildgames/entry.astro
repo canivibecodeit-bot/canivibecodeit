@@ -8,6 +8,7 @@ import Base from '../../layouts/Base.astro';
 import { bgEntryByEditToken } from '../../lib/db.js';
 import { buildGamesLive } from '../../lib/flags.js';
 import { BLURB_MAX, HOWTOAI_REC, NAME_MAX, gamesEndAt } from '../../lib/buildgames.js';
+import { winnersAnnounced } from '../../lib/buildgames-results.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -15,6 +16,7 @@ const token = Astro.url.searchParams.get('token') || '';
 const entry = token.length >= 20 && token.length <= 128 ? await bgEntryByEditToken(token) : null;
 const justSubmitted = Astro.url.searchParams.get('submitted') === '1';
 const windowOpen = Date.now() < gamesEndAt();
+const announced = !windowOpen && winnersAnnounced();
 
 let state = 'missing';
 if (entry) state = windowOpen ? 'editable' : 'locked';
@@ -49,9 +51,13 @@ const description = 'Your Build Games entry.';
           <>
             <h1>your entry</h1>
             <p class="bge-sub">
-              {state === 'editable'
-                ? 'Edit anything below. We emailed this link to you · it works until the window closes.'
-                : 'The build window has closed. Entries are locked for judging.'}
+              {state === 'editable' ? (
+                'Edit anything below. We emailed this link to you · it works until the window closes.'
+              ) : announced ? (
+                <>The build window has closed. <a href="/thebuildgames/results">The winners are announced</a>.</>
+              ) : (
+                'The build window has closed. Entries are locked for judging.'
+              )}
             </p>
           </>
         )}

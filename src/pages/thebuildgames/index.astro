@@ -36,6 +36,7 @@ import {
 import { dashboardStats } from '../../lib/analytics.js';
 import { faviconUrl, withUtm } from '../../lib/sponsors.js';
 import { onlineCount } from '../../lib/presence.js';
+import { winnersAnnounced } from '../../lib/buildgames-results.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -86,6 +87,9 @@ const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 // state and carries no countdown at all (lib/buildgames.js, gameClock).
 const clock = gameClock();
 const ended = clock.phase === 'ended';
+// Once the results are in the build every "winners by" line becomes a link
+// to them (lib/buildgames-results.js); ANNOUNCE_BY is only promised before.
+const announced = ended && winnersAnnounced();
 const cdTarget = clock.target ?? 0;
 const cd = countdownParts(cdTarget);
 
@@ -178,6 +182,11 @@ const hostOf = (u) => {
               trust facts. */}
           <p class="bg-theme">{THEME_ONE_LINER}</p>
           <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
+          {announced && (
+            <a class="bg-builders-cta bg-results-cta" href="/thebuildgames/results">
+              the winners are in <span aria-hidden="true">→</span>
+            </a>
+          )}
         </>
       ) : (
         <>
@@ -275,7 +284,13 @@ const hostOf = (u) => {
           <span class="bg-sg-num bg-sg-money" data-pot-amount data-pot-cents={potCents}>{usd(potCents)}</span>
           <span class="bg-sg-sub">funded by sponsor bids</span>
         </div>
-        {ended ? (
+        {announced ? (
+          <div class="bg-sg-cell">
+            <span class="bg-sg-label">the winners</span>
+            <span class="bg-sg-num">announced</span>
+            <a class="bg-sg-sub bg-sg-link" href="/thebuildgames/results">see the results →</a>
+          </div>
+        ) : ended ? (
           <div class="bg-sg-cell">
             <span class="bg-sg-label">the build window</span>
             <span class="bg-sg-num">closed</span>
@@ -386,7 +401,13 @@ const hostOf = (u) => {
             <p class="bg-bid-err" data-entry-err hidden></p>
           </form>
         ) : (
-          <p class="bg-enter-closed">the build window has closed · entries are locked for judging.</p>
+          <p class="bg-enter-closed">
+            {announced ? (
+              <>the build window has closed · <a href="/thebuildgames/results">the winners are announced</a>.</>
+            ) : (
+              'the build window has closed · entries are locked for judging.'
+            )}
+          </p>
         )}
       </section>
 
@@ -464,7 +485,11 @@ const hostOf = (u) => {
           <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
         </ol>
         <p class="bg-rules-fine">
-          winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,
+          {announced ? (
+            <>the winners are announced: <a href="/thebuildgames/results">see the results</a> · judges named runners-up,</>
+          ) : (
+            <>winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,</>
+          )}{' '}
           no money attached · plain-english version for builders:{' '}
           <a href="/thebuildgames/builders">how it works</a>
         </p>
@@ -1969,6 +1994,26 @@ const hostOf = (u) => {
   .bg-sg-sub {
     font: 11px var(--font-mono);
     color: var(--muted);
+  }
+
+  /* the strip's one link: the results, once they are announced */
+  .bg-sg-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  .bg-sg-link:hover {
+    text-decoration: underline;
+  }
+
+  .bg-enter-closed a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bg-enter-closed a:hover {
+    color: var(--primary);
   }
 
   @media (max-width: 720px) {

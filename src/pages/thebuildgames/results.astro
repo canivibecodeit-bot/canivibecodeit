@@ -1,0 +1,591 @@
+---
+/* The Build Games 2026: the results page. Public, indexable, linked from
+   the game page once the results are in the build (lib/buildgames-results.js).
+   Three winner cards in the game page's tile language, the money sentence,
+   how it was judged, every finalist, and the sponsors who funded the prizes
+   (the same board the game page shows, nothing from payment data).
+
+   What never appears here: scores, the judges' notes, repo links. The page
+   404s like the rest of the surface until BUILDGAMES_LIVE is set, and until
+   the shortlist file is in the build. */
+import Base from '../../layouts/Base.astro';
+import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
+import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
+import { buildGamesLive } from '../../lib/flags.js';
+import { bgLeaderboard } from '../../lib/db.js';
+import { CATEGORIES, JUDGES, MONEY_SENTENCE, displayName, rankSponsors } from '../../lib/buildgames.js';
+import { resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
+import { shortlist } from '../../lib/buildgames-shortlist.js';
+import { withUtm } from '../../lib/sponsors.js';
+
+if (!buildGamesLive() || !winnersAnnounced()) return new Response(null, { status: 404 });
+const entries = shortlist();
+if (!entries) return new Response(null, { status: 404 });
+
+const r = resultsView(entries);
+const prize = usd(r.prizeCents);
+const fund = usd(r.fundCents);
+const lineFor = (category) => CATEGORIES.find((c) => c.name === category)?.line ?? '';
+
+// The sponsors, as the game page lists them: the live board, ranked.
+let sponsors = [];
+try {
+  sponsors = rankSponsors(await bgLeaderboard()).filter((s) => s.status === 'active' && s.cleared_total > 0);
+} catch {
+  /* the thanks line renders without names */
+}
+const sponsorName = (s) => s.name ?? displayName(s);
+
+const title = `The Build Games ${r.year}: winners · canivibecodeit`;
+const socialTitle = `The Build Games ${r.year}: winners`;
+const description = `${r.winners.map((w) => `${w.category}: ${w.product}`).join('. ')}. ${r.finalists.length} finalists, three judges, ${fund} in prizes.`;
+
+// Names in a sentence: "a, b and c".
+const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+const judgeNames = joinNames(JUDGES.map((j) => j.name));
+---
+
+<Base {title} {socialTitle} {description} ogImage="/og/buildgames-results.png" hideSponsors={true} hideDigest={true}>
+  <main class="wrap bgr">
+    <header class="bgr-hero">
+      <p class="bgr-eyebrow">canivibecodeit presents</p>
+      <BuildGamesLogo class="bgr-logo" />
+      <h1 class="bgr-title">the winners</h1>
+      <p class="bgr-sub">
+        The first Build Games ran through September {r.year}. {r.entryCount} people entered, {r.finalists.length} made the
+        judges' shortlist, and three of them won {prize} each.
+      </p>
+    </header>
+
+    {/* The headline strip, in the game page's stat-strip voice. */}
+    <section class="bgr-strip" aria-label="Prize fund, finalists and judges">
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">prize fund</span>
+        <span class="bgr-sg-num bgr-sg-money">{fund}</span>
+        <span class="bgr-sg-sub">{prize} per category</span>
+      </div>
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">finalists</span>
+        <span class="bgr-sg-num">{r.finalists.length}</span>
+        <span class="bgr-sg-sub">from {r.entryCount} entries</span>
+      </div>
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">judges</span>
+        <span class="bgr-sg-num">{JUDGES.length}</span>
+        <span class="bgr-sg-sub">scored 0 to 10 per category</span>
+      </div>
+    </section>
+
+    {/* The three winners: the game page's category tiles, each holding its
+        winner. An ol because the categories are numbered on the game page. */}
+    <section class="bgr-winners" aria-labelledby="bgr-winners-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-winners-h">who won</h2>
+        <span class="note">one winner per category · {prize} each</span>
+      </div>
+      <ol class="bgr-cards" role="list">
+        {r.winners.map((w, i) => (
+          <li class:list={['bgr-card', `bgr-cat-${w.key}`]}>
+            <div class="bgr-cat-head">
+              <span class="bgr-cat-n">{i + 1}</span>
+              <span class="bgr-cat-name">{w.category}</span>
+            </div>
+            <p class="bgr-cat-line">{lineFor(w.category)}</p>
+            <h3 class="bgr-product">
+              <a href={w.entry.demoUrl} target="_blank" rel="noopener">{w.entry.product}</a>
+            </h3>
+            <p class="bgr-by">
+              {w.entry.name}{w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
+            </p>
+            {w.entry.oneLine && <p class="bgr-one">{w.entry.oneLine}</p>}
+            <div class="bgr-actions">
+              <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the ${w.entry.product} demo`}>
+                open the demo <span aria-hidden="true">→</span>
+              </a>
+              <span class="bgr-prize">{prize} prize</span>
+            </div>
+            <dl class="bgr-mentions">
+              <dt>honourable mentions</dt>
+              <dd>{joinNames(w.mentions.map((m) => m.product))}</dd>
+            </dl>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    {/* The money, plainly: the canonical sentence, then this year's figure. */}
+    <section class="bgr-money" aria-label="How the money works">
+      <p class="bgr-money-line">{MONEY_SENTENCE}</p>
+      <p class="bgr-money-line">This year that came to {fund}: three prizes of {prize}, one per category.</p>
+    </section>
+
+    <section class="bgr-how" aria-labelledby="bgr-how-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-how-h">how it was judged</h2>
+      </div>
+      <p class="bgr-prose">
+        {JUDGES.map((j, i) => (
+          <>
+            <a href={j.url} target="_blank" rel="noopener">{j.name}</a>
+            {i < JUDGES.length - 2 ? ', ' : i === JUDGES.length - 2 ? ' and ' : ''}
+          </>
+        ))}{' '}
+        scored every finalist from 0 to 10 in each category, independently, against the criteria published before the games
+        began. One prize per builder: where one entry led two categories it took the one it led by most, and the next entry
+        took the other. Runners-up are named with no money attached. The judges' decision is final.
+      </p>
+    </section>
+
+    {/* Every finalist, quietly: hairlines, not cards. Alphabetical so the
+        order says nothing about scores. */}
+    <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-finalists-h">all {r.finalists.length} finalists</h2>
+        <span class="note">alphabetical · every demo is public</span>
+      </div>
+      <ul class="bgr-rows" role="list">
+        {r.finalists.map((f) => (
+          <li class="bgr-row">
+            <div class="bgr-row-main">
+              <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
+              {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
+            </div>
+            <p class="bgr-row-by">
+              {f.name}{f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
+            </p>
+            {f.oneLine && <p class="bgr-row-line">{f.oneLine}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="bgr-thanks" aria-labelledby="bgr-thanks-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-thanks-h">thank you</h2>
+      </div>
+      <p class="bgr-prose">
+        The prize money came from the sponsors on the board
+        {sponsors.length > 0 ? (
+          <>
+            :{' '}
+            {sponsors.map((s, i) => (
+              <>
+                <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">{sponsorName(s)}</a>
+                {i < sponsors.length - 2 ? ', ' : i === sponsors.length - 2 ? ' and ' : ''}
+              </>
+            ))}
+            .
+          </>
+        ) : (
+          '.'
+        )}{' '}
+        None of it went to us. And to the {r.entryCount} people who built something in September: thank you for entering.
+      </p>
+    </section>
+
+    <BuildGamesNewsletter variant="section" />
+
+    <p class="bgr-foot">
+      <a href="/thebuildgames">back to the games</a> · <a href="/thebuildgames/builders">how it worked</a> ·{' '}
+      <a href="/thebuildgames/terms">the Build Games terms</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .bgr {
+    padding-top: 30px;
+    padding-bottom: 120px;
+  }
+
+  /* ---------- hero: the game page's lockup, then the title ---------- */
+  .bgr-hero {
+    text-align: center;
+  }
+
+  .bgr-eyebrow {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding-bottom: 10px;
+  }
+
+  .bgr-title {
+    margin-top: 22px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    text-wrap: balance;
+  }
+
+  .bgr-sub {
+    margin: 14px auto 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* ---------- headline strip (the game page's stat strip) ---------- */
+  .bgr-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 900px;
+    margin-inline: auto;
+    padding-top: 36px;
+    text-align: center;
+  }
+
+  .bgr-sg-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 18px;
+  }
+
+  .bgr-sg-cell + .bgr-sg-cell {
+    border-left: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bgr-sg-label {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bgr-sg-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  .bgr-sg-money {
+    color: var(--primary);
+  }
+
+  .bgr-sg-sub {
+    font: 11px var(--font-mono);
+    color: var(--muted);
+  }
+
+  /* ---------- section heads: the game page's list-head ---------- */
+  .bgr-list-head {
+    padding-top: 52px;
+  }
+
+  .bgr-list-head h2 {
+    font-size: 28px;
+  }
+
+  /* ---------- the three winner cards ---------- */
+  .bgr-cards {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 14px;
+    margin: 0;
+  }
+
+  .bgr-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px 18px 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    min-width: 0;
+  }
+
+  .bgr-cat-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .bgr-cat-n {
+    font: 800 13px var(--font-mono);
+    color: var(--primary);
+  }
+
+  .bgr-cat-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .bgr-cat-line {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* The winner: the biggest thing in the card. */
+  .bgr-product {
+    margin-top: 16px;
+    font-family: var(--font-display);
+    font-size: clamp(26px, 2.6vw, 32px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .bgr-product a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .bgr-product a:hover {
+    color: var(--primary);
+  }
+
+  .bgr-by {
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  .bgr-handle {
+    font: 12.5px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgr-one {
+    padding-top: 4px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .bgr-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 14px;
+    margin-top: auto;
+  }
+
+  .bgr-open {
+    padding: 11px 18px;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .bgr-prize {
+    font: 12px var(--font-mono);
+    color: var(--primary);
+    white-space: nowrap;
+  }
+
+  .bgr-mentions {
+    margin: 14px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bgr-mentions dt {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+
+  .bgr-mentions dd {
+    margin: 4px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* ---------- the money, plainly: the game page's quiet card ---------- */
+  .bgr-money {
+    max-width: 640px;
+    margin: 44px auto 0;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .bgr-money-line {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  /* ---------- prose sections ---------- */
+  .bgr-prose {
+    padding-top: 12px;
+    max-width: 66ch;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  .bgr-prose a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgr-prose a:hover {
+    color: var(--primary);
+  }
+
+  /* ---------- the finalists: rows on hairlines ---------- */
+  .bgr-rows {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0 0;
+  }
+
+  .bgr-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 0;
+    border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bgr-row:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bgr-row-main {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .bgr-row-product {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .bgr-row-product:hover {
+    color: var(--primary);
+  }
+
+  .bgr-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--primary) 50%, var(--border));
+    font: 11px var(--font-mono);
+    color: var(--primary);
+    white-space: nowrap;
+  }
+
+  .bgr-row-by {
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  .bgr-row-line {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 72ch;
+    text-wrap: pretty;
+  }
+
+  /* ---------- footer line: the game page's ---------- */
+  .bgr-foot {
+    padding-top: 40px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgr-foot a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bgr-foot a:hover {
+    color: var(--fg);
+  }
+
+  /* ---------- focus ---------- */
+  .bgr a:focus-visible,
+  .bgr :global(.btn:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .bgr-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bgr-strip {
+      grid-template-columns: 1fr;
+    }
+
+    .bgr-sg-cell {
+      padding: 14px 0;
+    }
+
+    .bgr-sg-cell + .bgr-sg-cell {
+      border-left: 0;
+      border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bgr {
+      padding-top: 24px;
+      padding-bottom: 80px;
+    }
+
+    .bgr-list-head {
+      padding-top: 40px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .bgr-list-head h2 {
+      font-size: 24px;
+    }
+
+    .bgr-open {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .bgr-prize {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
