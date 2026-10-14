@@ -34,7 +34,15 @@ try {
 } catch {
   /* the thanks line renders without names */
 }
-const sponsorName = (s) => s.name ?? displayName(s);
+// The same name the board prints: the sponsor's name, else the host, else the fallback.
+const hostOf = (u) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+};
+const sponsorName = (s) => s.name ?? hostOf(s.link) ?? displayName(s);
 
 const title = `The Build Games ${r.year}: winners · canivibecodeit`;
 const socialTitle = `The Build Games ${r.year}: winners`;
@@ -52,7 +60,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       <BuildGamesLogo class="bgr-logo" />
       <h1 class="bgr-title">the winners</h1>
       <p class="bgr-sub">
-        The first Build Games ran through September {r.year}. {r.entryCount} people entered, {r.finalists.length} made the
+        The first Build Games ran through September {r.year}. {r.entryCount} entries came in, {r.finalists.length} made the
         judges' shortlist, and three of them won {prize} each.
       </p>
     </header>
@@ -81,7 +89,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     <section class="bgr-winners" aria-labelledby="bgr-winners-h">
       <div class="list-head bgr-list-head">
         <h2 id="bgr-winners-h">who won</h2>
-        <span class="note">one winner per category · {prize} each</span>
+        <span class="note">one winner per category</span>
       </div>
       <ol class="bgr-cards" role="list">
         {r.winners.map((w, i) => (
@@ -99,7 +107,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
             </p>
             {w.entry.oneLine && <p class="bgr-one">{w.entry.oneLine}</p>}
             <div class="bgr-actions">
-              <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the ${w.entry.product} demo`}>
+              <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the demo: ${w.entry.product}`}>
                 open the demo <span aria-hidden="true">→</span>
               </a>
               <span class="bgr-prize">{prize} prize</span>
@@ -179,7 +187,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
         ) : (
           '.'
         )}{' '}
-        None of it went to us. And to the {r.entryCount} people who built something in September: thank you for entering.
+        None of it went to us. And to everyone who built something in September: thank you for entering.
       </p>
     </section>
 
