@@ -335,7 +335,7 @@ const hostOf = (u) => {
       <section class="bg-enter" id="enter" aria-label="Enter the games">
         {/* The entry count lives in the stat strip above — one number, one place. */}
         <div class="list-head bg-list-head">
-          <h2>enter the games</h2>
+          <h2>{announced ? 'the entries' : 'enter the games'}</h2>
         </div>
         {canEnter ? (
           <form class="bg-enter-form" method="post" action="/api/thebuildgames/enter" data-entry-form>
@@ -2000,6 +2000,11 @@ const hostOf = (u) => {
   .bg-sg-link {
     color: var(--primary);
     text-decoration: none;
+  }
+
+  /* the results button sits beside the idea pill: breathing room between them */
+  .bg-results-cta {
+    margin-left: 10px;
   }
 
   .bg-sg-link:hover {

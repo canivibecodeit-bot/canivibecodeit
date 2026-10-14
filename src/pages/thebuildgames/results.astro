@@ -58,7 +58,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     <header class="bgr-hero">
       <p class="bgr-eyebrow">canivibecodeit presents</p>
       <BuildGamesLogo class="bgr-logo" />
-      <h1 class="bgr-title">the winners</h1>
+      <h1 class="bgr-title"><span class="bgr-vh">The Build Games {r.year}: </span>the winners</h1>
       <p class="bgr-sub">
         The first Build Games ran through September {r.year}. {r.entryCount} entries came in, {r.finalists.length} made the
         judges' shortlist, and three of them won {prize} each.
@@ -105,7 +105,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
             <p class="bgr-by">
               {w.entry.name}{w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
             </p>
-            {w.entry.oneLine && <p class="bgr-one">{w.entry.oneLine}</p>}
+            <p class="bgr-one">{w.entry.oneLine}</p>
             <div class="bgr-actions">
               <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the demo: ${w.entry.product}`}>
                 open the demo <span aria-hidden="true">→</span>
@@ -113,7 +113,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
               <span class="bgr-prize">{prize} prize</span>
             </div>
             <dl class="bgr-mentions">
-              <dt>honourable mentions</dt>
+              <dt>runners-up</dt>
               <dd>
                 {w.mentions.map((m, j) => (
                   <>
@@ -182,30 +182,24 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
         <h2 id="bgr-thanks-h">thank you</h2>
       </div>
       <p class="bgr-prose">
-        The prize money came from the sponsors on the board
-        {sponsors.length > 0 ? (
-          <>
-            :{' '}
-            {sponsors.map((s, i) => (
-              <>
-                <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">{sponsorName(s)}</a>
-                {i < sponsors.length - 2 ? ', ' : i === sponsors.length - 2 ? ' and ' : ''}
-              </>
-            ))}
-            .
-          </>
-        ) : (
-          '.'
-        )}{' '}
-        None of it went to us. And to everyone who built something in September: thank you for entering.
+        The prize money came from the sponsors on the board. To them, and to everyone who built something in September:
+        thank you.
       </p>
+      {sponsors.length > 0 && (
+        <ul class="bgr-sponsors" role="list" aria-label="The sponsors">
+          {sponsors.map((s) => (
+            <li>
+              <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">{sponsorName(s)}</a>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
 
     <BuildGamesNewsletter variant="section" />
 
     <p class="bgr-foot">
-      <a href="/thebuildgames">back to the games</a> · <a href="/thebuildgames/builders">how it worked</a> ·{' '}
-      <a href="/thebuildgames/terms">the Build Games terms</a>
+      <a href="/thebuildgames">back to the games</a> · <a href="/thebuildgames/terms">the Build Games terms</a>
     </p>
   </main>
 </Base>
@@ -227,6 +221,16 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     letter-spacing: 0.18em;
     color: var(--muted);
     padding-bottom: 10px;
+  }
+
+  /* Visually hidden: the h1 announces the games and the year, the lockup above is decoration. */
+  .bgr-vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .bgr-title {
@@ -321,6 +325,23 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     flex-direction: column;
     gap: 6px;
     padding: 20px 18px 18px;
+    /* Three cards in a row share one set of rows, so names, buttons and
+       runners-up line up whatever the category line wraps to. */
+    grid-row: span 7;
+  }
+
+  @supports (grid-template-rows: subgrid) {
+    @media (min-width: 901px) {
+      .bgr-card {
+        display: grid;
+        grid-template-rows: subgrid;
+        row-gap: 6px;
+        align-content: start;
+      }
+    }
+  }
+
+  .bgr-card {
     border: 1px solid var(--border);
     border-radius: 12px;
     background: var(--surface);
@@ -345,7 +366,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   .bgr-cat-line {
-    font-size: 13.5px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--muted);
     text-wrap: pretty;
@@ -364,15 +385,19 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
   .bgr-product a {
     color: var(--fg);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
   }
 
   .bgr-product a:hover {
     color: var(--primary);
+    text-decoration-color: currentColor;
   }
 
   .bgr-by {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--fg);
   }
 
@@ -383,7 +408,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
   .bgr-one {
     padding-top: 4px;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.55;
     color: var(--muted);
     text-wrap: pretty;
@@ -426,7 +451,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
   .bgr-mentions dd {
     margin: 4px 0 0;
-    font-size: 13.5px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--muted);
   }
@@ -435,6 +460,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     color: var(--fg);
     text-decoration: underline;
     text-underline-offset: 3px;
+    white-space: nowrap;
   }
 
   .bgr-mentions a:hover {
@@ -455,7 +481,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   .bgr-money-line {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.65;
     color: var(--fg);
     text-wrap: pretty;
@@ -512,11 +538,15 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     font-size: 18px;
     font-weight: 700;
     color: var(--fg);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-underline-offset: 4px;
+    white-space: nowrap;
   }
 
   .bgr-row-product:hover {
     color: var(--primary);
+    text-decoration-color: currentColor;
   }
 
   /* The total: tabular figures, pushed to the row's right edge. */
@@ -546,16 +576,41 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   .bgr-row-by {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--fg);
   }
 
   .bgr-row-line {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.55;
     color: var(--muted);
     max-width: 72ch;
     text-wrap: pretty;
+  }
+
+  /* ---------- the sponsors, as the board names them ---------- */
+  .bgr-sponsors {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  .bgr-sponsors a {
+    display: inline-block;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font: 13px var(--font-mono);
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .bgr-sponsors a:hover {
+    border-color: var(--muted);
+    color: var(--primary);
   }
 
   /* ---------- footer line: the game page's ---------- */
@@ -584,24 +639,59 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   /* ---------- responsive ---------- */
+  /* Desktop sizes for body copy: the phone gets the larger default. */
+  @media (min-width: 640px) {
+    .bgr-cat-line,
+    .bgr-mentions dd {
+      font-size: 13.5px;
+    }
+
+    .bgr-by,
+    .bgr-one,
+    .bgr-row-by,
+    .bgr-row-line {
+      font-size: 14px;
+    }
+
+    .bgr-money-line {
+      font-size: 15px;
+    }
+  }
+
   @media (max-width: 900px) {
     .bgr-cards {
       grid-template-columns: 1fr;
     }
+
+    .bgr-actions {
+      justify-content: flex-start;
+      gap: 18px;
+    }
   }
 
+  /* The strip stays one row of three on phones, smaller, so the first
+     winner is on the first screen. */
   @media (max-width: 720px) {
     .bgr-strip {
-      grid-template-columns: 1fr;
+      padding-top: 26px;
     }
 
     .bgr-sg-cell {
-      padding: 14px 0;
+      gap: 5px;
+      padding: 2px 8px;
     }
 
-    .bgr-sg-cell + .bgr-sg-cell {
-      border-left: 0;
-      border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    .bgr-sg-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+    }
+
+    .bgr-sg-num {
+      font-size: 24px;
+    }
+
+    .bgr-sg-sub {
+      font-size: 10px;
     }
   }
 
@@ -620,6 +710,14 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
     .bgr-list-head h2 {
       font-size: 24px;
+    }
+
+    .bgr-title {
+      margin-top: 16px;
+    }
+
+    .bgr-sub {
+      margin-top: 10px;
     }
 
     .bgr-open {

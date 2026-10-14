@@ -30,8 +30,9 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
+    link: announced ? { href: '/thebuildgames/results', text: 'the 2026 winners' } : null,
     a: announced
-      ? 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners. the judges also named runners-up, with no money attached. the 2026 winners are on the results page.'
+      ? 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners. the judges also named runners-up, with no money attached.'
       : `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
   },
   {
@@ -64,12 +65,12 @@ const faq = [
 
     <div class="bgb-steps">
       <div class="bgb-step">
-        <span class="bgb-when">1 · now</span>
+        <span class="bgb-when">{announced ? '1 · before the games' : '1 · now'}</span>
         <b>sponsors fill the pool</b>
         <p>every spot on the board is a sponsor's bid. that's the sponsorship pool. the prize fund comes out of it.</p>
       </div>
       <div class="bgb-step">
-        <span class="bgb-when">2 · september 1</span>
+        <span class="bgb-when">{announced ? '2 · the games open' : '2 · september 1'}</span>
         <b>the brief drops</b>
         <p>
           what to build, the deadline, the judges and the prize split, all published before
@@ -94,7 +95,15 @@ const faq = [
         faq.map((f) => (
           <div class="bgb-qa">
             <dt>{f.q}</dt>
-            <dd>{f.a}</dd>
+            <dd>
+              {f.a}
+              {f.link && (
+                <>
+                  {' '}
+                  <a href={f.link.href}>{f.link.text} →</a>
+                </>
+              )}
+            </dd>
           </div>
         ))
       }
