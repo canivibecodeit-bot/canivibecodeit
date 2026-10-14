@@ -57,11 +57,16 @@ test('the fund is three prizes', () => {
   assert.equal(usd(RESULTS.fundCents), '$2,400');
 });
 
-test('the finalists list is alphabetical by product and flags the winners', () => {
+test('every finalist has a whole-number total out of 90, listed highest first, and the winners are flagged', () => {
   const view = resultsView(shortlist);
-  const products = view.finalists.map((f) => f.product);
-  const sorted = [...products].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
-  assert.deepEqual(products, sorted);
+  assert.equal(RESULTS.totals.length, shortlist.length, 'one total per finalist');
+  assert.equal(new Set(RESULTS.totals.map(([k]) => k)).size, shortlist.length, 'no key twice');
+  for (const f of view.finalists) {
+    assert.ok(Number.isInteger(f.total) && f.total >= 0 && f.total <= RESULTS.totalMax, `${f.product}: ${f.total}`);
+  }
+  const totals = view.finalists.map((f) => f.total);
+  assert.deepEqual(totals, [...totals].sort((a, b) => b - a), 'highest first');
+  assert.deepEqual(view.finalists.slice(0, 3).map((f) => f.product), ['InMotion', 'openheard', 'Excerpt'], 'ties keep the published order');
   const flagged = view.finalists.filter((f) => f.won).map((f) => f.won.category).sort();
   assert.deepEqual(flagged, [...CATEGORIES.map((c) => c.name)].sort());
 });

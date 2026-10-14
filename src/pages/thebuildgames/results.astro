@@ -114,7 +114,14 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
             </div>
             <dl class="bgr-mentions">
               <dt>honourable mentions</dt>
-              <dd>{joinNames(w.mentions.map((m) => m.product))}</dd>
+              <dd>
+                {w.mentions.map((m, j) => (
+                  <>
+                    <a href={m.demoUrl} target="_blank" rel="noopener">{m.product}</a>
+                    {j < w.mentions.length - 2 ? ', ' : j === w.mentions.length - 2 ? ' and ' : ''}
+                  </>
+                ))}
+              </dd>
             </dl>
           </li>
         ))}
@@ -139,8 +146,8 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
           </>
         ))}{' '}
         scored every finalist from 0 to 10 in each category, independently, against the criteria published before the games
-        began. One prize per builder: where one entry led two categories it took the one it led by most, and the next entry
-        took the other. Runners-up are named with no money attached. The judges' decision is final.
+        began. Totals are shown below. One prize per builder. Runners-up are named with no money attached. The judges'
+        decision is final.
       </p>
     </section>
 
@@ -148,8 +155,8 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
         order says nothing about scores. */}
     <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
       <div class="list-head bgr-list-head">
-        <h2 id="bgr-finalists-h">all {r.finalists.length} finalists</h2>
-        <span class="note">alphabetical · every demo is public</span>
+        <h2 id="bgr-finalists-h">all {r.finalists.length} finalists, by total</h2>
+        <span class="note">out of {r.totalMax} · highest first · every demo is public</span>
       </div>
       <ul class="bgr-rows" role="list">
         {r.finalists.map((f) => (
@@ -157,6 +164,9 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
             <div class="bgr-row-main">
               <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
               {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
+              <span class="bgr-row-total" aria-label={`total ${f.total} out of ${r.totalMax}`}>
+                <b>{f.total}</b><span class="bgr-row-max"> / {r.totalMax}</span>
+              </span>
             </div>
             <p class="bgr-row-by">
               {f.name}{f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
@@ -421,6 +431,16 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     color: var(--muted);
   }
 
+  .bgr-mentions a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgr-mentions a:hover {
+    color: var(--primary);
+  }
+
   /* ---------- the money, plainly: the game page's quiet card ---------- */
   .bgr-money {
     max-width: 640px;
@@ -497,6 +517,22 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
   .bgr-row-product:hover {
     color: var(--primary);
+  }
+
+  /* The total: tabular figures, pushed to the row's right edge. */
+  .bgr-row-total {
+    margin-left: auto;
+    font: 14px var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bgr-row-total b {
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--fg);
   }
 
   .bgr-badge {

@@ -47,6 +47,25 @@ export const RESULTS = {
       mentions: ['bge_zf7fq8w748', 'bge_fhmz8pxay2', 'bge_bewg2w6jrt'],
     },
   ],
+  // Each finalist's overall total across the three categories, as a whole
+  // number out of `totalMax`, highest first (the operator's published list).
+  // Totals only: per-category scores are never published.
+  totalMax: 90,
+  totals: [
+    ['bge_4jef5232vz', 62], // InMotion
+    ['bge_b9ysh6kzac', 55], // openheard
+    ['bge_969k3fecfz', 55], // Excerpt
+    ['bge_zf7fq8w748', 52], // Bloombroke
+    ['bge_hkqccvybpb', 50], // Framesmith
+    ['bge_fhmz8pxay2', 49], // Nodoku
+    ['bge_287wrcy2t8', 47], // Footnote
+    ['bge_s87jeazb67', 46], // CaptionLab
+    ['bge_bewg2w6jrt', 45], // Airmail (Paper Planes)
+    ['bge_45vnk923sg', 42], // Tasu
+    ['bge_k8535tznqt', 40], // OK RICH
+    ['bge_mpewgdyjcg', 39], // UserTrack
+    ['bge_4m9jcvknkv', 31], // Plinth
+  ],
   // Builder names as they are printed on the results page. The entry form
   // kept whatever was typed (one in capitals, one in lower case); the
   // shortlist file stays as submitted, these override the display only.
@@ -64,8 +83,9 @@ export const winnersAnnounced = () => RESULTS.winners.length > 0;
 export const usd = (cents) => '$' + Math.round(cents / 100).toLocaleString('en-US');
 
 /* The page's view of the results: every key resolved to its shortlist
-   entry (lib/buildgames-shortlist.js), the finalists in alphabetical order
-   with the category each one won, if any. */
+   entry (lib/buildgames-shortlist.js), the finalists by total, highest
+   first (ties keep the published order), each with its total and the
+   category it won, if any. */
 export function resultsView(entries) {
   if (!Array.isArray(entries) || entries.length === 0) throw new Error('results: no shortlist');
   const byKey = new Map(entries.map((e) => [e.key, e]));
@@ -82,14 +102,21 @@ export function resultsView(entries) {
     mentions: w.mentions.map(pick),
   }));
   const wonBy = new Map(winners.map((w) => [w.entry.key, w]));
+  const order = new Map(RESULTS.totals.map(([key], i) => [key, i]));
+  const totalOf = (key) => {
+    const row = RESULTS.totals.find(([k]) => k === key);
+    if (!row) throw new Error(`results: no total for ${key}`);
+    return row[1];
+  };
   const finalists = entries
-    .map((e) => ({ ...pick(e.key), won: wonBy.get(e.key) ?? null }))
-    .sort((a, b) => a.product.localeCompare(b.product, 'en', { sensitivity: 'base' }));
+    .map((e) => ({ ...pick(e.key), total: totalOf(e.key), won: wonBy.get(e.key) ?? null }))
+    .sort((a, b) => b.total - a.total || order.get(a.key) - order.get(b.key));
   return {
     year: RESULTS.year,
     prizeCents: RESULTS.prizeCents,
     fundCents: RESULTS.fundCents,
     entryCount: RESULTS.entryCount,
+    totalMax: RESULTS.totalMax,
     winners,
     finalists,
   };
