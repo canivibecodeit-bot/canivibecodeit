@@ -20,8 +20,10 @@ const description = `How The Build Games works if you build: free entry, three c
 const faq = [
   {
     q: 'how do i register?',
-    a: started
-      ? 'the entry form is on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
+    a: announced
+      ? 'entries for the 2026 games are closed. when the next games open the entry form will be on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
+      : started
+        ? 'the entry form is on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
       : "you don't, yet. join the newsletter and you'll get one email when entries open with the first game on september 1. the entry form will be on the main page.",
   },
   {
@@ -199,6 +201,18 @@ const faq = [
     margin-top: 30px;
     color: var(--muted);
     font-size: 12.5px;
+  }
+
+  .bgb-qa dd a,
+  .bgb-fine a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgb-qa dd a:hover,
+  .bgb-fine a:hover {
+    color: var(--primary);
   }
   @media (max-width: 760px) {
     .bgb-steps {

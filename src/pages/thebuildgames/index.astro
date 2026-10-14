@@ -181,11 +181,12 @@ const hostOf = (u) => {
               entry form; the caption under the stat strip carries the three
               trust facts. */}
           <p class="bg-theme">{THEME_ONE_LINER}</p>
-          <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
-          {announced && (
+          {announced ? (
             <a class="bg-builders-cta bg-results-cta" href="/thebuildgames/results">
               the winners are in <span aria-hidden="true">→</span>
             </a>
+          ) : (
+            <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
           )}
         </>
       ) : (
@@ -335,7 +336,7 @@ const hostOf = (u) => {
       <section class="bg-enter" id="enter" aria-label="Enter the games">
         {/* The entry count lives in the stat strip above — one number, one place. */}
         <div class="list-head bg-list-head">
-          <h2>{announced ? 'the entries' : 'enter the games'}</h2>
+          <h2>{announced ? 'the results' : 'enter the games'}</h2>
         </div>
         {canEnter ? (
           <form class="bg-enter-form" method="post" action="/api/thebuildgames/enter" data-entry-form>
@@ -2004,7 +2005,7 @@ const hostOf = (u) => {
 
   /* the results button sits beside the idea pill: breathing room between them */
   .bg-results-cta {
-    margin-left: 10px;
+    margin-top: 12px;
   }
 
   .bg-sg-link:hover {

@@ -70,7 +70,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">prize fund</span>
         <span class="bgr-sg-num bgr-sg-money">{fund}</span>
-        <span class="bgr-sg-sub">{prize} per category</span>
+        <span class="bgr-sg-sub">{prize} each</span>
       </div>
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">finalists</span>
@@ -80,7 +80,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">judges</span>
         <span class="bgr-sg-num">{JUDGES.length}</span>
-        <span class="bgr-sg-sub">scored 0 to 10 per category</span>
+        <span class="bgr-sg-sub">0 to 10 each</span>
       </div>
     </section>
 
@@ -100,7 +100,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
             </div>
             <p class="bgr-cat-line">{lineFor(w.category)}</p>
             <h3 class="bgr-product">
-              <a href={w.entry.demoUrl} target="_blank" rel="noopener">{w.entry.product}</a>
+              <a href={w.entry.demoUrl} target="_blank" rel="noopener" tabindex="-1">{w.entry.product}</a>
             </h3>
             <p class="bgr-by">
               {w.entry.name}{w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
@@ -157,14 +157,16 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
       <div class="list-head bgr-list-head">
         <h2 id="bgr-finalists-h">all {r.finalists.length} finalists, by total</h2>
-        <span class="note">out of {r.totalMax} · highest first · every demo is public</span>
+        <span class="note">out of {r.totalMax} · highest first, ties in category order · every demo is public</span>
       </div>
       <ul class="bgr-rows" role="list">
         {r.finalists.map((f) => (
           <li class="bgr-row">
             <div class="bgr-row-main">
-              <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
-              {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
+              <span class="bgr-row-head">
+                <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
+                {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
+              </span>
               <span class="bgr-row-total" aria-label={`total ${f.total} out of ${r.totalMax}`}>
                 <b>{f.total}</b><span class="bgr-row-max"> / {r.totalMax}</span>
               </span>
@@ -307,9 +309,6 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     padding-top: 52px;
   }
 
-  .bgr-list-head h2 {
-    font-size: 28px;
-  }
 
   /* ---------- the three winner cards ---------- */
   .bgr-cards {
@@ -528,10 +527,18 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   .bgr-row-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .bgr-row-head {
     display: flex;
     align-items: baseline;
     gap: 10px;
     flex-wrap: wrap;
+    min-width: 0;
   }
 
   .bgr-row-product {
@@ -552,7 +559,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
 
   /* The total: tabular figures, pushed to the row's right edge. */
   .bgr-row-total {
-    margin-left: auto;
+    justify-self: end;
     font: 14px var(--font-mono);
     color: var(--muted);
     font-variant-numeric: tabular-nums;
@@ -682,17 +689,8 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       padding: 2px 8px;
     }
 
-    .bgr-sg-label {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-    }
-
     .bgr-sg-num {
-      font-size: 24px;
-    }
-
-    .bgr-sg-sub {
-      font-size: 10px;
+      font-size: 28px;
     }
   }
 
@@ -709,9 +707,6 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       gap: 4px;
     }
 
-    .bgr-list-head h2 {
-      font-size: 24px;
-    }
 
     .bgr-title {
       margin-top: 16px;
