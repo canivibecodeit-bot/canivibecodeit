@@ -491,8 +491,8 @@ const hostOf = (u) => {
           ) : (
             <>winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,</>
           )}{' '}
-          no money attached · plain-english version for builders:{' '}
-          <a href="/thebuildgames/builders">how it works</a>
+          no money attached · the plain English version for builders:{' '}
+          <a class="bg-nowrap" href="/thebuildgames/builders">how it works</a>
         </p>
       </section>
 
@@ -695,7 +695,9 @@ const hostOf = (u) => {
             <span class="bg-cta-note">or <a href="#" data-bid-open>add a tagline, icon or email</a> · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
-          <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
+          <span class="bg-cta-note bg-soon">
+            {announced ? 'the board is closed · sponsor bidding reopens with the next games' : 'bidding opens with the games · get notified below'}
+          </span>
         )}
       </div>
 
@@ -2006,6 +2008,10 @@ const hostOf = (u) => {
   /* the results button sits beside the idea pill: breathing room between them */
   .bg-results-cta {
     margin-top: 12px;
+  }
+
+  .bg-nowrap {
+    white-space: nowrap;
   }
 
   .bg-sg-link:hover {

@@ -57,11 +57,13 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   <main class="wrap bgr">
     <header class="bgr-hero">
       <p class="bgr-eyebrow">canivibecodeit presents</p>
-      <BuildGamesLogo class="bgr-logo" />
+      <div aria-hidden="true">
+        <BuildGamesLogo class="bgr-logo" />
+      </div>
       <h1 class="bgr-title"><span class="bgr-vh">The Build Games {r.year}: </span>the winners</h1>
       <p class="bgr-sub">
         The first Build Games ran through September {r.year}. {r.entryCount} entries came in, {r.finalists.length} made the
-        judges' shortlist, and three of them won {prize} each.
+        judges' shortlist, and {joinNames(r.winners.map((w) => w.product))} won {prize} each.
       </p>
     </header>
 
@@ -70,7 +72,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">prize fund</span>
         <span class="bgr-sg-num bgr-sg-money">{fund}</span>
-        <span class="bgr-sg-sub">{prize} each</span>
+        <span class="bgr-sg-sub">three prizes</span>
       </div>
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">finalists</span>
@@ -80,7 +82,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       <div class="bgr-sg-cell">
         <span class="bgr-sg-label">judges</span>
         <span class="bgr-sg-num">{JUDGES.length}</span>
-        <span class="bgr-sg-sub">0 to 10 each</span>
+        <span class="bgr-sg-sub">0 to 10 per category</span>
       </div>
     </section>
 
@@ -157,7 +159,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
       <div class="list-head bgr-list-head">
         <h2 id="bgr-finalists-h">all {r.finalists.length} finalists, by total</h2>
-        <span class="note">out of {r.totalMax} · highest first, ties in category order · every demo is public</span>
+        <span class="note">out of {r.totalMax} · highest first, ties listed in category order · every demo is public</span>
       </div>
       <ul class="bgr-rows" role="list">
         {r.finalists.map((f) => (
@@ -167,8 +169,8 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
                 <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
                 {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
               </span>
-              <span class="bgr-row-total" aria-label={`total ${f.total} out of ${r.totalMax}`}>
-                <b>{f.total}</b><span class="bgr-row-max"> / {r.totalMax}</span>
+              <span class="bgr-row-total">
+                <b>{f.total}</b><span class="bgr-vh"> out of {r.totalMax}</span><span class="bgr-row-max" aria-hidden="true"> / {r.totalMax}</span>
               </span>
             </div>
             <p class="bgr-row-by">
@@ -302,6 +304,7 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   .bgr-sg-sub {
     font: 11px var(--font-mono);
     color: var(--muted);
+    text-wrap: balance;
   }
 
   /* ---------- section heads: the game page's list-head ---------- */
