@@ -36,7 +36,8 @@ import {
 import { dashboardStats } from '../../lib/analytics.js';
 import { faviconUrl, withUtm } from '../../lib/sponsors.js';
 import { onlineCount } from '../../lib/presence.js';
-import { winnersAnnounced } from '../../lib/buildgames-results.js';
+import { resultsView, usd as usdCents, winnersAnnounced } from '../../lib/buildgames-results.js';
+import { shortlist } from '../../lib/buildgames-shortlist.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -90,6 +91,16 @@ const ended = clock.phase === 'ended';
 // Once the results are in the build every "winners by" line becomes a link
 // to them (lib/buildgames-results.js); ANNOUNCE_BY is only promised before.
 const announced = ended && winnersAnnounced();
+// The three winners for the closed section: category, product, prize.
+let winners = [];
+if (announced) {
+  try {
+    const v = resultsView(shortlist() ?? []);
+    winners = v.winners.map((w) => ({ key: w.key, category: w.category, product: w.entry.product, prize: usdCents(v.prizeCents) }));
+  } catch {
+    /* the section keeps its one line */
+  }
+}
 const cdTarget = clock.target ?? 0;
 const cd = countdownParts(cdTarget);
 
@@ -402,13 +413,26 @@ const hostOf = (u) => {
             <p class="bg-bid-err" data-entry-err hidden></p>
           </form>
         ) : (
-          <p class="bg-enter-closed">
-            {announced ? (
-              <>the build window has closed · <a href="/thebuildgames/results">the winners are announced</a>.</>
-            ) : (
-              'the build window has closed · entries are locked for judging.'
+          <>
+            {announced && winners.length > 0 && (
+              <ul class="bg-winners" role="list">
+                {winners.map((w) => (
+                  <li class:list={['bg-winner', `bg-cat-${w.key}`]}>
+                    <span class="bg-winner-cat">{w.category}</span>
+                    <b class="bg-winner-name">{w.product}</b>
+                    <span class="bg-winner-prize">{w.prize}</span>
+                  </li>
+                ))}
+              </ul>
             )}
-          </p>
+            <p class="bg-enter-closed">
+              {announced ? (
+                <>the build window has closed · <a href="/thebuildgames/results">see the full results</a>.</>
+              ) : (
+                'the build window has closed · entries are locked for judging.'
+              )}
+            </p>
+          </>
         )}
       </section>
 
@@ -2016,6 +2040,78 @@ const hostOf = (u) => {
 
   .bg-sg-link:hover {
     text-decoration: underline;
+  }
+
+  /* The winners, once announced: one pill per category in the results page's colours. */
+  .bg-cat-replacement {
+    --cat: #26c6da;
+    --cat-rgb: 38, 198, 218;
+  }
+
+  .bg-cat-creative {
+    --cat: #ff7a5c;
+    --cat-rgb: 255, 122, 92;
+  }
+
+  .bg-cat-polished {
+    --cat: #ffb000;
+    --cat-rgb: 255, 176, 0;
+  }
+
+  :global([data-theme='light']) .bg-cat-replacement {
+    --cat: #0e7490;
+    --cat-rgb: 14, 116, 144;
+  }
+
+  :global([data-theme='light']) .bg-cat-creative {
+    --cat: #a83a0c;
+    --cat-rgb: 168, 58, 12;
+  }
+
+  :global([data-theme='light']) .bg-cat-polished {
+    --cat: #9a5b00;
+    --cat-rgb: 154, 91, 0;
+  }
+
+  .bg-winners {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 4px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .bg-winner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 180px;
+    padding: 12px 18px;
+    border: 1px solid rgba(var(--cat-rgb), 0.45);
+    border-radius: 12px;
+    background: rgba(var(--cat-rgb), 0.08);
+  }
+
+  .bg-winner-cat {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cat);
+  }
+
+  .bg-winner-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  .bg-winner-prize {
+    font: 12px var(--font-mono);
+    color: var(--cat);
   }
 
   .bg-enter-closed a {

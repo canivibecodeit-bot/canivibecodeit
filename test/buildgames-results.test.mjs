@@ -92,10 +92,10 @@ test('an unknown entry key fails loudly', () => {
   assert.throws(() => resultsView([]), /no shortlist/);
 });
 
-test('every finalist has its screenshot set (1440 and 720 WebP, 720 JPEG fallback)', () => {
+test('every finalist has its screenshot set (1440, 1080 and 720 WebP, 720 JPEG fallback)', () => {
   const dir = new URL('../public/thebuildgames/results/', import.meta.url);
   for (const e of shortlist) {
-    for (const f of [`${e.key}.webp`, `${e.key}-sm.webp`, `${e.key}-sm.jpg`]) {
+    for (const f of [`${e.key}.webp`, `${e.key}-md.webp`, `${e.key}-sm.webp`, `${e.key}-sm.jpg`]) {
       assert.ok(existsSync(new URL(f, dir)), `${e.product}: ${f}`);
     }
   }

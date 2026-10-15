@@ -279,6 +279,8 @@ function abcCard() {
 
 /* The Build Games results card (og/buildgames-results.png): the three
    winners by category. Force-added to git like the studies cards. */
+const CAT_COLORS = { replacement: '#26c6da', creative: '#ff7a5c', polished: '#ffb000' };
+
 function buildGamesResultsCard() {
   return page([
     logoRow,
@@ -290,7 +292,7 @@ function buildGamesResultsCard() {
       }, 'the winners'),
       el('div', { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }, RESULTS.winners.map((w) =>
         el('div', { display: 'flex', alignItems: 'baseline', gap: 18 }, [
-          el('div', { ...mono(24, COLORS.muted), width: 330 }, w.category),
+          el('div', { ...mono(24, CAT_COLORS[w.key] ?? COLORS.muted, 700), width: 330 }, w.category),
           el('div', { fontFamily: 'Space Grotesk', fontSize: 40, fontWeight: 700, color: COLORS.fg, lineHeight: 1.1 }, w.product),
         ])
       )),
@@ -380,7 +382,7 @@ if (range) {
   await renderCached(
     buildGamesResultsCard(),
     'buildgames-results.png',
-    `buildgames-results:${RESULTS.year}:${RESULTS.winners.map((w) => `${w.category}=${w.product}`).join(',')}:1`,
+    `buildgames-results:${RESULTS.year}:${RESULTS.winners.map((w) => `${w.category}=${w.product}`).join(',')}:2`,
     cache
   );
   for (const st of STUDIES) {
