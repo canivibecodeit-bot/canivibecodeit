@@ -87,6 +87,15 @@ test('display-name overrides apply to the winners and nowhere else', () => {
   assert.equal(view.finalists.find((f) => f.key === 'bge_b9ysh6kzac').name, 'ibo');
 });
 
+test('handle overrides: openheard prints @ibothinks, InMotion prints no handle, others as entered', () => {
+  const view = resultsView(shortlist);
+  const by = (k) => view.finalists.find((f) => f.key === k);
+  assert.equal(by('bge_b9ysh6kzac').handle, 'ibothinks');
+  assert.equal(by('bge_4jef5232vz').handle, '');
+  assert.equal(by('bge_969k3fecfz').handle, 'cdtreys');
+  assert.equal(view.winners.find((w) => w.key === 'creative').entry.handle, '');
+});
+
 test('an unknown entry key fails loudly', () => {
   assert.throws(() => resultsView(shortlist.filter((e) => e.key !== RESULTS.winners[0].entry)), /unknown entry/);
   assert.throws(() => resultsView([]), /no shortlist/);
