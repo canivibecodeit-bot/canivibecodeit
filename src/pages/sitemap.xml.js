@@ -1,5 +1,6 @@
 import { allApps, alternativesSitemapApps, productsSitemap, categoriesInUse, moatsInUse } from '../lib/apps.js';
-import { buildsLive, challengeLive, studiesLive } from '../lib/flags.js';
+import { buildGamesLive, buildsLive, challengeLive, studiesLive } from '../lib/flags.js';
+import { winnersAnnounced } from '../lib/buildgames-results.js';
 import { SHOWCASE_MODELS } from '../lib/models.js';
 import { STUDIES } from '../lib/studies.js';
 
@@ -25,6 +26,7 @@ export async function GET() {
     `${base}/vibecode-this-site`,
     ...(buildsLive() ? [`${base}/built-with`, ...SHOWCASE_MODELS.map((m) => `${base}/built-with/${m.slug}`)] : []),
     ...(studiesLive() ? [`${base}/studies`, ...STUDIES.map((s) => `${base}/studies/${s.slug}`)] : []),
+    ...(buildGamesLive() && winnersAnnounced() ? [`${base}/thebuildgames/results`] : []),
   ];
   // Studies carry a lastmod from their publish date; everything else is
   // a plain location as before.

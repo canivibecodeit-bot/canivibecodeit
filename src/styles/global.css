@@ -89,6 +89,8 @@ html {
   /* the canvas itself carries the theme ground: overscroll and mid-swap
      frames paint --bg, never the browser default */
   background: var(--bg);
+  /* Anchors and keyboard focus land below the sticky header (WCAG 2.4.11). */
+  scroll-padding-top: 80px;
 }
 
 body {

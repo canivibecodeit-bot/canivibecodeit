@@ -6,16 +6,23 @@
    gate, caps all live there); source=buildgames. The inline variant is
    deliberately QUIETER than a sponsor row: no border glow, no bid affordance,
    plainly not a paid placement. */
-import { gamesStarted } from '../lib/buildgames.js';
+import { gamesEnded, gamesStarted } from '../lib/buildgames.js';
+import { winnersAnnounced } from '../lib/buildgames-results.js';
 
 const { variant = 'section' } = Astro.props; // 'inline' | 'section'
 const started = gamesStarted();
+// After the results: the ask is the next games, not this one's winners.
+const announced = gamesEnded() && winnersAnnounced();
+// No link to the builders page from the builders page itself.
+const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/builders';
 ---
 
 <div class:list={['bgn', `bgn-${variant}`]}>
-  <p class="bgn-lead">
-    {variant === 'inline' ? 'building instead of sponsoring?' : started ? 'follow the games' : 'be there when it starts'}
-  </p>
+  {variant === 'section' ? (
+    <h2 class="bgn-lead">{variant === 'inline' ? 'building instead of sponsoring?' : announced ? 'the next games' : started ? 'follow the games' : 'be there when it starts'}</h2>
+  ) : (
+    <p class="bgn-lead">{variant === 'inline' ? 'building instead of sponsoring?' : announced ? 'the next games' : started ? 'follow the games' : 'be there when it starts'}</p>
+  )}
   <form class="bgn-form" method="post" action="/api/waitlist" data-digest>
     <label class="hp" aria-hidden="true">
       Leave this field empty
@@ -26,19 +33,38 @@ const started = gamesStarted();
     <button class="btn primary" type="submit">notify me</button>
   </form>
   <p class="bgn-sub">
-    {started ? 'join the newsletter · the results and winners, by email' : 'join the newsletter · one email when the games open'}
-    {' · '}<a href="/thebuildgames/builders">how it works</a>
+    {announced
+      ? 'join the newsletter · one email when the next games open'
+      : started
+        ? 'join the newsletter · the results and winners, by email'
+        : 'join the newsletter · one email when the games open'}
+    {!onBuilders && (
+      <>
+        {' · '}<a href="/thebuildgames/builders">how the games work</a>
+      </>
+    )}
   </p>
 </div>
 
 <style>
   .bgn {
+    position: relative;
     text-align: center;
+    overflow-x: clip;
   }
 
   .bgn-lead {
+    font-family: inherit;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .bgn a:focus-visible,
+  .bgn input:focus-visible,
+  .bgn :global(.btn:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 
   .bgn-sub {
@@ -47,17 +73,35 @@ const started = gamesStarted();
     color: var(--muted);
   }
 
+  .bgn-sub a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bgn-sub a:hover {
+    color: var(--fg);
+  }
+
   .bgn-form {
     display: flex;
     gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
     padding-top: 12px;
+    position: relative;
+    overflow-x: clip;
+  }
+
+  .bgn-form input,
+  .bgn-form button {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .bgn-form input[type='email'] {
-    flex: 1;
-    min-width: 200px;
+    flex: 1 1 200px;
+    min-width: 0;
     max-width: 320px;
     padding: 10px 12px;
     background: var(--bg);

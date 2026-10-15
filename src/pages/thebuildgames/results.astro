@@ -1,0 +1,1162 @@
+---
+/* The Build Games 2026: the results page. Public, indexable, linked from
+   the game page once the results are in the build (lib/buildgames-results.js).
+
+   Visual version (operator's brief, 15 Oct): the three winners are the page,
+   each a band with a screenshot of the live demo, the category in its own
+   colour, the product as the headline and the prize set large. Every
+   finalist has a card with a thumbnail and its total. The money and the
+   judging note sit side by side, quieter. Screenshots live under
+   public/thebuildgames/results/<entry key>{.webp,-sm.webp,-sm.jpg}: taken
+   from the live demos at 1440x900, no browser chrome.
+
+   What never appears here: per-category scores, the judges' notes, repo
+   links. The page 404s like the rest of the surface until BUILDGAMES_LIVE
+   is set, and until the shortlist file is in the build. */
+import Base from '../../layouts/Base.astro';
+import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
+import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
+import { buildGamesLive } from '../../lib/flags.js';
+import { bgLeaderboard } from '../../lib/db.js';
+import { JUDGES, MONEY_SENTENCE, displayName, monogram, rankSponsors } from '../../lib/buildgames.js';
+import { FUND_NOTE, resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
+import { shortlist } from '../../lib/buildgames-shortlist.js';
+import { faviconUrl, withUtm } from '../../lib/sponsors.js';
+
+if (!buildGamesLive() || !winnersAnnounced()) return new Response(null, { status: 404 });
+const entries = shortlist();
+if (!entries) return new Response(null, { status: 404 });
+
+const r = resultsView(entries);
+const prize = usd(r.prizeCents);
+const fund = usd(r.fundCents);
+
+// The screenshots: 1440x900 and 720x450 WebP, a 720 JPEG for the fallback.
+const SHOTS = '/thebuildgames/results';
+const shot = (key) => ({
+  xs: `${SHOTS}/${key}-xs.webp`,
+  big: `${SHOTS}/${key}.webp`,
+  md: `${SHOTS}/${key}-md.webp`,
+  sm: `${SHOTS}/${key}-sm.webp`,
+  jpg: `${SHOTS}/${key}-sm.jpg`,
+});
+
+// The sponsors, as the game page lists them: the live board, ranked.
+let sponsors = [];
+try {
+  sponsors = rankSponsors(await bgLeaderboard()).filter((s) => s.status === 'active' && s.cleared_total > 0);
+} catch {
+  /* the thanks line renders without names */
+}
+// The same name the board prints: the sponsor's name, else the host, else the fallback.
+const hostOf = (u) => {
+  try {
+    return new URL(u).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+};
+const sponsorName = (s) => s.name ?? hostOf(s.link) ?? displayName(s);
+
+const title = `The Build Games ${r.year}: winners · canivibecodeit`;
+const socialTitle = `The Build Games ${r.year}: winners`;
+const description = `${r.winners.map((w) => `${w.category}: ${w.product}`).join('. ')}. ${r.finalists.length} finalists, three judges, ${fund} in prizes.`;
+
+// Hyphenated compounds hold together when a line wraps (non-breaking hyphen).
+const nbHyphens = (t) => (t || '').replace(/(\w)-(\w)/g, '$1\u2011$2');
+
+// Names in a sentence: "a, b and c".
+const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+---
+
+<Base {title} {socialTitle} {description} ogImage="/og/buildgames-results.png" hideSponsors={true} hideDigest={true}>
+  {/* The first winner's picture is the largest thing on the first screen;
+      asking for it here starts the fetch while the stylesheet is still
+      loading (a preload link is valid in the body and Base has no head slot). */}
+  <link
+    rel="preload"
+    as="image"
+    type="image/webp"
+    imagesrcset={`${shot(r.winners[0].entry.key).sm} 720w, ${shot(r.winners[0].entry.key).md} 1080w, ${shot(r.winners[0].entry.key).big} 1440w`}
+    imagesizes="(min-width: 1180px) 520px, (min-width: 900px) 50vw, calc(100vw - 76px)"
+    fetchpriority="high"
+  />
+  <main class="wrap bgr">
+    <header class="bgr-hero">
+      <p class="bgr-eyebrow">canivibecodeit presents</p>
+      <div aria-hidden="true">
+        <BuildGamesLogo class="bgr-logo" />
+      </div>
+      <h1 class="bgr-title"><span class="bgr-vh">The Build Games {r.year}: </span>the winners</h1>
+      <p class="bgr-sub">
+        The first Build Games ran through September {r.year}. Of the {r.entryCount}&nbsp;entries, {r.finalists.length} made the
+        judges' shortlist, and {joinNames(r.winners.map((w) => w.product))} won {prize} each.
+      </p>
+    </header>
+
+    {/* The headline strip, in the game page's stat-strip voice. */}
+    <section class="bgr-strip" aria-label="Prize fund, finalists and judges">
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">prize fund</span>
+        <span class="bgr-sg-num bgr-sg-money">{fund}</span>
+        <span class="bgr-sg-sub">three prizes</span>
+      </div>
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">finalists</span>
+        <span class="bgr-sg-num">{r.finalists.length}</span>
+        <span class="bgr-sg-sub">from {r.entryCount} entries</span>
+      </div>
+      <div class="bgr-sg-cell">
+        <span class="bgr-sg-label">judges</span>
+        <span class="bgr-sg-num">{JUDGES.length}</span>
+        <span class="bgr-sg-sub">0 to 10 per category</span>
+      </div>
+    </section>
+
+    {/* The three winners: one band each, the demo's screenshot beside the
+        name and the prize. Colour-coded by category throughout the page. */}
+    <section class="bgr-winners" aria-labelledby="bgr-winners-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-winners-h">who won</h2>
+        <span class="note">one winner per category · {prize} each</span>
+      </div>
+      <ol class="bgr-wins" role="list">
+        {r.winners.map((w, i) => {
+          const s = shot(w.entry.key);
+          return (
+            <li class:list={['bgr-win', `bgr-cat-${w.key}`]} id={`winner-${w.key}`}>
+              {/* The picture repeats the name link's target, so it stays out of the tab order. */}
+              <a class="bgr-win-shot" href={w.entry.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcset={`${s.sm} 720w, ${s.md} 1080w, ${s.big} 1440w`}
+                    sizes="(min-width: 1180px) 520px, (min-width: 900px) 50vw, calc(100vw - 76px)"
+                  />
+                  <img
+                    src={s.jpg}
+                    width="1440"
+                    height="900"
+                    alt=""
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : undefined}
+                    decoding="async"
+                  />
+                </picture>
+              </a>
+              <div class="bgr-win-head">
+                <p class="bgr-win-cat">
+                  <span class="bgr-win-n">{i + 1}</span>
+                  {w.category}
+                </p>
+                <h3 class="bgr-win-name">
+                  <a href={w.entry.demoUrl} target="_blank" rel="noopener">{w.entry.product}</a>
+                </h3>
+              </div>
+              <div class="bgr-win-body">
+                <p class="bgr-win-line">{nbHyphens(w.entry.oneLine)}</p>
+                <p class="bgr-win-by bgr-by">
+                  <span class="bgr-name">{w.entry.name}</span>
+                  {w.entry.handle ? <span class="bgr-handle">@{w.entry.handle}</span> : null}
+                </p>
+                <p class="bgr-win-prize">
+                  <b>{prize}</b>
+                  <span>prize</span>
+                </p>
+                <div class="bgr-win-actions">
+                  <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the demo: ${w.entry.product}`}>
+                    open the demo <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+                <div class="bgr-ru">
+                  <span class="bgr-ru-label">runners-up</span>
+                  <ul class="bgr-ru-list" role="list">
+                    {w.mentions.map((m) => (
+                      <li>
+                        <a class="bgr-ru-pill" href={m.demoUrl} target="_blank" rel="noopener">
+                          <span class="bgr-ru-dot" aria-hidden="true"></span>
+                          {m.product}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+
+    {/* Every finalist as a card: thumbnail, name, builder, the total. By total,
+        highest first, so the order says what the judges said. */}
+    <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-finalists-h">all {r.finalists.length} finalists, by total</h2>
+        <span class="note">out of {r.totalMax} · highest first, ties listed in category order · every demo is public</span>
+      </div>
+      <ul class="bgr-grid" role="list">
+        {r.finalists.map((f) => {
+          const s = shot(f.key);
+          return (
+            <li class:list={['bgr-card', f.won && `bgr-cat-${f.won.key}`]}>
+              <a class="bgr-card-shot" href={f.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <picture>
+                  <source
+                    type="image/webp"
+                    srcset={`${s.xs} 360w, ${s.sm} 720w`}
+                    sizes="(max-width: 559px) 100px, (max-width: 1023px) 50vw, 33vw"
+                  />
+                  <img src={s.jpg} width="720" height="450" alt="" loading="lazy" decoding="async" />
+                </picture>
+              </a>
+              <div class="bgr-card-body">
+                <div class="bgr-card-head">
+                  <a class="bgr-card-name" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
+                  <span class="bgr-total">
+                    <b>{f.total}</b><span class="bgr-vh"> out of {r.totalMax}</span><span aria-hidden="true"> / {r.totalMax}</span>
+                  </span>
+                </div>
+                <p class="bgr-card-by bgr-by">
+                  <span class="bgr-name">{f.name}</span>
+                  {f.handle ? <span class="bgr-handle">@{f.handle}</span> : null}
+                </p>
+                {f.oneLine && <p class="bgr-card-line">{nbHyphens(f.oneLine)}</p>}
+                {f.won && <span class="bgr-pill">winner · {f.won.category}</span>}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+
+    {/* The money and the judging, side by side and quieter. */}
+    <section class="bgr-notes" aria-label="The money and the judging">
+      <div class="bgr-note bgr-note-money">
+        <h2 class="bgr-note-h">the money</h2>
+        <p>{MONEY_SENTENCE}</p>
+        <p>{FUND_NOTE}</p>
+      </div>
+      <div class="bgr-note">
+        <h2 class="bgr-note-h">how it was judged</h2>
+        <p>
+          {JUDGES.map((j, i) => (
+            <>
+              <a href={j.url} target="_blank" rel="noopener">{j.name}</a>
+              {i < JUDGES.length - 2 ? ', ' : i === JUDGES.length - 2 ? ' and ' : ''}
+            </>
+          ))}{' '}
+          scored every finalist from 0 to 10 in each category, independently, against the criteria published before the
+          games began. Totals are shown above. One prize per builder. Runners-up are named with no money attached. The
+          judges' decision is final.
+        </p>
+      </div>
+    </section>
+
+    <section class="bgr-thanks" aria-labelledby="bgr-thanks-h">
+      <div class="list-head bgr-list-head">
+        <h2 id="bgr-thanks-h">thank you</h2>
+      </div>
+      <p class="bgr-prose">
+        The prize money came from the sponsors on the board. To them, and to everyone who built something in September:
+        thank you.
+      </p>
+      {/* The sponsors as the board shows them: the stored icon, else the
+          same favicon source the board uses, the name and the tagline. */}
+      {sponsors.length > 0 && (
+        <ul class="bgr-sponsors" role="list" aria-label="The sponsors">
+          {sponsors.map((s) => (
+            <li class="bgr-sponsor">
+              <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">
+                <span class="bgr-sponsor-logo">
+                  {s.icon_url ? (
+                    <img src={s.icon_url} alt="" width="48" height="48" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : faviconUrl(s.link) ? (
+                    <img src={faviconUrl(s.link)} alt="" width="48" height="48" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : (
+                    <span class="bgr-monogram">{monogram(sponsorName(s))}</span>
+                  )}
+                </span>
+                <b class="bgr-sponsor-name">{sponsorName(s)}</b>
+                {s.tagline && <span class="bgr-sponsor-tag">{s.tagline}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+
+    <BuildGamesNewsletter variant="section" />
+
+    <p class="bgr-foot">
+      <a href="/thebuildgames">back to the games</a> · <a href="/thebuildgames/terms">the Build Games terms</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  /* The wrapper is the containing block for anything positioned inside it,
+     so an element a browser extension injects (a password manager's icon
+     beside a field) is clipped here and can never widen the page. */
+  .bgr {
+    position: relative;
+    padding-top: 30px;
+    padding-bottom: 120px;
+    overflow-x: clip;
+  }
+
+  /* ---------- category colours: the lockup's coral and teal, the site's amber.
+     Each winner band, pill and runner-up pill reads its colour from --cat. ---------- */
+  .bgr {
+    --on-cat: #0b0d0b;
+  }
+
+  :global([data-theme='light']) .bgr {
+    --on-cat: #ffffff;
+  }
+
+  .bgr-cat-replacement {
+    --cat: #26c6da;
+    --cat-rgb: 38, 198, 218;
+  }
+
+  .bgr-cat-creative {
+    --cat: #ff7a5c;
+    --cat-rgb: 255, 122, 92;
+  }
+
+  .bgr-cat-polished {
+    --cat: #ffb000;
+    --cat-rgb: 255, 176, 0;
+  }
+
+  :global([data-theme='light']) .bgr-cat-replacement {
+    --cat: #0e7490;
+    --cat-rgb: 14, 116, 144;
+  }
+
+  :global([data-theme='light']) .bgr-cat-creative {
+    --cat: #c2301d;
+    --cat-rgb: 194, 48, 29;
+  }
+
+  :global([data-theme='light']) .bgr-cat-polished {
+    --cat: #8f6400;
+    --cat-rgb: 143, 100, 0;
+  }
+
+  /* Visually hidden: for the h1's full name and the totals' spoken form. */
+  .bgr-vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------- hero ---------- */
+  .bgr-hero {
+    text-align: center;
+  }
+
+  .bgr-eyebrow {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding-bottom: 10px;
+  }
+
+  .bgr-title {
+    margin-top: 22px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(40px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    text-wrap: balance;
+  }
+
+  .bgr-sub {
+    margin: 14px auto 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* ---------- headline strip (the game page's stat strip) ---------- */
+  .bgr-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 900px;
+    margin-inline: auto;
+    padding-top: 36px;
+    text-align: center;
+  }
+
+  .bgr-sg-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 18px;
+  }
+
+  .bgr-sg-cell + .bgr-sg-cell {
+    border-left: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  }
+
+  .bgr-sg-label {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bgr-sg-num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* The fund leads the numbers: bigger than its neighbours and than any prize. */
+  .bgr-sg-money {
+    color: var(--primary);
+    font-size: clamp(36px, 4.4vw, 48px);
+  }
+
+  .bgr-sg-sub {
+    font: 11px var(--font-mono);
+    color: var(--muted);
+    text-wrap: balance;
+  }
+
+  /* ---------- section heads: the game page's list-head ---------- */
+  .bgr-list-head {
+    padding-top: 52px;
+  }
+
+  /* ---------- the winner bands ---------- */
+  .bgr-wins {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 0;
+    display: grid;
+    gap: 14px;
+  }
+
+  /* Side by side, the three bands share one height: the tallest sets it. */
+  @media (min-width: 900px) {
+    .bgr-wins {
+      grid-auto-rows: 1fr;
+    }
+  }
+
+  .bgr-win {
+    scroll-margin-top: 84px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'shot head'
+      'shot body';
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(var(--cat-rgb), 0.1), rgba(var(--cat-rgb), 0.03) 55%, var(--surface));
+    overflow: hidden;
+  }
+
+  .bgr-win-shot {
+    grid-area: shot;
+    display: block;
+    align-self: center;
+    padding: 18px 0 18px 18px;
+    min-width: 0;
+  }
+
+  .bgr-win-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+    background: color-mix(in srgb, var(--fg) 6%, var(--surface));
+  }
+
+  .bgr-win-head {
+    grid-area: head;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 26px 28px 0;
+    min-width: 0;
+  }
+
+  .bgr-win-body {
+    grid-area: body;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 28px 24px;
+    min-width: 0;
+  }
+
+  .bgr-win-cat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 700 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--cat);
+  }
+
+  .bgr-win-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--cat);
+    color: var(--on-cat);
+    font: 800 12px var(--font-mono);
+    letter-spacing: 0;
+  }
+
+  .bgr-win-name {
+    margin-top: 6px;
+    font-family: var(--font-display);
+    font-size: clamp(28px, 2.8vw, 38px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .bgr-win-name a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--cat-rgb), 0.45);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+
+  .bgr-win-name a:hover {
+    text-decoration-color: var(--cat);
+  }
+
+  .bgr-win-line {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .bgr-win-by {
+    font-size: 16px;
+    color: var(--fg);
+  }
+
+  /* Name and handle wrap as whole units; the dot joins them only on one line. */
+  .bgr-by {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 10px;
+    min-width: 0;
+  }
+
+  .bgr-name {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bgr-handle {
+    font: 12.5px var(--font-mono);
+    color: var(--muted);
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+
+
+  /* The prize: the biggest figure after the fund, in the category colour. */
+  .bgr-win-prize {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-top: 10px;
+  }
+
+  .bgr-win-prize b {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: var(--cat);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bgr-win-prize span {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bgr-win-actions {
+    padding-top: 6px;
+  }
+
+  .bgr-open {
+    padding: 11px 18px;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .bgr-win .bgr-open {
+    background: var(--cat);
+    color: var(--on-cat);
+  }
+
+  .bgr-ru {
+    margin-top: auto;
+    padding-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bgr-ru-label {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+
+  .bgr-ru-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .bgr-ru-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px 4px 7px;
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+    border-radius: 999px;
+    background: var(--surface);
+    font: 12px var(--font-mono);
+    color: var(--fg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .bgr-ru-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cat);
+    flex-shrink: 0;
+  }
+
+  .bgr-ru-pill:hover {
+    border-color: var(--cat);
+    color: var(--cat);
+  }
+
+  /* ---------- the finalists: a grid of cards ---------- */
+  .bgr-grid {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .bgr-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .bgr-card.bgr-cat-replacement,
+  .bgr-card.bgr-cat-creative,
+  .bgr-card.bgr-cat-polished {
+    border-color: rgba(var(--cat-rgb), 0.45);
+  }
+
+  .bgr-card-shot {
+    display: block;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--fg) 6%, var(--surface));
+  }
+
+  .bgr-card-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .bgr-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px 16px;
+    min-width: 0;
+  }
+
+  .bgr-card-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .bgr-card-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-underline-offset: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bgr-card-name:hover {
+    color: var(--primary);
+    text-decoration-color: currentColor;
+  }
+
+  /* The total as a small badge: tabular figures, the figure bold. */
+  .bgr-total {
+    justify-self: end;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bgr-total b {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--fg);
+  }
+
+  .bgr-card-by {
+    font-size: 16px;
+    color: var(--fg);
+  }
+
+  .bgr-card-line {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .bgr-pill {
+    align-self: flex-start;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--cat-rgb), 0.5);
+    background: rgba(var(--cat-rgb), 0.1);
+    font: 700 11px var(--font-mono);
+    color: var(--cat);
+    white-space: nowrap;
+  }
+
+  /* A compact card: thumbnail left, text right. Used for every card on
+     phones (the page is long enough) and for a last card left alone on
+     its row at two or three columns, which then spans the row. */
+  @media (min-width: 1024px) {
+    .bgr-card:last-child:nth-child(3n + 1) {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .bgr-card:last-child:nth-child(3n + 1) .bgr-card-shot {
+      border-bottom: 0;
+      border-right: 1px solid var(--border);
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+
+    .bgr-card:last-child:nth-child(3n + 1) .bgr-card-shot img {
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  @media (min-width: 560px) and (max-width: 1023px) {
+    .bgr-card:last-child:nth-child(2n + 1) {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .bgr-card:last-child:nth-child(2n + 1) .bgr-card-shot {
+      border-bottom: 0;
+      border-right: 1px solid var(--border);
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+
+    .bgr-card:last-child:nth-child(2n + 1) .bgr-card-shot img {
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  /* ---------- the money and the judging, quieter ---------- */
+  .bgr-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 52px;
+  }
+
+  .bgr-note {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .bgr-note-h {
+    font: 700 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+
+  .bgr-note p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .bgr-note a,
+  .bgr-prose a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgr-note a:hover,
+  .bgr-prose a:hover {
+    color: var(--primary);
+  }
+
+  /* ---------- prose and the sponsors ---------- */
+  .bgr-prose {
+    padding-top: 12px;
+    max-width: 66ch;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+
+  .bgr-sponsors {
+    list-style: none;
+    margin: 0;
+    padding: 16px 0 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .bgr-sponsor a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 20px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+    color: var(--fg);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .bgr-sponsor a:hover {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  .bgr-sponsor-logo img,
+  .bgr-monogram {
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-bottom: 4px;
+  }
+
+  .bgr-monogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--fg) 8%, var(--surface));
+    font: 700 16px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgr-sponsor-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .bgr-sponsor-tag {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* ---------- footer line: the game page's ---------- */
+  .bgr-foot {
+    padding-top: 40px;
+    text-align: center;
+    font: 12px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgr-foot a {
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .bgr-foot a:hover {
+    color: var(--fg);
+  }
+
+  /* ---------- focus ---------- */
+  .bgr a:focus-visible,
+  .bgr :global(.btn:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Tiles keep their own corners when focused. */
+  .bgr-sponsor a:focus-visible,
+  .bgr-win-shot:focus-visible,
+  .bgr-card-shot:focus-visible {
+    border-radius: 12px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (min-width: 640px) {
+    .bgr-sponsor-tag {
+      font-size: 13px;
+    }
+
+    .bgr-win-line,
+    .bgr-win-by,
+    .bgr-card-by,
+    .bgr-card-line {
+      font-size: 14px;
+    }
+
+    .bgr-note p {
+      font-size: 14.5px;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .bgr-grid,
+    .bgr-sponsors {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 899px) {
+    .bgr-win {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        'head'
+        'shot'
+        'body';
+    }
+
+    .bgr-win-shot {
+      padding: 0 20px;
+    }
+
+    .bgr-win-head {
+      padding: 20px 20px 16px;
+    }
+
+    .bgr-win-body {
+      padding: 16px 20px 20px;
+    }
+
+    .bgr-notes {
+      grid-template-columns: 1fr;
+    }
+
+    .bgr-finalists .bgr-list-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bgr-strip {
+      padding-top: 26px;
+    }
+
+    .bgr-sg-cell {
+      gap: 5px;
+      padding: 2px 8px;
+    }
+
+    .bgr-sg-num {
+      font-size: 24px;
+    }
+
+    .bgr-sg-money {
+      font-size: 34px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bgr {
+      padding-top: 24px;
+      padding-bottom: 80px;
+    }
+
+    .bgr-title {
+      margin-top: 16px;
+    }
+
+    .bgr-sub {
+      margin-top: 10px;
+    }
+
+    .bgr-list-head {
+      padding-top: 40px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .bgr-win-head {
+      padding: 18px 16px 14px;
+    }
+
+    .bgr-win-body {
+      padding: 14px 16px 18px;
+    }
+
+    .bgr-open {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .bgr-sponsors {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 559px) {
+    .bgr-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .bgr-card {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .bgr-card-shot {
+      border-bottom: 0;
+      padding: 12px 0 12px 12px;
+      background: none;
+    }
+
+    .bgr-card-shot img {
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .bgr-card-body {
+      padding: 12px 14px 14px;
+      gap: 3px;
+    }
+
+    .bgr-card-name {
+      font-size: 16px;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    .bgr-pill {
+      margin-top: 6px;
+    }
+  }
+</style>

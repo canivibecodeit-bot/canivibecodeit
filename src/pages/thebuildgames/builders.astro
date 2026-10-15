@@ -6,11 +6,13 @@
 import Base from '../../layouts/Base.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
-import { ANNOUNCE_BY, MONEY_SENTENCE, gamesStarted } from '../../lib/buildgames.js';
+import { ANNOUNCE_BY, MONEY_SENTENCE, gamesEnded, gamesStarted } from '../../lib/buildgames.js';
+import { winnersAnnounced } from '../../lib/buildgames-results.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
 const started = gamesStarted();
+const announced = gamesEnded() && winnersAnnounced();
 
 const title = 'The Build Games · for the builders';
 const description = `How The Build Games works if you build: free entry, three categories, three judges. ${MONEY_SENTENCE}`;
@@ -18,8 +20,10 @@ const description = `How The Build Games works if you build: free entry, three c
 const faq = [
   {
     q: 'how do i register?',
-    a: started
-      ? 'the entry form is on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
+    a: announced
+      ? 'entries for the 2026 games are closed. when the next games open the entry form will be on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
+      : started
+        ? 'the entry form is on the main page: your name, a public demo URL and a public github repo. free, takes a minute.'
       : "you don't, yet. join the newsletter and you'll get one email when entries open with the first game on september 1. the entry form will be on the main page.",
   },
   {
@@ -28,7 +32,10 @@ const faq = [
   },
   {
     q: 'is there only one winner?',
-    a: `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
+    link: announced ? { href: '/thebuildgames/results', text: 'the 2026 winners' } : null,
+    a: announced
+      ? 'there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners. the judges also named runners-up, with no money attached.'
+      : `there are three prize categories and the prize fund splits evenly across them, a third each. one winner per category, so three winners minimum. judges may also name runners-up, with no money attached. winners are announced on the games page by ${ANNOUNCE_BY}.`,
   },
   {
     q: 'can i use AI to build?',
@@ -60,12 +67,12 @@ const faq = [
 
     <div class="bgb-steps">
       <div class="bgb-step">
-        <span class="bgb-when">1 · now</span>
+        <span class="bgb-when">{announced ? '1 · before the games' : '1 · now'}</span>
         <b>sponsors fill the pool</b>
         <p>every spot on the board is a sponsor's bid. that's the sponsorship pool. the prize fund comes out of it.</p>
       </div>
       <div class="bgb-step">
-        <span class="bgb-when">2 · september 1</span>
+        <span class="bgb-when">{announced ? '2 · the games open' : '2 · september 1'}</span>
         <b>the brief drops</b>
         <p>
           what to build, the deadline, the judges and the prize split, all published before
@@ -90,7 +97,15 @@ const faq = [
         faq.map((f) => (
           <div class="bgb-qa">
             <dt>{f.q}</dt>
-            <dd>{f.a}</dd>
+            <dd>
+              {f.a}
+              {f.link && (
+                <>
+                  {' '}
+                  <a class="bgb-nowrap" href={f.link.href}>{f.link.text} →</a>
+                </>
+              )}
+            </dd>
           </div>
         ))
       }
@@ -99,8 +114,13 @@ const faq = [
     {/* Astro collapses whitespace between a text line and an <a> on the next
         line — the explicit {' '} separators are load-bearing. */}
     <p class="bgb-fine">
-      this is the plain english version · <a href="/thebuildgames/terms">the Build Games terms</a>{' '}
+      this is the plain English version · <a href="/thebuildgames/terms">the Build Games terms</a>{' '}
       are the contract · 18+, void where prohibited ·{' '}
+      {announced && (
+        <>
+          <a class="bgb-nowrap" href="/thebuildgames/results">the 2026 winners</a> ·{' '}
+        </>
+      )}
       <a href="/thebuildgames">back to the board</a>
     </p>
   </main>
@@ -181,6 +201,22 @@ const faq = [
     margin-top: 30px;
     color: var(--muted);
     font-size: 12.5px;
+  }
+
+  .bgb-nowrap {
+    white-space: nowrap;
+  }
+
+  .bgb-qa dd a,
+  .bgb-fine a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgb-qa dd a:hover,
+  .bgb-fine a:hover {
+    color: var(--primary);
   }
   @media (max-width: 760px) {
     .bgb-steps {

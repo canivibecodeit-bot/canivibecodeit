@@ -36,6 +36,8 @@ import {
 import { dashboardStats } from '../../lib/analytics.js';
 import { faviconUrl, withUtm } from '../../lib/sponsors.js';
 import { onlineCount } from '../../lib/presence.js';
+import { resultsView, usd as usdCents, winnersAnnounced } from '../../lib/buildgames-results.js';
+import { shortlist } from '../../lib/buildgames-shortlist.js';
 
 if (!buildGamesLive()) return new Response(null, { status: 404 });
 
@@ -86,6 +88,19 @@ const cableOn = (Astro.url.searchParams.get('cable') ?? 'on') !== 'off';
 // state and carries no countdown at all (lib/buildgames.js, gameClock).
 const clock = gameClock();
 const ended = clock.phase === 'ended';
+// Once the results are in the build every "winners by" line becomes a link
+// to them (lib/buildgames-results.js); ANNOUNCE_BY is only promised before.
+const announced = ended && winnersAnnounced();
+// The three winners for the closed section: category, product, prize.
+let winners = [];
+if (announced) {
+  try {
+    const v = resultsView(shortlist() ?? []);
+    winners = v.winners.map((w) => ({ key: w.key, category: w.category, product: w.entry.product, prize: usdCents(v.prizeCents) }));
+  } catch {
+    /* the section keeps its one line */
+  }
+}
 const cdTarget = clock.target ?? 0;
 const cd = countdownParts(cdTarget);
 
@@ -177,7 +192,13 @@ const hostOf = (u) => {
               entry form; the caption under the stat strip carries the three
               trust facts. */}
           <p class="bg-theme">{THEME_ONE_LINER}</p>
-          <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
+          {announced ? (
+            <a class="bg-builders-cta bg-results-cta" href="/thebuildgames/results">
+              the winners are in <span aria-hidden="true">→</span>
+            </a>
+          ) : (
+            <a class="bg-theme-pill" href="/">{THEME_SUB}</a>
+          )}
         </>
       ) : (
         <>
@@ -275,7 +296,13 @@ const hostOf = (u) => {
           <span class="bg-sg-num bg-sg-money" data-pot-amount data-pot-cents={potCents}>{usd(potCents)}</span>
           <span class="bg-sg-sub">funded by sponsor bids</span>
         </div>
-        {ended ? (
+        {announced ? (
+          <div class="bg-sg-cell">
+            <span class="bg-sg-label">prizes</span>
+            <span class="bg-sg-num">{winners.length > 0 ? `${winners.length} × ${winners[0].prize}` : 'announced'}</span>
+            <a class="bg-sg-sub bg-sg-link" href="/thebuildgames/results">see the results →</a>
+          </div>
+        ) : ended ? (
           <div class="bg-sg-cell">
             <span class="bg-sg-label">the build window</span>
             <span class="bg-sg-num">closed</span>
@@ -320,7 +347,7 @@ const hostOf = (u) => {
       <section class="bg-enter" id="enter" aria-label="Enter the games">
         {/* The entry count lives in the stat strip above — one number, one place. */}
         <div class="list-head bg-list-head">
-          <h2>enter the games</h2>
+          <h2>{announced ? 'the results' : 'enter the games'}</h2>
         </div>
         {canEnter ? (
           <form class="bg-enter-form" method="post" action="/api/thebuildgames/enter" data-entry-form>
@@ -386,7 +413,28 @@ const hostOf = (u) => {
             <p class="bg-bid-err" data-entry-err hidden></p>
           </form>
         ) : (
-          <p class="bg-enter-closed">the build window has closed · entries are locked for judging.</p>
+          <>
+            {announced && winners.length > 0 && (
+              <ul class="bg-winners" role="list">
+                {winners.map((w) => (
+                  <li>
+                    <a class:list={['bg-winner', `bg-cat-${w.key}`]} href={`/thebuildgames/results#winner-${w.key}`}>
+                      <span class="bg-winner-cat">{w.category}</span>
+                      <b class="bg-winner-name">{w.product}</b>
+                      <span class="bg-winner-prize">{w.prize}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p class="bg-enter-closed">
+              {announced ? (
+                <>the build window has closed · <a href="/thebuildgames/results">see the full results</a>.</>
+              ) : (
+                'the build window has closed · entries are locked for judging.'
+              )}
+            </p>
+          </>
         )}
       </section>
 
@@ -464,9 +512,13 @@ const hostOf = (u) => {
           <li><a href="/thebuildgames/terms">The terms</a> are the contract.</li>
         </ol>
         <p class="bg-rules-fine">
-          winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,
-          no money attached · plain-english version for builders:{' '}
-          <a href="/thebuildgames/builders">how it works</a>
+          {announced ? (
+            <>the winners are announced: <a href="/thebuildgames/results">see the results</a> · judges named runners-up,</>
+          ) : (
+            <>winners are announced on this page by {ANNOUNCE_BY} · judges may name runners-up,</>
+          )}{' '}
+          no money attached · the plain English version for builders:{' '}
+          <a class="bg-nowrap" href="/thebuildgames/builders">how it works</a>
         </p>
       </section>
 
@@ -669,7 +721,9 @@ const hostOf = (u) => {
             <span class="bg-cta-note">or <a href="#" data-bid-open>add a tagline, icon or email</a> · enter from ${minEntryUsd.toLocaleString('en-US')} · you keep your spot until someone's total is higher</span>
           </>
         ) : (
-          <span class="bg-cta-note bg-soon">bidding opens with the games · get notified below</span>
+          <span class="bg-cta-note bg-soon">
+            {announced ? 'the board is closed · sponsor bidding reopens with the next games' : 'bidding opens with the games · get notified below'}
+          </span>
         )}
       </div>
 
@@ -1969,6 +2023,118 @@ const hostOf = (u) => {
   .bg-sg-sub {
     font: 11px var(--font-mono);
     color: var(--muted);
+  }
+
+  /* the strip's one link: the results, once they are announced */
+  .bg-sg-link {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  /* the results button sits beside the idea pill: breathing room between them */
+  .bg-results-cta {
+    margin-top: 12px;
+  }
+
+  .bg-nowrap {
+    white-space: nowrap;
+  }
+
+  .bg-rules-fine {
+    text-wrap: balance;
+  }
+
+  .bg-sg-link:hover {
+    text-decoration: underline;
+  }
+
+  /* The winners, once announced: one pill per category in the results page's colours. */
+  .bg-cat-replacement {
+    --cat: #26c6da;
+    --cat-rgb: 38, 198, 218;
+  }
+
+  .bg-cat-creative {
+    --cat: #ff7a5c;
+    --cat-rgb: 255, 122, 92;
+  }
+
+  .bg-cat-polished {
+    --cat: #ffb000;
+    --cat-rgb: 255, 176, 0;
+  }
+
+  :global([data-theme='light']) .bg-cat-replacement {
+    --cat: #0e7490;
+    --cat-rgb: 14, 116, 144;
+  }
+
+  :global([data-theme='light']) .bg-cat-creative {
+    --cat: #c2301d;
+    --cat-rgb: 194, 48, 29;
+  }
+
+  :global([data-theme='light']) .bg-cat-polished {
+    --cat: #8f6400;
+    --cat-rgb: 143, 100, 0;
+  }
+
+  .bg-winners {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 4px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .bg-winner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 180px;
+    padding: 12px 18px;
+    border: 1px solid rgba(var(--cat-rgb), 0.45);
+    border-radius: 12px;
+    background: rgba(var(--cat-rgb), 0.08);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .bg-winner:hover {
+    border-color: var(--cat);
+    background: rgba(var(--cat-rgb), 0.14);
+  }
+
+  .bg-winner-cat {
+    font: 700 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cat);
+  }
+
+  .bg-winner-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  .bg-winner-prize {
+    font: 12px var(--font-mono);
+    color: var(--cat);
+  }
+
+  .bg-enter-closed a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bg-enter-closed a:hover {
+    color: var(--primary);
   }
 
   @media (max-width: 720px) {
