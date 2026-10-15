@@ -62,6 +62,9 @@ const title = `The Build Games ${r.year}: winners · canivibecodeit`;
 const socialTitle = `The Build Games ${r.year}: winners`;
 const description = `${r.winners.map((w) => `${w.category}: ${w.product}`).join('. ')}. ${r.finalists.length} finalists, three judges, ${fund} in prizes.`;
 
+// Hyphenated compounds hold together when a line wraps (non-breaking hyphen).
+const nbHyphens = (t) => (t || '').replace(/(\w)-(\w)/g, '$1\u2011$2');
+
 // Names in a sentence: "a, b and c".
 const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 ---
@@ -151,7 +154,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
                 </h3>
               </div>
               <div class="bgr-win-body">
-                <p class="bgr-win-line">{w.entry.oneLine}</p>
+                <p class="bgr-win-line">{nbHyphens(w.entry.oneLine)}</p>
                 <p class="bgr-win-by bgr-by">
                   <span class="bgr-name">{w.entry.name}</span>
                   {w.entry.handle ? <span class="bgr-handle">@{w.entry.handle}</span> : null}
@@ -218,7 +221,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
                   <span class="bgr-name">{f.name}</span>
                   {f.handle ? <span class="bgr-handle">@{f.handle}</span> : null}
                 </p>
-                {f.oneLine && <p class="bgr-card-line">{f.oneLine}</p>}
+                {f.oneLine && <p class="bgr-card-line">{nbHyphens(f.oneLine)}</p>}
                 {f.won && <span class="bgr-pill">winner · {f.won.category}</span>}
               </div>
             </li>
@@ -552,7 +555,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    column-gap: 6px;
+    column-gap: 10px;
     min-width: 0;
   }
 
@@ -572,15 +575,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     text-overflow: ellipsis;
   }
 
-  .bgr-name + .bgr-handle::before {
-    content: '· ';
-  }
 
-  @media (max-width: 559px) {
-    .bgr-card .bgr-name + .bgr-handle::before {
-      content: none;
-    }
-  }
 
   /* The prize: the biggest figure after the fund, in the category colour. */
   .bgr-win-prize {
