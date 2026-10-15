@@ -73,6 +73,13 @@ export const RESULTS = {
     bge_4jef5232vz: 'Noureddine Ratbaoui',
     bge_969k3fecfz: 'Aidan Tan',
   },
+  // Handles as they are printed (display only, the shortlist file stays as
+  // submitted). An empty string prints no handle: InMotion's builder entered
+  // one that does not exist on X; openheard's builder changed his.
+  handles: {
+    bge_b9ysh6kzac: 'ibothinks',
+    bge_4jef5232vz: '',
+  },
 };
 
 // Once the results are in the build they are announced: the game page,
@@ -97,7 +104,7 @@ export function resultsView(entries) {
   const pick = (key) => {
     const e = byKey.get(key);
     if (!e) throw new Error(`results: unknown entry ${key}`);
-    return { ...e, name: RESULTS.names[key] ?? e.name };
+    return { ...e, name: RESULTS.names[key] ?? e.name, handle: RESULTS.handles[key] ?? e.handle };
   };
   const winners = RESULTS.winners.map((w) => ({
     key: w.key,
