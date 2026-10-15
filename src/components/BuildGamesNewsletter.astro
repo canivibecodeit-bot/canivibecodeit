@@ -18,9 +18,11 @@ const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/bui
 ---
 
 <div class:list={['bgn', `bgn-${variant}`]}>
-  <p class="bgn-lead">
-    {variant === 'inline' ? 'building instead of sponsoring?' : announced ? 'the next games' : started ? 'follow the games' : 'be there when it starts'}
-  </p>
+  {variant === 'section' ? (
+    <h2 class="bgn-lead">{variant === 'inline' ? 'building instead of sponsoring?' : announced ? 'the next games' : started ? 'follow the games' : 'be there when it starts'}</h2>
+  ) : (
+    <p class="bgn-lead">{variant === 'inline' ? 'building instead of sponsoring?' : announced ? 'the next games' : started ? 'follow the games' : 'be there when it starts'}</p>
+  )}
   <form class="bgn-form" method="post" action="/api/waitlist" data-digest>
     <label class="hp" aria-hidden="true">
       Leave this field empty
@@ -50,8 +52,17 @@ const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/bui
   }
 
   .bgn-lead {
+    font-family: inherit;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .bgn a:focus-visible,
+  .bgn input:focus-visible,
+  .bgn :global(.btn:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 
   .bgn-sub {

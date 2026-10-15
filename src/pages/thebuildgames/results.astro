@@ -152,9 +152,9 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
               </div>
               <div class="bgr-win-body">
                 <p class="bgr-win-line">{w.entry.oneLine}</p>
-                <p class="bgr-win-by">
+                <p class="bgr-win-by bgr-by">
                   <span class="bgr-name">{w.entry.name}</span>
-                  {w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
+                  {w.entry.handle ? <span class="bgr-handle">@{w.entry.handle}</span> : null}
                 </p>
                 <p class="bgr-win-prize">
                   <b>{prize}</b>
@@ -214,9 +214,9 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
                     <b>{f.total}</b><span class="bgr-vh"> out of {r.totalMax}</span><span aria-hidden="true"> / {r.totalMax}</span>
                   </span>
                 </div>
-                <p class="bgr-card-by">
+                <p class="bgr-card-by bgr-by">
                   <span class="bgr-name">{f.name}</span>
-                  {f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
+                  {f.handle ? <span class="bgr-handle">@{f.handle}</span> : null}
                 </p>
                 {f.oneLine && <p class="bgr-card-line">{f.oneLine}</p>}
                 {f.won && <span class="bgr-pill">winner · {f.won.category}</span>}
@@ -547,14 +547,39 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     color: var(--fg);
   }
 
+  /* Name and handle wrap as whole units; the dot joins them only on one line. */
+  .bgr-by {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 6px;
+    min-width: 0;
+  }
+
   .bgr-name {
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .bgr-handle {
     font: 12.5px var(--font-mono);
     color: var(--muted);
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bgr-name + .bgr-handle::before {
+    content: '· ';
+  }
+
+  @media (max-width: 559px) {
+    .bgr-card .bgr-name + .bgr-handle::before {
+      content: none;
+    }
   }
 
   /* The prize: the biggest figure after the fund, in the category colour. */
@@ -694,6 +719,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     flex-direction: column;
     gap: 4px;
     padding: 14px 16px 16px;
+    min-width: 0;
   }
 
   .bgr-card-head {
@@ -1052,6 +1078,9 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 
     .bgr-card-name {
       font-size: 16px;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
     }
 
     .bgr-pill {
