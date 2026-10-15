@@ -298,8 +298,8 @@ const hostOf = (u) => {
         </div>
         {announced ? (
           <div class="bg-sg-cell">
-            <span class="bg-sg-label">the winners</span>
-            <span class="bg-sg-num">announced</span>
+            <span class="bg-sg-label">prizes</span>
+            <span class="bg-sg-num">{winners.length > 0 ? `${winners.length} × ${winners[0].prize}` : 'announced'}</span>
             <a class="bg-sg-sub bg-sg-link" href="/thebuildgames/results">see the results →</a>
           </div>
         ) : ended ? (

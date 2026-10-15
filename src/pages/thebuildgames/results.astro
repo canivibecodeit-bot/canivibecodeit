@@ -34,6 +34,7 @@ const fund = usd(r.fundCents);
 // The screenshots: 1440x900 and 720x450 WebP, a 720 JPEG for the fallback.
 const SHOTS = '/thebuildgames/results';
 const shot = (key) => ({
+  xs: `${SHOTS}/${key}-xs.webp`,
   big: `${SHOTS}/${key}.webp`,
   md: `${SHOTS}/${key}-md.webp`,
   sm: `${SHOTS}/${key}-sm.webp`,
@@ -74,7 +75,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
       </div>
       <h1 class="bgr-title"><span class="bgr-vh">The Build Games {r.year}: </span>the winners</h1>
       <p class="bgr-sub">
-        The first Build Games ran through September {r.year}. {r.entryCount} entries came in, {r.finalists.length} made the
+        The first Build Games ran through September {r.year}. Of the {r.entryCount}&nbsp;entries, {r.finalists.length} made the
         judges' shortlist, and {joinNames(r.winners.map((w) => w.product))} won {prize} each.
       </p>
     </header>
@@ -141,7 +142,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
               <div class="bgr-win-body">
                 <p class="bgr-win-line">{w.entry.oneLine}</p>
                 <p class="bgr-win-by">
-                  {w.entry.name}
+                  <span class="bgr-name">{w.entry.name}</span>
                   {w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
                 </p>
                 <p class="bgr-win-prize">
@@ -187,7 +188,11 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
             <li class:list={['bgr-card', f.won && `bgr-cat-${f.won.key}`]}>
               <a class="bgr-card-shot" href={f.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
                 <picture>
-                  <source type="image/webp" srcset={s.sm} />
+                  <source
+                    type="image/webp"
+                    srcset={`${s.xs} 360w, ${s.sm} 720w`}
+                    sizes="(max-width: 559px) 100px, (max-width: 1023px) 50vw, 33vw"
+                  />
                   <img src={s.jpg} width="720" height="450" alt="" loading="lazy" decoding="async" />
                 </picture>
               </a>
@@ -199,7 +204,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
                   </span>
                 </div>
                 <p class="bgr-card-by">
-                  {f.name}
+                  <span class="bgr-name">{f.name}</span>
                   {f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
                 </p>
                 {f.oneLine && <p class="bgr-card-line">{f.oneLine}</p>}
@@ -417,7 +422,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   }
 
   .bgr-win {
-    scroll-margin-top: 24px;
+    scroll-margin-top: 84px;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
@@ -525,6 +530,10 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     color: var(--fg);
   }
 
+  .bgr-name {
+    white-space: nowrap;
+  }
+
   .bgr-handle {
     font: 12.5px var(--font-mono);
     color: var(--muted);
@@ -598,20 +607,20 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr-ru-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 5px 10px 5px 8px;
+    gap: 6px;
+    padding: 4px 9px 4px 7px;
     border: 1px solid rgba(var(--cat-rgb), 0.35);
     border-radius: 999px;
     background: var(--surface);
-    font: 12.5px var(--font-mono);
+    font: 12px var(--font-mono);
     color: var(--fg);
     text-decoration: none;
     white-space: nowrap;
   }
 
   .bgr-ru-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--cat);
     flex-shrink: 0;
