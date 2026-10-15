@@ -295,7 +295,11 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 </Base>
 
 <style>
+  /* The wrapper is the containing block for anything positioned inside it,
+     so an element a browser extension injects (a password manager's icon
+     beside a field) is clipped here and can never widen the page. */
   .bgr {
+    position: relative;
     padding-top: 30px;
     padding-bottom: 120px;
     overflow-x: clip;
@@ -988,6 +992,13 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     outline: 2px solid var(--primary);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* Tiles keep their own corners when focused. */
+  .bgr-sponsor a:focus-visible,
+  .bgr-win-shot:focus-visible,
+  .bgr-card-shot:focus-visible {
+    border-radius: 12px;
   }
 
   /* ---------- responsive ---------- */
