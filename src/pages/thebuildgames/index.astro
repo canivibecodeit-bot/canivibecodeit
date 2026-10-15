@@ -417,10 +417,12 @@ const hostOf = (u) => {
             {announced && winners.length > 0 && (
               <ul class="bg-winners" role="list">
                 {winners.map((w) => (
-                  <li class:list={['bg-winner', `bg-cat-${w.key}`]}>
-                    <span class="bg-winner-cat">{w.category}</span>
-                    <b class="bg-winner-name">{w.product}</b>
-                    <span class="bg-winner-prize">{w.prize}</span>
+                  <li>
+                    <a class:list={['bg-winner', `bg-cat-${w.key}`]} href={`/thebuildgames/results#winner-${w.key}`}>
+                      <span class="bg-winner-cat">{w.category}</span>
+                      <b class="bg-winner-name">{w.product}</b>
+                      <span class="bg-winner-prize">{w.prize}</span>
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -2064,13 +2066,13 @@ const hostOf = (u) => {
   }
 
   :global([data-theme='light']) .bg-cat-creative {
-    --cat: #a83a0c;
-    --cat-rgb: 168, 58, 12;
+    --cat: #c2301d;
+    --cat-rgb: 194, 48, 29;
   }
 
   :global([data-theme='light']) .bg-cat-polished {
-    --cat: #9a5b00;
-    --cat-rgb: 154, 91, 0;
+    --cat: #8f6400;
+    --cat-rgb: 143, 100, 0;
   }
 
   .bg-winners {
@@ -2093,6 +2095,13 @@ const hostOf = (u) => {
     border: 1px solid rgba(var(--cat-rgb), 0.45);
     border-radius: 12px;
     background: rgba(var(--cat-rgb), 0.08);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .bg-winner:hover {
+    border-color: var(--cat);
+    background: rgba(var(--cat-rgb), 0.14);
   }
 
   .bg-winner-cat {

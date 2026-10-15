@@ -109,14 +109,14 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
         {r.winners.map((w, i) => {
           const s = shot(w.entry.key);
           return (
-            <li class:list={['bgr-win', `bgr-cat-${w.key}`]}>
+            <li class:list={['bgr-win', `bgr-cat-${w.key}`]} id={`winner-${w.key}`}>
               {/* The picture repeats the name link's target, so it stays out of the tab order. */}
               <a class="bgr-win-shot" href={w.entry.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
                 <picture>
                   <source
                     type="image/webp"
                     srcset={`${s.sm} 720w, ${s.md} 1080w, ${s.big} 1440w`}
-                    sizes="(min-width: 1180px) 600px, (min-width: 900px) 52vw, calc(100vw - 76px)"
+                    sizes="(min-width: 1180px) 520px, (min-width: 900px) 50vw, calc(100vw - 76px)"
                   />
                   <img
                     src={s.jpg}
@@ -216,7 +216,6 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
       <div class="bgr-note bgr-note-money">
         <h2 class="bgr-note-h">the money</h2>
         <p>{MONEY_SENTENCE}</p>
-        <p>This year that came to {fund}: three prizes of {prize}, one per category.</p>
         <p>{FUND_NOTE}</p>
       </div>
       <div class="bgr-note">
@@ -299,13 +298,13 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   }
 
   :global([data-theme='light']) .bgr-cat-creative {
-    --cat: #a83a0c;
-    --cat-rgb: 168, 58, 12;
+    --cat: #c2301d;
+    --cat-rgb: 194, 48, 29;
   }
 
   :global([data-theme='light']) .bgr-cat-polished {
-    --cat: #9a5b00;
-    --cat-rgb: 154, 91, 0;
+    --cat: #8f6400;
+    --cat-rgb: 143, 100, 0;
   }
 
   /* Visually hidden: for the h1's full name and the totals' spoken form. */
@@ -383,7 +382,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr-sg-num {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(28px, 3.4vw, 40px);
+    font-size: clamp(24px, 2.6vw, 32px);
     line-height: 1;
     color: var(--fg);
     font-variant-numeric: tabular-nums;
@@ -418,6 +417,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   }
 
   .bgr-win {
+    scroll-margin-top: 24px;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
@@ -486,7 +486,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     height: 22px;
     border-radius: 50%;
     background: var(--cat);
-    color: #0b0d0b;
+    color: var(--on-cat);
     font: 800 12px var(--font-mono);
     letter-spacing: 0;
   }
@@ -494,7 +494,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr-win-name {
     margin-top: 6px;
     font-family: var(--font-display);
-    font-size: clamp(30px, 3.2vw, 42px);
+    font-size: clamp(28px, 2.8vw, 38px);
     line-height: 1.05;
     letter-spacing: -0.02em;
     font-weight: 700;
@@ -528,6 +528,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr-handle {
     font: 12.5px var(--font-mono);
     color: var(--muted);
+    white-space: nowrap;
   }
 
   /* The prize: the biggest figure after the fund, in the category colour. */
@@ -540,7 +541,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 
   .bgr-win-prize b {
     font-family: var(--font-display);
-    font-size: clamp(30px, 3vw, 40px);
+    font-size: clamp(30px, 3.4vw, 44px);
     line-height: 1;
     letter-spacing: -0.03em;
     font-weight: 700;
@@ -591,18 +592,18 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
 
   .bgr-ru-pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 12px 6px 9px;
+    padding: 5px 10px 5px 8px;
     border: 1px solid rgba(var(--cat-rgb), 0.35);
     border-radius: 999px;
     background: var(--surface);
-    font: 13px var(--font-mono);
+    font: 12.5px var(--font-mono);
     color: var(--fg);
     text-decoration: none;
     white-space: nowrap;
@@ -951,7 +952,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     }
 
     .bgr-sg-num {
-      font-size: 28px;
+      font-size: 24px;
     }
 
     .bgr-sg-money {
@@ -1002,21 +1003,20 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 
     .bgr-card {
       display: grid;
-      grid-template-columns: 124px minmax(0, 1fr);
+      grid-template-columns: 112px minmax(0, 1fr);
       align-items: start;
     }
 
     .bgr-card-shot {
       border-bottom: 0;
-      border-right: 1px solid var(--border);
-      align-self: stretch;
-      display: flex;
-      align-items: center;
+      padding: 12px 0 12px 12px;
+      background: none;
     }
 
     .bgr-card-shot img {
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
     }
 
     .bgr-card-body {
