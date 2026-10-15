@@ -1,19 +1,24 @@
 ---
 /* The Build Games 2026: the results page. Public, indexable, linked from
    the game page once the results are in the build (lib/buildgames-results.js).
-   Three winner cards in the game page's tile language, the money sentence,
-   how it was judged, every finalist, and the sponsors who funded the prizes
-   (the same board the game page shows, nothing from payment data).
 
-   What never appears here: scores, the judges' notes, repo links. The page
-   404s like the rest of the surface until BUILDGAMES_LIVE is set, and until
-   the shortlist file is in the build. */
+   Visual version (operator's brief, 15 Oct): the three winners are the page,
+   each a band with a screenshot of the live demo, the category in its own
+   colour, the product as the headline and the prize set large. Every
+   finalist has a card with a thumbnail and its total. The money and the
+   judging note sit side by side, quieter. Screenshots live under
+   public/thebuildgames/results/<entry key>{.webp,-sm.webp,-sm.jpg}: taken
+   from the live demos at 1440x900, no browser chrome.
+
+   What never appears here: per-category scores, the judges' notes, repo
+   links. The page 404s like the rest of the surface until BUILDGAMES_LIVE
+   is set, and until the shortlist file is in the build. */
 import Base from '../../layouts/Base.astro';
 import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgLeaderboard } from '../../lib/db.js';
-import { CATEGORIES, JUDGES, MONEY_SENTENCE, displayName, rankSponsors } from '../../lib/buildgames.js';
+import { JUDGES, MONEY_SENTENCE, displayName, rankSponsors } from '../../lib/buildgames.js';
 import { FUND_NOTE, resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
 import { shortlist } from '../../lib/buildgames-shortlist.js';
 import { withUtm } from '../../lib/sponsors.js';
@@ -25,7 +30,10 @@ if (!entries) return new Response(null, { status: 404 });
 const r = resultsView(entries);
 const prize = usd(r.prizeCents);
 const fund = usd(r.fundCents);
-const lineFor = (category) => CATEGORIES.find((c) => c.name === category)?.line ?? '';
+
+// The screenshots: 1440x900 and 720x450 WebP, a 720 JPEG for the fallback.
+const SHOTS = '/thebuildgames/results';
+const shot = (key) => ({ big: `${SHOTS}/${key}.webp`, sm: `${SHOTS}/${key}-sm.webp`, jpg: `${SHOTS}/${key}-sm.jpg` });
 
 // The sponsors, as the game page lists them: the live board, ranked.
 let sponsors = [];
@@ -50,7 +58,6 @@ const description = `${r.winners.map((w) => `${w.category}: ${w.product}`).join(
 
 // Names in a sentence: "a, b and c".
 const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
-const judgeNames = joinNames(JUDGES.map((j) => j.name));
 ---
 
 <Base {title} {socialTitle} {description} ogImage="/og/buildgames-results.png" hideSponsors={true} hideDigest={true}>
@@ -86,100 +93,138 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       </div>
     </section>
 
-    {/* The three winners: the game page's category tiles, each holding its
-        winner. An ol because the categories are numbered on the game page. */}
+    {/* The three winners: one band each, the demo's screenshot beside the
+        name and the prize. Colour-coded by category throughout the page. */}
     <section class="bgr-winners" aria-labelledby="bgr-winners-h">
       <div class="list-head bgr-list-head">
         <h2 id="bgr-winners-h">who won</h2>
-        <span class="note">one winner per category</span>
+        <span class="note">one winner per category · {prize} each</span>
       </div>
-      <ol class="bgr-cards" role="list">
-        {r.winners.map((w, i) => (
-          <li class:list={['bgr-card', `bgr-cat-${w.key}`]}>
-            <div class="bgr-cat-head">
-              <span class="bgr-cat-n">{i + 1}</span>
-              <span class="bgr-cat-name">{w.category}</span>
-            </div>
-            <p class="bgr-cat-line">{lineFor(w.category)}</p>
-            <h3 class="bgr-product">
-              <a href={w.entry.demoUrl} target="_blank" rel="noopener" tabindex="-1">{w.entry.product}</a>
-            </h3>
-            <p class="bgr-by">
-              {w.entry.name}{w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
-            </p>
-            <p class="bgr-one">{w.entry.oneLine}</p>
-            <div class="bgr-actions">
-              <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the demo: ${w.entry.product}`}>
-                open the demo <span aria-hidden="true">→</span>
+      <ol class="bgr-wins" role="list">
+        {r.winners.map((w, i) => {
+          const s = shot(w.entry.key);
+          return (
+            <li class:list={['bgr-win', `bgr-cat-${w.key}`]}>
+              {/* The picture repeats the name link's target, so it stays out of the tab order. */}
+              <a class="bgr-win-shot" href={w.entry.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <picture>
+                  <source type="image/webp" srcset={`${s.sm} 720w, ${s.big} 1440w`} sizes="(min-width: 900px) 56vw, 100vw" />
+                  <img
+                    src={s.jpg}
+                    width="1440"
+                    height="900"
+                    alt=""
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={i === 0 ? 'high' : undefined}
+                    decoding="async"
+                  />
+                </picture>
               </a>
-              <span class="bgr-prize">{prize} prize</span>
-            </div>
-            <dl class="bgr-mentions">
-              <dt>runners-up</dt>
-              <dd>
-                {w.mentions.map((m, j) => (
-                  <>
-                    <a href={m.demoUrl} target="_blank" rel="noopener">{m.product}</a>
-                    {j < w.mentions.length - 2 ? ', ' : j === w.mentions.length - 2 ? ' and ' : ''}
-                  </>
-                ))}
-              </dd>
-            </dl>
-          </li>
-        ))}
+              <div class="bgr-win-body">
+                <p class="bgr-win-cat">
+                  <span class="bgr-win-n">{i + 1}</span>
+                  {w.category}
+                </p>
+                <h3 class="bgr-win-name">
+                  <a href={w.entry.demoUrl} target="_blank" rel="noopener">{w.entry.product}</a>
+                </h3>
+                <p class="bgr-win-line">{w.entry.oneLine}</p>
+                <p class="bgr-win-by">
+                  {w.entry.name}
+                  {w.entry.handle ? <span class="bgr-handle"> · @{w.entry.handle}</span> : null}
+                </p>
+                <p class="bgr-win-prize">
+                  <b>{prize}</b>
+                  <span>prize</span>
+                </p>
+                <div class="bgr-win-actions">
+                  <a class="btn primary bgr-open" href={w.entry.demoUrl} target="_blank" rel="noopener" aria-label={`open the demo: ${w.entry.product}`}>
+                    open the demo <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+                <div class="bgr-ru">
+                  <span class="bgr-ru-label">runners-up</span>
+                  <ul class="bgr-ru-list" role="list">
+                    {w.mentions.map((m) => {
+                      const t = shot(m.key);
+                      return (
+                        <li>
+                          <a class="bgr-ru-pill" href={m.demoUrl} target="_blank" rel="noopener">
+                            <img src={t.sm} width="36" height="22" alt="" loading="lazy" decoding="async" />
+                            {m.product}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </section>
 
-    {/* The money, plainly: the canonical sentence, then this year's figure. */}
-    <section class="bgr-money" aria-label="How the money works">
-      <p class="bgr-money-line">{MONEY_SENTENCE}</p>
-      <p class="bgr-money-line">This year that came to {fund}: three prizes of {prize}, one per category.</p>
-      <p class="bgr-money-line">{FUND_NOTE}</p>
-    </section>
-
-    <section class="bgr-how" aria-labelledby="bgr-how-h">
-      <div class="list-head bgr-list-head">
-        <h2 id="bgr-how-h">how it was judged</h2>
-      </div>
-      <p class="bgr-prose">
-        {JUDGES.map((j, i) => (
-          <>
-            <a href={j.url} target="_blank" rel="noopener">{j.name}</a>
-            {i < JUDGES.length - 2 ? ', ' : i === JUDGES.length - 2 ? ' and ' : ''}
-          </>
-        ))}{' '}
-        scored every finalist from 0 to 10 in each category, independently, against the criteria published before the games
-        began. Totals are shown below. One prize per builder. Runners-up are named with no money attached. The judges'
-        decision is final.
-      </p>
-    </section>
-
-    {/* Every finalist, quietly: hairlines, not cards. Alphabetical so the
-        order says nothing about scores. */}
+    {/* Every finalist as a card: thumbnail, name, builder, the total. By total,
+        highest first, so the order says what the judges said. */}
     <section class="bgr-finalists" aria-labelledby="bgr-finalists-h">
       <div class="list-head bgr-list-head">
         <h2 id="bgr-finalists-h">all {r.finalists.length} finalists, by total</h2>
         <span class="note">out of {r.totalMax} · highest first, ties listed in category order · every demo is public</span>
       </div>
-      <ul class="bgr-rows" role="list">
-        {r.finalists.map((f) => (
-          <li class="bgr-row">
-            <div class="bgr-row-main">
-              <span class="bgr-row-head">
-                <a class="bgr-row-product" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
-                {f.won && <span class="bgr-badge">winner · {f.won.category}</span>}
-              </span>
-              <span class="bgr-row-total">
-                <b>{f.total}</b><span class="bgr-vh"> out of {r.totalMax}</span><span class="bgr-row-max" aria-hidden="true"> / {r.totalMax}</span>
-              </span>
-            </div>
-            <p class="bgr-row-by">
-              {f.name}{f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
-            </p>
-            {f.oneLine && <p class="bgr-row-line">{f.oneLine}</p>}
-          </li>
-        ))}
+      <ul class="bgr-grid" role="list">
+        {r.finalists.map((f) => {
+          const s = shot(f.key);
+          return (
+            <li class:list={['bgr-card', f.won && `bgr-cat-${f.won.key}`]}>
+              <a class="bgr-card-shot" href={f.demoUrl} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                <picture>
+                  <source type="image/webp" srcset={s.sm} />
+                  <img src={s.jpg} width="720" height="450" alt="" loading="lazy" decoding="async" />
+                </picture>
+              </a>
+              <div class="bgr-card-body">
+                <div class="bgr-card-head">
+                  <a class="bgr-card-name" href={f.demoUrl} target="_blank" rel="noopener">{f.product}</a>
+                  <span class="bgr-total">
+                    <b>{f.total}</b><span class="bgr-vh"> out of {r.totalMax}</span><span aria-hidden="true"> / {r.totalMax}</span>
+                  </span>
+                </div>
+                <p class="bgr-card-by">
+                  {f.name}
+                  {f.handle ? <span class="bgr-handle"> · @{f.handle}</span> : null}
+                </p>
+                {f.oneLine && <p class="bgr-card-line">{f.oneLine}</p>}
+                {f.won && <span class="bgr-pill">winner · {f.won.category}</span>}
+              </div>
+            </li>
+          );
+        })}
       </ul>
+    </section>
+
+    {/* The money and the judging, side by side and quieter. */}
+    <section class="bgr-notes" aria-label="The money and the judging">
+      <div class="bgr-note bgr-note-money">
+        <h2>the money</h2>
+        <p>{MONEY_SENTENCE}</p>
+        <p>This year that came to {fund}: three prizes of {prize}, one per category.</p>
+        <p>{FUND_NOTE}</p>
+      </div>
+      <div class="bgr-note">
+        <h2>how it was judged</h2>
+        <p>
+          {JUDGES.map((j, i) => (
+            <>
+              <a href={j.url} target="_blank" rel="noopener">{j.name}</a>
+              {i < JUDGES.length - 2 ? ', ' : i === JUDGES.length - 2 ? ' and ' : ''}
+            </>
+          ))}{' '}
+          scored every finalist from 0 to 10 in each category, independently, against the criteria published before the
+          games began. Totals are shown above. One prize per builder. Runners-up are named with no money attached. The
+          judges' decision is final.
+        </p>
+      </div>
     </section>
 
     <section class="bgr-thanks" aria-labelledby="bgr-thanks-h">
@@ -215,7 +260,49 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     padding-bottom: 120px;
   }
 
-  /* ---------- hero: the game page's lockup, then the title ---------- */
+  /* ---------- category colours: the lockup's coral and teal, the site's amber.
+     Each winner band, pill and runner-up pill reads its colour from --cat. ---------- */
+  .bgr-cat-replacement {
+    --cat: #2fd6a6;
+    --cat-rgb: 47, 214, 166;
+  }
+
+  .bgr-cat-creative {
+    --cat: #ff7a5c;
+    --cat-rgb: 255, 122, 92;
+  }
+
+  .bgr-cat-polished {
+    --cat: #ffb000;
+    --cat-rgb: 255, 176, 0;
+  }
+
+  :global([data-theme='light']) .bgr-cat-replacement {
+    --cat: #0a8a66;
+    --cat-rgb: 10, 138, 102;
+  }
+
+  :global([data-theme='light']) .bgr-cat-creative {
+    --cat: #c2410c;
+    --cat-rgb: 194, 65, 12;
+  }
+
+  :global([data-theme='light']) .bgr-cat-polished {
+    --cat: #9a6700;
+    --cat-rgb: 154, 103, 0;
+  }
+
+  /* Visually hidden: for the h1's full name and the totals' spoken form. */
+  .bgr-vh {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* ---------- hero ---------- */
   .bgr-hero {
     text-align: center;
   }
@@ -226,16 +313,6 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     letter-spacing: 0.18em;
     color: var(--muted);
     padding-bottom: 10px;
-  }
-
-  /* Visually hidden: the h1 announces the games and the year, the lockup above is decoration. */
-  .bgr-vh {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
   }
 
   .bgr-title {
@@ -312,94 +389,103 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     padding-top: 52px;
   }
 
-
-  /* ---------- the three winner cards ---------- */
-  .bgr-cards {
+  /* ---------- the winner bands ---------- */
+  .bgr-wins {
     list-style: none;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding-top: 14px;
     margin: 0;
-  }
-
-  .bgr-card {
+    padding: 14px 0 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 20px 18px 18px;
-    /* Three cards in a row share one set of rows, so names, buttons and
-       runners-up line up whatever the category line wraps to. */
-    grid-row: span 7;
+    gap: 14px;
   }
 
-  @supports (grid-template-rows: subgrid) {
-    @media (min-width: 901px) {
-      .bgr-card {
-        display: grid;
-        grid-template-rows: subgrid;
-        row-gap: 6px;
-        align-content: start;
-      }
-    }
+  .bgr-win {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(var(--cat-rgb), 0.1), rgba(var(--cat-rgb), 0.03) 55%, var(--surface));
+    overflow: hidden;
   }
 
-  .bgr-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
+  .bgr-win-shot {
+    display: block;
+    position: relative;
+    min-height: 100%;
+    border-right: 1px solid rgba(var(--cat-rgb), 0.25);
+    background: #0b0d0b;
+  }
+
+  .bgr-win-shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .bgr-win-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 26px 28px 24px;
     min-width: 0;
   }
 
-  .bgr-cat-head {
+  .bgr-win-cat {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 10px;
+    font: 700 12px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--cat);
   }
 
-  .bgr-cat-n {
-    font: 800 13px var(--font-mono);
-    color: var(--primary);
+  .bgr-win-n {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--cat);
+    color: #0b0d0b;
+    font: 800 12px var(--font-mono);
+    letter-spacing: 0;
   }
 
-  .bgr-cat-name {
+  .bgr-win-name {
+    margin-top: 6px;
     font-family: var(--font-display);
-    font-size: 17px;
-    font-weight: 700;
-  }
-
-  .bgr-cat-line {
-    font-size: 16px;
-    line-height: 1.5;
-    color: var(--muted);
-    text-wrap: pretty;
-  }
-
-  /* The winner: the biggest thing in the card. */
-  .bgr-product {
-    margin-top: 16px;
-    font-family: var(--font-display);
-    font-size: clamp(26px, 2.6vw, 32px);
-    line-height: 1.1;
-    letter-spacing: -0.015em;
+    font-size: clamp(30px, 3.2vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     font-weight: 700;
     overflow-wrap: anywhere;
   }
 
-  .bgr-product a {
+  .bgr-win-name a {
     color: var(--fg);
     text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-decoration-color: rgba(var(--cat-rgb), 0.45);
     text-decoration-thickness: 2px;
-    text-underline-offset: 5px;
+    text-underline-offset: 6px;
   }
 
-  .bgr-product a:hover {
-    color: var(--primary);
-    text-decoration-color: currentColor;
+  .bgr-win-name a:hover {
+    text-decoration-color: var(--cat);
   }
 
-  .bgr-by {
+  .bgr-win-line {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .bgr-win-by {
     font-size: 16px;
     color: var(--fg);
   }
@@ -409,22 +495,33 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     color: var(--muted);
   }
 
-  .bgr-one {
-    padding-top: 4px;
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--muted);
-    text-wrap: pretty;
+  /* The prize: the biggest figure after the fund, in the category colour. */
+  .bgr-win-prize {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-top: 10px;
   }
 
-  .bgr-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding-top: 14px;
-    margin-top: auto;
+  .bgr-win-prize b {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 4.2vw, 56px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: var(--cat);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bgr-win-prize span {
+    font: 11px var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+  }
+
+  .bgr-win-actions {
+    padding-top: 6px;
   }
 
   .bgr-open {
@@ -433,64 +530,221 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     text-decoration: none;
   }
 
-  .bgr-prize {
-    font: 12px var(--font-mono);
-    color: var(--primary);
-    white-space: nowrap;
+  .bgr-ru {
+    margin-top: auto;
+    padding-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .bgr-mentions {
-    margin: 14px 0 0;
-    padding-top: 12px;
-    border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  }
-
-  .bgr-mentions dt {
+  .bgr-ru-label {
     font: 700 11px var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: color-mix(in srgb, var(--fg) 75%, var(--muted));
   }
 
-  .bgr-mentions dd {
-    margin: 4px 0 0;
-    font-size: 16px;
-    line-height: 1.5;
-    color: var(--muted);
+  .bgr-ru-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
-  .bgr-mentions a {
+  .bgr-ru-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 5px;
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+    border-radius: 999px;
+    background: var(--surface);
+    font: 13px var(--font-mono);
     color: var(--fg);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    text-decoration: none;
     white-space: nowrap;
   }
 
-  .bgr-mentions a:hover {
-    color: var(--primary);
+  .bgr-ru-pill img {
+    width: 36px;
+    height: 22px;
+    border-radius: 999px;
+    object-fit: cover;
+    object-position: top;
   }
 
-  /* ---------- the money, plainly: the game page's quiet card ---------- */
-  .bgr-money {
-    max-width: 640px;
-    margin: 44px auto 0;
-    padding: 20px 22px;
+  .bgr-ru-pill:hover {
+    border-color: var(--cat);
+    color: var(--cat);
+  }
+
+  /* ---------- the finalists: a grid of cards ---------- */
+  .bgr-grid {
+    list-style: none;
+    margin: 0;
+    padding: 14px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .bgr-card {
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .bgr-card.bgr-cat-replacement,
+  .bgr-card.bgr-cat-creative,
+  .bgr-card.bgr-cat-polished {
+    border-color: rgba(var(--cat-rgb), 0.45);
+  }
+
+  .bgr-card-shot {
+    display: block;
+    border-bottom: 1px solid var(--border);
+    background: #0b0d0b;
+  }
+
+  .bgr-card-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .bgr-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px 16px;
+  }
+
+  .bgr-card-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
     gap: 10px;
+  }
+
+  .bgr-card-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    text-underline-offset: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bgr-card-name:hover {
+    color: var(--primary);
+    text-decoration-color: currentColor;
+  }
+
+  /* The total as a small badge: tabular figures, the figure bold. */
+  .bgr-total {
+    justify-self: end;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    font: 12px var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    white-space: nowrap;
+  }
+
+  .bgr-total b {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--fg);
+  }
+
+  .bgr-card-by {
+    font-size: 16px;
+    color: var(--fg);
+  }
+
+  .bgr-card-line {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bgr-pill {
+    align-self: flex-start;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--cat-rgb), 0.5);
+    background: rgba(var(--cat-rgb), 0.1);
+    font: 700 11px var(--font-mono);
+    color: var(--cat);
+    white-space: nowrap;
+  }
+
+  /* ---------- the money and the judging, quieter ---------- */
+  .bgr-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 52px;
+  }
+
+  .bgr-note {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 22px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: var(--surface);
   }
 
-  .bgr-money-line {
+  .bgr-note h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .bgr-note p {
     font-size: 16px;
-    line-height: 1.65;
-    color: var(--fg);
+    line-height: 1.6;
+    color: var(--muted);
     text-wrap: pretty;
   }
 
-  /* ---------- prose sections ---------- */
+  .bgr-note a,
+  .bgr-prose a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bgr-note a:hover,
+  .bgr-prose a:hover {
+    color: var(--primary);
+  }
+
+  /* ---------- prose and the sponsors ---------- */
   .bgr-prose {
     padding-top: 12px;
     max-width: 66ch;
@@ -500,106 +754,6 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
     text-wrap: pretty;
   }
 
-  .bgr-prose a {
-    color: var(--fg);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .bgr-prose a:hover {
-    color: var(--primary);
-  }
-
-  /* ---------- the finalists: rows on hairlines ---------- */
-  .bgr-rows {
-    list-style: none;
-    margin: 0;
-    padding: 8px 0 0;
-  }
-
-  .bgr-row {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 14px 0;
-    border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  }
-
-  .bgr-row:last-child {
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  }
-
-  .bgr-row-main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 10px;
-  }
-
-  .bgr-row-head {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    flex-wrap: wrap;
-    min-width: 0;
-  }
-
-  .bgr-row-product {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--fg);
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--fg) 30%, transparent);
-    text-underline-offset: 4px;
-    white-space: nowrap;
-  }
-
-  .bgr-row-product:hover {
-    color: var(--primary);
-    text-decoration-color: currentColor;
-  }
-
-  /* The total: tabular figures, pushed to the row's right edge. */
-  .bgr-row-total {
-    justify-self: end;
-    font: 14px var(--font-mono);
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1;
-    white-space: nowrap;
-  }
-
-  .bgr-row-total b {
-    font-weight: 700;
-    font-size: 17px;
-    color: var(--fg);
-  }
-
-  .bgr-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--primary) 50%, var(--border));
-    font: 11px var(--font-mono);
-    color: var(--primary);
-    white-space: nowrap;
-  }
-
-  .bgr-row-by {
-    font-size: 16px;
-    color: var(--fg);
-  }
-
-  .bgr-row-line {
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--muted);
-    max-width: 72ch;
-    text-wrap: pretty;
-  }
-
-  /* ---------- the sponsors, as the board names them ---------- */
   .bgr-sponsors {
     list-style: none;
     margin: 0;
@@ -650,45 +804,50 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
   }
 
   /* ---------- responsive ---------- */
-  /* Desktop sizes for body copy: the phone gets the larger default. */
   @media (min-width: 640px) {
-    .bgr-cat-line,
-    .bgr-mentions dd {
-      font-size: 13.5px;
-    }
-
-    .bgr-by,
-    .bgr-one,
-    .bgr-row-by,
-    .bgr-row-line {
+    .bgr-win-line,
+    .bgr-win-by,
+    .bgr-card-by,
+    .bgr-card-line {
       font-size: 14px;
     }
 
-    .bgr-money-line {
-      font-size: 15px;
+    .bgr-note p {
+      font-size: 14.5px;
     }
   }
 
-  @media (max-width: 900px) {
-    .bgr-cards {
+  @media (max-width: 1023px) {
+    .bgr-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 899px) {
+    .bgr-win {
       grid-template-columns: 1fr;
     }
 
-    /* A long heading and its note stack rather than share a row. */
+    .bgr-win-shot {
+      border-right: 0;
+      border-bottom: 1px solid rgba(var(--cat-rgb), 0.25);
+    }
+
+    .bgr-win-body {
+      padding: 20px 20px 20px;
+    }
+
+    .bgr-notes {
+      grid-template-columns: 1fr;
+    }
+
     .bgr-finalists .bgr-list-head {
       flex-direction: column;
       align-items: flex-start;
       gap: 4px;
     }
-
-    .bgr-actions {
-      justify-content: flex-start;
-      gap: 18px;
-    }
   }
 
-  /* The strip stays one row of three on phones, smaller, so the first
-     winner is on the first screen. */
   @media (max-width: 720px) {
     .bgr-strip {
       padding-top: 26px;
@@ -710,14 +869,6 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       padding-bottom: 80px;
     }
 
-    .bgr-list-head {
-      padding-top: 40px;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
-
-
     .bgr-title {
       margin-top: 16px;
     }
@@ -726,14 +877,26 @@ const judgeNames = joinNames(JUDGES.map((j) => j.name));
       margin-top: 10px;
     }
 
+    .bgr-list-head {
+      padding-top: 40px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .bgr-win-body {
+      padding: 18px 16px 18px;
+    }
+
     .bgr-open {
       width: 100%;
       justify-content: center;
     }
+  }
 
-    .bgr-prize {
-      width: 100%;
-      text-align: center;
+  @media (max-width: 559px) {
+    .bgr-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

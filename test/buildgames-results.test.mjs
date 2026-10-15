@@ -3,7 +3,7 @@
    three in the game's order, and the honourable mentions never include the
    winner of their own category. No database is touched. Run: npm test */
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { CATEGORIES } from '../src/lib/buildgames.js';
 import { SCORE_CATEGORIES, normaliseShortlist } from '../src/lib/buildgames-judging.js';
@@ -90,4 +90,13 @@ test('display-name overrides apply to the winners and nowhere else', () => {
 test('an unknown entry key fails loudly', () => {
   assert.throws(() => resultsView(shortlist.filter((e) => e.key !== RESULTS.winners[0].entry)), /unknown entry/);
   assert.throws(() => resultsView([]), /no shortlist/);
+});
+
+test('every finalist has its screenshot set (1440 and 720 WebP, 720 JPEG fallback)', () => {
+  const dir = new URL('../public/thebuildgames/results/', import.meta.url);
+  for (const e of shortlist) {
+    for (const f of [`${e.key}.webp`, `${e.key}-sm.webp`, `${e.key}-sm.jpg`]) {
+      assert.ok(existsSync(new URL(f, dir)), `${e.product}: ${f}`);
+    }
+  }
 });
