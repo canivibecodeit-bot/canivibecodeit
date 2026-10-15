@@ -49,6 +49,7 @@ const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/bui
 <style>
   .bgn {
     text-align: center;
+    overflow-x: clip;
   }
 
   .bgn-lead {
@@ -86,11 +87,19 @@ const onBuilders = Astro.url.pathname.replace(/\/$/, '') === '/thebuildgames/bui
     justify-content: center;
     flex-wrap: wrap;
     padding-top: 12px;
+    overflow-x: clip;
+  }
+
+  .bgn-form input,
+  .bgn-form button {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .bgn-form input[type='email'] {
-    flex: 1;
-    min-width: 200px;
+    flex: 1 1 200px;
+    min-width: 0;
     max-width: 320px;
     padding: 10px 12px;
     background: var(--bg);

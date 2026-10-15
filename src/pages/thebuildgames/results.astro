@@ -18,10 +18,10 @@ import BuildGamesLogo from '../../components/BuildGamesLogo.astro';
 import BuildGamesNewsletter from '../../components/BuildGamesNewsletter.astro';
 import { buildGamesLive } from '../../lib/flags.js';
 import { bgLeaderboard } from '../../lib/db.js';
-import { JUDGES, MONEY_SENTENCE, displayName, rankSponsors } from '../../lib/buildgames.js';
+import { JUDGES, MONEY_SENTENCE, displayName, monogram, rankSponsors } from '../../lib/buildgames.js';
 import { FUND_NOTE, resultsView, usd, winnersAnnounced } from '../../lib/buildgames-results.js';
 import { shortlist } from '../../lib/buildgames-shortlist.js';
-import { withUtm } from '../../lib/sponsors.js';
+import { faviconUrl, withUtm } from '../../lib/sponsors.js';
 
 if (!buildGamesLive() || !winnersAnnounced()) return new Response(null, { status: 404 });
 const entries = shortlist();
@@ -261,11 +261,25 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
         The prize money came from the sponsors on the board. To them, and to everyone who built something in September:
         thank you.
       </p>
+      {/* The sponsors as the board shows them: the stored icon, else the
+          same favicon source the board uses, the name and the tagline. */}
       {sponsors.length > 0 && (
         <ul class="bgr-sponsors" role="list" aria-label="The sponsors">
           {sponsors.map((s) => (
-            <li>
-              <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">{sponsorName(s)}</a>
+            <li class="bgr-sponsor">
+              <a href={withUtm(s.link, 'build_games')} target="_blank" rel="sponsored nofollow noopener">
+                <span class="bgr-sponsor-logo">
+                  {s.icon_url ? (
+                    <img src={s.icon_url} alt="" width="48" height="48" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : faviconUrl(s.link) ? (
+                    <img src={faviconUrl(s.link)} alt="" width="48" height="48" loading="lazy" referrerpolicy="no-referrer" />
+                  ) : (
+                    <span class="bgr-monogram">{monogram(sponsorName(s))}</span>
+                  )}
+                </span>
+                <b class="bgr-sponsor-name">{sponsorName(s)}</b>
+                {s.tagline && <span class="bgr-sponsor-tag">{s.tagline}</span>}
+              </a>
             </li>
           ))}
         </ul>
@@ -284,6 +298,7 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr {
     padding-top: 30px;
     padding-bottom: 120px;
+    overflow-x: clip;
   }
 
   /* ---------- category colours: the lockup's coral and teal, the site's amber.
@@ -889,25 +904,65 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   .bgr-sponsors {
     list-style: none;
     margin: 0;
-    padding: 14px 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 10px;
+    padding: 16px 0 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
   }
 
-  .bgr-sponsors a {
-    display: inline-block;
-    padding: 7px 14px;
+  .bgr-sponsor a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 20px 16px;
     border: 1px solid var(--border);
-    border-radius: 999px;
-    font: 13px var(--font-mono);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
     color: var(--fg);
     text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
 
-  .bgr-sponsors a:hover {
-    border-color: var(--muted);
-    color: var(--primary);
+  .bgr-sponsor a:hover {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  }
+
+  .bgr-sponsor-logo img,
+  .bgr-monogram {
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-bottom: 4px;
+  }
+
+  .bgr-monogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--fg) 8%, var(--surface));
+    font: 700 16px var(--font-mono);
+    color: var(--muted);
+  }
+
+  .bgr-sponsor-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .bgr-sponsor-tag {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--muted);
+    text-wrap: pretty;
   }
 
   /* ---------- footer line: the game page's ---------- */
@@ -937,6 +992,10 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 
   /* ---------- responsive ---------- */
   @media (min-width: 640px) {
+    .bgr-sponsor-tag {
+      font-size: 13px;
+    }
+
     .bgr-win-line,
     .bgr-win-by,
     .bgr-card-by,
@@ -950,7 +1009,8 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
   }
 
   @media (max-width: 1023px) {
-    .bgr-grid {
+    .bgr-grid,
+    .bgr-sponsors {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -1039,6 +1099,12 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     .bgr-open {
       width: 100%;
       justify-content: center;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .bgr-sponsors {
+      grid-template-columns: 1fr;
     }
   }
 
