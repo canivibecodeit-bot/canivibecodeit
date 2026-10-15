@@ -74,11 +74,11 @@ export const RESULTS = {
     bge_969k3fecfz: 'Aidan Tan',
   },
   // Handles as they are printed (display only, the shortlist file stays as
-  // submitted). An empty string prints no handle: InMotion's builder entered
-  // one that does not exist on X; openheard's builder changed his.
+  // submitted; an empty string would print no handle). Both winners below
+  // confirmed new X accounts after entering.
   handles: {
     bge_b9ysh6kzac: 'ibothinks',
-    bge_4jef5232vz: '',
+    bge_4jef5232vz: 'Nours_design',
   },
 };
 
