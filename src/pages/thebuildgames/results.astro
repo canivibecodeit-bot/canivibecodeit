@@ -416,9 +416,15 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
     list-style: none;
     margin: 0;
     padding: 14px 0 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 14px;
+  }
+
+  /* Side by side, the three bands share one height: the tallest sets it. */
+  @media (min-width: 900px) {
+    .bgr-wins {
+      grid-auto-rows: 1fr;
+    }
   }
 
   .bgr-win {
