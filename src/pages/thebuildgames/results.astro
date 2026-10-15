@@ -67,6 +67,17 @@ const joinNames = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).joi
 ---
 
 <Base {title} {socialTitle} {description} ogImage="/og/buildgames-results.png" hideSponsors={true} hideDigest={true}>
+  {/* The first winner's picture is the largest thing on the first screen;
+      asking for it here starts the fetch while the stylesheet is still
+      loading (a preload link is valid in the body and Base has no head slot). */}
+  <link
+    rel="preload"
+    as="image"
+    type="image/webp"
+    imagesrcset={`${shot(r.winners[0].entry.key).sm} 720w, ${shot(r.winners[0].entry.key).md} 1080w, ${shot(r.winners[0].entry.key).big} 1440w`}
+    imagesizes="(min-width: 1180px) 520px, (min-width: 900px) 50vw, calc(100vw - 76px)"
+    fetchpriority="high"
+  />
   <main class="wrap bgr">
     <header class="bgr-hero">
       <p class="bgr-eyebrow">canivibecodeit presents</p>
